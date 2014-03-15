@@ -6,7 +6,6 @@
  Description: Base class for matching of CSC or GEM Digis to SimTrack
 
  Original Author:  "Vadim Khotilovich"
- $Id: DigiMatcher.h,v 1.1 2013/02/11 07:33:06 khotilov Exp $
 */
 
 #include "GEMCode/GEMValidation/src/BaseMatcher.h"
@@ -15,9 +14,6 @@
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 
 class SimHitMatcher;
-class CSCGeometry;
-class GEMGeometry;
-class CSCLayerGeometry;
 
 class DigiMatcher : public BaseMatcher
 {
@@ -55,9 +51,6 @@ public:
 protected:
 
   const SimHitMatcher* simhit_matcher_;
-
-  const CSCGeometry* csc_geo_;
-  const GEMGeometry* gem_geo_;
 
   const DigiContainer no_digis_;
 };

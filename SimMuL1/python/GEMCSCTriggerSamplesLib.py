@@ -121,3 +121,14 @@ files['_gem_dphi_pat2_PU0'] = ['/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM_
 files['_gem_dphi_pat2_PU100'] = [
     '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM_NuGun_PU100_L1_dphi_pat2_110K/',
     '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM_NuGun_PU100_L1_dphi_pat2_128K/']
+    
+## new batch of samples on EOS
+
+## produced on top of https://github.com/gem-sw/cmssw/tree/adb1cc3e0fad25bc0da2e4430e3e0965160a58dc
+## 6 partition geometry + post CSC TF pt bug + detailed GEM digi model
+eosfiles = {}
+
+## official samples for L1 trigger development
+eosfiles['_pt2-50_PU000_6part2019'] = ['/eos/uscms/store/user/jdimasva/SingleMuPt2-50Fwdv2_100K_DIGI_PU000/jdimasva/SingleMuPt2-50Fwdv2_1M/SingleMuPt2-50Fwdv2_100K_DIGI_PU000/36687f2fa27757b21d07bf97e7678b19/']
+eosfiles['_pt2-50_PU140_6part2019'] = ['/eos/uscms/store/user/jdimasva/SingleMuPt2-50Fwdv2_100K_DIGI_PU140/jdimasva/SingleMuPt2-50Fwdv2_1M/SingleMuPt2-50Fwdv2_100K_DIGI_PU140/7444237097ec40e1cd737724f1a85642/']
+eosfiles['_pt2-50_PU400_6part2019'] = ['/eos/uscms/store/user/aysen/SingleMuPt2-50Fwdv2_100K_DIGI_PU400/aysen/SingleMuPt2-50Fwdv2_1M/SingleMuPt2-50Fwdv2_100K_DIGI_PU400/6bcb78929a3bd07607400097784c7b5b/']

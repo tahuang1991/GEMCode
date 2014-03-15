@@ -26,6 +26,44 @@ BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
   // Get the propagators                                                                                  
   es.get< TrackingComponentsRecord >().get("SteppingHelixPropagatorAlong", propagator_);
   es.get< TrackingComponentsRecord >().get("SteppingHelixPropagatorOpposite", propagatorOpposite_);
+
+  /// get the geometry
+  hasGEMGeometry_ = false;
+  hasRPCGeometry_ = false;
+  hasCSCGeometry_ = false;
+  hasME0Geometry_ = false;
+
+  try {
+    es.get<MuonGeometryRecord>().get(gem_geom);
+    gemGeometry_ = &*gem_geom;
+  } catch (edm::eventsetup::NoProxyException<GEMGeometry>& e) {
+    hasGEMGeometry_ = false;
+    LogDebug("MuonSimHitAnalyzer") << "+++ Info: GEM geometry is unavailable. +++\n";
+  }
+
+  try {
+    es.get<MuonGeometryRecord>().get(me0_geom);
+    me0Geometry_ = &*me0_geom;
+  } catch (edm::eventsetup::NoProxyException<ME0Geometry>& e) {
+    hasME0Geometry_ = false;
+    LogDebug("MuonSimHitAnalyzer") << "+++ Info: ME0 geometry is unavailable. +++\n";
+  }
+
+  try {
+    es.get<MuonGeometryRecord>().get(csc_geom);
+    cscGeometry_ = &*csc_geom;
+  } catch (edm::eventsetup::NoProxyException<CSCGeometry>& e) {
+    hasCSCGeometry_ = false;
+    LogDebug("MuonSimHitAnalyzer") << "+++ Info: CSC geometry is unavailable. +++\n";
+  }
+
+  try {
+    es.get<MuonGeometryRecord>().get(rpc_geom);
+    rpcGeometry_ = &*rpc_geom;
+  } catch (edm::eventsetup::NoProxyException<RPCGeometry>& e) {
+    hasRPCGeometry_ = false;
+    LogDebug("MuonSimHitAnalyzer") << "+++ Info: RPC geometry is unavailable. +++\n";
+  }
 }
 
 
@@ -66,10 +104,28 @@ BaseMatcher::propagateToZ(float z) const
   return propagateToZ(inner_point, inner_vec, z);
 }
 
+
 GlobalPoint
 BaseMatcher::propagatedPositionGEM() const
 {
   const double eta(trk().momentum().eta());
   const int endcap( (eta > 0.) ? 1 : -1);
   return propagateToZ(endcap*AVERAGE_GEM_Z);
+}
+
+
+unsigned int
+BaseMatcher::gemDetFromCSCDet(unsigned int id,int layer)
+{
+  CSCDetId cscId(id);
+  // returns the gem superr chamber for a given ME1/1 chamber(ME1/1a + ME1/1b)
+  GEMDetId gemId(cscId.zendcap(), 1, cscId.station(), layer, cscId.chamber(),0); 
+  return gemId.rawId();
+}
+
+
+std::pair<unsigned int, unsigned int> 
+BaseMatcher::gemDetsFromCSCDet(unsigned int id)
+{
+  return std::make_pair(gemDetFromCSCDet(id,1),gemDetFromCSCDet(id,2));
 }

@@ -370,11 +370,12 @@ def cscMatchingEfficiencyToStripsAndWires(filesDir, input_file, plotDir, ext):
     c = TCanvas("c","c",700,450)
     c.Clear()
     base  = TH1F("base",title,nBins,minBin,maxBin)
-    base.SetMinimum(0.0)
+    base.SetMinimum(0.8)
     base.SetMaximum(1.02)
     base.Draw("")
     base.GetXaxis().SetLabelSize(0.05)
     base.GetYaxis().SetLabelSize(0.05)
+    base.GetYaxis().SetRangeUser(yrange[0],yrange[1])
 
     h1 = draw_geff(t, title, h_bins, toPlot, ok_sh1, ok_w1, "same", kRed)
     h2 = draw_geff(t, title, h_bins, toPlot, ok_sh1, ok_st1, "same")
@@ -431,7 +432,7 @@ def cscMatchingEfficiencyToStripsAndWires_2(filesDir, input_file, plotDir, ext):
     c = TCanvas("c","c",700,450)
     c.Clear()
     base  = TH1F("base",title,nBins,minBin,maxBin)
-    base.SetMinimum(0.0)
+    base.SetMinimum(0.8)
     base.SetMaximum(1.02)
     base.Draw("")
     base.GetXaxis().SetLabelSize(0.05)
@@ -493,7 +494,7 @@ def cscMatchingEfficiencyToAlctClct(filesDir, input_file, plotDir, ext):
     c = TCanvas("c","c",700,450)
     c.Clear()
     base  = TH1F("base",title,nBins,minBin,maxBin)
-    base.SetMinimum(0.0)
+    base.SetMinimum(0.8)
     base.SetMaximum(1.02)
     base.Draw("")
     base.GetXaxis().SetLabelSize(0.05)
@@ -554,7 +555,7 @@ def cscMatchingEfficiencyToAlctClct_2(filesDir, input_file, plotDir, ext):
     c = TCanvas("c","c",700,450)
     c.Clear()
     base  = TH1F("base",title,nBins,minBin,maxBin)
-    base.SetMinimum(0.0)
+    base.SetMinimum(0.8)
     base.SetMaximum(1.02)
     base.Draw("")
     base.GetXaxis().SetLabelSize(0.05)
@@ -615,7 +616,7 @@ def cscMatchingEfficiencyToLct(filesDir, input_file, plotDir, ext):
     c = TCanvas("c","c",700,450)
     c.Clear()
     base  = TH1F("base",title,nBins,minBin,maxBin)
-    base.SetMinimum(0.0)
+    base.SetMinimum(0.80)
     base.SetMaximum(1.02)
     base.Draw("")
     base.GetXaxis().SetLabelSize(0.05)
@@ -626,20 +627,308 @@ def cscMatchingEfficiencyToLct(filesDir, input_file, plotDir, ext):
 
 ##    h2 = draw_geff(t, title, h_bins, toPlot, AND(ok_sh2, ok_st2, ok_w2, ok_alct2, ok_clct2), ok_lct2, "same", kBlue)
    
-    leg = TLegend(0.45,0.2,.75,0.35, "", "brNDC");
+    leg = TLegend(0.10,0.2,.75,0.35, "", "brNDC");
     leg.SetBorderSize(0)
     leg.SetFillStyle(0)
-    leg.SetTextSize(0.06)
-    leg.AddEntry(h1, "LCT, requiring ALCT and CLCT","l")
+    leg.SetTextSize(0.04)
+    leg.AddEntry(h1, "LCT,denominator requiring simtrack with any ALCT and any CLCT","l")
     leg.AddEntry(h2, "LCT","l")
     leg.Draw("same");
     
-    tex = TLatex(.45,.4,"1.64<|#eta|<2.12")
+    tex = TLatex(.25,.4,"PU140,1.64<|#eta|<2.12")
     tex.SetTextSize(0.05)
     tex.SetNDC()
     tex.Draw("same")
 
     c.Print("%scsc_lct_matching_efficiency%s"%(plotDir,ext))
+
+#____________________________________________________________________
+def PadmatchingtoSimTrEfficiency(filesDir, input_file, plotDir, ext):
+
+    gStyle.SetTitleStyle(0);
+    gStyle.SetTitleAlign(13); ##coord in top left
+    gStyle.SetTitleX(0.);
+    gStyle.SetTitleY(1.);
+    gStyle.SetTitleW(1);
+    gStyle.SetTitleH(0.058);
+    gStyle.SetTitleBorderSize(0);
+    
+    gStyle.SetPadLeftMargin(0.126);
+    gStyle.SetPadRightMargin(0.04);
+    gStyle.SetPadTopMargin(0.06);
+    gStyle.SetPadBottomMargin(0.13);
+    gStyle.SetOptStat(0);
+    gStyle.SetMarkerStyle(1);
+    
+    ok_eta = TCut("TMath::Abs(eta)>1.5 && TMath::Abs(eta)<2.5")
+
+    t = getTree("%s%s"%(filesDir, input_file))
+
+    ## variables for the plot
+    topTitle = " " * 11 + "GEM Pad matching Efficiency" + " " * 35 + "CMS Simulation Preliminary"
+    xTitle = "Generated muon #eta"
+    yTitle = "Efficiency"
+    title = "%s;%s;%s"%(topTitle,xTitle,yTitle)
+    toPlot = "TMath::Abs(eta)"
+    h_bins = "(70,1.5,2.2)"
+    nBins = int(h_bins[1:-1].split(',')[0])
+    minBin = float(h_bins[1:-1].split(',')[1])
+    maxBin = float(h_bins[1:-1].split(',')[2])
+
+    c = TCanvas("c","c",700,450)
+    c.Clear()
+    base  = TH1F("base",title,nBins,minBin,maxBin)
+    base.SetMinimum(0.8)
+    base.SetMaximum(1.02)
+    base.Draw("")
+    base.GetXaxis().SetLabelSize(0.05)
+    base.GetYaxis().SetLabelSize(0.05)
+
+     
+    Cut1_den = ok_gsh1 
+    Cut1_num = ok_pad1
+    Cut2_den = ok_gsh2 
+    Cut2_num = ok_pad2 
+    Cut3_den = OR(ok_gsh1,ok_gsh2) 
+    Cut3_num = OR(ok_pad1,ok_pad2) 
+    h1 = draw_geff(t, title, h_bins, toPlot, Cut1_den, Cut1_num, "same", kRed)
+    h2 = draw_geff(t, title, h_bins, toPlot, Cut2_den, Cut2_num, "same", kBlue)
+#    h3 = draw_geff(t, title, h_bins, toPlot, Cut3_den, Cut3_num, "same", kGreen)
+
+    
+    leg = TLegend(0.45,0.2,.75,0.35, "", "brNDC");
+    leg.SetBorderSize(0)
+#    leg.SetFillStyle(0)
+    leg.SetTextSize(0.03)
+    leg.AddEntry(h1, "Pad matching for odd GEMDetId","l")
+    leg.AddEntry(h2, "Pad matching for even GEMDetId","l")
+#    leg.AddEntry(h3, "Pad1 or Pad2","l")
+    leg.Draw("same");
+   
+    
+    tex = TLatex(.25,.4,"PU140,1.64<|#eta|<2.12")
+    tex.SetTextSize(0.05)
+    tex.SetNDC()
+    tex.Draw("same")
+
+    c.Print("%sgempad_matching_efficiency%s"%(plotDir,ext))
+
+#____________________________________________________________________
+def PadDigimatchingtoSimTrEfficiency(filesDir, input_file, plotDir, ext):
+
+    gStyle.SetTitleStyle(0);
+    gStyle.SetTitleAlign(13); ##coord in top left
+    gStyle.SetTitleX(0.);
+    gStyle.SetTitleY(1.);
+    gStyle.SetTitleW(1);
+    gStyle.SetTitleH(0.058);
+    gStyle.SetTitleBorderSize(0);
+    
+    gStyle.SetPadLeftMargin(0.126);
+    gStyle.SetPadRightMargin(0.04);
+    gStyle.SetPadTopMargin(0.06);
+    gStyle.SetPadBottomMargin(0.13);
+    gStyle.SetOptStat(0);
+    gStyle.SetMarkerStyle(1);
+    
+    ok_eta = TCut("TMath::Abs(eta)>1.5 && TMath::Abs(eta)<2.5")
+
+    t = getTree("%s%s"%(filesDir, input_file))
+
+    ## variables for the plot
+    topTitle = " " * 11 + "GEM Pad Digi matching Efficiency" + " " * 35 + "CMS Simulation Preliminary"
+    xTitle = "Generated muon #eta"
+    yTitle = "Efficiency"
+    title = "%s;%s;%s"%(topTitle,xTitle,yTitle)
+    toPlot = "TMath::Abs(eta)"
+    h_bins = "(70,1.5,2.2)"
+    nBins = int(h_bins[1:-1].split(',')[0])
+    minBin = float(h_bins[1:-1].split(',')[1])
+    maxBin = float(h_bins[1:-1].split(',')[2])
+
+    c = TCanvas("c","c",700,450)
+    c.Clear()
+    base  = TH1F("base",title,nBins,minBin,maxBin)
+    base.SetMinimum(0.8)
+    base.SetMaximum(1.02)
+    base.Draw("")
+    base.GetXaxis().SetLabelSize(0.05)
+    base.GetYaxis().SetLabelSize(0.05)
+
+     
+    Cut1_den = ok_gsh1 
+    Cut1_num = ok_gdg1
+    Cut2_den = ok_gsh2
+    Cut2_num = ok_gdg2
+#    Cut3_den = OR(Cut1_den,Cut2_den) 
+#    Cut3_num = OR(Cut1_num,Cut2_num) 
+    h1 = draw_geff(t, title, h_bins, toPlot, Cut1_den, Cut1_num, "same", kRed)
+    h2 = draw_geff(t, title, h_bins, toPlot, Cut2_den, Cut2_num, "same", kBlue)
+#    h3 = draw_geff(t, title, h_bins, toPlot, Cut3_den, Cut3_num, "same", kGreen)
+
+    
+    leg = TLegend(0.25,0.2,.75,0.35, "", "brNDC");
+    leg.SetBorderSize(0)
+#    leg.SetFillStyle(0)
+    leg.SetTextSize(0.03)
+    leg.AddEntry(h1, "GEM Digi matching for odd GEMDetId ","l")
+    leg.AddEntry(h2, "GEM Digi matching for even GEMDetId","l")
+#    leg.AddEntry(h3, "Pad1 or Pad2","l")
+    leg.Draw("same");
+   
+    
+    tex = TLatex(.25,.4,"PU140 ,1.64<|#eta|<2.12")
+    tex.SetTextSize(0.05)
+    tex.SetNDC()
+    tex.Draw("same")
+
+    c.Print("%sgempad_Digi_matching_efficiency%s"%(plotDir,ext))
+
+
+#____________________________________________________________________
+def PadmatchingwithLCTstoSimTrEfficiency(filesDir, input_file, plotDir, ext):
+
+    gStyle.SetTitleStyle(0);
+    gStyle.SetTitleAlign(13); ##coord in top left
+    gStyle.SetTitleX(0.);
+    gStyle.SetTitleY(1.);
+    gStyle.SetTitleW(1);
+    gStyle.SetTitleH(0.058);
+    gStyle.SetTitleBorderSize(0);
+    
+    gStyle.SetPadLeftMargin(0.126);
+    gStyle.SetPadRightMargin(0.04);
+    gStyle.SetPadTopMargin(0.06);
+    gStyle.SetPadBottomMargin(0.13);
+    gStyle.SetOptStat(0);
+    gStyle.SetMarkerStyle(1);
+    
+    ok_eta = TCut("TMath::Abs(eta)>1.5 && TMath::Abs(eta)<2.5")
+
+    t = getTree("%s%s"%(filesDir, input_file))
+
+    ## variables for the plot
+    topTitle = " " * 11 + "GEM Pad matching with LCT Efficiency" + " " * 35 + "CMS Simulation Preliminary"
+    xTitle = "Generated muon #eta"
+    yTitle = "Efficiency"
+    title = "%s;%s;%s"%(topTitle,xTitle,yTitle)
+    toPlot = "TMath::Abs(eta)"
+    h_bins = "(70,1.5,2.2)"
+    nBins = int(h_bins[1:-1].split(',')[0])
+    minBin = float(h_bins[1:-1].split(',')[1])
+    maxBin = float(h_bins[1:-1].split(',')[2])
+
+    c = TCanvas("c","c",700,450)
+    c.Clear()
+    base  = TH1F("base",title,nBins,minBin,maxBin)
+    base.SetMinimum(0.8)
+    base.SetMaximum(1.02)
+    base.Draw("")
+    base.GetXaxis().SetLabelSize(0.05)
+    base.GetYaxis().SetLabelSize(0.05)
+    base.GetYaxis().SetRangeUser(yrange[0],yrange[1])
+
+     
+    Cut1_den = ok_lct1 
+    Cut1_num = ok_pad1_lct1 
+    Cut2_den = ok_lct2 
+    Cut2_num = ok_pad2_lct2
+#    Cut3_den = OR(Cut1_den,Cut2_den) 
+#    Cut3_num = OR(Cut1_num,Cut2_num) 
+    h1 = draw_geff(t, title, h_bins, toPlot, Cut1_den, Cut1_num, "same", kRed)
+    h2 = draw_geff(t, title, h_bins, toPlot, Cut2_den, Cut2_num, "same", kBlue)
+#    h3 = draw_geff(t, title, h_bins, toPlot, Cut3_den, Cut3_num, "same", kGreen)
+
+    
+    leg = TLegend(0.25,0.2,.75,0.35, "require simtrack with any lct ", "brNDC");
+    leg.SetBorderSize(0)
+#    leg.SetFillStyle(0)
+    leg.SetTextSize(0.03)
+    leg.AddEntry(h1, "Pad matching for odd GEMDetId","l")
+    leg.AddEntry(h2, "Pad matching for even GEMDetId","l")
+#    leg.AddEntry(h3, "Pad1 or Pad2","l")
+    leg.Draw("same");
+   
+    
+    tex = TLatex(.25,.4,"PU140,1.64<|#eta|<2.12")
+    tex.SetTextSize(0.05)
+    tex.SetNDC()
+    tex.Draw("same")
+
+    c.Print("%sgempad_matching_lcts_efficiency%s"%(plotDir,ext))
+
+#____________________________________________________________________
+def CoPadmatchingtoSimTrEfficiency(filesDir, input_file, plotDir, ext):
+
+    gStyle.SetTitleStyle(0);
+    gStyle.SetTitleAlign(13); ##coord in top left
+    gStyle.SetTitleX(0.);
+    gStyle.SetTitleY(1.);
+    gStyle.SetTitleW(1);
+    gStyle.SetTitleH(0.058);
+    gStyle.SetTitleBorderSize(0);
+    
+    gStyle.SetPadLeftMargin(0.126);
+    gStyle.SetPadRightMargin(0.04);
+    gStyle.SetPadTopMargin(0.06);
+    gStyle.SetPadBottomMargin(0.13);
+    gStyle.SetOptStat(0);
+    gStyle.SetMarkerStyle(1);
+    
+    ok_eta = TCut("TMath::Abs(eta)>1.5 && TMath::Abs(eta)<2.5")
+
+    t = getTree("%s%s"%(filesDir, input_file))
+
+    ## variables for the plot
+    topTitle = " " * 11 + "GEM CoPad matching Efficiency" + " " * 35 + "CMS Simulation Preliminary"
+    xTitle = "Generated muon #eta"
+    yTitle = "Efficiency"
+    title = "%s;%s;%s"%(topTitle,xTitle,yTitle)
+    toPlot = "TMath::Abs(eta)"
+    h_bins = "(70,1.5,2.2)"
+    nBins = int(h_bins[1:-1].split(',')[0])
+    minBin = float(h_bins[1:-1].split(',')[1])
+    maxBin = float(h_bins[1:-1].split(',')[2])
+    yrange = [0.4,1.02]
+    xrange = [1.5,2.2]
+
+    c = TCanvas("c","c",800,600)
+    c.Clear()
+    base  = TH1F("base",title,nBins,minBin,maxBin)
+    base.SetMinimum(0.0)
+    base.SetMaximum(1.02)
+    base.Draw("")
+    base.GetXaxis().SetLabelSize(0.05)
+    base.GetYaxis().SetLabelSize(0.05)
+    base.GetYaxis().SetRangeUser(yrange[0],yrange[1])
+     
+    Cut1_den = ok_gsh1 
+    Cut1_num = ok_copad1
+    Cut2_den = ok_gsh2 
+    Cut2_num = ok_copad2
+    Cut3_den = OR(ok_gsh1,ok_gsh2) 
+    Cut3_num = OR(ok_copad1,ok_copad2) 
+    h1 = draw_geff(t, title, h_bins, toPlot, Cut1_den, Cut1_num, "same", kRed, 1, 1)
+    h2 = draw_geff(t, title, h_bins, toPlot, Cut2_den, Cut2_num, "same", kBlue, 1, 1)
+#    h3 = draw_geff(t, title, h_bins, toPlot, Cut3_den, Cut3_num, "same", kGreen)
+
+    
+    leg = TLegend(0.15,0.75,0.75,0.90, "", "brNDC");
+    leg.SetBorderSize(0)
+#    leg.SetFillStyle(0)
+    leg.SetTextSize(0.03)
+    leg.AddEntry(h1, "CoPad matching for odd GEMDetId","l")
+    leg.AddEntry(h2, "CoPad matching for even GEMDetId","l")
+#    leg.AddEntry(h3, "Pad1 or Pad2","l")
+    leg.Draw("same");
+   
+    
+    tex = TLatex(.25,.7,"PU140,1.64<|#eta|<2.12")
+    tex.SetTextSize(0.05)
+    tex.SetNDC()
+    tex.Draw("same")
+
+    c.Print("%sgem_copad_matching_efficiency%s"%(plotDir,ext))
 
 #_______________________________________________________________________________
 def makePlots(ext):
@@ -659,17 +948,22 @@ if __name__ == "__main__":
     makePlots(".eps")
     """
     input_dir = "files/"
-    output_dir = "csc_digi_matching/"
-
-#    input_file = "gem-csc_stub_ana_pt20_PU100_moreStats.root"
+    output_dir = "csc_gem_matching/"
     input_file = "gem-csc_stub_ana.root"
+    ext = ".png"
     
     cscMatchingEfficiencyToStripsAndWires(input_dir, input_file, output_dir, ".png")
     cscMatchingEfficiencyToStripsAndWires_2(input_dir, input_file, output_dir, ".png")
     cscMatchingEfficiencyToAlctClct(input_dir, input_file, output_dir, ".png")
     cscMatchingEfficiencyToAlctClct_2(input_dir, input_file, output_dir, ".png")
     cscMatchingEfficiencyToLct(input_dir, input_file, output_dir, ".png")
+    PadmatchingtoSimTrEfficiency(input_dir, input_file, output_dir, ext)
+    PadmatchingwithLCTstoSimTrEfficiency(input_dir, input_file, output_dir, ext)
+    PadDigimatchingtoSimTrEfficiency(input_dir, input_file, output_dir, ext)
+    
+    CoPadmatchingtoSimTrEfficiency(input_dir, input_file, output_dir, ext)
 
+    
 
 
    ### DO NOT REMOVE THE STUFF IN COMMENTS ###

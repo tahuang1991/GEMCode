@@ -1,10 +1,5 @@
-#include "GEMRecHitMatcher.h"
-#include "SimHitMatcher.h"
-
-#include "DataFormats/MuonDetId/interface/GEMDetId.h"
-#include "FWCore/Framework/interface/ESHandle.h"
-#include "Geometry/Records/interface/MuonGeometryRecord.h"
-#include "Geometry/GEMGeometry/interface/GEMGeometry.h"
+#include "GEMCode/GEMValidation/src/GEMRecHitMatcher.h"
+#include "GEMCode/GEMValidation/src/SimHitMatcher.h"
 
 using namespace std;
 using namespace matching;
@@ -12,17 +7,13 @@ using namespace matching;
 GEMRecHitMatcher::GEMRecHitMatcher(SimHitMatcher& sh)
   : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
   , simhit_matcher_(&sh)
-
 {
-  gemRecHitInput_ = conf().getUntrackedParameter<edm::InputTag>("gemRecHitInput",
-      edm::InputTag("gemRecHits"));
-
-  minBXGEM_ = conf().getUntrackedParameter<int>("minBXGEM", -1);
-  maxBXGEM_ = conf().getUntrackedParameter<int>("maxBXGEM", 1);
-
-  matchDeltaStrip_ = conf().getUntrackedParameter<int>("matchDeltaStripGEM", 1);
-
-  setVerbose(conf().getUntrackedParameter<int>("verboseGEMRecHit", 0));
+  auto gemRecHit_= conf().getParameter<edm::ParameterSet>("gemRecHit");
+  gemRecHitInput_ = gemRecHit_.getParameter<edm::InputTag>("input");
+  minBXGEM_ = gemRecHit_.getParameter<int>("minBX");
+  maxBXGEM_ = gemRecHit_.getParameter<int>("maxBX");
+  matchDeltaStrip_ = gemRecHit_.getParameter<int>("matchDeltaStrip");
+  setVerbose(gemRecHit_.getParameter<int>("verbose"));
 
   if (!(gemRecHitInput_.label().empty()))
   {
@@ -39,10 +30,6 @@ GEMRecHitMatcher::init()
   edm::Handle<GEMRecHitCollection> gem_rechits;
   event().getByLabel(gemRecHitInput_, gem_rechits);
   matchRecHitsToSimTrack(*gem_rechits.product());
-
-  edm::ESHandle<GEMGeometry> gem_g;
-  eventSetup().get<MuonGeometryRecord>().get(gem_g);
-  gem_geo_ = &*gem_g;
 }
 
 
@@ -72,10 +59,22 @@ GEMRecHitMatcher::matchRecHitsToSimTrack(const GEMRecHitCollection& rechits)
       // check that the rechit is within BX range
       if (d->BunchX() < minBXGEM_ || d->BunchX() > maxBXGEM_) continue;
       // check that it matches a strip that was hit by SimHits from our track
-      if (hit_strips.find(d->firstClusterStrip()) == hit_strips.end()) continue;
+
+      int firstStrip = d->firstClusterStrip();
+      int cls = d->clusterSize();
+      bool stripFound = false;
+
+      for(int i = firstStrip; i < (firstStrip + cls); i++){
+
+	if (hit_strips.find(i) != hit_strips.end()) stripFound = true;
+        //std::cout<<i<<" "<<firstStrip<<" "<<cls<<" "<<stripFound<<std::endl;
+	
+      }
+
+      if (!stripFound) continue;
       if (verbose()) cout<<"oki"<<endl;
 
-      auto myrechit = make_digi(id, d->firstClusterStrip(), d->BunchX(), GEM_STRIP);
+      auto myrechit = make_digi(id, d->firstClusterStrip(), d->BunchX(), GEM_STRIP, d->clusterSize());
       detid_to_recHits_[id].push_back(myrechit);
       chamber_to_recHits_[ p_id.chamberId().rawId() ].push_back(myrechit);
       superchamber_to_recHits_[ superch_id() ].push_back(myrechit);
@@ -188,8 +187,8 @@ GEMRecHitMatcher::recHitPosition(const RecHit& rechit) const
   if ( t == GEM_STRIP )
   {
     GEMDetId idd(id);
-    LocalPoint lp = gem_geo_->etaPartition(idd)->centreOfStrip(strip);
-    gp = gem_geo_->idToDet(id)->surface().toGlobal(lp);
+    LocalPoint lp = gemGeometry_->etaPartition(idd)->centreOfStrip(strip);
+    gp = gemGeometry_->idToDet(id)->surface().toGlobal(lp);
   }
 
   return gp;

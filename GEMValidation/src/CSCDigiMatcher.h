@@ -6,7 +6,6 @@
  Description: Matching of Digis to SimTrack in CSC
 
  Original Author:  "Vadim Khotilovich"
- $Id: CSCDigiMatcher.h,v 1.1 2013/02/11 07:33:06 khotilov Exp $
 */
 
 #include "GEMCode/GEMValidation/src/DigiMatcher.h"
@@ -90,6 +89,9 @@ private:
   Id2DigiContainer chamber_to_wires_;
 
   std::set<unsigned int> selectDetIds(const Id2DigiContainer &digis, int csc_type) const;
+  
+  int verboseStrip_;
+  int verboseWG_;
 };
 
 #endif

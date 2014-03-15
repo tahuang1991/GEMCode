@@ -8,8 +8,6 @@
  It's a manager-matcher class, as it uses specialized matching classes to match SimHits, various digis and stubs.
 
  Original Author:  "Vadim Khotilovich"
- $Id: SimTrackMatchManager.h,v 1.1 2013/02/11 07:33:07 khotilov Exp $
-
 */
 
 #include "GEMCode/GEMValidation/src/BaseMatcher.h"
@@ -17,6 +15,7 @@
 #include "GEMCode/GEMValidation/src/GEMDigiMatcher.h"
 #include "GEMCode/GEMValidation/src/CSCDigiMatcher.h"
 #include "GEMCode/GEMValidation/src/CSCStubMatcher.h"
+#include "GEMCode/GEMValidation/src/TrackMatcher.h"
 #include "GEMCode/GEMValidation/src/GEMRecHitMatcher.h"
 
 class SimTrackMatchManager
@@ -32,6 +31,7 @@ public:
   const GEMDigiMatcher& gemDigis() const {return gem_digis_;}
   const CSCDigiMatcher& cscDigis() const {return csc_digis_;}
   const CSCStubMatcher& cscStubs() const {return stubs_;}
+  const TrackMatcher& tracks() const {return tracks_;}
   const GEMRecHitMatcher& gemRecHits() const {return gem_rechits_;}
   
 private:
@@ -40,6 +40,7 @@ private:
   GEMDigiMatcher gem_digis_;
   CSCDigiMatcher csc_digis_;
   CSCStubMatcher stubs_;
+  TrackMatcher tracks_;
   GEMRecHitMatcher gem_rechits_;
 };
 

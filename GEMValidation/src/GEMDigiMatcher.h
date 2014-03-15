@@ -6,7 +6,6 @@
  Description: Matching of Digis for SimTrack in GEM
 
  Original Author:  "Vadim Khotilovich"
- $Id: GEMDigiMatcher.h,v 1.1 2013/02/11 07:33:07 khotilov Exp $
 */
 
 #include "DigiMatcher.h"
@@ -106,6 +105,10 @@ private:
   std::map<unsigned int, DigiContainer> detid_to_copads_;
   std::map<unsigned int, DigiContainer> chamber_to_copads_;
   std::map<unsigned int, DigiContainer> superchamber_to_copads_;
+
+  bool verboseDigi_;
+  bool verbosePad_;
+  bool verboseCoPad_;
 };
 
 #endif
