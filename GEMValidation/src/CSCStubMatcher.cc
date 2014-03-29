@@ -13,6 +13,7 @@ CSCStubMatcher::CSCStubMatcher(SimHitMatcher& sh, CSCDigiMatcher& dg, GEMDigiMat
 : DigiMatcher(sh)
 , digi_matcher_(&dg)
 , gem_digi_matcher_(&gem_dg)
+, sh_matcher_(&sh)
 {
   auto cscCLCT_ = conf().getParameter<edm::ParameterSet>("cscCLCT");
   clctInput_ = cscCLCT_.getParameter<edm::InputTag>("input");
@@ -369,7 +370,14 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
     const int my_wg(digi_wg(alct));
     const int my_bx(digi_bx(alct));
     // remember that trigger strips are wrapped-around
-    const int my_hs_gem((nStrips-cscKeyLayerGeometry->nearestStrip(lpME))*2);
+    const int my_hs_gem_propagate((nStrips-cscKeyLayerGeometry->nearestStrip(lpME))*2);
+    
+    const auto& hits = sh_matcher_->hitsInChamber(id);
+    const float my_hs_gem(sh_matcher_->simHitsMeanStrip(hits));
+    if (caseAlctClct) std::cout << "caseAlctClct" << std::endl;
+    else if(matchAlctGem_)std::cout << "caseAlctGem" << std::endl;
+    std::cout << "mean half strip from simhits " << sh_matcher_->simHitsMeanStrip(hits) 
+	<<"   half strip by propagating track " << my_hs_gem_propagate << std::endl; 
 
     if (verbose()) cout<<"will match hs"<<my_hs<<" wg"<<my_wg<<" bx"<<my_bx<<" to #lct "<<n_lct<<endl;
     for (auto &lct: lcts_tmp)
@@ -379,7 +387,7 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
         if (verbose()) cout<<"  BAD"<<endl;
         continue;
       }
-      if (matchAlctGem_ and caseAlctGem and !(my_bx == digi_bx(lct) and std::abs(my_hs_gem - digi_channel(lct))<3 and my_wg == digi_wg(lct) ) ){
+      if (matchAlctGem_ and caseAlctGem and !(my_bx == digi_bx(lct) and std::fabs(my_hs_gem - digi_channel(lct))<3 and my_wg == digi_wg(lct) ) ){
         if (verbose()) cout<<"  BAD"<<endl;
         continue;
       }
