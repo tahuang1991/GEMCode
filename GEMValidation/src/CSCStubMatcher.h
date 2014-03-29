@@ -98,6 +98,7 @@ private:
 
   const CSCDigiMatcher* digi_matcher_;
   const GEMDigiMatcher* gem_digi_matcher_;
+  const SimHitMatcher* sh_matcher_;
 
   edm::InputTag clctInput_;
   edm::InputTag alctInput_;
