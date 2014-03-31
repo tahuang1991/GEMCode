@@ -373,7 +373,7 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
     // remember that trigger strips are wrapped-around
     const int my_hs_gem_propagate((nStrips-cscKeyLayerGeometry->nearestStrip(lpME))*2);
     
-    const auto& hits = sh_matcher_->hitsInChamber(id);
+    const auto hits = sh_matcher_->hitsInChamber(id);
     const float my_hs_gem_mean(sh_matcher_->simHitsMeanStrip(hits));
     if (caseAlctClct) std::cout << "caseAlctClct" << std::endl;
     else if(matchAlctGem_)std::cout << "caseAlctGem" << std::endl;
@@ -390,7 +390,7 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
         if (verbose()) cout<<"  BAD"<<endl;
         continue;
       }
-      if (matchAlctGem_ and caseAlctGem and !(my_bx == digi_bx(lct) and std::fabs(my_hs_gem - digi_channel(lct))<3 and my_wg == digi_wg(lct) ) ){
+      if (matchAlctGem_ and caseAlctGem and !(my_bx == digi_bx(lct) and std::abs(my_hs_gem - digi_channel(lct))<3 and my_wg == digi_wg(lct) ) ){
         if (verbose()) cout<<"  BAD"<<endl;
         continue;
       }
