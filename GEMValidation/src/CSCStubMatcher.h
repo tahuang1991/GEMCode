@@ -140,6 +140,7 @@ private:
   bool addGhostLCTs_;
   bool addGhostMPLCTs_;
   bool matchAlctGem_;
+  bool MeanOrPropagate_;
 
   int minNHitsChamber_;
   int minNHitsChamberALCT_;
