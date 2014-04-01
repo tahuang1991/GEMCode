@@ -11,10 +11,10 @@ SimTrackMatching = cms.PSet(
     overrideminNHitsChamber = cms.bool(False),
     minNHitsChamber = cms.untracked.int32(4),
     verbose = cms.bool(False),
-    verboseSimHit = cms.int32(0),
-    verboseGEMDigi = cms.int32(0),
-    verboseCSCDigi = cms.int32(0),
-    verboseCSCStub = cms.int32(0),
+#    verboseSimHit = cms.int32(0),
+#    verboseGEMDigi = cms.int32(0),
+#    verboseCSCDigi = cms.int32(0),
+#    verboseCSCStub = cms.int32(0),
     ## per collection params
     simTrack = cms.PSet(
         verbose = cms.int32(0),
@@ -123,7 +123,7 @@ SimTrackMatching = cms.PSet(
         minNHitsChamber = cms.int32(4),
         addGhosts = cms.bool(True),
         matchAlctGem = cms.bool(False),
-        MeanOrPropagate = cms.bool(True),
+        hsFromSimHitMean = cms.bool(True),
     ),
     cscMPLCT = cms.PSet(
         verbose = cms.int32(0),
