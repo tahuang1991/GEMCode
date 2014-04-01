@@ -37,7 +37,7 @@ CSCStubMatcher::CSCStubMatcher(SimHitMatcher& sh, CSCDigiMatcher& dg, GEMDigiMat
   minNHitsChamberLCT_ = cscLCT_.getParameter<int>("minNHitsChamber");
   addGhostLCTs_ = cscLCT_.getParameter<bool>("addGhosts");
   matchAlctGem_ = cscLCT_.getParameter<bool>("matchAlctGem");
-  MeanOrPropagate_ = cscLCT_.getParameter<bool>("MeanOrPropagate");
+  hsFromSimHitMean_ = cscLCT_.getParameter<bool>("hsFromSimHitMean");
 
   auto cscMPLCT_ = conf().getParameter<edm::ParameterSet>("cscMPLCT");
   mplctInput_ = cscMPLCT_.getParameter<edm::InputTag>("input");
@@ -380,7 +380,7 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
     std::cout << "mean half strip from simhits " << sh_matcher_->simHitsMeanStrip(hits) 
 	<<"   half strip by propagating track " << my_hs_gem_propagate << std::endl; 
     float my_hs_gem;
-    if (MeanOrPropagate_)  my_hs_gem = my_hs_gem_mean;
+    if (hsFromSimHitMean_)  my_hs_gem = my_hs_gem_mean;
     else my_hs_gem = my_hs_gem_propagate;
     if (verbose()) cout<<"will match hs"<<my_hs<<" wg"<<my_wg<<" bx"<<my_bx<<" to #lct "<<n_lct<<endl;
     for (auto &lct: lcts_tmp)
