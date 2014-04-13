@@ -59,10 +59,6 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 
-## GEM geometry customization
-from Geometry.GEMGeometry.gemGeometryCustoms import custom_GE11_6partitions_v1
-process = custom_GE11_6partitions_v1(process)
-
 ## GEM digitizer
 from SimMuon.GEMDigitizer.customizeGEMDigi import customize_digi_addGEM_muon_only
 process = customize_digi_addGEM_muon_only(process)
@@ -82,18 +78,6 @@ process = customise_csc_L1Stubs(process)
 ## GEM-CSC emulator
 from SLHCUpgradeSimulations.Configuration.gemCustoms import customise_L1Emulator as customise_L1EmulatorGEM
 process = customise_L1EmulatorGEM(process, ptdphi)
-process.simCscTriggerPrimitiveDigis.clctSLHC.clctNplanesHitPattern = 3
-tmb = process.simCscTriggerPrimitiveDigis.tmbSLHC
-
-"""
-tmb.clctToAlct = cms.untracked.bool(False)
-tmb.printAvailablePads = cms.untracked.bool(False)
-tmb.dropLowQualityCLCTsNoGEMs_ME1a = cms.untracked.bool(True)
-tmb.dropLowQualityCLCTsNoGEMs_ME1b = cms.untracked.bool(True)
-tmb.buildLCTfromALCTandGEM_ME1a = cms.untracked.bool(False)
-tmb.buildLCTfromALCTandGEM_ME1b = cms.untracked.bool(True)
-tmb.doLCTGhostBustingWithGEMs = cms.untracked.bool(False)
-"""
 
 ## RPC-CSC emulator
 from SLHCUpgradeSimulations.Configuration.rpcCustoms import customise_L1Emulator as customise_L1EmulatorRPC
