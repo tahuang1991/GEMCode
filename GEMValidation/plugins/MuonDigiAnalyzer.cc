@@ -297,11 +297,11 @@ void MuonDigiAnalyzer::beginRun(edm::Run const&, edm::EventSetup const& iSetup)
     chamberHeight_ = gp_top.perp() - gp_bottom.perp();
     
     using namespace std;
-    cout<<"half top "<<top_half_striplength<<" bot "<<lp_bottom<<endl;
-    cout<<"r  top "<<gp_top.perp()<<" bot "<<gp_bottom.perp()<<endl;
+    //cout<<"half top "<<top_half_striplength<<" bot "<<lp_bottom<<endl;
+    //cout<<"r  top "<<gp_top.perp()<<" bot "<<gp_bottom.perp()<<endl;
     LocalPoint p0(0.,0.,0.);
-    cout<<"r0 top "<<top_chamber->toGlobal(p0).perp()<<" bot "<< bottom_chamber->toGlobal(p0).perp()<<endl;
-    cout<<"rch "<<radiusCenter_<<" hch "<<chamberHeight_<<endl;
+    //cout<<"r0 top "<<top_chamber->toGlobal(p0).perp()<<" bot "<< bottom_chamber->toGlobal(p0).perp()<<endl;
+    //cout<<"rch "<<radiusCenter_<<" hch "<<chamberHeight_<<endl;
     
     buildLUT();
   }
@@ -730,11 +730,11 @@ void MuonDigiAnalyzer::analyzeTracks(edm::ParameterSet cfg_, const edm::Event& i
     track_.gem_trk_eta = gp_track.eta();
     track_.gem_trk_phi = gp_track.phi();
     track_.gem_trk_rho = gp_track.perp();
-    std::cout << "track eta phi rho = " << track_.gem_trk_eta << " " << track_.gem_trk_phi << " " << track_.gem_trk_rho << std::endl;
+    //std::cout << "track eta phi rho = " << track_.gem_trk_eta << " " << track_.gem_trk_phi << " " << track_.gem_trk_rho << std::endl;
     
     float track_angle = gp_track.phi().degrees();
     if (track_angle < 0.) track_angle += 360.;
-    std::cout << "track angle = " << track_angle << std::endl;
+    //std::cout << "track angle = " << track_angle << std::endl;
     const int track_region = (gp_track.z() > 0 ? 1 : -1);
     
     // closest chambers in phi
@@ -770,8 +770,8 @@ void MuonDigiAnalyzer::analyzeTracks(edm::ParameterSet cfg_, const edm::Event& i
     track_.gem_ly_even = lp_track_even_partition.y() + (gp_even_partition.perp() - radiusCenter_);
     track_.gem_ly_odd = lp_track_odd_partition.y() + (gp_odd_partition.perp() - radiusCenter_);
 
-    std::cout << track_.gem_lx_even << " " << track_.gem_ly_even << std::endl;
-    std::cout << track_.gem_lx_odd << " " << track_.gem_ly_odd << std::endl;
+    //std::cout << track_.gem_lx_even << " " << track_.gem_ly_even << std::endl;
+    //std::cout << track_.gem_lx_odd << " " << track_.gem_ly_odd << std::endl;
 
 
     auto gem_sh_ids_ch = match_sh.chamberIdsGEM();
@@ -915,8 +915,8 @@ MuonDigiAnalyzer::getClosestChambers(int region, float phi)
 {
   auto& phis(positiveLUT_.first);
   auto upper = std::upper_bound(phis.begin(), phis.end(), phi);
-  std::cout << "lower = " << upper - phis.begin()  << std::endl;
-  std::cout << "upper = " << upper - phis.begin() + 1 << std::endl;
+  //std::cout << "lower = " << upper - phis.begin()  << std::endl;
+  //std::cout << "upper = " << upper - phis.begin() + 1 << std::endl;
   auto& LUT = (region == 1 ? positiveLUT_.second : negativeLUT_.second);
   return std::make_pair(LUT.at(upper - phis.begin()), (LUT.at((upper - phis.begin() + 1)%36)));
 }
