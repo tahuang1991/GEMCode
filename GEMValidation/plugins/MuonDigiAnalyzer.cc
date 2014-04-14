@@ -1,21 +1,3 @@
-// -*- C++ -*-
-//
-// Package:    MuonDigiAnalyzer
-// Class:      MuonDigiAnalyzer
-// 
-/**\class MuonDigiAnalyzer MuonDigiAnalyzer.cc MyAnalyzers/MuonDigiAnalyzer/src/MuonDigiAnalyzer.cc
-
- Description: [one line class summary]
-
- Implementation:
-     [Notes on implementation]
-*/
-//
-// $Id: MuonDigiAnalyzer.cc,v 1.9 2013/04/23 07:40:17 dildick Exp $
-//
-//
-
-
 // system include files
 #include <memory>
 #include <string>
