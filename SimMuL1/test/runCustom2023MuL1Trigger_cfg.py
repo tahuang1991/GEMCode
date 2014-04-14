@@ -55,7 +55,7 @@ if hasattr(sys, "argv") == True:
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgradePLS3', '')
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 
@@ -77,7 +77,7 @@ process = customise_csc_L1Stubs(process)
 
 ## GEM-CSC emulator
 from SLHCUpgradeSimulations.Configuration.gemCustoms import customise_L1Emulator as customise_L1EmulatorGEM
-process = customise_L1EmulatorGEM(process, ptdphi)
+#process = customise_L1EmulatorGEM(process, ptdphi)
 
 ## RPC-CSC emulator
 from SLHCUpgradeSimulations.Configuration.rpcCustoms import customise_L1Emulator as customise_L1EmulatorRPC
@@ -107,9 +107,9 @@ process.source = cms.Source("PoolSource",
 )
 
 ## input
-from GEMCode.SimMuL1.GEMCSCTriggerSamplesLib import *
+from GEMCode.SimMuL1.GEMCSCTriggerSamplesLib import useInputDir
 from GEMCode.GEMValidation.InputFileHelpers import *
-#process = useInputDir(process, eosfiles['_pt2-50_PU140_6part2019'], True)
+process = useInputDir(process, eosfiles['_pt2-50_PU0_SLHC10_2023Muon'], True)
 
 
 physics = False

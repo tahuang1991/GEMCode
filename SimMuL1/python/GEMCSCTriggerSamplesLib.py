@@ -132,3 +132,5 @@ eosfiles = {}
 eosfiles['_pt2-50_PU000_6part2019'] = ['/eos/uscms/store/user/jdimasva/SingleMuPt2-50Fwdv2_100K_DIGI_PU000/jdimasva/SingleMuPt2-50Fwdv2_1M/SingleMuPt2-50Fwdv2_100K_DIGI_PU000/36687f2fa27757b21d07bf97e7678b19/']
 eosfiles['_pt2-50_PU140_6part2019'] = ['/eos/uscms/store/user/jdimasva/SingleMuPt2-50Fwdv2_100K_DIGI_PU140/jdimasva/SingleMuPt2-50Fwdv2_1M/SingleMuPt2-50Fwdv2_100K_DIGI_PU140/7444237097ec40e1cd737724f1a85642/']
 eosfiles['_pt2-50_PU400_6part2019'] = ['/eos/uscms/store/user/aysen/SingleMuPt2-50Fwdv2_100K_DIGI_PU400/aysen/SingleMuPt2-50Fwdv2_1M/SingleMuPt2-50Fwdv2_100K_DIGI_PU400/6bcb78929a3bd07607400097784c7b5b/']
+
+eosfiles['_pt2-50_PU0_SLHC10_2023Muon'] = ['/eos/uscms/store/user/dildick/dildick/SingleMuPt2-50Fwdv2_50k_DIGI_PU0_SLHC10_2023Muon/SingleMuPt2-50Fwdv2_50k_DIGI_PU0_SLHC10_2023Muon/3fc7116e7a0ba79c1b27ffca0468fa34/']
