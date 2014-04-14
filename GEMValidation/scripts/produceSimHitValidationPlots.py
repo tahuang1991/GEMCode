@@ -22,7 +22,7 @@ def produceOccupanyPlots(plotter):
 
     gemSimHitOccupancyXY(plotter,i)
     gemSimHitOccupancyRZ(plotter,i)
-    gemSimHitTOF(plotter,i)
+    #gemSimHitTOF(plotter,i)
     cscSimHitOccupancyXY(plotter,i)
     rpcSimHitOccupancyXY(plotter,i)
     #   gemSimhitMomentum(plotter,i) 

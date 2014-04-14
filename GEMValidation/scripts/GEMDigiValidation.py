@@ -12,7 +12,7 @@ ROOT.gROOT.SetBatch(1)
 
 
 #_______________________________________________________________________________
-def gemGEMDigiOccupancyXY(plotter):
+def gemDigiOccupancyXY(plotter):
   ## station 1
   draw_occ(plotter.targetDir, "strip_dg_xy_rm1_st1_l1", plotter.ext, plotter.treeGEMDigis, "Digi occupancy: region-1, station1, layer1; globalX [cm]; globalY [cm]", 
 	   "h_", "(260,-260,260,260,-260,260)", "g_x:g_y", AND(rm1,st1,l1), "COLZ")
@@ -99,7 +99,7 @@ def gemGEMDigiOccupancyXY(plotter):
   
 
 #_______________________________________________________________________________
-def gemGEMDigiOccupancyStripPhi(plotter):
+def gemDigiOccupancyStripPhi(plotter):
   draw_occ(plotter.targetDir, "strip_dg_phistrip_rm1_st1_l1", plotter.ext, plotter.treeGEMDigis, "Digi occupancy: region-1 station1 layer1; phi [rad]; strip", 
 	   "h_", "(280,-3.141592654,3.141592654,%d,0,%d)"%(plotter.nstripsGE11/2,plotter.nstripsGE11), "strip:g_phi", AND(rm1,st1,l1), "COLZ")
   draw_occ(plotter.targetDir, "strip_dg_phistrip_rm1_st1_l2", plotter.ext, plotter.treeGEMDigis, "Digi occupancy: region-1 station1 layer2; phi [rad]; strip", 
@@ -129,7 +129,7 @@ def gemGEMDigiOccupancyStripPhi(plotter):
 
 
 #_______________________________________________________________________________
-def gemGEMDigiOccupancyStrip(plotter):
+def gemDigiOccupancyStrip(plotter):
   draw_1D(plotter.targetDir, "strip_dg_rm1_st1_l1", plotter.ext, plotter.treeGEMDigis, "Digi occupancy per strip number, region-1 station1 layer1;strip number;entries", 
 	  "h_", "(384,0.5,384.5)", "strip", AND(rm1,st1,l1))
   draw_1D(plotter.targetDir, "strip_dg_rm1_st1_l2", plotter.ext, plotter.treeGEMDigis, "Digi occupancy per strip number, region-1 station1 layer2;strip number;entries", 
@@ -159,7 +159,7 @@ def gemGEMDigiOccupancyStrip(plotter):
     
 
 #_______________________________________________________________________________
-def gemGEMDigiBX(plotter):
+def gemDigiBX(plotter):
   draw_bx(plotter.targetDir, "strip_digi_bx_rm1_l1", plotter.ext, plotter.treeGEMDigis, "Bunch crossing: region-1, layer1;bunch crossing;entries", 
 	  "h_", "(11,-5.5,5.5)", "bx", AND(rm1,l1))
   draw_bx(plotter.targetDir, "strip_digi_bx_rm1_l2", plotter.ext, plotter.treeGEMDigis, "Bunch crossing: region-1, layer2;bunch crossing;entries", 
@@ -171,7 +171,7 @@ def gemGEMDigiBX(plotter):
 
 
 #_______________________________________________________________________________
-def gemGEMDigiOccupancyRZ(plotter):
+def gemDigiOccupancyRZ(plotter):
   draw_occ(plotter.targetDir, "strip_dg_zr_rm1", plotter.ext, plotter.treeGEMDigis, "Digi occupancy: region-1; globalZ [cm]; globalR [cm]", 
            "h_", "(200,-573,-564,55,130,240)", "g_r:g_z", rm1, "COLZ")
   draw_occ(plotter.targetDir, "strip_dg_zr_rp1", plotter.ext, plotter.treeGEMDigis, "Digi occupancy: region1; globalZ [cm]; globalR [cm]", 
@@ -179,7 +179,7 @@ def gemGEMDigiOccupancyRZ(plotter):
 
 
 #_______________________________________________________________________________
-def gemGEMPadOccupancyXY(plotter):
+def gemPadOccupancyXY(plotter):
   draw_occ(plotter.targetDir, "pad_dg_xy_rm1_l1", plotter.ext, plotter.treeGEMCSPadDigis, "Pad occupancy: region-1, layer1; globalX [cm]; globalY [cm]", 
 	   "h_", "(260,-260,260,260,-260,260)", "g_x:g_y", AND(rm1,l1), "COLZ")
   draw_occ(plotter.targetDir, "pad_dg_xy_rm1_l2", plotter.ext, plotter.treeGEMCSPadDigis, "Pad occupancy: region-1, layer2; globalX [cm]; globalY [cm]", 
@@ -191,7 +191,7 @@ def gemGEMPadOccupancyXY(plotter):
 
 
 #_______________________________________________________________________________
-def gemGEMPadOccupancyPadPhi(plotter):
+def gemPadOccupancyPadPhi(plotter):
   draw_occ(plotter.targetDir, "pad_dg_phipad_rm1_st1_l1", plotter.ext, plotter.treeGEMCSPadDigis, "Pad occupancy: region-1 station1 layer1; phi [rad]; pad", 
 	   "h_", "(280,-3.141592654,3.141592654, %f" %(plotter.npadsGE11/2.) + ",0, %f" %(plotter.npadsGE11) + ")", "pad:g_phi", AND(rm1,st1,l1), "COLZ")
   draw_occ(plotter.targetDir, "pad_dg_phipad_rm1_st1_l2", plotter.ext, plotter.treeGEMCSPadDigis, "Pad occupancy: region-1 station1 layer2; phi [rad]; pad", 
@@ -221,7 +221,7 @@ def gemGEMPadOccupancyPadPhi(plotter):
 
 
 #_______________________________________________________________________________
-def gemGEMPadOccupancyPad(plotter):
+def gemPadOccupancyPad(plotter):
   draw_1D(plotter.targetDir, "pad_dg_rm1_st1_l1", plotter.ext, plotter.treeGEMCSPadDigis, "Digi occupancy per pad number, region-1 station1 layer1;pad number;entries", 
 	  "h_", "( %f" %(plotter.npadsGE11) + ",0.5, %f" %(plotter.npadsGE11 + 0.5) + ")", "pad", AND(rm1,st1,l1))
   draw_1D(plotter.targetDir, "pad_dg_rm1_st1_l2", plotter.ext, plotter.treeGEMCSPadDigis, "Digi occupancy per pad number, region-1 station1 layer2;pad number;entries", 
@@ -251,7 +251,7 @@ def gemGEMPadOccupancyPad(plotter):
 
 
 #_______________________________________________________________________________
-def gemGEMPadBX(plotter):
+def gemPadBX(plotter):
   draw_bx(plotter.targetDir, "pad_dg_bx_rm1_l1", plotter.ext, plotter.treeGEMCSPadDigis, "Bunch crossing: region-1, layer1;bunch crossing;entries", 
 	  "h_", "(11,-5.5,5.5)", "bx", AND(rm1,l1))
   draw_bx(plotter.targetDir, "pad_dg_bx_rm1_l2", plotter.ext, plotter.treeGEMCSPadDigis, "Bunch crossing: region-1, layer2;bunch crossing;entries", 
@@ -263,7 +263,7 @@ def gemGEMPadBX(plotter):
 
     
 #_______________________________________________________________________________
-def gemGEMCoPadOccupancyCoPadPhi(plotter):
+def gemCoPadOccupancyCoPadPhi(plotter):
   draw_occ(plotter.targetDir, "copad_dg_phipad_rm1_l1", plotter.ext, plotter.treeGEMCSCoPadDigis, "Pad occupancy: region-1; phi [rad]; pad", 
 	   "h_", "(280,-3.141592654,3.141592654, %f" %(plotter.npadsGE11/2.) + ",0, %f" %(plotter.npadsGE11) + ")", "pad:g_phi", rm1, "COLZ")
   draw_occ(plotter.targetDir, "copad_dg_phipad_rp1_l1", plotter.ext, plotter.treeGEMCSCoPadDigis, "Pad occupancy: region1; phi [rad]; pad", 
@@ -271,7 +271,7 @@ def gemGEMCoPadOccupancyCoPadPhi(plotter):
 
     
 #_______________________________________________________________________________
-def gemGEMCoPadOccupancyCoPad(plotter):
+def gemCoPadOccupancyCoPad(plotter):
   draw_1D(plotter.targetDir, "copad_dg_rm1_l1", plotter.ext, plotter.treeGEMCSCoPadDigis, "Digi occupancy per pad number, region-1;pad number;entries", 
 	  "h_", "( %f" %(plotter.npadsGE11) + ",0.5, %f" %(plotter.npadsGE11 + 0.5) +  ")", "pad", rm1)
   draw_1D(plotter.targetDir, "copad_dg_rp1_l1", plotter.ext, plotter.treeGEMCSCoPadDigis, "Digi occupancy per pad number, region1;pad number;entries", 
@@ -279,7 +279,7 @@ def gemGEMCoPadOccupancyCoPad(plotter):
 
 
 #_______________________________________________________________________________
-def gemGEMCoPadOccupancyXY(plotter):
+def gemCoPadOccupancyXY(plotter):
   draw_occ(plotter.targetDir, "copad_dg_xy_rm1_l1", plotter.ext, plotter.treeGEMCSCoPadDigis, "Pad occupancy: region-1; globalX [cm]; globalY [cm]", 
 	   "h_", "(260,-260,260,260,-260,260)", "g_x:g_y", rm1, "COLZ")
   draw_occ(plotter.targetDir, "copad_dg_xy_rp1_l1", plotter.ext, plotter.treeGEMCSCoPadDigis, "Pad occupancy: region1; globalX [cm]; globalY [cm]", 
@@ -287,7 +287,7 @@ def gemGEMCoPadOccupancyXY(plotter):
 
 
 #_______________________________________________________________________________
-def gemGEMCoPadBX(plotter):
+def gemCoPadBX(plotter):
   draw_bx(plotter.targetDir, "copad_dg_bx_rm1", plotter.ext, plotter.treeGEMCSCoPadDigis, "Bunch crossing: region-1;bunch crossing;entries", 
 	  "h_", "(11,-5.5,5.5)", "bx", rm1)
   draw_bx(plotter.targetDir, "copad_dg_bx_rp1", plotter.ext, plotter.treeGEMCSCoPadDigis, "Bunch crossing: region1;bunch crossing;entries", 
@@ -295,7 +295,7 @@ def gemGEMCoPadBX(plotter):
 
 
 #_______________________________________________________________________________
-def gemGEMPadOccupancyRZ(plotter):
+def gemPadOccupancyRZ(plotter):
   draw_occ(plotter.targetDir, "pad_dg_zr_rm1", plotter.ext, plotter.treeGEMCSPadDigis, "Pad occupancy: region-1; globalZ [cm]; globalR [cm]", 
 	   "h_", "(200,-573,-564,55,130,240)", "g_r:g_z", rm1, "COLZ")
   draw_occ(plotter.targetDir, "pad_dg_zr_rp1", plotter.ext, plotter.treeGEMCSPadDigis, "Pad occupancy: region1; globalZ [cm]; globalR [cm]", 
@@ -303,7 +303,7 @@ def gemGEMPadOccupancyRZ(plotter):
 
 
 #_______________________________________________________________________________
-def gemGEMCoPadOccupancyRZ(plotter):
+def gemCoPadOccupancyRZ(plotter):
   draw_occ(plotter.targetDir, "copad_dg_zr_rm1", plotter.ext, plotter.treeGEMCSCoPadDigis, "Pad occupancy: region-1; globalZ [cm]; globalR [cm]", 
 	   "h_", "(200,-573,-564,55,130,240)", "g_r:g_z", rm1, "COLZ")
   draw_occ(plotter.targetDir, "copad_dg_zr_rp1", plotter.ext, plotter.treeGEMCSCoPadDigis, "Pad occupancy: region1; globalZ [cm]; globalR [cm]", 

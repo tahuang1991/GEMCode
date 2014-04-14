@@ -77,21 +77,21 @@
 
 struct MyRPCDigi
 {
-   Int_t detId;
-   Short_t region, ring, station, sector, layer, subsector, roll;
-   Short_t strip, bx;
-   Float_t x, y;
-   Float_t g_r, g_eta, g_phi, g_x, g_y, g_z;
+  Int_t detId;
+  Short_t region, ring, station, sector, layer, subsector, roll, chamber;
+  Short_t strip, bx;
+  Float_t x, y;
+  Float_t g_r, g_eta, g_phi, g_x, g_y, g_z;
 };
 
 
 struct MyGEMDigi
 {  
-   Int_t detId;
-   Short_t region, ring, station, layer, chamber, roll;
-   Short_t strip, bx;
-   Float_t x, y;
-   Float_t g_r, g_eta, g_phi, g_x, g_y, g_z;
+  Int_t detId;
+  Short_t region, ring, station, layer, chamber, roll;
+  Short_t strip, bx;
+  Float_t x, y;
+  Float_t g_r, g_eta, g_phi, g_x, g_y, g_z;
 };
 
 struct MyGEMCSCPadDigis
@@ -339,6 +339,7 @@ void MuonDigiAnalyzer::bookRPCDigiTree()
   rpc_tree_->Branch("layer", &rpc_digi_.layer);
   rpc_tree_->Branch("subsector", &rpc_digi_.subsector);
   rpc_tree_->Branch("roll", &rpc_digi_.roll);
+  rpc_tree_->Branch("chamber", &rpc_digi_.chamber);
   rpc_tree_->Branch("strip", &rpc_digi_.strip);
   rpc_tree_->Branch("bx", &rpc_digi_.bx);
   rpc_tree_->Branch("x", &rpc_digi_.x);
@@ -486,6 +487,8 @@ void MuonDigiAnalyzer::analyzeRPC()
     rpc_digi_.layer = (Short_t) id.layer();
     rpc_digi_.subsector = (Short_t) id.subsector();
     rpc_digi_.roll = (Short_t) id.roll();
+    const int nSubSectors(id.station()>1 and id.ring()==1 ? 3 : 6); //only works for endcap
+    rpc_digi_.chamber = ((id.sector()-1)*nSubSectors + id.subsector())%18+1;
 
     RPCDigiCollection::const_iterator digiItr;
     //loop over digis of given roll

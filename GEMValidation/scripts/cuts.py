@@ -57,6 +57,14 @@ def OR(*arg):
 
 
 #_______________________________________________________________________________
+def re(i):
+    if i==1:
+        return TCut("region==1")
+    else:
+        return TCut("region==-1")
+    
+
+#_______________________________________________________________________________
 def la(i):
     return TCut("layer==%d"%(i))
 
@@ -91,6 +99,7 @@ ec1 = TCut("endcap==1")
 
 even = TCut("chamber%2==0")
 odd  = TCut("chamber%2==1")
+evenodd = [even, odd, all]
 
 rpc_sector_even = TCut("sector%2==0")
 rpc_sector_odd  = TCut("sector%2==1")
