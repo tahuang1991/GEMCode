@@ -21,9 +21,10 @@ def rpcDigiOccupancyXY(plotter):
             ## loop on even/odd
             for k in range(1,4):
                 
-                title = "Digi occupancy: region-1, station%d; globalX [cm]; globalY [cm]"%(i)
                 postfix = ['_even', '_odd', '']
                 region = ['rp1', 'rm1']
+                regions = ['region1','region-1']
+                title = "Digi occupancy: %s, station%d; globalX [cm]; globalY [cm]"%(regions[j-1], i)
                 
-                draw_occ(plotter.targetDir, "rpc_strip_dg_xy_%s_st%d%s"%(region[j],i,postfix[k]), plotter.ext, plotter.treeRPCDigis, title, 
-                         "h_", "(700,-700,700,700,-700,700)", "g_x:g_y", AND(re(j),st(i),evenodd[k]), "COLZ")
+                draw_occ(plotter.targetDir, "rpc_strip_dg_xy_%s_st%d%s"%(region[j-1], i, postfix[k-1]), plotter.ext, plotter.treeRPCDigis, title,
+                         "h_", "(700,-700,700,700,-700,700)", "g_x:g_y", AND(re(j), st(i), evenodd[k-1]), "COLZ")

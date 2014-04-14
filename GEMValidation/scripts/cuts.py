@@ -99,7 +99,7 @@ ec1 = TCut("endcap==1")
 
 even = TCut("chamber%2==0")
 odd  = TCut("chamber%2==1")
-evenodd = [even, odd, all]
+evenodd = [even, odd, TCut("")]
 
 rpc_sector_even = TCut("sector%2==0")
 rpc_sector_odd  = TCut("sector%2==1")

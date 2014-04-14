@@ -19,7 +19,7 @@ class SimHitPlotter():
   def __init__(self):
     self.inputDir = os.getenv("CMSSW_BASE") + "/src/"
     self.inputFile = "gem_sh_ana.root"
-    self.targetDir = "testDirectory/"
+    self.targetDir = "simHitValidationPlots/"
     self.ext = ".png"
     self.analyzer = "MuonSimHitAnalyzer"
     self.gemSimHits = "GEMSimHits"
@@ -44,7 +44,7 @@ class DigiPlotter():
   def __init__(self):
     self.inputDir = os.getenv("CMSSW_BASE") + "/src/"
     self.inputFile = "gem_digi_ana.root"
-    self.targetDir = "testDirectory/"
+    self.targetDir = "digiValidationPlots/"
     self.ext = ".png"
     self.analyzer = "MuonDigiAnalyzer"
     self.gemDigis = "GEMDigiTree"
@@ -61,7 +61,7 @@ class DigiPlotter():
     self.treeTracks = (self.dirAna).Get(self.simTracks)
     self.nstripsGE11 = 384
     self.nstripsGE21 = 768
-    self.npadsGE11 = 96
+    self.npadsGE11 = 192
     self.npadsGE21 = 192
 
 class GEMCSCStubPlotter():
