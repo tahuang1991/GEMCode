@@ -67,7 +67,7 @@ SimHitMatcher::init()
     no++;
   }
   vector<unsigned> track_ids = getIdsOfSimTrackShower(trk().trackId(), *sim_tracks.product(), *sim_vertices.product());
-
+//  std::cout << "number of track ids in this simtrack: " << track_ids.size() << std::endl;
   // select CSC simhits
   edm::PSimHitContainer csc_hits_select;
   for (auto& h: *csc_hits.product())
@@ -118,12 +118,13 @@ SimHitMatcher::getIdsOfSimTrackShower(unsigned int initial_trk_id,
 {
   vector<unsigned int> result;
   result.push_back(initial_trk_id);
-
+//  std::cout << "initial trk id " << initial_trk_id << std::endl;
   if (! (simMuOnlyGEM_ || simMuOnlyCSC_) ) return result;
 
   for (auto& t: sim_tracks)
   {
     SimTrack last_trk = t;
+//    std::cout << "track id " << t.trackId() << std::endl;
     bool is_child = 0;
     while (1)
     {
@@ -131,6 +132,7 @@ SimHitMatcher::getIdsOfSimTrackShower(unsigned int initial_trk_id,
       if ( sim_vertices[last_trk.vertIndex()].noParent() ) break;
       
       unsigned parentId = sim_vertices[last_trk.vertIndex()].parentIndex();
+//      std::cout << "parent id " << parentId << std::endl;
       if ( parentId == initial_trk_id )
       {
         is_child = 1;
@@ -145,6 +147,7 @@ SimHitMatcher::getIdsOfSimTrackShower(unsigned int initial_trk_id,
     if (is_child)
     {
       result.push_back(t.trackId());
+//      std::cout << "id collected : " << t.trackId() << std::endl;
     }
   }
   return result;
