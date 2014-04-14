@@ -1,14 +1,3 @@
-//
-// Package:    MuonSimHitAnalyzer
-// Class:      MuonSimHitAnalyzer
-// 
-// \class MuonSimHitAnalyzer
-//
-// Description: Analyzer GEM SimHit information
-// To be used for GEM algorithm development.
-//
-//
-
 // system include files
 #include <memory>
 #include <algorithm>
