@@ -32,6 +32,7 @@
 #include "DataFormats/L1Trigger/interface/L1MuonParticleFwd.h"
 #include "DataFormats/L1Trigger/interface/L1MuonParticle.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
+#include "DataFormats/Math/interface/deltaR.h"
 
 #include "L1Trigger/CSCCommonTrigger/interface/CSCConstants.h"
 #include "L1Trigger/CSCCommonTrigger/interface/CSCTriggerGeometry.h"
@@ -67,15 +68,15 @@ struct MyCLCT
 struct MyLCT
 {
   Int_t event, endcap, station, ring, chamber, bx;
-  Int_t quality, pattern;
-  Char_t hasGEM;
+  Int_t quality, pattern, strip, wiregroup;
+  Int_t hasGEM;
 };
 
 struct MyMPLCT
 {
   Int_t event, endcap, station, ring, chamber, bx;
   Int_t quality, strip, wiregroup;
-  Char_t hasGEM;
+  Int_t hasGEM;
   Float_t etalut, philut;
 };
 
@@ -203,8 +204,10 @@ class GEMCSCTriggerRateTree : public edm::EDAnalyzer
   void analyzeGMTCandRate(const edm::Event&);
 
   // parameters
+  edm::ParameterSet simTrackMatching;
   edm::ParameterSet CSCTFSPset;
   edm::ParameterSet ptLUTset;
+
   CSCTFPtLUT* ptLUT;
   CSCTFSectorProcessor* my_SPs[2][6];
   CSCSectorReceiverLUT* srLUTs_[5][6][2];

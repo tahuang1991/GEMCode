@@ -1,43 +1,45 @@
 #include "GEMCode/SimMuL1/plugins/GEMCSCTriggerRateTree.h"
 
 GEMCSCTriggerRateTree::GEMCSCTriggerRateTree(const edm::ParameterSet& iConfig):
+  simTrackMatching(iConfig.getParameter<edm::ParameterSet>("simTrackMatching")),
   CSCTFSPset(iConfig.getParameter<edm::ParameterSet>("sectorProcessor")),
   ptLUTset(CSCTFSPset.getParameter<edm::ParameterSet>("PTLUT")),
   ptLUT(0),
   centralBxOnlyGMT_(iConfig.getUntrackedParameter< bool >("centralBxOnlyGMT",false)),
   doSelectEtaForGMTRates_(iConfig.getUntrackedParameter< bool >("doSelectEtaForGMTRates",false))
 {
-  auto cscALCT = iConfig.getParameter<edm::ParameterSet>("cscALCT");
+  auto cscALCT = simTrackMatching.getParameter<edm::ParameterSet>("cscALCT");
   verboseALCT_ = cscALCT.getParameter<int>("verbose");
   minBXALCT_ = cscALCT.getParameter<int>("minBX");
   maxBXALCT_ = cscALCT.getParameter<int>("maxBX");
 
-  auto cscCLCT = iConfig.getParameter<edm::ParameterSet>("cscCLCT");
+  auto cscCLCT = simTrackMatching.getParameter<edm::ParameterSet>("cscCLCT");
   verboseCLCT_ = cscCLCT.getParameter<int>("verbose");
   minBXCLCT_ = cscCLCT.getParameter<int>("minBX");
   maxBXCLCT_ = cscCLCT.getParameter<int>("maxBX");
 
-  auto cscLCT = iConfig.getParameter<edm::ParameterSet>("cscLCT");
+  auto cscLCT = simTrackMatching.getParameter<edm::ParameterSet>("cscLCT");
   verboseLCT_ = cscLCT.getParameter<int>("verbose");
   minBXLCT_ = cscLCT.getParameter<int>("minBX");
   maxBXLCT_ = cscLCT.getParameter<int>("maxBX");
 
-  auto cscMPLCT = iConfig.getParameter<edm::ParameterSet>("cscMPLCT");
+  auto cscMPLCT = simTrackMatching.getParameter<edm::ParameterSet>("cscMPLCT");
   verboseMPLCT_ = cscMPLCT.getParameter<int>("verbose");
   minBXMPLCT_ = cscMPLCT.getParameter<int>("minBX");
   maxBXMPLCT_ = cscMPLCT.getParameter<int>("maxBX");
   
-  auto tfTrack = iConfig.getParameter<edm::ParameterSet>("tfTrack");
+  auto tfTrack = simTrackMatching.getParameter<edm::ParameterSet>("tfTrack");
   verboseTFTrack_ = tfTrack.getParameter<int>("verbose");
+  std::cout << "verbose " << verboseTFTrack_ << std::endl;
   minBXTFTrack_ = tfTrack.getParameter<int>("minBX");
   maxBXTFTrack_ = tfTrack.getParameter<int>("maxBX");
   
-  auto tfCand = iConfig.getParameter<edm::ParameterSet>("tfCand");
+  auto tfCand = simTrackMatching.getParameter<edm::ParameterSet>("tfCand");
   verboseTFCand_ = tfCand.getParameter<int>("verbose");
   minBXTFCand_ = tfCand.getParameter<int>("minBX");
   maxBXTFCand_ = tfCand.getParameter<int>("maxBX");
 
-  auto gmtCand = iConfig.getParameter<edm::ParameterSet>("gmtCand");
+  auto gmtCand = simTrackMatching.getParameter<edm::ParameterSet>("gmtCand");
   verboseGMTCand_ = gmtCand.getParameter<int>("verbose");
   minBXGMTCand_ = gmtCand.getParameter<int>("minBX");
   maxBXGMTCand_ = gmtCand.getParameter<int>("maxBX");
@@ -137,36 +139,74 @@ GEMCSCTriggerRateTree::beginJob()
 void 
 GEMCSCTriggerRateTree::intializeTree()
 {
+  alct_.event = -999;
+  alct_.endcap = -999;  
+  alct_.station = -999;   
+  alct_.ring = -999;   
+  alct_.chamber = -999;   
+  alct_.bx = -999;  
+
+  clct_.event = -999;
+  clct_.endcap = -999;  
+  clct_.station = -999;   
+  clct_.ring = -999;   
+  clct_.chamber = -999;   
+  clct_.bx = -999;  
+
+  lct_.event = -999;
+  lct_.endcap = -999;  
+  lct_.station = -999;   
+  lct_.ring = -999;   
+  lct_.chamber = -999;   
+  lct_.bx = -999;  
+  lct_.quality = -999;
+  lct_.strip = -999;
+  lct_.wiregroup = -999;
+  lct_.hasGEM = 0;
+
+  mplct_.event = -999;
+  mplct_.endcap = -999;  
+  mplct_.station = -999;   
+  mplct_.ring = -999;   
+  mplct_.chamber = -999;   
+  mplct_.bx = -999;  
+  mplct_.quality = -999;
+  mplct_.strip = -999;
+  mplct_.wiregroup = -999;
+  mplct_.hasGEM = 0;
+  mplct_.etalut = -999;
+  mplct_.philut = -999;
+
   tftrack_.event = -999;
   tftrack_.bx = -999;
   tftrack_.pt = -999;
   tftrack_.eta = -999;
   tftrack_.phi = -999;
-  tftrack_.quality = -999;
-  tftrack_.hasME1a = -999;
-  tftrack_.hasME1b = -999; 
-  tftrack_.hasME12 = -999; 
-  tftrack_.hasME13 = -999;
-  tftrack_.hasME21 = -999; 
-  tftrack_.hasME22 = -999;
-  tftrack_.hasME31 = -999; 
-  tftrack_.hasME32 = -999;
-  tftrack_.hasME41 = -999; 
-  tftrack_.hasME42 = -999;
-  tftrack_.hasGE11 = -999; 
-  tftrack_.hasGE21S = -999; 
-  tftrack_.hasGE21L = -999; 
-  tftrack_.hasME0 = -999;
-  tftrack_.hasRE12 = -999; 
-  tftrack_.hasRE13 = -999;
-  tftrack_.hasRE22 = -999;
-  tftrack_.hasRE23 = -999; 
-  tftrack_.hasRE31 = -999; 
-  tftrack_.hasRE32 = -999;
-  tftrack_.hasRE33 = -999;
-  tftrack_.hasRE41 = -999; 
-  tftrack_.hasRE42 = -999;
-  tftrack_.hasRE43 = -999; 
+  tftrack_.quality = -999 ;
+  Tftrack_.hasME1a = 0;
+  tftrack_.hasME1b = 0; 
+  tftrack_.hasME12 = 0; 
+  tftrack_.hasME13 = 0;
+  tftrack_.hasME21 = 0; 
+  tftrack_.hasME22 = 0;
+  tftrack_.hasME31 = 0; 
+  tftrack_.hasME32 = 0;
+  tftrack_.hasME41 = 0; 
+  tftrack_.hasME42 = 0;
+  tftrack_.hasGE11 = 0; 
+  tftrack_.hasGE21S = 0; 
+  tftrack_.hasGE21L = 0; 
+  tftrack_.hasME0 = 0;
+  tftrack_.hasRE12 = 0; 
+  tftrack_.hasRE13 = 0;
+  tftrack_.hasRE22 = 0;
+  tftrack_.hasRE23 = 0; 
+  tftrack_.hasRE31 = 0; 
+  tftrack_.hasRE32 = 0;
+  tftrack_.hasRE33 = 0;
+  tftrack_.hasRE41 = 0; 
+  tftrack_.hasRE42 = 0;
+  tftrack_.hasRE43 = 0; 
 
   tfcand_.event = -999;
   tfcand_.bx = -999;
@@ -174,30 +214,92 @@ GEMCSCTriggerRateTree::intializeTree()
   tfcand_.eta = -999;
   tfcand_.phi = -999;
   tfcand_.quality = -999;
-  tfcand_.hasME1a = -999;
-  tfcand_.hasME1b = -999; 
-  tfcand_.hasME12 = -999; 
-  tfcand_.hasME13 = -999;
-  tfcand_.hasME21 = -999; 
-  tfcand_.hasME22 = -999;
-  tfcand_.hasME31 = -999; 
-  tfcand_.hasME32 = -999;
-  tfcand_.hasME41 = -999; 
-  tfcand_.hasME42 = -999;
-  tfcand_.hasGE11 = -999; 
-  tfcand_.hasGE21S = -999; 
-  tfcand_.hasGE21L = -999; 
-  tfcand_.hasME0 = -999;
-  tfcand_.hasRE12 = -999; 
-  tfcand_.hasRE13 = -999;
-  tfcand_.hasRE22 = -999;
-  tfcand_.hasRE23 = -999; 
-  tfcand_.hasRE31 = -999; 
-  tfcand_.hasRE32 = -999;
-  tfcand_.hasRE33 = -999;
-  tfcand_.hasRE41 = -999; 
-  tfcand_.hasRE42 = -999;
-  tfcand_.hasRE43 = -999; 
+  tfcand_.hasME1a = 0;
+  tfcand_.hasME1b = 0; 
+  tfcand_.hasME12 = 0; 
+  tfcand_.hasME13 = 0;
+  tfcand_.hasME21 = 0; 
+  tfcand_.hasME22 = 0;
+  tfcand_.hasME31 = 0; 
+  tfcand_.hasME32 = 0;
+  tfcand_.hasME41 = 0; 
+  tfcand_.hasME42 = 0;
+  tfcand_.hasGE11 = 0; 
+  tfcand_.hasGE21S = 0; 
+  tfcand_.hasGE21L = 0; 
+  tfcand_.hasME0 = 0;
+  tfcand_.hasRE12 = 0; 
+  tfcand_.hasRE13 = 0;
+  tfcand_.hasRE22 = 0;
+  tfcand_.hasRE23 = 0; 
+  tfcand_.hasRE31 = 0; 
+  tfcand_.hasRE32 = 0;
+  tfcand_.hasRE33 = 0;
+  tfcand_.hasRE41 = 0; 
+  tfcand_.hasRE42 = 0;
+  tfcand_.hasRE43 = 0; 
+
+  gmtregcand_.event = -999;
+  gmtregcand_.bx = -999;
+  gmtregcand_.pt = -999;
+  gmtregcand_.eta = -999;
+  gmtregcand_.phi = -999;
+  gmtregcand_.quality = -999;
+  gmtregcand_.hasME1a = 0;
+  gmtregcand_.hasME1b = 0; 
+  gmtregcand_.hasME12 = 0; 
+  gmtregcand_.hasME13 = 0;
+  gmtregcand_.hasME21 = 0; 
+  gmtregcand_.hasME22 = 0;
+  gmtregcand_.hasME31 = 0; 
+  gmtregcand_.hasME32 = 0;
+  gmtregcand_.hasME41 = 0; 
+  gmtregcand_.hasME42 = 0;
+  gmtregcand_.hasGE11 = 0; 
+  gmtregcand_.hasGE21S = 0; 
+  gmtregcand_.hasGE21L = 0; 
+  gmtregcand_.hasME0 = 0;
+  gmtregcand_.hasRE12 = 0; 
+  gmtregcand_.hasRE13 = 0;
+  gmtregcand_.hasRE22 = 0;
+  gmtregcand_.hasRE23 = 0; 
+  gmtregcand_.hasRE31 = 0; 
+  gmtregcand_.hasRE32 = 0;
+  gmtregcand_.hasRE33 = 0;
+  gmtregcand_.hasRE41 = 0; 
+  gmtregcand_.hasRE42 = 0;
+  gmtregcand_.hasRE43 = 0; 
+
+  gmtcand_.event = -999;
+  gmtcand_.bx = -999;
+  gmtcand_.pt = -999;
+  gmtcand_.eta = -999;
+  gmtcand_.phi = -999;
+  gmtcand_.quality = -999;
+  gmtcand_.hasME1a = 0;
+  gmtcand_.hasME1b = 0; 
+  gmtcand_.hasME12 = 0; 
+  gmtcand_.hasME13 = 0;
+  gmtcand_.hasME21 = 0; 
+  gmtcand_.hasME22 = 0;
+  gmtcand_.hasME31 = 0; 
+  gmtcand_.hasME32 = 0;
+  gmtcand_.hasME41 = 0; 
+  gmtcand_.hasME42 = 0;
+  gmtcand_.hasGE11 = 0; 
+  gmtcand_.hasGE21S = 0; 
+  gmtcand_.hasGE21L = 0; 
+  gmtcand_.hasME0 = 0;
+  gmtcand_.hasRE12 = 0; 
+  gmtcand_.hasRE13 = 0;
+  gmtcand_.hasRE22 = 0;
+  gmtcand_.hasRE23 = 0; 
+  gmtcand_.hasRE31 = 0; 
+  gmtcand_.hasRE32 = 0;
+  gmtcand_.hasRE33 = 0;
+  gmtcand_.hasRE41 = 0; 
+  gmtcand_.hasRE42 = 0;
+  gmtcand_.hasRE43 = 0; 
 }
 
 // ================================================================================================
@@ -205,6 +307,7 @@ void
 GEMCSCTriggerRateTree::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   // need to reset here
+  intializeTree();
 
 //   // DT primitives for input to TF for debugging
 //   iEvent.getByLabel("simDtTriggerPrimitiveDigis", dttrig_);
@@ -642,24 +745,24 @@ GEMCSCTriggerRateTree::analyzeTFTrackRate(const edm::Event& iEvent)
     
     MatchCSCMuL1::TFTRACK myTFTrk;
     myTFTrk.init( &(trk->first) , ptLUT, muScales, muPtScale);
-    myTFTrk.dr = 999.;
 
     tftrack_.event = iEvent.id().event();
     tftrack_.bx = trk->first.bx();
     tftrack_.pt = myTFTrk.pt;
-    tftrack_.eta = myTFTrk.pt;
-    tftrack_.phi = myTFTrk.eta;
+    tftrack_.eta = myTFTrk.eta;
+    tftrack_.phi = myTFTrk.phi;
     
     for (auto detUnitIt = trk->second.begin(); detUnitIt != trk->second.end(); detUnitIt++) {
       const CSCDetId& id = (*detUnitIt).first;
+      std::cout << id << std::endl;
       auto range = (*detUnitIt).second;
       for (auto digiIt = range.first; digiIt != range.second; digiIt++) {
         if (!((*digiIt).isValid())) continue;
+        std::cout << " " << *digiIt << std::endl;
         myTFTrk.trgdigis.push_back(&*digiIt);
         myTFTrk.trgids.push_back(id);
         myTFTrk.trgetaphis.push_back(intersectionEtaPhi(id,(*digiIt).getKeyWG(),(*digiIt).getStrip()));
         myTFTrk.trgstubs.push_back(buildTrackStub((*digiIt),id));
-        
         // stub analysis
         if (id.station()==1 and id.ring()==4) tftrack_.hasME1a = 1;
         if (id.station()==1 and id.ring()==1) tftrack_.hasME1b = 1;
