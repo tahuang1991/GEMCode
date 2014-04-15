@@ -15,11 +15,6 @@ sample = 'minbias'
 globalTag = 'upgradePLS3'
 suffix = 'rate'
 
-## input
-from GEMCode.SimMuL1.GEMCSCTriggerSamplesLib import *
-from GEMCode.GEMValidation.InputFileHelpers import *
-#process = useInputDir(process, files['_gem98_pt2-50_PU0_pt0_new'], False)
-
 # import of standard configurations
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.StandardSequences.Services_cff')
@@ -72,6 +67,11 @@ process.source = cms.Source("PoolSource",
         'file:out_L1.root'
     )
 )
+
+## input
+from GEMCode.SimMuL1.GEMCSCTriggerSamplesLib import *
+from GEMCode.GEMValidation.InputFileHelpers import *
+#process = useInputDir(process, files['_gem98_pt2-50_PU0_pt0_new'], False)
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(events)
