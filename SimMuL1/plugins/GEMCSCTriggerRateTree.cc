@@ -1,11 +1,5 @@
 #include "GEMCode/SimMuL1/plugins/GEMCSCTriggerRateTree.h"
 
-const int GEMCSCTriggerRateTree::pbend[CSCConstants::NUM_CLCT_PATTERNS]= 
-   { -999,  -5,  4, -4,  3, -3,  2, -2,  1, -1,  0}; // "signed" pattern (== phiBend)
-const double GEMCSCTriggerRateTree::PT_THRESHOLDS[N_PT_THRESHOLDS] = {0,10,20,30,40,50};
-const double GEMCSCTriggerRateTree::PT_THRESHOLDS_FOR_ETA[N_PT_THRESHOLDS] = {10,15,30,40,55,70};
-
-// ================================================================================================
 GEMCSCTriggerRateTree::GEMCSCTriggerRateTree(const edm::ParameterSet& iConfig):
   CSCTFSPset(iConfig.getParameter<edm::ParameterSet>("sectorProcessor")),
   ptLUTset(CSCTFSPset.getParameter<edm::ParameterSet>("PTLUT")),

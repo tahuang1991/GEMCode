@@ -162,13 +162,7 @@ class GEMCSCTriggerRateTree : public edm::EDAnalyzer
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
 
   enum trig_cscs {MAX_STATIONS = 4, CSC_TYPES = 10};
-  //Various useful constants
-  static const int pbend[CSCConstants::NUM_CLCT_PATTERNS];
-
-  enum pt_thresh {N_PT_THRESHOLDS = 6};
   enum gmtRegCand{CSC=0, DT, RPCb, RPCf};
-  static const double PT_THRESHOLDS[N_PT_THRESHOLDS];
-  static const double PT_THRESHOLDS_FOR_ETA[N_PT_THRESHOLDS];
   
  private:
   
