@@ -23,6 +23,7 @@ SimTrackMatching = cms.PSet(
         requireVertex = cms.bool(True),
         requireGenPart = cms.bool(True),
     ),
+    ## GEM
     gemSimHit = cms.PSet(
         verbose = cms.int32(0),
         input = cms.InputTag('g4SimHits','MuonGEMHits'),
@@ -55,12 +56,38 @@ SimTrackMatching = cms.PSet(
         maxBX = cms.int32(1),
         matchDeltaStrip = cms.int32(1),
     ),
+    ## ME0
     me0SimHit = cms.PSet(
         verbose = cms.int32(0),
         input = cms.InputTag('g4SimHits','MuonME0Hits'),
         simMuOnly = cms.bool(True),
         discardEleHits = cms.bool(True),
     ),
+    me0DigiPreReco = cms.PSet(
+        verbose = cms.int32(0),
+        input = cms.InputTag("simMuonME0Digis"),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+    ),
+    me0RecHit = cms.PSet(
+        verbose = cms.int32(0),
+        input = cms.InputTag("me0RecHits"),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+    ),
+    me0Segment = cms.PSet(
+        verbose = cms.int32(0),
+        input = cms.InputTag("me0Segments"),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+    ),
+    me0Muon = cms.PSet(
+        verbose = cms.int32(0),
+        input = cms.InputTag("me0MuonConverter"),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+    ),
+    ## RPC
     rpcSimHit = cms.PSet(
         verbose = cms.int32(0),
         input = cms.InputTag('g4SimHits','MuonRPCHits'),
@@ -74,6 +101,7 @@ SimTrackMatching = cms.PSet(
         maxBX = cms.int32(1),
         matchDeltaStrip = cms.int32(1),
     ),
+    ## CSC
     cscSimHit = cms.PSet(
         verbose = cms.int32(0),
         input = cms.InputTag('g4SimHits','MuonCSCHits'),
