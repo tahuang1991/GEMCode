@@ -10,25 +10,44 @@ GEMCSCTriggerRateTree::GEMCSCTriggerRateTree(const edm::ParameterSet& iConfig):
   CSCTFSPset(iConfig.getParameter<edm::ParameterSet>("sectorProcessor")),
   ptLUTset(CSCTFSPset.getParameter<edm::ParameterSet>("PTLUT")),
   ptLUT(0),
-  minBX_(iConfig.getUntrackedParameter<int>("minBX",-6)),
-  maxBX_(iConfig.getUntrackedParameter<int>("maxBX",6)),
-  minTMBBX_(iConfig.getUntrackedParameter<int>("minTMBBX",-6)),
-  maxTMBBX_(iConfig.getUntrackedParameter<int>("maxTMBBX",6)),
-  minRateBX_(iConfig.getUntrackedParameter<int>("minRateBX",-1)),
-  maxRateBX_(iConfig.getUntrackedParameter<int>("maxRateBX",1)),
-  minBxALCT_(iConfig.getUntrackedParameter<int>("minBxALCT",5)),
-  maxBxALCT_(iConfig.getUntrackedParameter<int>("maxBxALCT",7)),
-  minBxCLCT_(iConfig.getUntrackedParameter<int>("minBxCLCT",5)),
-  maxBxCLCT_(iConfig.getUntrackedParameter<int>("maxBxCLCT",7)),
-  minBxLCT_(iConfig.getUntrackedParameter<int>("minBxLCT",5)),
-  maxBxLCT_(iConfig.getUntrackedParameter<int>("maxBxLCT",7)),
-  minBxMPLCT_(iConfig.getUntrackedParameter<int>("minBxMPLCT",5)),
-  maxBxMPLCT_(iConfig.getUntrackedParameter<int>("maxBxMPLCT",7)),
-  minBxGMT_(iConfig.getUntrackedParameter<int>("minBxGMT",-1)),
-  maxBxGMT_(iConfig.getUntrackedParameter<int>("maxBxGMT",1)),
   centralBxOnlyGMT_(iConfig.getUntrackedParameter< bool >("centralBxOnlyGMT",false)),
   doSelectEtaForGMTRates_(iConfig.getUntrackedParameter< bool >("doSelectEtaForGMTRates",false))
 {
+  auto cscALCT = iConfig.getParameter<edm::ParameterSet>("cscALCT");
+  verboseALCT_ = cscALCT.getParameter<int>("verbose");
+  minBXALCT_ = cscALCT.getParameter<int>("minBX");
+  maxBXALCT_ = cscALCT.getParameter<int>("maxBX");
+
+  auto cscCLCT = iConfig.getParameter<edm::ParameterSet>("cscCLCT");
+  verboseCLCT_ = cscCLCT.getParameter<int>("verbose");
+  minBXCLCT_ = cscCLCT.getParameter<int>("minBX");
+  maxBXCLCT_ = cscCLCT.getParameter<int>("maxBX");
+
+  auto cscLCT = iConfig.getParameter<edm::ParameterSet>("cscLCT");
+  verboseLCT_ = cscLCT.getParameter<int>("verbose");
+  minBXLCT_ = cscLCT.getParameter<int>("minBX");
+  maxBXLCT_ = cscLCT.getParameter<int>("maxBX");
+
+  auto cscMPLCT = iConfig.getParameter<edm::ParameterSet>("cscMPLCT");
+  verboseMPLCT_ = cscMPLCT.getParameter<int>("verbose");
+  minBXMPLCT_ = cscMPLCT.getParameter<int>("minBX");
+  maxBXMPLCT_ = cscMPLCT.getParameter<int>("maxBX");
+  
+  auto tfTrack = iConfig.getParameter<edm::ParameterSet>("tfTrack");
+  verboseTFTrack_ = tfTrack.getParameter<int>("verbose");
+  minBXTFTrack_ = tfTrack.getParameter<int>("minBX");
+  maxBXTFTrack_ = tfTrack.getParameter<int>("maxBX");
+  
+  auto tfCand = iConfig.getParameter<edm::ParameterSet>("tfCand");
+  verboseTFCand_ = tfCand.getParameter<int>("verbose");
+  minBXTFCand_ = tfCand.getParameter<int>("minBX");
+  maxBXTFCand_ = tfCand.getParameter<int>("maxBX");
+
+  auto gmtCand = iConfig.getParameter<edm::ParameterSet>("gmtCand");
+  verboseGMTCand_ = gmtCand.getParameter<int>("verbose");
+  minBXGMTCand_ = gmtCand.getParameter<int>("minBX");
+  maxBXGMTCand_ = gmtCand.getParameter<int>("maxBX");
+
   edm::ParameterSet srLUTset = CSCTFSPset.getParameter<edm::ParameterSet>("SRLUT");
 
   for(int e=0; e<2; e++) 
@@ -214,7 +233,7 @@ GEMCSCTriggerRateTree::analyze(const edm::Event& iEvent, const edm::EventSetup& 
     // Get GMT candidates from all bunch crossings
     std::vector<L1MuGMTReadoutRecord> gmt_records = hl1GmtCands_->getRecords();
     for ( std::vector< L1MuGMTReadoutRecord >::const_iterator rItr=gmt_records.begin(); rItr!=gmt_records.end() ; ++rItr ){
-      if (rItr->getBxInEvent() < minBxGMT_ or rItr->getBxInEvent() > maxBxGMT_) continue;
+      if (rItr->getBxInEvent() < minBXGMTCand_ or rItr->getBxInEvent() > maxBXGMTCand_) continue;
       
       std::vector<L1MuGMTExtendedCand> GMTCands = rItr->getGMTCands();
       for ( std::vector<L1MuGMTExtendedCand>::const_iterator  cItr = GMTCands.begin() ; cItr != GMTCands.end() ; ++cItr )
@@ -247,7 +266,7 @@ GEMCSCTriggerRateTree::analyze(const edm::Event& iEvent, const edm::EventSetup& 
   analyzeCLCTRate(iEvent);
   analyzeLCTRate(iEvent);
   analyzeMPCLCTRate(iEvent);
-  //  analyzeTFTrackRate(iEvent);
+  analyzeTFTrackRate(iEvent);
   //  analyzeTFCandRate(iEvent);
   //  analyzeGMTRegCandRate(iEvent);
   //  analyzeGMTCandRate(iEvent);
@@ -481,7 +500,7 @@ GEMCSCTriggerRateTree::analyzeALCTRate(const edm::Event& iEvent)
     {
       if (!(*digiIt).isValid()) continue;
       const int bx((*digiIt).getBX());
-      if (bx < minBxALCT_ or bx > maxBxALCT_) continue;
+      if (bx < minBXALCT_ or bx > maxBXALCT_) continue;
       alct_.event = iEvent.id().event();
       alct_.endcap = detId.zendcap();
       alct_.station = detId.station();
@@ -491,8 +510,7 @@ GEMCSCTriggerRateTree::analyzeALCTRate(const edm::Event& iEvent)
       alct_tree_->Fill();
 
       // debug
-      bool debug(true);
-      if (debug){
+      if (verboseALCT_){
         std::cout << "------------------------------------------------------------------------------" << std::endl;         
         std::cout << "Event " << alct_.event << ", detId " << detId << ", ALCT " << digiIt-range.first << std::endl;
         std::cout << "endcap " << alct_.endcap << ", station " << alct_.station << ", ring " << alct_.ring << ", chamber " << alct_.chamber << std::endl;
@@ -518,7 +536,7 @@ GEMCSCTriggerRateTree::analyzeCLCTRate(const edm::Event& iEvent)
     {
       if (!(*digiIt).isValid()) continue;
       const int bx((*digiIt).getBX());
-      if (bx < minBxCLCT_ or bx > maxBxCLCT_) continue;
+      if (bx < minBXCLCT_ or bx > maxBXCLCT_) continue;
       clct_.event = iEvent.id().event();
       clct_.endcap = detId.zendcap();
       clct_.station = detId.station();
@@ -528,8 +546,7 @@ GEMCSCTriggerRateTree::analyzeCLCTRate(const edm::Event& iEvent)
       clct_tree_->Fill();
 
       // debug
-      bool debug(true);
-      if (debug){
+      if (verboseCLCT_){
         std::cout << "------------------------------------------------------------------------------" << std::endl;         
         std::cout << "Event " << clct_.event << ", detId " << detId << ", CLCT " << digiIt-range.first << std::endl;
         std::cout << "endcap " << clct_.endcap << ", station " << clct_.station << ", ring " << clct_.ring << ", chamber " << clct_.chamber << std::endl;
@@ -556,7 +573,7 @@ GEMCSCTriggerRateTree::analyzeLCTRate(const edm::Event& iEvent)
     {
       if (!(*digiIt).isValid()) continue;
       const int bx((*digiIt).getBX());
-      if (bx < minBxLCT_ or bx > maxBxLCT_) continue;
+      if (bx < minBXLCT_ or bx > maxBXLCT_) continue;
       lct_.event = iEvent.id().event();
       lct_.endcap = detId.zendcap();
       lct_.station = detId.station();
@@ -566,8 +583,7 @@ GEMCSCTriggerRateTree::analyzeLCTRate(const edm::Event& iEvent)
       lct_tree_->Fill();
 
       // debug
-      bool debug(true);
-      if (debug){
+      if (verboseLCT_){
         std::cout << "------------------------------------------------------------------------------" << std::endl;         
         std::cout << "Event " << lct_.event << ", detId " << detId << ", LCT " << digiIt-range.first << std::endl;
         std::cout << "endcap " << lct_.endcap << ", station " << lct_.station << ", ring " << lct_.ring << ", chamber " << lct_.chamber << std::endl;
@@ -593,7 +609,7 @@ GEMCSCTriggerRateTree::analyzeMPCLCTRate(const edm::Event& iEvent)
     {
       if (!(*digiIt).isValid()) continue;
       const int bx((*digiIt).getBX());
-      if (bx < minBxMPLCT_ or bx > maxBxMPLCT_) continue;
+      if (bx < minBXMPLCT_ or bx > maxBXMPLCT_) continue;
       mplct_.event = iEvent.id().event();
       mplct_.endcap = detId.zendcap();
       mplct_.station = detId.station();
@@ -606,12 +622,12 @@ GEMCSCTriggerRateTree::analyzeMPCLCTRate(const edm::Event& iEvent)
       mplct_tree_->Fill();
 
       // debug
-      bool debug(true);
-      if (debug){
+      if (verboseMPLCT_){
         std::cout << "------------------------------------------------------------------------------" << std::endl;         
         std::cout << "Event " << mplct_.event << ", detId " << detId << ", MPLCT " << digiIt-range.first << std::endl;
         std::cout << "endcap " << mplct_.endcap << ", station " << mplct_.station << ", ring " << mplct_.ring << ", chamber " << mplct_.chamber << std::endl;
         std::cout << *digiIt << std::endl;
+        std::cout << "eta " << mplct_.etalut << ", phi " << mplct_.philut << std::endl;
       }
     }
   }
@@ -626,7 +642,7 @@ GEMCSCTriggerRateTree::analyzeTFTrackRate(const edm::Event& iEvent)
   const L1CSCTrackCollection* l1Tracks = hl1Tracks.product();
 
   for (auto trk = l1Tracks->begin(); trk != l1Tracks->end(); trk++) {
-    if (trk->first.bx() < minRateBX_ or trk->first.bx() > maxRateBX_) continue;
+    if (trk->first.bx() < minBXTFTrack_ or trk->first.bx() > maxBXTFTrack_) continue;
     const bool endcapOnly(true);
     if (endcapOnly and abs(trk->first.endcap())!=1) continue;
     
@@ -664,8 +680,7 @@ GEMCSCTriggerRateTree::analyzeTFTrackRate(const edm::Event& iEvent)
       }
     }
 
-    bool debug(true);
-    if (debug){
+    if (verboseTFTrack_){
       std::cout << "------------------------------------------------------------------------------" << std::endl; 
       std::cout << "Track " << trk - l1Tracks->begin() << " information" << std::endl;
       std::cout << "bx " << tftrack_.bx << ", pt " << tftrack_.pt << ", eta " << tftrack_.eta << ", phi " << tftrack_.phi << std::endl;
@@ -693,7 +708,7 @@ GEMCSCTriggerRateTree::analyzeTFCandRate(const edm::Event& iEvent)
   const std::vector< L1MuRegionalCand > *l1TfCands = hl1TfCands.product();
 
   for (auto trk = l1TfCands->begin(); trk != l1TfCands->end(); trk++){
-    if ( trk->bx() < minRateBX_ or trk->bx() > maxRateBX_ ) continue;
+    if ( trk->bx() < minBXTFCand_ or trk->bx() > maxBXTFCand_ ) continue;
     //    const int sign_eta(((trk->eta_packed() & 0x20) == 0) ? 1.:-1);
     MatchCSCMuL1::TFCAND myTFCand;
     myTFCand.init( &*trk , ptLUT, muScales, muPtScale);
@@ -773,7 +788,7 @@ GEMCSCTriggerRateTree::analyzeGMTRegCandRate(const edm::Event& iEvent, int type)
   }
   
   for (auto trk = collection.begin(); trk != collection.end(); trk++) {
-    if (trk->bx() < minRateBX_ or trk->bx() > maxRateBX_) continue;
+    if (trk->bx() < minBXGMTCand_ or trk->bx() > maxBXGMTCand_) continue;
     //double sign_eta = ( (trk->eta_packed() & 0x20) == 0) ? 1.:-1;
     MatchCSCMuL1::GMTREGCAND myGMTREGCand;
     myGMTREGCand.init( &*trk , muScales, muPtScale);
@@ -829,7 +844,7 @@ GEMCSCTriggerRateTree::analyzeGMTCandRate(const edm::Event& iEvent)
 {
   const std::vector<L1MuGMTReadoutRecord> gmt_records(hl1GmtCands_->getRecords());
   for (auto rItr=gmt_records.begin(); rItr!=gmt_records.end(); ++rItr) {
-    if (rItr->getBxInEvent() < minBxGMT_ or rItr->getBxInEvent() > maxBxGMT_) continue;
+    if (rItr->getBxInEvent() < minBXGMTCand_ or rItr->getBxInEvent() > maxBXGMTCand_) continue;
     
     const std::vector<L1MuGMTExtendedCand> GMTCands(rItr->getGMTCands());    
     const std::vector<L1MuRegionalCand> CSCCands(rItr->getCSCCands());
@@ -839,7 +854,7 @@ GEMCSCTriggerRateTree::analyzeGMTCandRate(const edm::Event& iEvent)
     
     for (auto trk = GMTCands.begin(); trk != GMTCands.end(); ++trk){
       if(trk->empty()) continue;
-      if (trk->bx() < minRateBX_ or trk->bx() > maxRateBX_) continue;
+      if (trk->bx() < minBXGMTCand_ or trk->bx() > minBXGMTCand_) continue;
 
       MatchCSCMuL1::GMTCAND myGMTCand;
       myGMTCand.init( &*trk , muScales, muPtScale);

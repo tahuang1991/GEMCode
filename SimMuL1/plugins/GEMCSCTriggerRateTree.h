@@ -221,24 +221,33 @@ class GEMCSCTriggerRateTree : public edm::EDAnalyzer
   edm::ESHandle< L1MuTriggerScales > muScales;
   edm::ESHandle< L1MuTriggerPtScale > muPtScale;
 
-  // config parameters:
-  int minBX_;
-  int maxBX_;
-  int minTMBBX_;
-  int maxTMBBX_;
-  int minRateBX_;
-  int maxRateBX_;
+  int verboseALCT_;
+  int minBXALCT_;
+  int maxBXALCT_;
 
-  int minBxALCT_;
-  int maxBxALCT_;
-  int minBxCLCT_;
-  int maxBxCLCT_;
-  int minBxLCT_;
-  int maxBxLCT_;
-  int minBxMPLCT_;
-  int maxBxMPLCT_;
-  int minBxGMT_;
-  int maxBxGMT_;
+  int verboseCLCT_;
+  int minBXCLCT_;
+  int maxBXCLCT_;
+
+  int verboseLCT_;
+  int minBXLCT_;
+  int maxBXLCT_;
+
+  int verboseMPLCT_;
+  int minBXMPLCT_;
+  int maxBXMPLCT_;
+  
+  int verboseTFTrack_;
+  int minBXTFTrack_;
+  int maxBXTFTrack_;
+  
+  int verboseTFCand_;
+  int minBXTFCand_;
+  int maxBXTFCand_;
+
+  int verboseGMTCand_;
+  int minBXGMTCand_;
+  int maxBXGMTCand_;
 
   bool centralBxOnlyGMT_;
   bool doSelectEtaForGMTRates_;
