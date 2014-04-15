@@ -84,15 +84,15 @@ struct MyTFTrack
   Int_t event, bx;
   Float_t pt, eta, phi;
   Int_t quality;
-  Char_t hasME1a, hasME1b, hasME12, hasME13;
-  Char_t hasME21, hasME22;
-  Char_t hasME31, hasME32;
-  Char_t hasME41, hasME42;
-  Char_t hasGE11, hasGE21, hasME0;
-  Char_t hasRE12, hasRE13;
-  Char_t hasRE22, hasRE23;
-  Char_t hasRE31, hasRE32, hasRE33;
-  Char_t hasRE41, hasRE42, hasRE43;
+  Int_t hasME1a, hasME1b, hasME12, hasME13;
+  Int_t hasME21, hasME22;
+  Int_t hasME31, hasME32;
+  Int_t hasME41, hasME42;
+  Int_t hasGE11, hasGE21S, hasGE21L, hasME0;
+  Int_t hasRE12, hasRE13;
+  Int_t hasRE22, hasRE23;
+  Int_t hasRE31, hasRE32, hasRE33;
+  Int_t hasRE41, hasRE42, hasRE43;
 };
 
 struct MyTFCand
@@ -100,15 +100,15 @@ struct MyTFCand
   Int_t event, bx;
   Float_t pt, eta, phi;
   Int_t quality;
-  Char_t hasME1a, hasME1b, hasME12, hasME13;
-  Char_t hasME21, hasME22;
-  Char_t hasME31, hasME32;
-  Char_t hasME41, hasME42;
-  Char_t hasGE11, hasGE21, hasME0;
-  Char_t hasRE12, hasRE13;
-  Char_t hasRE22, hasRE23;
-  Char_t hasRE31, hasRE32, hasRE33;
-  Char_t hasRE41, hasRE42, hasRE43;
+  Int_t hasME1a, hasME1b, hasME12, hasME13;
+  Int_t hasME21, hasME22;
+  Int_t hasME31, hasME32;
+  Int_t hasME41, hasME42;
+  Int_t hasGE11, hasGE21S, hasGE21L, hasME0;
+  Int_t hasRE12, hasRE13;
+  Int_t hasRE22, hasRE23;
+  Int_t hasRE31, hasRE32, hasRE33;
+  Int_t hasRE41, hasRE42, hasRE43;
 };
 
 struct MyGMTRegCand
@@ -116,16 +116,16 @@ struct MyGMTRegCand
   Int_t event, bx;
   Float_t pt, eta, phi;
   Int_t quality;
-  Char_t hasME1a, hasME1b, hasME12, hasME13;
-  Char_t hasME21, hasME22;
-  Char_t hasME31, hasME32;
-  Char_t hasME41, hasME42;
-  Char_t hasGE11, hasGE21, hasME0;
-  Char_t hasRE12, hasRE13;
-  Char_t hasRE22, hasRE23;
-  Char_t hasRE31, hasRE32, hasRE33;
-  Char_t hasRE41, hasRE42, hasRE43;
-  Char_t isCSC,isDT,isRPCf,isRPCb;
+  Int_t hasME1a, hasME1b, hasME12, hasME13;
+  Int_t hasME21, hasME22;
+  Int_t hasME31, hasME32;
+  Int_t hasME41, hasME42;
+  Int_t hasGE11, hasGE21S, hasGE21L, hasME0;
+  Int_t hasRE12, hasRE13;
+  Int_t hasRE22, hasRE23;
+  Int_t hasRE31, hasRE32, hasRE33;
+  Int_t hasRE41, hasRE42, hasRE43;
+  Int_t isCSC,isDT,isRPCf,isRPCb;
 };
 
 struct MyGMT
@@ -133,18 +133,18 @@ struct MyGMT
   Int_t event, bx;
   Float_t pt, eta, phi;
   Int_t quality;
-  Char_t isGoodSingleMuon;
-  Char_t isGoodDoubleMuon;
-  Char_t hasME1a, hasME1b, hasME12, hasME13;
-  Char_t hasME21, hasME22;
-  Char_t hasME31, hasME32;
-  Char_t hasME41, hasME42;
-  Char_t hasGE11, hasGE21, hasME0;
-  Char_t hasRE12, hasRE13;
-  Char_t hasRE22, hasRE23;
-  Char_t hasRE31, hasRE32, hasRE33;
-  Char_t hasRE41, hasRE42, hasRE43;
-  Char_t isCSC,isDT,isRPCf,isRPCb;
+  Int_t isGoodSingleMuon;
+  Int_t isGoodDoubleMuon;
+  Int_t hasME1a, hasME1b, hasME12, hasME13;
+  Int_t hasME21, hasME22;
+  Int_t hasME31, hasME32;
+  Int_t hasME41, hasME42;
+  Int_t hasGE11, hasGE21S, hasGE21L, hasME0;
+  Int_t hasRE12, hasRE13;
+  Int_t hasRE22, hasRE23;
+  Int_t hasRE31, hasRE32, hasRE33;
+  Int_t hasRE41, hasRE42, hasRE43;
+  Int_t isCSC,isDT,isRPCf,isRPCb;
 };
 
 class GEMCSCTriggerRateTree : public edm::EDAnalyzer 
@@ -196,6 +196,8 @@ class GEMCSCTriggerRateTree : public edm::EDAnalyzer
   void bookGMTRegionalTree();
   void bookGMTCandTree();
 
+  void intializeTree();
+
   void analyzeALCTRate(const edm::Event&);
   void analyzeCLCTRate(const edm::Event&);
   void analyzeLCTRate(const edm::Event&);
@@ -220,9 +222,6 @@ class GEMCSCTriggerRateTree : public edm::EDAnalyzer
   edm::ESHandle< L1MuTriggerPtScale > muPtScale;
 
   // config parameters:
-  bool matchAllTrigPrimitivesInChamber_;
-  int debugRATE;
-
   int minBX_;
   int maxBX_;
   int minTMBBX_;
@@ -243,8 +242,6 @@ class GEMCSCTriggerRateTree : public edm::EDAnalyzer
 
   bool centralBxOnlyGMT_;
   bool doSelectEtaForGMTRates_;
-  bool doME1a_;
-  bool defaultME1a;
 
   const CSCGeometry* cscGeometry;
 

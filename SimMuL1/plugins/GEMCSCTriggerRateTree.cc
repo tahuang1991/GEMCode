@@ -7,11 +7,9 @@ const double GEMCSCTriggerRateTree::PT_THRESHOLDS_FOR_ETA[N_PT_THRESHOLDS] = {10
 
 // ================================================================================================
 GEMCSCTriggerRateTree::GEMCSCTriggerRateTree(const edm::ParameterSet& iConfig):
-  CSCTFSPset(iConfig.getParameter<edm::ParameterSet>("SectorProcessor")),
+  CSCTFSPset(iConfig.getParameter<edm::ParameterSet>("sectorProcessor")),
   ptLUTset(CSCTFSPset.getParameter<edm::ParameterSet>("PTLUT")),
   ptLUT(0),
-  matchAllTrigPrimitivesInChamber_(iConfig.getUntrackedParameter<bool>("matchAllTrigPrimitivesInChamber", false)),
-  debugRATE(iConfig.getUntrackedParameter<int>("debugRATE", 0)),
   minBX_(iConfig.getUntrackedParameter<int>("minBX",-6)),
   maxBX_(iConfig.getUntrackedParameter<int>("maxBX",6)),
   minTMBBX_(iConfig.getUntrackedParameter<int>("minTMBBX",-6)),
@@ -29,10 +27,7 @@ GEMCSCTriggerRateTree::GEMCSCTriggerRateTree(const edm::ParameterSet& iConfig):
   minBxGMT_(iConfig.getUntrackedParameter<int>("minBxGMT",-1)),
   maxBxGMT_(iConfig.getUntrackedParameter<int>("maxBxGMT",1)),
   centralBxOnlyGMT_(iConfig.getUntrackedParameter< bool >("centralBxOnlyGMT",false)),
-  doSelectEtaForGMTRates_(iConfig.getUntrackedParameter< bool >("doSelectEtaForGMTRates",false)),
-  doME1a_(iConfig.getUntrackedParameter< bool >("doME1a",false)),
-  // special treatment of matching in ME1a for the case of the default emulator
-  defaultME1a(iConfig.getUntrackedParameter<bool>("defaultME1a", false))
+  doSelectEtaForGMTRates_(iConfig.getUntrackedParameter< bool >("doSelectEtaForGMTRates",false))
 {
   edm::ParameterSet srLUTset = CSCTFSPset.getParameter<edm::ParameterSet>("SRLUT");
 
@@ -126,6 +121,72 @@ GEMCSCTriggerRateTree::beginJob()
 }
 
 
+void 
+GEMCSCTriggerRateTree::intializeTree()
+{
+  tftrack_.event = -999;
+  tftrack_.bx = -999;
+  tftrack_.pt = -999;
+  tftrack_.eta = -999;
+  tftrack_.phi = -999;
+  tftrack_.quality = -999;
+  tftrack_.hasME1a = -999;
+  tftrack_.hasME1b = -999; 
+  tftrack_.hasME12 = -999; 
+  tftrack_.hasME13 = -999;
+  tftrack_.hasME21 = -999; 
+  tftrack_.hasME22 = -999;
+  tftrack_.hasME31 = -999; 
+  tftrack_.hasME32 = -999;
+  tftrack_.hasME41 = -999; 
+  tftrack_.hasME42 = -999;
+  tftrack_.hasGE11 = -999; 
+  tftrack_.hasGE21S = -999; 
+  tftrack_.hasGE21L = -999; 
+  tftrack_.hasME0 = -999;
+  tftrack_.hasRE12 = -999; 
+  tftrack_.hasRE13 = -999;
+  tftrack_.hasRE22 = -999;
+  tftrack_.hasRE23 = -999; 
+  tftrack_.hasRE31 = -999; 
+  tftrack_.hasRE32 = -999;
+  tftrack_.hasRE33 = -999;
+  tftrack_.hasRE41 = -999; 
+  tftrack_.hasRE42 = -999;
+  tftrack_.hasRE43 = -999; 
+
+  tfcand_.event = -999;
+  tfcand_.bx = -999;
+  tfcand_.pt = -999;
+  tfcand_.eta = -999;
+  tfcand_.phi = -999;
+  tfcand_.quality = -999;
+  tfcand_.hasME1a = -999;
+  tfcand_.hasME1b = -999; 
+  tfcand_.hasME12 = -999; 
+  tfcand_.hasME13 = -999;
+  tfcand_.hasME21 = -999; 
+  tfcand_.hasME22 = -999;
+  tfcand_.hasME31 = -999; 
+  tfcand_.hasME32 = -999;
+  tfcand_.hasME41 = -999; 
+  tfcand_.hasME42 = -999;
+  tfcand_.hasGE11 = -999; 
+  tfcand_.hasGE21S = -999; 
+  tfcand_.hasGE21L = -999; 
+  tfcand_.hasME0 = -999;
+  tfcand_.hasRE12 = -999; 
+  tfcand_.hasRE13 = -999;
+  tfcand_.hasRE22 = -999;
+  tfcand_.hasRE23 = -999; 
+  tfcand_.hasRE31 = -999; 
+  tfcand_.hasRE32 = -999;
+  tfcand_.hasRE33 = -999;
+  tfcand_.hasRE41 = -999; 
+  tfcand_.hasRE42 = -999;
+  tfcand_.hasRE43 = -999; 
+}
+
 // ================================================================================================
 void 
 GEMCSCTriggerRateTree::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
@@ -186,10 +247,10 @@ GEMCSCTriggerRateTree::analyze(const edm::Event& iEvent, const edm::EventSetup& 
   analyzeCLCTRate(iEvent);
   analyzeLCTRate(iEvent);
   analyzeMPCLCTRate(iEvent);
-  analyzeTFTrackRate(iEvent);
-  analyzeTFCandRate(iEvent);
-  analyzeGMTRegCandRate(iEvent);
-  analyzeGMTCandRate(iEvent);
+  //  analyzeTFTrackRate(iEvent);
+  //  analyzeTFCandRate(iEvent);
+  //  analyzeGMTRegCandRate(iEvent);
+  //  analyzeGMTCandRate(iEvent);
 }
 
 // ================================================================================================
@@ -282,7 +343,8 @@ GEMCSCTriggerRateTree::bookTFTrackTree()
   tftrack_tree_->Branch("hasRE42",&tftrack_.hasRE42);
   tftrack_tree_->Branch("hasRE43",&tftrack_.hasRE43);
   tftrack_tree_->Branch("hasGE11",&tftrack_.hasGE11);
-  tftrack_tree_->Branch("hasGE21",&tftrack_.hasGE21);
+  tftrack_tree_->Branch("hasGE21S",&tftrack_.hasGE21S);
+  tftrack_tree_->Branch("hasGE21L",&tftrack_.hasGE21L);
   tftrack_tree_->Branch("hasME0",&tftrack_.hasME0);
 }
 
@@ -318,7 +380,8 @@ GEMCSCTriggerRateTree::bookTFCandTree()
   tfcand_tree_->Branch("hasRE42",&tfcand_.hasRE42);
   tfcand_tree_->Branch("hasRE43",&tfcand_.hasRE43);
   tfcand_tree_->Branch("hasGE11",&tfcand_.hasGE11);
-  tfcand_tree_->Branch("hasGE21",&tfcand_.hasGE21);
+  tfcand_tree_->Branch("hasGE21S",&tfcand_.hasGE21S);
+  tfcand_tree_->Branch("hasGE21L",&tfcand_.hasGE21L);
   tfcand_tree_->Branch("hasME0",&tfcand_.hasME0);
 }
 
@@ -355,7 +418,8 @@ GEMCSCTriggerRateTree::bookGMTRegionalTree()
   gmtregcand_tree_->Branch("hasRE42",&gmtregcand_.hasRE42);
   gmtregcand_tree_->Branch("hasRE43",&gmtregcand_.hasRE43);
   gmtregcand_tree_->Branch("hasGE11",&gmtregcand_.hasGE11);
-  gmtregcand_tree_->Branch("hasGE21",&gmtregcand_.hasGE21);
+  gmtregcand_tree_->Branch("hasGE21S",&gmtregcand_.hasGE21S);
+  gmtregcand_tree_->Branch("hasGE21L",&gmtregcand_.hasGE21L);
   gmtregcand_tree_->Branch("hasME0",&gmtregcand_.hasME0);
   gmtregcand_tree_->Branch("isCSC",&gmtregcand_.isCSC);
   gmtregcand_tree_->Branch("isDT",&gmtregcand_.isDT);
@@ -396,7 +460,8 @@ GEMCSCTriggerRateTree::bookGMTCandTree()
   gmtcand_tree_->Branch("hasRE42",&gmtcand_.hasRE42);
   gmtcand_tree_->Branch("hasRE43",&gmtcand_.hasRE43);
   gmtcand_tree_->Branch("hasGE11",&gmtcand_.hasGE11);
-  gmtcand_tree_->Branch("hasGE21",&gmtcand_.hasGE21);
+  gmtcand_tree_->Branch("hasGE21S",&gmtcand_.hasGE21S);
+  gmtcand_tree_->Branch("hasGE21L",&gmtcand_.hasGE21L);
   gmtcand_tree_->Branch("hasME0",&gmtcand_.hasME0);
 }
 
@@ -424,6 +489,15 @@ GEMCSCTriggerRateTree::analyzeALCTRate(const edm::Event& iEvent)
       alct_.chamber = detId.chamber();
       alct_.bx = bx - 6;
       alct_tree_->Fill();
+
+      // debug
+      bool debug(true);
+      if (debug){
+        std::cout << "------------------------------------------------------------------------------" << std::endl;         
+        std::cout << "Event " << alct_.event << ", detId " << detId << ", ALCT " << digiIt-range.first << std::endl;
+        std::cout << "endcap " << alct_.endcap << ", station " << alct_.station << ", ring " << alct_.ring << ", chamber " << alct_.chamber << std::endl;
+        std::cout << *digiIt << std::endl;
+      }
     }
   }
 }
@@ -452,6 +526,15 @@ GEMCSCTriggerRateTree::analyzeCLCTRate(const edm::Event& iEvent)
       clct_.chamber = detId.chamber();
       clct_.bx = bx - 6;
       clct_tree_->Fill();
+
+      // debug
+      bool debug(true);
+      if (debug){
+        std::cout << "------------------------------------------------------------------------------" << std::endl;         
+        std::cout << "Event " << clct_.event << ", detId " << detId << ", CLCT " << digiIt-range.first << std::endl;
+        std::cout << "endcap " << clct_.endcap << ", station " << clct_.station << ", ring " << clct_.ring << ", chamber " << clct_.chamber << std::endl;
+        std::cout << *digiIt << std::endl;
+      }
     }
   }
 }
@@ -481,6 +564,15 @@ GEMCSCTriggerRateTree::analyzeLCTRate(const edm::Event& iEvent)
       lct_.chamber = detId.chamber();
       lct_.bx = bx - 6;
       lct_tree_->Fill();
+
+      // debug
+      bool debug(true);
+      if (debug){
+        std::cout << "------------------------------------------------------------------------------" << std::endl;         
+        std::cout << "Event " << lct_.event << ", detId " << detId << ", LCT " << digiIt-range.first << std::endl;
+        std::cout << "endcap " << lct_.endcap << ", station " << lct_.station << ", ring " << lct_.ring << ", chamber " << lct_.chamber << std::endl;
+        std::cout << *digiIt << std::endl;
+      }
     }
   }
 }
@@ -512,6 +604,15 @@ GEMCSCTriggerRateTree::analyzeMPCLCTRate(const edm::Event& iEvent)
       mplct_.etalut = stub.etaValue();
       mplct_.philut = stub.phiValue();
       mplct_tree_->Fill();
+
+      // debug
+      bool debug(true);
+      if (debug){
+        std::cout << "------------------------------------------------------------------------------" << std::endl;         
+        std::cout << "Event " << mplct_.event << ", detId " << detId << ", MPLCT " << digiIt-range.first << std::endl;
+        std::cout << "endcap " << mplct_.endcap << ", station " << mplct_.station << ", ring " << mplct_.ring << ", chamber " << mplct_.chamber << std::endl;
+        std::cout << *digiIt << std::endl;
+      }
     }
   }
 }
@@ -524,16 +625,14 @@ GEMCSCTriggerRateTree::analyzeTFTrackRate(const edm::Event& iEvent)
   iEvent.getByLabel("simCsctfTrackDigis",hl1Tracks);
   const L1CSCTrackCollection* l1Tracks = hl1Tracks.product();
 
-  for (auto  trk = l1Tracks->begin(); trk != l1Tracks->end(); trk++) {
+  for (auto trk = l1Tracks->begin(); trk != l1Tracks->end(); trk++) {
     if (trk->first.bx() < minRateBX_ or trk->first.bx() > maxRateBX_) continue;
     const bool endcapOnly(true);
-    if (endcapOnly and trk->first.endcap()!=1) continue;
+    if (endcapOnly and abs(trk->first.endcap())!=1) continue;
     
     MatchCSCMuL1::TFTRACK myTFTrk;
     myTFTrk.init( &(trk->first) , ptLUT, muScales, muPtScale);
     myTFTrk.dr = 999.;
-    // add the TFTrack to the list
-    rtTFTracks_.push_back(myTFTrk);
 
     tftrack_.event = iEvent.id().event();
     tftrack_.bx = trk->first.bx();
@@ -544,26 +643,43 @@ GEMCSCTriggerRateTree::analyzeTFTrackRate(const edm::Event& iEvent)
     for (auto detUnitIt = trk->second.begin(); detUnitIt != trk->second.end(); detUnitIt++) {
       const CSCDetId& id = (*detUnitIt).first;
       auto range = (*detUnitIt).second;
-      for (auto  digiIt = range.first; digiIt != range.second; digiIt++) {
-	if (!((*digiIt).isValid())) continue;
-	myTFTrk.trgdigis.push_back(&*digiIt);
-	myTFTrk.trgids.push_back(id);
-	myTFTrk.trgetaphis.push_back(intersectionEtaPhi(id,(*digiIt).getKeyWG(),(*digiIt).getStrip()));
-	myTFTrk.trgstubs.push_back( buildTrackStub((*digiIt),id));
-
-	// stub analysis
-	if (id.station()==1 and id.ring()==4) tftrack_.hasME1a |= 1;
-	if (id.station()==1 and id.ring()==1) tftrack_.hasME1b |= 1;
-	if (id.station()==1 and id.ring()==2) tftrack_.hasME12 |= 1;
-	if (id.station()==1 and id.ring()==3) tftrack_.hasME13 |= 1; 
-	if (id.station()==2 and id.ring()==1) tftrack_.hasME21 |= 1;
-	if (id.station()==2 and id.ring()==2) tftrack_.hasME22 |= 1;
-	if (id.station()==3 and id.ring()==1) tftrack_.hasME31 |= 1;
-	if (id.station()==3 and id.ring()==2) tftrack_.hasME32 |= 1;
-	if (id.station()==4 and id.ring()==1) tftrack_.hasME41 |= 1;
-	if (id.station()==4 and id.ring()==2) tftrack_.hasME42 |= 1;
+      for (auto digiIt = range.first; digiIt != range.second; digiIt++) {
+        if (!((*digiIt).isValid())) continue;
+        myTFTrk.trgdigis.push_back(&*digiIt);
+        myTFTrk.trgids.push_back(id);
+        myTFTrk.trgetaphis.push_back(intersectionEtaPhi(id,(*digiIt).getKeyWG(),(*digiIt).getStrip()));
+        myTFTrk.trgstubs.push_back(buildTrackStub((*digiIt),id));
+        
+        // stub analysis
+        if (id.station()==1 and id.ring()==4) tftrack_.hasME1a = 1;
+        if (id.station()==1 and id.ring()==1) tftrack_.hasME1b = 1;
+        if (id.station()==1 and id.ring()==2) tftrack_.hasME12 = 1;
+        if (id.station()==1 and id.ring()==3) tftrack_.hasME13 = 1; 
+        if (id.station()==2 and id.ring()==1) tftrack_.hasME21 = 1;
+        if (id.station()==2 and id.ring()==2) tftrack_.hasME22 = 1;
+        if (id.station()==3 and id.ring()==1) tftrack_.hasME31 = 1;
+        if (id.station()==3 and id.ring()==2) tftrack_.hasME32 = 1;
+        if (id.station()==4 and id.ring()==1) tftrack_.hasME41 = 1;
+        if (id.station()==4 and id.ring()==2) tftrack_.hasME42 = 1;
       }
     }
+
+    bool debug(true);
+    if (debug){
+      std::cout << "------------------------------------------------------------------------------" << std::endl; 
+      std::cout << "Track " << trk - l1Tracks->begin() << " information" << std::endl;
+      std::cout << "bx " << tftrack_.bx << ", pt " << tftrack_.pt << ", eta " << tftrack_.eta << ", phi " << tftrack_.phi << std::endl;
+      std::cout << "dR " << myTFTrk.dr << ", nIds " << myTFTrk.trgids.size() << ", nStubs " << myTFTrk.trgstubs.size() << std::endl;
+      std::cout << "hasME1a " << tftrack_.hasME1a << ", hasME1b " << tftrack_.hasME1b << ", hasME12 " << tftrack_.hasME12 << std::endl;
+      std::cout << "hasME13 " << tftrack_.hasME13 << ", hasME21 " << tftrack_.hasME21 << ", hasME22 " << tftrack_.hasME22 << std::endl;
+      std::cout << "hasME31 " << tftrack_.hasME31 << ", hasME32 " << tftrack_.hasME32 << ", hasME41 " << tftrack_.hasME41 << std::endl;
+      std::cout << "hasME42 " << tftrack_.hasME42 << std::endl;
+      std::cout << "------------------------------------------------------------------------------" << std::endl;       
+    }
+
+    // add the TFTrack to the list
+    rtTFTracks_.push_back(myTFTrk);
+
     tftrack_tree_->Fill();
   }
 }
@@ -582,43 +698,46 @@ GEMCSCTriggerRateTree::analyzeTFCandRate(const edm::Event& iEvent)
     MatchCSCMuL1::TFCAND myTFCand;
     myTFCand.init( &*trk , ptLUT, muScales, muPtScale);
     myTFCand.dr = 999.;
-    rtTFCands_.push_back(myTFCand);
     // associate the TFTracks to this TFCand
     for (size_t tt = 0; tt<rtTFTracks_.size(); tt++){
       if (trk->bx()         != rtTFTracks_[tt].l1trk->bx() or
-	  trk->phi_packed() != rtTFTracks_[tt].phi_packed or
-	  trk->pt_packed()  != rtTFTracks_[tt].pt_packed or
-	  trk->eta_packed() != rtTFTracks_[tt].eta_packed) continue;
+          trk->phi_packed() != rtTFTracks_[tt].phi_packed or
+          trk->pt_packed()  != rtTFTracks_[tt].pt_packed or
+          trk->eta_packed() != rtTFTracks_[tt].eta_packed) continue;
       myTFCand.tftrack = &(rtTFTracks_[tt]);
       // ids now hold *trigger segments IDs*
       myTFCand.ids = rtTFTracks_[tt].trgids;
       myTFCand.nTFStubs = rtTFTracks_[tt].nStubs(1,1,1,1,1);
     }
-    
+
     // analysis
-    if (myTFCand.tftrack != nullptr) continue;
+    if (myTFCand.tftrack == nullptr) continue;
     tfcand_.event = iEvent.id().event();
     tfcand_.bx = trk->bx();
     tfcand_.pt = myTFCand.tftrack->pt;
     tfcand_.eta = myTFCand.tftrack->eta;
     tfcand_.phi = myTFCand.tftrack->phi;
-    auto trgids(myTFCand.tftrack->trgids);
  
+    std::cout << tfcand_.bx << " " << tfcand_.pt << " " << tfcand_.eta << " " << tfcand_.phi << std::endl;
+    std::cout << myTFCand.tftrack->trgids.size() << std::endl;
     // stub analysis
-    for (auto id : trgids){
-      if (id.station()==1 and id.ring()==4) tftrack_.hasME1a |= 1;
-      if (id.station()==1 and id.ring()==1) tftrack_.hasME1b |= 1;
-      if (id.station()==1 and id.ring()==2) tftrack_.hasME12 |= 1;
-      if (id.station()==1 and id.ring()==3) tftrack_.hasME13 |= 1; 
-      if (id.station()==2 and id.ring()==1) tftrack_.hasME21 |= 1;
-      if (id.station()==2 and id.ring()==2) tftrack_.hasME22 |= 1;
-      if (id.station()==3 and id.ring()==1) tftrack_.hasME31 |= 1;
-      if (id.station()==3 and id.ring()==2) tftrack_.hasME32 |= 1;
-      if (id.station()==4 and id.ring()==1) tftrack_.hasME41 |= 1;
-      if (id.station()==4 and id.ring()==2) tftrack_.hasME42 |= 1;
+    for (auto id : myTFCand.tftrack->trgids){
+      std::cout << "stubs " << id << std::endl;
+      if (id.station()==1 and id.ring()==4) tftrack_.hasME1a = 1;
+      if (id.station()==1 and id.ring()==1) tftrack_.hasME1b = 1;
+      if (id.station()==1 and id.ring()==2) tftrack_.hasME12 = 1;
+      if (id.station()==1 and id.ring()==3) tftrack_.hasME13 = 1; 
+      if (id.station()==2 and id.ring()==1) tftrack_.hasME21 = 1;
+      if (id.station()==2 and id.ring()==2) tftrack_.hasME22 = 1;
+      if (id.station()==3 and id.ring()==1) tftrack_.hasME31 = 1;
+      if (id.station()==3 and id.ring()==2) tftrack_.hasME32 = 1;
+      if (id.station()==4 and id.ring()==1) tftrack_.hasME41 = 1;
+      if (id.station()==4 and id.ring()==2) tftrack_.hasME42 = 1;
     }
+    rtTFCands_.push_back(myTFCand);
+
+    tfcand_tree_->Fill();
   }
-  tfcand_tree_->Fill();
 }
 
 
@@ -681,24 +800,23 @@ GEMCSCTriggerRateTree::analyzeGMTRegCandRate(const edm::Event& iEvent, int type)
     gmtregcand_.eta = myGMTREGCand.eta;
     gmtregcand_.phi = myGMTREGCand.phi;
     gmtregcand_.quality = trk->quality();
-    if (type == gmtRegCand::CSC)  gmtregcand_.isCSC  |= 1;
-    if (type == gmtRegCand::DT)   gmtregcand_.isDT   |= 1;
-    if (type == gmtRegCand::RPCb) gmtregcand_.isRPCb |= 1;
-    if (type == gmtRegCand::RPCf) gmtregcand_.isRPCf |= 1;
-    auto trgids(myGMTREGCand.ids);
+    if (type == gmtRegCand::CSC)  gmtregcand_.isCSC  = 1;
+    if (type == gmtRegCand::DT)   gmtregcand_.isDT   = 1;
+    if (type == gmtRegCand::RPCb) gmtregcand_.isRPCb = 1;
+    if (type == gmtRegCand::RPCf) gmtregcand_.isRPCf = 1;
     
     // stub analysis
-    for (auto id : trgids){
-      if (id.station()==1 and id.ring()==4) gmtregcand_.hasME1a |= 1;
-      if (id.station()==1 and id.ring()==1) gmtregcand_.hasME1b |= 1;
-      if (id.station()==1 and id.ring()==2) gmtregcand_.hasME12 |= 1;
-      if (id.station()==1 and id.ring()==3) gmtregcand_.hasME13 |= 1; 
-      if (id.station()==2 and id.ring()==1) gmtregcand_.hasME21 |= 1;
-      if (id.station()==2 and id.ring()==2) gmtregcand_.hasME22 |= 1;
-      if (id.station()==3 and id.ring()==1) gmtregcand_.hasME31 |= 1;
-      if (id.station()==3 and id.ring()==2) gmtregcand_.hasME32 |= 1;
-      if (id.station()==4 and id.ring()==1) gmtregcand_.hasME41 |= 1;
-      if (id.station()==4 and id.ring()==2) gmtregcand_.hasME42 |= 1;
+    for (auto id : myGMTREGCand.ids){
+      if (id.station()==1 and id.ring()==4) gmtregcand_.hasME1a = 1;
+      if (id.station()==1 and id.ring()==1) gmtregcand_.hasME1b = 1;
+      if (id.station()==1 and id.ring()==2) gmtregcand_.hasME12 = 1;
+      if (id.station()==1 and id.ring()==3) gmtregcand_.hasME13 = 1; 
+      if (id.station()==2 and id.ring()==1) gmtregcand_.hasME21 = 1;
+      if (id.station()==2 and id.ring()==2) gmtregcand_.hasME22 = 1;
+      if (id.station()==3 and id.ring()==1) gmtregcand_.hasME31 = 1;
+      if (id.station()==3 and id.ring()==2) gmtregcand_.hasME32 = 1;
+      if (id.station()==4 and id.ring()==1) gmtregcand_.hasME41 = 1;
+      if (id.station()==4 and id.ring()==2) gmtregcand_.hasME42 = 1;
     }
     gmtregcand_tree_->Fill();
   }
@@ -731,65 +849,65 @@ GEMCSCTriggerRateTree::analyzeGMTCandRate(const edm::Event& iEvent)
       myGMTCand.regcand = nullptr;
       myGMTCand.regcand_rpc = nullptr;
       
-//       float gpt = myGMTCand.pt;
+      //       float gpt = myGMTCand.pt;
       const float geta(fabs(myGMTCand.eta));
       const bool eta_q(geta > 1.2);
       
       MatchCSCMuL1::GMTREGCAND * gmt_csc = nullptr;
       if (trk->isFwd() && ( trk->isMatchedCand() or !trk->isRPC())) {
-	const L1MuRegionalCand rcsc(CSCCands[trk->getDTCSCIndex()]);
-	unsigned my_i = 999;
-	for (unsigned i=0; i< rtGmtRegCscCands_.size(); i++) {
-	  if (rcsc.getDataWord()!=rtGmtRegCscCands_[i].l1reg->getDataWord()) continue;
-	  my_i = i;
-	  break;
-	}
-	if (my_i<99) gmt_csc = &rtGmtRegCscCands_[my_i];
-	else std::cout<<"DOES NOT EXIST IN rtGmtRegCscCands_! Should not happen!"<<std::endl;
-	myGMTCand.regcand = gmt_csc;
-	myGMTCand.ids = gmt_csc->ids;
+        const L1MuRegionalCand rcsc(CSCCands[trk->getDTCSCIndex()]);
+        unsigned my_i = 999;
+        for (unsigned i=0; i< rtGmtRegCscCands_.size(); i++) {
+          if (rcsc.getDataWord()!=rtGmtRegCscCands_[i].l1reg->getDataWord()) continue;
+          my_i = i;
+          break;
+        }
+        if (my_i<99) gmt_csc = &rtGmtRegCscCands_[my_i];
+        else std::cout<<"DOES NOT EXIST IN rtGmtRegCscCands_! Should not happen!"<<std::endl;
+        myGMTCand.regcand = gmt_csc;
+        myGMTCand.ids = gmt_csc->ids;
       }
       
       MatchCSCMuL1::GMTREGCAND * gmt_rpcf = nullptr;
       if (trk->isFwd() && (trk->isMatchedCand() or trk->isRPC())) {
-	const L1MuRegionalCand rrpcf = RPCfCands[trk->getRPCIndex()];
-	unsigned my_i = 999;
-	for (unsigned i=0; i< rtGmtRegRpcfCands_.size(); i++) {
-	  if (rrpcf.getDataWord()!=rtGmtRegRpcfCands_[i].l1reg->getDataWord()) continue;
-	  my_i = i;
-	  break;
-	}
-	if (my_i<99) gmt_rpcf = &rtGmtRegRpcfCands_[my_i];
-	else std::cout<<"DOES NOT EXIST IN rtGmtRegRpcfCands_! Should not happen!"<<std::endl;
-	myGMTCand.regcand_rpc = gmt_rpcf;
+        const L1MuRegionalCand rrpcf = RPCfCands[trk->getRPCIndex()];
+        unsigned my_i = 999;
+        for (unsigned i=0; i< rtGmtRegRpcfCands_.size(); i++) {
+          if (rrpcf.getDataWord()!=rtGmtRegRpcfCands_[i].l1reg->getDataWord()) continue;
+          my_i = i;
+          break;
+        }
+        if (my_i<99) gmt_rpcf = &rtGmtRegRpcfCands_[my_i];
+        else std::cout<<"DOES NOT EXIST IN rtGmtRegRpcfCands_! Should not happen!"<<std::endl;
+        myGMTCand.regcand_rpc = gmt_rpcf;
       }
       
       MatchCSCMuL1::GMTREGCAND * gmt_rpcb = nullptr;
       if (!(trk->isFwd()) && (trk->isMatchedCand() or trk->isRPC())){
-	const L1MuRegionalCand rrpcb = RPCbCands[trk->getRPCIndex()];
-	unsigned my_i = 999;
-	for (unsigned i=0; i< rtGmtRegRpcbCands_.size(); i++){
-	  if (rrpcb.getDataWord()!=rtGmtRegRpcbCands_[i].l1reg->getDataWord()) continue;
-	  my_i = i;
-	  break;
-	}
-	if (my_i<99) gmt_rpcb = &rtGmtRegRpcbCands_[my_i];
-	else std::cout<<"DOES NOT EXIST IN rtGmtRegRpcbCands_! Should not happen!"<<std::endl;
-	myGMTCand.regcand_rpc = gmt_rpcb;
+        const L1MuRegionalCand rrpcb = RPCbCands[trk->getRPCIndex()];
+        unsigned my_i = 999;
+        for (unsigned i=0; i< rtGmtRegRpcbCands_.size(); i++){
+          if (rrpcb.getDataWord()!=rtGmtRegRpcbCands_[i].l1reg->getDataWord()) continue;
+          my_i = i;
+          break;
+        }
+        if (my_i<99) gmt_rpcb = &rtGmtRegRpcbCands_[my_i];
+        else std::cout<<"DOES NOT EXIST IN rtGmtRegRpcbCands_! Should not happen!"<<std::endl;
+        myGMTCand.regcand_rpc = gmt_rpcb;
       }
       
       MatchCSCMuL1::GMTREGCAND * gmt_dt = nullptr;
       if (!(trk->isFwd()) && (trk->isMatchedCand() or !(trk->isRPC()))){
-	const L1MuRegionalCand rdt = DTCands[trk->getDTCSCIndex()];
-	unsigned my_i = 999;
-	for (unsigned i=0; i< rtGmtRegDtCands_.size(); i++){
-	  if (rdt.getDataWord()!=rtGmtRegDtCands_[i].l1reg->getDataWord()) continue;
-	  my_i = i;
-	  break;
-	}
-	if (my_i<99) gmt_dt = &rtGmtRegDtCands_[my_i];
-	else std::cout<<"DOES NOT EXIST IN rtGmtRegDtCands_! Should not happen!"<<std::endl;
-	myGMTCand.regcand = gmt_dt;
+        const L1MuRegionalCand rdt = DTCands[trk->getDTCSCIndex()];
+        unsigned my_i = 999;
+        for (unsigned i=0; i< rtGmtRegDtCands_.size(); i++){
+          if (rdt.getDataWord()!=rtGmtRegDtCands_[i].l1reg->getDataWord()) continue;
+          my_i = i;
+          break;
+        }
+        if (my_i<99) gmt_dt = &rtGmtRegDtCands_[my_i];
+        else std::cout<<"DOES NOT EXIST IN rtGmtRegDtCands_! Should not happen!"<<std::endl;
+        myGMTCand.regcand = gmt_dt;
       }
       // stub analysis 
       rtGmtCands_.push_back(myGMTCand);
@@ -801,32 +919,32 @@ GEMCSCTriggerRateTree::analyzeGMTCandRate(const edm::Event& iEvent)
       gmtcand_.eta = myGMTCand.eta;
       gmtcand_.phi = myGMTCand.phi;
       gmtcand_.quality = trk->quality();
-      if (trk->useInSingleMuonTrigger()) gmtcand_.isGoodSingleMuon |= 1;
-      if (trk->useInSingleMuonTrigger()) gmtcand_.isGoodDoubleMuon |= 1;
+      if (trk->useInSingleMuonTrigger()) gmtcand_.isGoodSingleMuon = 1;
+      if (trk->useInSingleMuonTrigger()) gmtcand_.isGoodDoubleMuon = 1;
       auto trgids(myGMTCand.ids);
-      
+      std::cout << "etst"<<std::endl;
       // stub analysis
       for (auto id : trgids){
-	if (id.station()==1 and id.ring()==4) gmtcand_.hasME1a |= 1;
-	if (id.station()==1 and id.ring()==1) gmtcand_.hasME1b |= 1;
-	if (id.station()==1 and id.ring()==2) gmtcand_.hasME12 |= 1;
-	if (id.station()==1 and id.ring()==3) gmtcand_.hasME13 |= 1; 
-	if (id.station()==2 and id.ring()==1) gmtcand_.hasME21 |= 1;
-	if (id.station()==2 and id.ring()==2) gmtcand_.hasME22 |= 1;
-	if (id.station()==3 and id.ring()==1) gmtcand_.hasME31 |= 1;
-	if (id.station()==3 and id.ring()==2) gmtcand_.hasME32 |= 1;
-	if (id.station()==4 and id.ring()==1) gmtcand_.hasME41 |= 1;
-	if (id.station()==4 and id.ring()==2) gmtcand_.hasME42 |= 1;
+	if (id.station()==1 and id.ring()==4) gmtcand_.hasME1a = 1;
+	if (id.station()==1 and id.ring()==1) gmtcand_.hasME1b = 1;
+	if (id.station()==1 and id.ring()==2) gmtcand_.hasME12 = 1;
+	if (id.station()==1 and id.ring()==3) gmtcand_.hasME13 = 1; 
+	if (id.station()==2 and id.ring()==1) gmtcand_.hasME21 = 1;
+	if (id.station()==2 and id.ring()==2) gmtcand_.hasME22 = 1;
+	if (id.station()==3 and id.ring()==1) gmtcand_.hasME31 = 1;
+	if (id.station()==3 and id.ring()==2) gmtcand_.hasME32 = 1;
+	if (id.station()==4 and id.ring()==1) gmtcand_.hasME41 = 1;
+	if (id.station()==4 and id.ring()==2) gmtcand_.hasME42 = 1;
       }
 
       const bool isCSC(gmt_csc != nullptr);
       const bool isDT(gmt_dt  != nullptr);
       const bool isRPCf(gmt_rpcf != nullptr);
       const bool isRPCb(gmt_rpcb != nullptr);
-      if (isCSC)  gmtcand_.isCSC  |= 1;
-      if (isDT)   gmtcand_.isDT   |= 1;
-      if (isRPCb) gmtcand_.isRPCb |= 1;
-      if (isRPCf) gmtcand_.isRPCf |= 1;
+      if (isCSC)  gmtcand_.isCSC  = 1;
+      if (isDT)   gmtcand_.isDT   = 1;
+      if (isRPCb) gmtcand_.isRPCb = 1;
+      if (isRPCf) gmtcand_.isRPCf = 1;
 
       const bool hasCSCCand(isCSC and gmt_csc->tfcand != nullptr);
       const bool hasCSCTrack(isCSC and gmt_csc->tfcand->tftrack != nullptr);
