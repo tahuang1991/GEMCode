@@ -23,8 +23,12 @@
 #include "DataFormats/GEMDigi/interface/GEMDigiCollection.h"
 #include "DataFormats/GEMDigi/interface/GEMCSCPadDigiCollection.h"
 #include "DataFormats/RPCDigi/interface/RPCDigiCollection.h"
+#include "DataFormats/CSCDigi/interface/CSCALCTDigiCollection.h"
+#include "DataFormats/CSCDigi/interface/CSCCLCTDigiCollection.h"
+#include "DataFormats/CSCDigi/interface/CSCCorrelatedLCTDigiCollection.h"
 #include "DataFormats/MuonDetId/interface/RPCDetId.h"
 #include "DataFormats/MuonDetId/interface/GEMDetId.h"
+#include "DataFormats/MuonDetId/interface/CSCDetId.h"
 #include "DataFormats/GeometrySurface/interface/LocalError.h"
 #include "DataFormats/GeometryVector/interface/LocalPoint.h"
 #include "DataFormats/Scalers/interface/DcsStatus.h"
@@ -66,6 +70,23 @@ struct MyRPCDigi
   Float_t g_r, g_eta, g_phi, g_x, g_y, g_z;
 };
 
+struct MyCSCWireDigi
+{
+  Int_t detId;
+  Short_t region, ring, station, chamber, layer;
+  Short_t wiregroup, bx;
+  Float_t x, y;
+  Float_t g_r, g_eta, g_phi, g_x, g_y, g_z;
+};
+
+struct MyCSCStripDigi
+{
+  Int_t detId;
+  Short_t region, ring, station, chamber, layer;
+  Short_t halfstrip, bx;
+  Float_t x, y;
+  Float_t g_r, g_eta, g_phi, g_x, g_y, g_z;
+};
 
 struct MyGEMDigi
 {  
@@ -470,7 +491,7 @@ void MuonDigiAnalyzer::analyzeRPC()
     rpc_digi_.subsector = (Short_t) id.subsector();
     rpc_digi_.roll = (Short_t) id.roll();
     const int nSubSectors(id.station()>1 and id.ring()==1 ? 3 : 6); //only works for endcap
-    rpc_digi_.chamber = ((id.sector()-1)*nSubSectors + id.subsector())%18+1;
+    rpc_digi_.chamber = (id.sector()-1)*nSubSectors + id.subsector();
 
     RPCDigiCollection::const_iterator digiItr;
     //loop over digis of given roll
