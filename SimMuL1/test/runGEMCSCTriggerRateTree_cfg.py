@@ -77,6 +77,14 @@ process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(events)
 )
 
+## analyzer - use unganged TF!!!
+from GEMCode.GEMValidation.simTrackMatching_cfi import SimTrackMatching
+from L1Trigger.CSCTrackFinder.csctfTrackDigisUngangedME1a_cfi import csctfTrackDigisUngangedME1a
+process.GEMCSCTriggerRateTree = cms.EDAnalyzer("GEMCSCTriggerRateTree",
+    simTrackMatching = SimTrackMatching,
+    sectorProcessor = csctfTrackDigisUngangedME1a.SectorProcessor,
+)
+
 ## output
 outputFileName = 'hp_' + sample + "_" + cmssw + "_" + globalTag + "_pu%d"%(pileup) + '_w3' + suffix + '.root'
 print "outputFile:", outputFileName
@@ -84,19 +92,6 @@ print "outputFile:", outputFileName
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string(outputFileName)
 )
-
-process.GEMCSCTriggerRateTree = cms.EDAnalyzer("GEMCSCTriggerRateTree",
-    minBxALCT = cms.untracked.int32(5),
-    maxBxALCT = cms.untracked.int32(7),
-    minBxCLCT = cms.untracked.int32(5),
-    maxBxCLCT = cms.untracked.int32(7),
-    minBxLCT = cms.untracked.int32(5),
-    maxBxLCT = cms.untracked.int32(7),
-    minBxMPLCT = cms.untracked.int32(5),
-    maxBxMPLCT = cms.untracked.int32(7),
-    sectorProcessor = cms.untracked.PSet(),
-)
-process.GEMCSCTriggerRateTree.sectorProcessor = process.simCsctfTrackDigis.SectorProcessor
 
 ## Sequence and schedule
 process.ana_seq = cms.Sequence(process.GEMCSCTriggerRateTree)
