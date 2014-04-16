@@ -84,7 +84,7 @@ private:
 
   const RecHitContainer no_recHits_;
 
-  bool verbose_;
+  bool verboseGEM_;
 };
 
 #endif

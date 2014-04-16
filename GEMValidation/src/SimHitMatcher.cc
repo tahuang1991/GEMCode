@@ -50,6 +50,8 @@ SimHitMatcher::init()
 {
   edm::Handle<edm::PSimHitContainer> csc_hits;
   edm::Handle<edm::PSimHitContainer> gem_hits;
+  edm::Handle<edm::PSimHitContainer> rpc_hits;
+  edm::Handle<edm::PSimHitContainer> me0_hits;
   edm::Handle<edm::SimTrackContainer> sim_tracks;
   edm::Handle<edm::SimVertexContainer> sim_vertices;
 
@@ -57,6 +59,8 @@ SimHitMatcher::init()
   event().getByLabel(simInputLabel_, sim_vertices);
   event().getByLabel(cscSimHitInput_, csc_hits);
   event().getByLabel(gemSimHitInput_, gem_hits);
+  event().getByLabel(rpcSimHitInput_, rpc_hits);
+  event().getByLabel(me0SimHitInput_, me0_hits);
 
   // fill trkId2Index associoation:
   int no = 0;
@@ -76,9 +80,10 @@ SimHitMatcher::init()
     if ( useCSCChamberType(id.iChamberType()) )  csc_hits_select.push_back(h);
   }
 
-  matchSimHitsToSimTrack(track_ids, csc_hits_select, *gem_hits.product());
+  matchSimHitsToSimTrack(track_ids, csc_hits_select, *gem_hits.product(),
+                         *rpc_hits.product(),*me0_hits.product());
 
-  if (verbose())
+  if (verboseCSC_)
   {
     cout<<"sh tn ntids "<<no<<" "<<track_ids.size()<<" "<<csc_hits_select.size()<<endl;
     cout<<"detids "<<detIdsGEM().size()<<" "<<detIdsCSC().size()<<endl;
@@ -94,6 +99,10 @@ SimHitMatcher::init()
       cout<<"nstrp "<<strips.size()<<endl;
       cout<<"strps : "; std::copy(strips.begin(), strips.end(), ostream_iterator<int>(cout, " ")); cout<<endl;
     }
+  }
+
+  if (verboseGEM_) 
+  {
     auto gem_ch_ids = chamberIdsGEM();
     for (auto id: gem_ch_ids)
     {
@@ -153,7 +162,10 @@ SimHitMatcher::getIdsOfSimTrackShower(unsigned int initial_trk_id,
 
 void
 SimHitMatcher::matchSimHitsToSimTrack(std::vector<unsigned int> track_ids,
-    const edm::PSimHitContainer& csc_hits, const edm::PSimHitContainer& gem_hits)
+                                      const edm::PSimHitContainer& csc_hits, 
+                                      const edm::PSimHitContainer& gem_hits,
+                                      const edm::PSimHitContainer& rpc_hits, 
+                                      const edm::PSimHitContainer& me0_hits)
 {
   for (auto& track_id: track_ids)
   {
@@ -184,6 +196,32 @@ SimHitMatcher::matchSimHitsToSimTrack(std::vector<unsigned int> track_ids,
       gem_chamber_to_hits_[ p_id.chamberId().rawId() ].push_back(h);
       GEMDetId superch_id(p_id.region(), p_id.ring(), p_id.station(), 1, p_id.chamber(), 0);
       gem_superchamber_to_hits_[ superch_id() ].push_back(h);
+    }
+    for (auto& h: rpc_hits)
+    {
+      if (h.trackId() != track_id) continue;
+      int pdgid = h.particleType();
+      if (simMuOnlyRPC_ && std::abs(pdgid) != 13) continue;
+      // discard electron hits in the RPC chambers
+      if (discardEleHitsRPC_ && pdgid == 11) continue;
+
+      rpc_detid_to_hits_[ h.detUnitId() ].push_back(h);
+      rpc_hits_.push_back(h);
+      RPCDetId layer_id( h.detUnitId() );
+      rpc_chamber_to_hits_[ layer_id.chamberId().rawId() ].push_back(h);
+    }
+    for (auto& h: me0_hits)
+    {
+      if (h.trackId() != track_id) continue;
+      int pdgid = h.particleType();
+      if (simMuOnlyME0_ && std::abs(pdgid) != 13) continue;
+      // discard electron hits in the ME0 chambers
+      if (discardEleHitsME0_ && pdgid == 11) continue;
+
+      me0_detid_to_hits_[ h.detUnitId() ].push_back(h);
+      me0_hits_.push_back(h);
+      ME0DetId layer_id( h.detUnitId() );
+      me0_chamber_to_hits_[ layer_id.chamberId().rawId() ].push_back(h);
     }
   }
 
