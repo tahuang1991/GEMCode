@@ -16,10 +16,6 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorOpposite_cfi')
 process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAlong_cfi')
 
-## GEM geometry customization
-from Geometry.GEMGeometry.gemGeometryCustoms import custom_GE11_6partitions_v1
-process = custom_GE11_6partitions_v1(process)
-
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring('file:out_L1.root')
 )
@@ -35,7 +31,7 @@ process.TFileService = cms.Service("TFileService",
     fileName = cms.string("gem-csc_stub_ana.root")
 )
 
-## global tag for 2019 upgrade studies
+## global tag for upgrade studies
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2019', '')
 
