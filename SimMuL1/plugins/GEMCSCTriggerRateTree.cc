@@ -183,7 +183,7 @@ GEMCSCTriggerRateTree::intializeTree()
   tftrack_.eta = -999;
   tftrack_.phi = -999;
   tftrack_.quality = -999 ;
-  Tftrack_.hasME1a = 0;
+  tftrack_.hasME1a = 0;
   tftrack_.hasME1b = 0; 
   tftrack_.hasME12 = 0; 
   tftrack_.hasME13 = 0;
