@@ -6,8 +6,10 @@ process = cms.Process("GEMCSCANA")
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
-process.load('Configuration.Geometry.GeometryExtended2019_cff')
-process.load('Configuration.Geometry.GeometryExtended2019Reco_cff')
+process.load('Configuration.Geometry.GeometryExtended2023MuonReco_cff')
+process.load('Configuration.Geometry.GeometryExtended2023Muon_cff')
+#process.load('Configuration.Geometry.GeometryExtended2019_cff')
+#process.load('Configuration.Geometry.GeometryExtended2019Reco_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -17,11 +19,13 @@ process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorOp
 process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAlong_cfi')
 
 ## GEM geometry customization
-from Geometry.GEMGeometry.gemGeometryCustoms import custom_GE11_6partitions_v1
-process = custom_GE11_6partitions_v1(process)
+#from Geometry.GEMGeometry.gemGeometryCustoms import custom_GE11_8partitions_v1
+#process = custom_GE11_8partitions_v1(process)
 
+
+InputFiles = ['file:/uscms_data/d3/tahuang/CMSSW_6_2_0_SLHC10/src/GEMCode/SimMuL1/Debug/out_L1.root']
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('file:out_L1.root')
+    fileNames = cms.untracked.vstring(*InputFiles)
 )
 
 process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(100)
