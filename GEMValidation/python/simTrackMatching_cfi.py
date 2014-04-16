@@ -157,29 +157,30 @@ SimTrackMatching = cms.PSet(
         minNHitsChamber = cms.int32(4),
         addGhosts = cms.bool(True),
     ),
+    ## tracks
     tfTrack = cms.PSet(
         verbose = cms.int32(0),
         input = cms.InputTag("simCsctfTrackDigis"),
-        minBX = cms.int32(5),
-        maxBX = cms.int32(7),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
     ),
     tfCand = cms.PSet(
         verbose = cms.int32(0),
         input = cms.InputTag("simCsctfDigis", "CSC"),
-        minBX = cms.int32(5),
-        maxBX = cms.int32(7),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
     ),
     gmtCand = cms.PSet(
         verbose = cms.int32(0),
         input = cms.InputTag("simGmtDigis"),
-        minBX = cms.int32(5),
-        maxBX = cms.int32(7),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
     ),
     l1Extra = cms.PSet(
         verbose = cms.int32(0),
         input = cms.InputTag("l1extraParticles"),
-        minBX = cms.int32(5),
-        maxBX = cms.int32(7),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
     ),
 )
 
@@ -202,5 +203,16 @@ def useOnlySimHitCollections(analyzer):
     analyzer.simTrackMatching.l1Extra.input = ""
     return analyzer
 
+def upToDigiCollections(analyzer):
+    analyzer.simTrackMatching.cscCLCT.input = ""
+    analyzer.simTrackMatching.cscALCT.input = ""
+    analyzer.simTrackMatching.cscLCT.input = ""
+    analyzer.simTrackMatching.cscMPLCT.input = ""
+    analyzer.simTrackMatching.gemRecHit.input = ""
+    analyzer.simTrackMatching.tfTrack.input = ""
+    analyzer.simTrackMatching.tfCand.input = ""
+    analyzer.simTrackMatching.gmtCand.input = ""
+    analyzer.simTrackMatching.l1Extra.input = ""
+    return analyzer
 
 
