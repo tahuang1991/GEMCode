@@ -118,7 +118,10 @@ private:
       const edm::SimTrackContainer& simTracks, const edm::SimVertexContainer& simVertices);
 
   void matchSimHitsToSimTrack(std::vector<unsigned int> track_ids,
-      const edm::PSimHitContainer& csc_hits, const edm::PSimHitContainer& gem_hits);
+                              const edm::PSimHitContainer& csc_hits, 
+                              const edm::PSimHitContainer& gem_hits,
+                              const edm::PSimHitContainer& rpc_hits,
+                              const edm::PSimHitContainer& me0_hits);
 
   bool simMuOnlyCSC_;
   bool simMuOnlyGEM_;
