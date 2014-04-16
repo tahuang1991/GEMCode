@@ -30,7 +30,6 @@ GEMCSCTriggerRateTree::GEMCSCTriggerRateTree(const edm::ParameterSet& iConfig):
   
   auto tfTrack = simTrackMatching.getParameter<edm::ParameterSet>("tfTrack");
   verboseTFTrack_ = tfTrack.getParameter<int>("verbose");
-  std::cout << "verbose " << verboseTFTrack_ << std::endl;
   minBXTFTrack_ = tfTrack.getParameter<int>("minBX");
   maxBXTFTrack_ = tfTrack.getParameter<int>("maxBX");
   
@@ -183,7 +182,7 @@ GEMCSCTriggerRateTree::intializeTree()
   tftrack_.eta = -999;
   tftrack_.phi = -999;
   tftrack_.quality = -999 ;
-  Tftrack_.hasME1a = 0;
+  tftrack_.hasME1a = 0;
   tftrack_.hasME1b = 0; 
   tftrack_.hasME12 = 0; 
   tftrack_.hasME13 = 0;
@@ -754,11 +753,9 @@ GEMCSCTriggerRateTree::analyzeTFTrackRate(const edm::Event& iEvent)
     
     for (auto detUnitIt = trk->second.begin(); detUnitIt != trk->second.end(); detUnitIt++) {
       const CSCDetId& id = (*detUnitIt).first;
-      std::cout << id << std::endl;
       auto range = (*detUnitIt).second;
       for (auto digiIt = range.first; digiIt != range.second; digiIt++) {
         if (!((*digiIt).isValid())) continue;
-        std::cout << " " << *digiIt << std::endl;
         myTFTrk.trgdigis.push_back(&*digiIt);
         myTFTrk.trgids.push_back(id);
         myTFTrk.trgetaphis.push_back(intersectionEtaPhi(id,(*digiIt).getKeyWG(),(*digiIt).getStrip()));
@@ -778,15 +775,19 @@ GEMCSCTriggerRateTree::analyzeTFTrackRate(const edm::Event& iEvent)
     }
 
     if (verboseTFTrack_){
-      std::cout << "------------------------------------------------------------------------------" << std::endl; 
-      std::cout << "Track " << trk - l1Tracks->begin() << " information" << std::endl;
-      std::cout << "bx " << tftrack_.bx << ", pt " << tftrack_.pt << ", eta " << tftrack_.eta << ", phi " << tftrack_.phi << std::endl;
-      std::cout << "dR " << myTFTrk.dr << ", nIds " << myTFTrk.trgids.size() << ", nStubs " << myTFTrk.trgstubs.size() << std::endl;
-      std::cout << "hasME1a " << tftrack_.hasME1a << ", hasME1b " << tftrack_.hasME1b << ", hasME12 " << tftrack_.hasME12 << std::endl;
-      std::cout << "hasME13 " << tftrack_.hasME13 << ", hasME21 " << tftrack_.hasME21 << ", hasME22 " << tftrack_.hasME22 << std::endl;
-      std::cout << "hasME31 " << tftrack_.hasME31 << ", hasME32 " << tftrack_.hasME32 << ", hasME41 " << tftrack_.hasME41 << std::endl;
-      std::cout << "hasME42 " << tftrack_.hasME42 << std::endl;
-      std::cout << "------------------------------------------------------------------------------" << std::endl;       
+      std::cout << "------------------------------------------------------------------------------" << std::endl
+                << "Track " << trk - l1Tracks->begin() << " information" << std::endl
+                << "bx " << tftrack_.bx << ", pt " << tftrack_.pt << ", eta " << tftrack_.eta << ", phi " << tftrack_.phi << std::endl
+                << "Summary of endcap hits: " << myTFTrk.trgstubs.size() << " stubs in " << myTFTrk.trgids.size() << " detIds " << std::endl
+                << "Station 0: " << std::endl << "\tME0 " << tftrack_.hasME0 << std::endl
+                << "Station 1: " << std::endl << "\tME1a " << tftrack_.hasME1a << "\tME1b " << tftrack_.hasME1b << "\tME12 " << tftrack_.hasME12 
+                << "\tME13 " << tftrack_.hasME13 << "\tGE11 " << tftrack_.hasGE11 << "\tRE12 " << tftrack_.hasRE12 << "\tRE13 " << tftrack_.hasRE13 << std::endl
+                << "Station 2: " << std::endl << "\tME21 " << tftrack_.hasME21 << "\tME22 " << tftrack_.hasME22 << "\tGE21S "<< tftrack_.hasGE21S 
+                << "\tGE21L "<< tftrack_.hasGE21L << "\tRE22 " << tftrack_.hasRE22 << "\tRE23 " << tftrack_.hasRE23 << std::endl
+                << "Station 3: " << std::endl << "\tME31 " << tftrack_.hasME31 << "\tME32 " << tftrack_.hasME32 << "\tRE31 " << tftrack_.hasRE31 
+                << "\tRE32 " << tftrack_.hasRE32 << "\tRE33 " << tftrack_.hasRE33 << std::endl
+                << "Station 4: " << std::endl << "\tME41 " << tftrack_.hasME41 << "\tME42 " << tftrack_.hasME42 << "\tRE41 " << tftrack_.hasRE41 
+                << "\tRE42 " << tftrack_.hasRE42 << "\tRE43 " << tftrack_.hasRE43 << std::endl;
     }
 
     // add the TFTrack to the list
@@ -809,7 +810,6 @@ GEMCSCTriggerRateTree::analyzeTFCandRate(const edm::Event& iEvent)
     //    const int sign_eta(((trk->eta_packed() & 0x20) == 0) ? 1.:-1);
     MatchCSCMuL1::TFCAND myTFCand;
     myTFCand.init( &*trk , ptLUT, muScales, muPtScale);
-    myTFCand.dr = 999.;
     // associate the TFTracks to this TFCand
     for (size_t tt = 0; tt<rtTFTracks_.size(); tt++){
       if (trk->bx()         != rtTFTracks_[tt].l1trk->bx() or
@@ -830,22 +830,36 @@ GEMCSCTriggerRateTree::analyzeTFCandRate(const edm::Event& iEvent)
     tfcand_.eta = myTFCand.tftrack->eta;
     tfcand_.phi = myTFCand.tftrack->phi;
  
-    std::cout << tfcand_.bx << " " << tfcand_.pt << " " << tfcand_.eta << " " << tfcand_.phi << std::endl;
-    std::cout << myTFCand.tftrack->trgids.size() << std::endl;
     // stub analysis
     for (auto id : myTFCand.tftrack->trgids){
-      std::cout << "stubs " << id << std::endl;
-      if (id.station()==1 and id.ring()==4) tftrack_.hasME1a = 1;
-      if (id.station()==1 and id.ring()==1) tftrack_.hasME1b = 1;
-      if (id.station()==1 and id.ring()==2) tftrack_.hasME12 = 1;
-      if (id.station()==1 and id.ring()==3) tftrack_.hasME13 = 1; 
-      if (id.station()==2 and id.ring()==1) tftrack_.hasME21 = 1;
-      if (id.station()==2 and id.ring()==2) tftrack_.hasME22 = 1;
-      if (id.station()==3 and id.ring()==1) tftrack_.hasME31 = 1;
-      if (id.station()==3 and id.ring()==2) tftrack_.hasME32 = 1;
-      if (id.station()==4 and id.ring()==1) tftrack_.hasME41 = 1;
-      if (id.station()==4 and id.ring()==2) tftrack_.hasME42 = 1;
+      if (id.station()==1 and id.ring()==4) tfcand_.hasME1a = 1;
+      if (id.station()==1 and id.ring()==1) tfcand_.hasME1b = 1;
+      if (id.station()==1 and id.ring()==2) tfcand_.hasME12 = 1;
+      if (id.station()==1 and id.ring()==3) tfcand_.hasME13 = 1; 
+      if (id.station()==2 and id.ring()==1) tfcand_.hasME21 = 1;
+      if (id.station()==2 and id.ring()==2) tfcand_.hasME22 = 1;
+      if (id.station()==3 and id.ring()==1) tfcand_.hasME31 = 1;
+      if (id.station()==3 and id.ring()==2) tfcand_.hasME32 = 1;
+      if (id.station()==4 and id.ring()==1) tfcand_.hasME41 = 1;
+      if (id.station()==4 and id.ring()==2) tfcand_.hasME42 = 1;
     }
+
+    if (verboseTFCand_){
+      std::cout << "------------------------------------------------------------------------------" << std::endl
+                << "Track " << trk - l1TfCands->begin() << " information" << std::endl
+                << "bx " << tfcand_.bx << ", pt " << tfcand_.pt << ", eta " << tfcand_.eta << ", phi " << tfcand_.phi << std::endl
+                << "Summary of endcap hits: " << myTFCand.tftrack->trgstubs.size() << " stubs in " << myTFCand.tftrack->trgids.size() << " detIds " << std::endl
+                << "Station 0: " << std::endl << "\tME0 " << tfcand_.hasME0 << std::endl
+                << "Station 1: " << std::endl << "\tME1a " << tfcand_.hasME1a << "\tME1b " << tfcand_.hasME1b << "\tME12 " << tfcand_.hasME12 
+                << "\tME13 " << tfcand_.hasME13 << "\tGE11 " << tfcand_.hasGE11 << "\tRE12 " << tfcand_.hasRE12 << "\tRE13 " << tfcand_.hasRE13 << std::endl
+                << "Station 2: " << std::endl << "\tME21 " << tfcand_.hasME21 << "\tME22 " << tfcand_.hasME22 << "\tGE21S "<< tfcand_.hasGE21S 
+                << "\tGE21L "<< tfcand_.hasGE21L << "\tRE22 " << tfcand_.hasRE22 << "\tRE23 " << tfcand_.hasRE23 << std::endl
+                << "Station 3: " << std::endl << "\tME31 " << tfcand_.hasME31 << "\tME32 " << tfcand_.hasME32 << "\tRE31 " << tfcand_.hasRE31 
+                << "\tRE32 " << tfcand_.hasRE32 << "\tRE33 " << tfcand_.hasRE33 << std::endl
+                << "Station 4: " << std::endl << "\tME41 " << tfcand_.hasME41 << "\tME42 " << tfcand_.hasME42 << "\tRE41 " << tfcand_.hasRE41 
+                 << "\tRE42 " << tfcand_.hasRE42 << "\tRE43 " << tfcand_.hasRE43 << std::endl;
+    }
+    
     rtTFCands_.push_back(myTFCand);
 
     tfcand_tree_->Fill();
@@ -889,12 +903,11 @@ GEMCSCTriggerRateTree::analyzeGMTRegCandRate(const edm::Event& iEvent, int type)
     //double sign_eta = ( (trk->eta_packed() & 0x20) == 0) ? 1.:-1;
     MatchCSCMuL1::GMTREGCAND myGMTREGCand;
     myGMTREGCand.init( &*trk , muScales, muPtScale);
-    myGMTREGCand.dr = 999.;
     myGMTREGCand.tfcand = nullptr;
     for (unsigned i=0; i< rtTFCands_.size(); i++) {
       if (trk->bx()          != rtTFCands_[i].l1cand->bx()         or
-	  trk->phi_packed()  != rtTFCands_[i].l1cand->phi_packed() or
-	  trk->eta_packed()  != rtTFCands_[i].l1cand->eta_packed()) continue;
+          trk->phi_packed()  != rtTFCands_[i].l1cand->phi_packed() or
+          trk->eta_packed()  != rtTFCands_[i].l1cand->eta_packed()) continue;
       myGMTREGCand.tfcand = &(rtTFCands_[i]);
       myGMTREGCand.ids = rtTFCands_[i].ids;
       myGMTREGCand.nTFStubs = rtTFCands_[i].nTFStubs;
@@ -930,6 +943,23 @@ GEMCSCTriggerRateTree::analyzeGMTRegCandRate(const edm::Event& iEvent, int type)
       if (id.station()==4 and id.ring()==1) gmtregcand_.hasME41 = 1;
       if (id.station()==4 and id.ring()==2) gmtregcand_.hasME42 = 1;
     }
+
+//     if (verboseGMTCand_){
+//       std::cout << "------------------------------------------------------------------------------" << std::endl
+//                 << "Track " << trk - collection.begin() << " information" << std::endl
+//                 << "bx " << gmtregcand_.bx << ", pt " << gmtregcand_.pt << ", eta " << gmtregcand_.eta << ", phi " << gmtregcand_.phi << std::endl
+//                 << "Summary of endcap hits: " << myGMTREGCand.trgstubs.size() << " stubs in " << myGMTREGCand.trgids.size() << " detIds " << std::endl
+//                 << "Station 0: " << std::endl << "\tME0 " << gmtregcand_.hasME0 << std::endl
+//                 << "Station 1: " << std::endl << "\tME1a " << gmtregcand_.hasME1a << "\tME1b " << gmtregcand_.hasME1b << "\tME12 " << gmtregcand_.hasME12 
+//                 << "\tME13 " << gmtregcand_.hasME13 << "\tGE11 " << gmtregcand_.hasGE11 << "\tRE12 " << gmtregcand_.hasRE12 << "\tRE13 " << gmtregcand_.hasRE13 << std::endl
+//                 << "Station 2: " << std::endl << "\tME21 " << gmtregcand_.hasME21 << "\tME22 " << gmtregcand_.hasME22 << "\tGE21S "<< gmtregcand_.hasGE21S 
+//                 << "\tGE21L "<< gmtregcand_.hasGE21L << "\tRE22 " << gmtregcand_.hasRE22 << "\tRE23 " << gmtregcand_.hasRE23 << std::endl
+//                 << "Station 3: " << std::endl << "\tME31 " << gmtregcand_.hasME31 << "\tME32 " << gmtregcand_.hasME32 << "\tRE31 " << gmtregcand_.hasRE31 
+//                 << "\tRE32 " << gmtregcand_.hasRE32 << "\tRE33 " << gmtregcand_.hasRE33 << std::endl
+//                 << "Station 4: " << std::endl << "\tME41 " << gmtregcand_.hasME41 << "\tME42 " << gmtregcand_.hasME42 << "\tRE41 " << gmtregcand_.hasRE41 
+//                 << "\tRE42 " << gmtregcand_.hasRE42 << "\tRE43 " << gmtregcand_.hasRE43 << std::endl;
+//     }
+
     gmtregcand_tree_->Fill();
   }
 }
@@ -955,7 +985,6 @@ GEMCSCTriggerRateTree::analyzeGMTCandRate(const edm::Event& iEvent)
 
       MatchCSCMuL1::GMTCAND myGMTCand;
       myGMTCand.init( &*trk , muScales, muPtScale);
-      myGMTCand.dr = 999.;
       if (doSelectEtaForGMTRates_ && myGMTCand.eta<0) continue;
       
       myGMTCand.regcand = nullptr;
@@ -1034,7 +1063,6 @@ GEMCSCTriggerRateTree::analyzeGMTCandRate(const edm::Event& iEvent)
       if (trk->useInSingleMuonTrigger()) gmtcand_.isGoodSingleMuon = 1;
       if (trk->useInSingleMuonTrigger()) gmtcand_.isGoodDoubleMuon = 1;
       auto trgids(myGMTCand.ids);
-      std::cout << "etst"<<std::endl;
       // stub analysis
       for (auto id : trgids){
 	if (id.station()==1 and id.ring()==4) gmtcand_.hasME1a = 1;
@@ -1076,6 +1104,22 @@ GEMCSCTriggerRateTree::analyzeGMTCandRate(const edm::Event& iEvent)
       myGMTCand.isCSC3s = isCSC3s;
       myGMTCand.isCSC2q = isCSC2q;
       myGMTCand.isCSC3q = isCSC3q;
+
+//       if (verboseGMTCand_){
+//         std::cout << "------------------------------------------------------------------------------" << std::endl
+//                   << "Track " << trk - GMTCands.begin() << " information" << std::endl
+//                   << "bx " << gmtcand_.bx << ", pt " << gmtcand_.pt << ", eta " << gmtcand_.eta << ", phi " << gmtcand_.phi << std::endl
+//                   << "Summary of endcap hits: " << myGMTCand.trgstubs.size() << " stubs in " << myGMTCand.trgids.size() << " detIds " << std::endl
+//                   << "Station 0: " << std::endl << "\tME0 " << gmtcand_.hasME0 << std::endl
+//                   << "Station 1: " << std::endl << "\tME1a " << gmtcand_.hasME1a << "\tME1b " << gmtcand_.hasME1b << "\tME12 " << gmtcand_.hasME12 
+//                   << "\tME13 " << gmtcand_.hasME13 << "\tGE11 " << gmtcand_.hasGE11 << "\tRE12 " << gmtcand_.hasRE12 << "\tRE13 " << gmtcand_.hasRE13 << std::endl
+//                   << "Station 2: " << std::endl << "\tME21 " << gmtcand_.hasME21 << "\tME22 " << gmtcand_.hasME22 << "\tGE21S "<< gmtcand_.hasGE21S 
+//                   << "\tGE21L "<< gmtcand_.hasGE21L << "\tRE22 " << gmtcand_.hasRE22 << "\tRE23 " << gmtcand_.hasRE23 << std::endl
+//                   << "Station 3: " << std::endl << "\tME31 " << gmtcand_.hasME31 << "\tME32 " << gmtcand_.hasME32 << "\tRE31 " << gmtcand_.hasRE31 
+//                   << "\tRE32 " << gmtcand_.hasRE32 << "\tRE33 " << gmtcand_.hasRE33 << std::endl
+//                   << "Station 4: " << std::endl << "\tME41 " << gmtcand_.hasME41 << "\tME42 " << gmtcand_.hasME42 << "\tRE41 " << gmtcand_.hasRE41 
+//                   << "\tRE42 " << gmtcand_.hasRE42 << "\tRE43 " << gmtcand_.hasRE43 << std::endl;
+//       }      
       
       rtGmtCands_.push_back(myGMTCand);
       gmtcand_tree_->Fill();
