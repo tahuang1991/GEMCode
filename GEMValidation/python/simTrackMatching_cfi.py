@@ -101,6 +101,13 @@ SimTrackMatching = cms.PSet(
         maxBX = cms.int32(1),
         matchDeltaStrip = cms.int32(1),
     ),
+    rpcRecHit = cms.PSet(
+        verbose = cms.int32(0),
+        input = cms.InputTag("rpcRecHits"),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+        matchDeltaStrip = cms.int32(1),
+    ),
     ## CSC
     cscSimHit = cms.PSet(
         verbose = cms.int32(0),
@@ -167,6 +174,12 @@ SimTrackMatching = cms.PSet(
     tfCand = cms.PSet(
         verbose = cms.int32(0),
         input = cms.InputTag("simCsctfDigis", "CSC"),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+    ),
+    gmtRegCand = cms.PSet(
+        verbose = cms.int32(0),
+        input = cms.InputTag("simGmtDigis"),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
     ),
