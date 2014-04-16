@@ -57,7 +57,7 @@ CSCDigiMatcher::matchTriggerDigisToSimTrack(const CSCComparatorDigiCollection& c
     CSCDetId layer_id(id);
 
     auto hit_strips = simhit_matcher_->hitStripsInDetId(id, matchDeltaStrip_);
-    if (verbose())
+    if (verboseStrip_)
     {
       cout<<"sit_strips_fat ";
       copy(hit_strips.begin(), hit_strips.end(), ostream_iterator<int>(cout, " "));
@@ -67,7 +67,7 @@ CSCDigiMatcher::matchTriggerDigisToSimTrack(const CSCComparatorDigiCollection& c
     auto comp_digis_in_det = comparators.get(layer_id);
     for (auto c = comp_digis_in_det.first; c != comp_digis_in_det.second; ++c)
     {
-      if (verbose()) cout<<"sdigi "<<layer_id<<" "<<*c<<endl;
+      if (verboseStrip_) cout<<"sdigi "<<layer_id<<" "<<*c<<endl;
 
       // check that the first BX for this digi wasn't too early or too late
       if (c->getTimeBin() < minBXCSCComp_ || c->getTimeBin() > maxBXCSCComp_) continue;
@@ -75,7 +75,7 @@ CSCDigiMatcher::matchTriggerDigisToSimTrack(const CSCComparatorDigiCollection& c
       int strip = c->getStrip(); // strips are counted from 1
       // check that it matches a strip that was hit by SimHits from our track
       if (hit_strips.find(strip) == hit_strips.end()) continue;
-      if (verbose()) cout<<"oki"<<endl;
+      if (verboseStrip_) cout<<"oki"<<endl;
 
       // get half-strip, counting from 1
       int half_strip = 2*strip - 1 + c->getComparator();
