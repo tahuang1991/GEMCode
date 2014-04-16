@@ -33,6 +33,8 @@ process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(100)
 ## input
 from GEMCode.SimMuL1.GEMCSCTriggerSamplesLib import *
 from GEMCode.GEMValidation.InputFileHelpers import *
+#InputFiles = ['/uscms_data/d3/tahuang/CMSSW_6_2_0_SLHC10/src/GEMCode/SimMuL1/Debug/out_L1.root']
+#process = useInputDir(process, InputFiles, False)
 #process = useInputDir(process, files['_gem98_pt2-50_PU0_pt0_new'], False)
 
 process.TFileService = cms.Service("TFileService",
