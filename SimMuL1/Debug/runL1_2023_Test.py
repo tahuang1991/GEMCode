@@ -85,12 +85,16 @@ process = customise_L1EmulatorGEM(process, ptdphi)
 process.simCscTriggerPrimitiveDigis.clctSLHC.clctNplanesHitPattern = 3
 tmb = process.simCscTriggerPrimitiveDigis.tmbSLHC
 tmb.clctToAlct = cms.untracked.bool(False)
-tmb.printAvailablePads = cms.untracked.bool(False)
-tmb.dropLowQualityCLCTsNoGEMs_ME1a = cms.untracked.bool(True)
-tmb.dropLowQualityCLCTsNoGEMs_ME1b = cms.untracked.bool(True)
-tmb.buildLCTfromALCTandGEM_ME1a = cms.untracked.bool(False)
-tmb.buildLCTfromALCTandGEM_ME1b = cms.untracked.bool(True)
-tmb.doLCTGhostBustingWithGEMs = cms.untracked.bool(False)
+tmb.tmbCrossBxAlgorithm = cms.untracked.uint32(2)
+tmb.me11ILT.debugGemMatching = cms.untracked.bool(True)
+tmb.me11ILT.debugGemMatching = cms.untracked.bool(True)
+tmb.me11ILT.runME11ILT = cms.untracked.bool(True)
+tmb.me11ILT.FirstTwoLCTsInME11 = cms.untracked.bool(True) 
+tmb.me11ILT.printAvailablePads = cms.untracked.bool(True)
+tmb.me11ILT.dropLowQualityCLCTsNoGEMs_ME1a = cms.untracked.bool(True)
+tmb.me11ILT.dropLowQualityCLCTsNoGEMs_ME1b = cms.untracked.bool(True)
+tmb.me11ILT.buildLCTfromALCTandGEM_ME1a = cms.untracked.bool(True)
+tmb.me11ILT.buildLCTfromALCTandGEM_ME1b = cms.untracked.bool(True)
 me21ILT = tmb.me21ILT
 me21ILT.runME21ILT = cms.untracked.bool(True)
 #me21ILT.doGemMatching = cms.untracked.bool(True)
@@ -98,7 +102,7 @@ me21ILT.runME21ILT = cms.untracked.bool(True)
 #tmb.me11ILT.runME11ILT = cms.untracked.bool(True)
 me21ILT.buildLCTfromALCTandGEM = cms.untracked.bool(True)
 me21ILT.dropLowQualityCLCTsNoGEMs = cms.untracked.bool(True)
-#me21ILT.printAvailablePads = cms.untracked.bool(True)
+me21ILT.printAvailablePads = cms.untracked.bool(False)
 
 
 ## RPC-CSC emulator
