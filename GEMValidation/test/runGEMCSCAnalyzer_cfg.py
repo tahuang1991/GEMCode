@@ -6,8 +6,10 @@ process = cms.Process("GEMCSCANA")
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
-process.load('Configuration.Geometry.GeometryExtended2019_cff')
-process.load('Configuration.Geometry.GeometryExtended2019Reco_cff')
+process.load('Configuration.Geometry.GeometryExtended2023MuonReco_cff')
+process.load('Configuration.Geometry.GeometryExtended2023Muon_cff')
+#process.load('Configuration.Geometry.GeometryExtended2019_cff')
+#process.load('Configuration.Geometry.GeometryExtended2019Reco_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -16,8 +18,14 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorOpposite_cfi')
 process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAlong_cfi')
 
+## GEM geometry customization
+#from Geometry.GEMGeometry.gemGeometryCustoms import custom_GE11_8partitions_v1
+#process = custom_GE11_8partitions_v1(process)
+
+
+InputFiles = ['file:/uscms_data/d3/tahuang/test/CMSSW_6_2_0_SLHC10/src/GEMCode/SimMuL1/Debug/out_L1_Test1.root']
 process.source = cms.Source("PoolSource",
-    fileNames = cms.untracked.vstring('file:out_L1.root')
+    fileNames = cms.untracked.vstring(*InputFiles)
 )
 
 process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(100)
@@ -25,10 +33,12 @@ process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(100)
 ## input
 from GEMCode.SimMuL1.GEMCSCTriggerSamplesLib import *
 from GEMCode.GEMValidation.InputFileHelpers import *
+#InputFiles = ['/uscms_data/d3/tahuang/CMSSW_6_2_0_SLHC10/src/GEMCode/SimMuL1/Debug/out_L1.root']
+#process = useInputDir(process, InputFiles, False)
 #process = useInputDir(process, files['_gem98_pt2-50_PU0_pt0_new'], False)
 
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string("gem-csc_stub_ana.root")
+    fileName = cms.string("GEMCSC_Ana_Test1.root")
 )
 
 ## global tag for upgrade studies

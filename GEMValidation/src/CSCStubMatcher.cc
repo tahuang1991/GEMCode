@@ -375,10 +375,10 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
     
     const auto hits = sh_matcher_->hitsInChamber(id);
     const float my_hs_gem_mean(sh_matcher_->simHitsMeanStrip(hits));
-    if (caseAlctClct) std::cout << "caseAlctClct" << std::endl;
-    else if(matchAlctGem_)std::cout << "caseAlctGem" << std::endl;
-    std::cout << "mean half strip from simhits " << sh_matcher_->simHitsMeanStrip(hits) 
-	<<"   half strip by propagating track " << my_hs_gem_propagate << std::endl; 
+  //  if (caseAlctClct) std::cout << "caseAlctClct" << std::endl;
+   // else if(matchAlctGem_)std::cout << "caseAlctGem" << std::endl;
+  //  std::cout << "mean half strip from simhits " << sh_matcher_->simHitsMeanStrip(hits) 
+//	<<"   half strip by propagating track " << my_hs_gem_propagate << std::endl; 
     float my_hs_gem;
     if (hsFromSimHitMean_)  my_hs_gem = my_hs_gem_mean;
     else my_hs_gem = my_hs_gem_propagate;

@@ -9,8 +9,8 @@ process.load('Configuration.StandardSequences.Services_cff')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
-process.load('Configuration.Geometry.GeometryExtended2019Reco_cff')
-process.load('Configuration.Geometry.GeometryExtended2019_cff')
+process.load('Configuration.Geometry.GeometryExtended2023MuonReco_cff')
+process.load('Configuration.Geometry.GeometryExtended2023Muon_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
@@ -23,7 +23,7 @@ process.load('Configuration.StandardSequences.EndOfProcess_cff')
 from FWCore.ParameterSet.VarParsing import VarParsing
 options = VarParsing ('python')
 options.register ('pu',
-                  0,
+                  140,
                   VarParsing.multiplicity.singleton,
                   VarParsing.varType.float,
                   "PU: 100  default")
@@ -53,15 +53,15 @@ if hasattr(sys, "argv") == True:
 
 ## global tag for 2019 upgrade studies
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2019', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgradePLS3', '')
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 
 ## GEM geometry customization
-from Geometry.GEMGeometry.gemGeometryCustoms import custom_GE11_6partitions_v1
-process = custom_GE11_6partitions_v1(process)
+#from Geometry.GEMGeometry.gemGeometryCustoms import custom_GE11_6partitions_v1
+#process = custom_GE11_6partitions_v1(process)
 
 ## GEM digitizer
 from SimMuon.GEMDigitizer.customizeGEMDigi import customize_digi_addGEM_muon_only
@@ -82,9 +82,28 @@ process = customise_csc_L1Stubs(process)
 ## GEM-CSC emulator
 from SLHCUpgradeSimulations.Configuration.gemCustoms import customise_L1Emulator as customise_L1EmulatorGEM
 process = customise_L1EmulatorGEM(process, ptdphi)
+process.simCscTriggerPrimitiveDigis.clctSLHC.clctNplanesHitPattern = 3
 tmb = process.simCscTriggerPrimitiveDigis.tmbSLHC
-tmb.me11ILT.runME11ILT = cms.untracked.bool(False)
-tmb.me11ILT.printAvailablePads = cms.untracked.bool(False)
+tmb.clctToAlct = cms.untracked.bool(False)
+tmb.tmbCrossBxAlgorithm = cms.untracked.uint32(2)
+tmb.me11ILT.runME11ILT = cms.untracked.bool(True)
+tmb.me11ILT.debugLUTs = cms.untracked.bool(False)
+tmb.me11ILT.doGemMatching = cms.untracked.bool(True)
+tmb.me11ILT.debugGemMatching = cms.untracked.bool(False)
+tmb.me11ILT.firstTwoLCTsInChamber = cms.untracked.bool(True) 
+tmb.me11ILT.dropLowQualityCLCTsNoGEMs_ME1a = cms.untracked.bool(False)
+tmb.me11ILT.dropLowQualityCLCTsNoGEMs_ME1b = cms.untracked.bool(True)
+tmb.me11ILT.buildLCTfromALCTandGEM_ME1a = cms.untracked.bool(True)
+tmb.me11ILT.buildLCTfromALCTandGEM_ME1b = cms.untracked.bool(True)
+me21ILT = tmb.me21ILT
+me21ILT.runME21ILT = cms.untracked.bool(True)
+me21ILT.doGemMatching = cms.untracked.bool(True)
+me21ILT.debugGemMatching = cms.untracked.bool(False)
+me21ILT.debugLUTs = cms.untracked.bool(False)
+#tmb.me11ILT.runME11ILT = cms.untracked.bool(True)
+me21ILT.buildLCTfromALCTandGEM = cms.untracked.bool(True)
+me21ILT.dropLowQualityCLCTsNoGEMs = cms.untracked.bool(True)
+
 
 ## RPC-CSC emulator
 from SLHCUpgradeSimulations.Configuration.rpcCustoms import customise_L1Emulator as customise_L1EmulatorRPC
@@ -110,14 +129,17 @@ process = addPileUp(process, pu)
 process.source = cms.Source("PoolSource",
   duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
   inputCommands = cms.untracked.vstring('keep  *_*_*_*'),
-  fileNames = cms.untracked.vstring('file:out_sim.root')
+  skipEvents = cms.untracked.uint32(73),
+  fileNames = cms.untracked.vstring('file:out_digi.root')
 )
 
 ## input
 from GEMCode.SimMuL1.GEMCSCTriggerSamplesLib import *
 from GEMCode.GEMValidation.InputFileHelpers import *
-process = useInputDir(process, eosfiles['_pt2-50_PU000_6part2019'], True)
+#process = useInputDir(process, eosfiles['_pt2-50_PU140_6part2019'], True)
 
+InputDir = ['/eos/uscms/store/user/dildick/dildick/SingleMuPt2-50Fwdv2_50k_DIGI_PU0_SLHC10_2023Muon/SingleMuPt2-50Fwdv2_50k_DIGI_PU0_SLHC10_2023Muon/3fc7116e7a0ba79c1b27ffca0468fa34/']
+process = useInputDir(process, InputDir, True)
 
 physics = False
 if not physics:
@@ -131,7 +153,7 @@ if not physics:
         'drop *_simDttfDigis_*_*',
         'drop *_simCsctfDigis_*_*',
         'drop *_simGmtDigis_*_*',
-        'drop *_l1extraParticles_*_*',
+        'drop *_l1extraParticles_*_*'
         )
     
 ## output commands 
@@ -173,7 +195,7 @@ if not physics:
 
 ## custom sequences
 process.mul1 = cms.Sequence(
-  process.pdigi *
+#  process.pdigi *
   process.SimL1MuTriggerPrimitives *
   process.SimL1MuTrackFinders *
   process.simRpcTriggerDigis *
@@ -182,8 +204,8 @@ process.mul1 = cms.Sequence(
 )
 
 process.muL1Short = cms.Sequence(
-  process.pdigi *
-  process.simCscTriggerPrimitiveDigis *
+#  process.pdigi *
+  process.simCscTriggerPrimitiveDigis * 
   process.SimL1MuTrackFinders *
   process.simGmtDigis *
   process.L1Extra
