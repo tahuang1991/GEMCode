@@ -3,9 +3,13 @@ import FWCore.ParameterSet.Config as cms
 SimTrackMatching = cms.PSet(
     # common
     useCSCChamberTypes = cms.untracked.vint32(0,1,2,3,4,5,6,7,8,9,10),
-    cscStations = cms.vstring('ALL','ME11','ME1a','ME1b',
-                              'ME12','ME13','ME21','ME22',
-                              'ME31','ME32','ME41','ME42'),
+    ## endcap stations
+    cscStations = cms.vstring('ALL','ME11','ME1a','ME1b','ME12','ME13',
+                              'ME21','ME22','ME31','ME32','ME41','ME42'),
+    gemStations = cms.vstring('GE11','GE21'),
+    me0Stations = cms.vstring('ME0'),
+    rpcStations = cms.vstring('RE12','RE13','RE22','RE23','RE31',
+                              'RE32','RE33','RE41','RE42','RE43')
     ntupleTrackChamberDelta = cms.bool(True),
     ntupleTrackEff = cms.bool(True),
     overrideminNHitsChamber = cms.bool(False),
