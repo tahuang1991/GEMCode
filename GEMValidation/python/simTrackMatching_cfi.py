@@ -212,6 +212,7 @@ def useOnlySimHitCollections(analyzer):
     analyzer.simTrackMatching.gemRecHit.input = ""
     analyzer.simTrackMatching.tfTrack.input = ""
     analyzer.simTrackMatching.tfCand.input = ""
+    analyzer.simTrackMatching.gmtRegCand.input = ""
     analyzer.simTrackMatching.gmtCand.input = ""
     analyzer.simTrackMatching.l1Extra.input = ""
     return analyzer
@@ -224,8 +225,25 @@ def upToDigiCollections(analyzer):
     analyzer.simTrackMatching.gemRecHit.input = ""
     analyzer.simTrackMatching.tfTrack.input = ""
     analyzer.simTrackMatching.tfCand.input = ""
+    analyzer.simTrackMatching.gmtRegCand.input = ""
     analyzer.simTrackMatching.gmtCand.input = ""
     analyzer.simTrackMatching.l1Extra.input = ""
     return analyzer
 
+def useOnlyRecHitCollections(analyzer):
+    analyzer.simTrackMatching.gemStripDigi.input = ""
+    analyzer.simTrackMatching.gemPadDigi.input = ""
+    analyzer.simTrackMatching.gemCoPadDigi.input = ""
+    analyzer.simTrackMatching.cscStripDigi.input = ""
+    analyzer.simTrackMatching.cscWireDigi.input = ""
+    analyzer.simTrackMatching.cscCLCT.input = ""
+    analyzer.simTrackMatching.cscALCT.input = ""
+    analyzer.simTrackMatching.cscLCT.input = ""
+    analyzer.simTrackMatching.cscMPLCT.input = ""
+    analyzer.simTrackMatching.tfTrack.input = ""
+    analyzer.simTrackMatching.tfCand.input = ""
+    analyzer.simTrackMatching.gmtRegCand.input = ""
+    analyzer.simTrackMatching.gmtCand.input = ""
+    analyzer.simTrackMatching.l1Extra.input = ""
+    return analyzer
 
