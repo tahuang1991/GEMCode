@@ -164,6 +164,18 @@ SimTrackMatching = cms.PSet(
         minNHitsChamber = cms.int32(4),
         addGhosts = cms.bool(True),
     ),
+    cscRecHit = cms.PSet(
+        verbose = cms.int32(0),
+        input = cms.InputTag("csc2DRecHits"),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+    ),
+    cscSegment = cms.PSet(
+        verbose = cms.int32(0),
+        input = cms.InputTag("cscSegments"),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+    ),
     ## tracks
     tfTrack = cms.PSet(
         verbose = cms.int32(0),
@@ -197,53 +209,101 @@ SimTrackMatching = cms.PSet(
     ),
 )
 
-
 ## additional utilities
-def useOnlySimHitCollections(analyzer):
+def noRPCCollections(analyzer):
+    analyzer.simTrackMatching.rpcSimHit.input = ""
+    analyzer.simTrackMatching.rpcStripDigi.input = ""
+    analyzer.simTrackMatching.rpcRecHit.input = ""
+    return analyzer
+
+def noGEMCollections(analyzer):
+    analyzer.simTrackMatching.gemSimHit.input = ""
     analyzer.simTrackMatching.gemStripDigi.input = ""
     analyzer.simTrackMatching.gemPadDigi.input = ""
     analyzer.simTrackMatching.gemCoPadDigi.input = ""
+    analyzer.simTrackMatching.gemRecHit.input = ""
+    return analyzer
+
+def noCSCCollections(analyzer):
+    analyzer.simTrackMatching.cscSimHit.input = ""
     analyzer.simTrackMatching.cscStripDigi.input = ""
     analyzer.simTrackMatching.cscWireDigi.input = ""
     analyzer.simTrackMatching.cscCLCT.input = ""
     analyzer.simTrackMatching.cscALCT.input = ""
     analyzer.simTrackMatching.cscLCT.input = ""
     analyzer.simTrackMatching.cscMPLCT.input = ""
-    analyzer.simTrackMatching.gemRecHit.input = ""
+    analyzer.simTrackMatching.cscRecHit.input = ""
+    analyzer.simTrackMatching.cscSegment.input = ""
+    return analyzer
+
+def noME0Collections(analyzer):
+    analyzer.simTrackMatching.me0SimHit.input = ""
+    analyzer.simTrackMatching.me0DigiPreReco.input = ""
+    analyzer.simTrackMatching.me0RecHit.input = ""
+    analyzer.simTrackMatching.me0Segment.input = ""
+    analyzer.simTrackMatching.me0Muon.input = ""
+    return analyzer
+
+def noTrackCollections(analyzer):
     analyzer.simTrackMatching.tfTrack.input = ""
     analyzer.simTrackMatching.tfCand.input = ""
     analyzer.simTrackMatching.gmtRegCand.input = ""
     analyzer.simTrackMatching.gmtCand.input = ""
     analyzer.simTrackMatching.l1Extra.input = ""
+    return analyzer
+
+def noSimHitCollections(analyzer):    
+    analyzer.simTrackMatching.rpcSimHit.input = ""
+    analyzer.simTrackMatching.gemSimHit.input = ""
+    analyzer.simTrackMatching.cscSimHit.input = ""
+    analyzer.simTrackMatching.me0SimHit.input = ""
+    return analyzer
+    
+def noDigiCollections(analyzer):    
+    analyzer.simTrackMatching.me0DigiPreReco.input = ""
+    analyzer.simTrackMatching.rpcStripDigi.input = ""
+    analyzer.simTrackMatching.gemStripDigi.input = ""
+    analyzer.simTrackMatching.gemPadDigi.input = ""
+    analyzer.simTrackMatching.gemCoPadDigi.input = ""
+    analyzer.simTrackMatching.cscStripDigi.input = ""
+    analyzer.simTrackMatching.cscWireDigi.input = ""
+    return analyzer
+
+def noL1Collections(analyzer):    
+    analyzer.simTrackMatching.cscCLCT.input = ""
+    analyzer.simTrackMatching.cscALCT.input = ""
+    analyzer.simTrackMatching.cscLCT.input = ""
+    analyzer.simTrackMatching.cscMPLCT.input = ""
+    return analyzer
+
+def noRecoCollections(analyzer):    
+    analyzer.simTrackMatching.me0RecHit.input = ""
+    analyzer.simTrackMatching.me0Segment.input = ""
+    analyzer.simTrackMatching.me0Muon.input = ""
+    analyzer.simTrackMatching.gemRecHit.input = ""
+    analyzer.simTrackMatching.rpcRecHit.input = ""
+    analyzer.simTrackMatching.cscRecHit.input = ""
+    analyzer.simTrackMatching.cscSegment.input = ""
+    return analyzer
+
+def onlySimHitCollections(analyzer):
+    analyzer = noDigiCollections(analyzer)
+    analyzer = noL1Collections(analyzer)
+    analyzer = noRecoCollections(analyzer)    
+    analyzer = noTrackCollections(analyzer)
     return analyzer
 
 def upToDigiCollections(analyzer):
-    analyzer.simTrackMatching.cscCLCT.input = ""
-    analyzer.simTrackMatching.cscALCT.input = ""
-    analyzer.simTrackMatching.cscLCT.input = ""
-    analyzer.simTrackMatching.cscMPLCT.input = ""
-    analyzer.simTrackMatching.gemRecHit.input = ""
-    analyzer.simTrackMatching.tfTrack.input = ""
-    analyzer.simTrackMatching.tfCand.input = ""
-    analyzer.simTrackMatching.gmtRegCand.input = ""
-    analyzer.simTrackMatching.gmtCand.input = ""
-    analyzer.simTrackMatching.l1Extra.input = ""
+    analyzer = noL1Collections(analyzer)
+    analyzer = noRecoCollections(analyzer)
+    analyzer = noTrackCollections(analyzer)
     return analyzer
 
-def useOnlyRecHitCollections(analyzer):
-    analyzer.simTrackMatching.gemStripDigi.input = ""
-    analyzer.simTrackMatching.gemPadDigi.input = ""
-    analyzer.simTrackMatching.gemCoPadDigi.input = ""
-    analyzer.simTrackMatching.cscStripDigi.input = ""
-    analyzer.simTrackMatching.cscWireDigi.input = ""
-    analyzer.simTrackMatching.cscCLCT.input = ""
-    analyzer.simTrackMatching.cscALCT.input = ""
-    analyzer.simTrackMatching.cscLCT.input = ""
-    analyzer.simTrackMatching.cscMPLCT.input = ""
-    analyzer.simTrackMatching.tfTrack.input = ""
-    analyzer.simTrackMatching.tfCand.input = ""
-    analyzer.simTrackMatching.gmtRegCand.input = ""
-    analyzer.simTrackMatching.gmtCand.input = ""
-    analyzer.simTrackMatching.l1Extra.input = ""
+def upToL1Collections(analyzer):
+    analyzer = noRecoCollections(analyzer)
+    analyzer = noTrackCollections(analyzer)
     return analyzer
 
+def upToRecoCollections(analyzer):
+    analyzer = noTrackCollections(analyzer)
+    return analyzer
