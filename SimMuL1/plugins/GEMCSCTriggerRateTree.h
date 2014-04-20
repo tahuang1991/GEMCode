@@ -242,6 +242,10 @@ class GEMCSCTriggerRateTree : public edm::EDAnalyzer
   int minBXTFCand_;
   int maxBXTFCand_;
 
+  int verboseGMTRegCand_;
+  int minBXGMTRegCand_;
+  int maxBXGMTRegCand_;
+
   int verboseGMTCand_;
   int minBXGMTCand_;
   int maxBXGMTCand_;
