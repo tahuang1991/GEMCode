@@ -38,6 +38,11 @@ GEMCSCTriggerRateTree::GEMCSCTriggerRateTree(const edm::ParameterSet& iConfig):
   minBXTFCand_ = tfCand.getParameter<int>("minBX");
   maxBXTFCand_ = tfCand.getParameter<int>("maxBX");
 
+  auto gmtRegCand = simTrackMatching.getParameter<edm::ParameterSet>("gmtRegCand");
+  verboseGMTRegCand_ = gmtRegCand.getParameter<int>("verbose");
+  minBXGMTRegCand_ = gmtRegCand.getParameter<int>("minBX");
+  maxBXGMTRegCand_ = gmtRegCand.getParameter<int>("maxBX");
+
   auto gmtCand = simTrackMatching.getParameter<edm::ParameterSet>("gmtCand");
   verboseGMTCand_ = gmtCand.getParameter<int>("verbose");
   minBXGMTCand_ = gmtCand.getParameter<int>("minBX");
@@ -363,7 +368,7 @@ GEMCSCTriggerRateTree::analyze(const edm::Event& iEvent, const edm::EventSetup& 
   analyzeLCTRate(iEvent);
   analyzeMPCLCTRate(iEvent);
   analyzeTFTrackRate(iEvent);
-  //  analyzeTFCandRate(iEvent);
+  analyzeTFCandRate(iEvent);
   //  analyzeGMTRegCandRate(iEvent);
   //  analyzeGMTCandRate(iEvent);
 }
@@ -899,7 +904,7 @@ GEMCSCTriggerRateTree::analyzeGMTRegCandRate(const edm::Event& iEvent, int type)
   }
   
   for (auto trk = collection.begin(); trk != collection.end(); trk++) {
-    if (trk->bx() < minBXGMTCand_ or trk->bx() > maxBXGMTCand_) continue;
+    if (trk->bx() < minBXGMTRegCand_ or trk->bx() > maxBXGMTRegCand_) continue;
     //double sign_eta = ( (trk->eta_packed() & 0x20) == 0) ? 1.:-1;
     MatchCSCMuL1::GMTREGCAND myGMTREGCand;
     myGMTREGCand.init( &*trk , muScales, muPtScale);
@@ -944,7 +949,7 @@ GEMCSCTriggerRateTree::analyzeGMTRegCandRate(const edm::Event& iEvent, int type)
       if (id.station()==4 and id.ring()==2) gmtregcand_.hasME42 = 1;
     }
 
-//     if (verboseGMTCand_){
+//     if (verboseGMTRegCand_){
 //       std::cout << "------------------------------------------------------------------------------" << std::endl
 //                 << "Track " << trk - collection.begin() << " information" << std::endl
 //                 << "bx " << gmtregcand_.bx << ", pt " << gmtregcand_.pt << ", eta " << gmtregcand_.eta << ", phi " << gmtregcand_.phi << std::endl
