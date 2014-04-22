@@ -82,9 +82,6 @@ process = customise_csc_L1Stubs(process)
 ## GEM-CSC emulator
 from SLHCUpgradeSimulations.Configuration.gemCustoms import customise_L1Emulator as customise_L1EmulatorGEM
 process = customise_L1EmulatorGEM(process, ptdphi)
-tmb = process.simCscTriggerPrimitiveDigis.tmbSLHC
-tmb.me11ILT.runME11ILT = cms.untracked.bool(False)
-tmb.me11ILT.printAvailablePads = cms.untracked.bool(False)
 
 ## RPC-CSC emulator
 from SLHCUpgradeSimulations.Configuration.rpcCustoms import customise_L1Emulator as customise_L1EmulatorRPC
