@@ -59,10 +59,6 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100000) )
 
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 
-## GEM geometry customization
-from Geometry.GEMGeometry.gemGeometryCustoms import custom_GE11_6partitions_v1
-process = custom_GE11_6partitions_v1(process)
-
 ## GEM digitizer
 from SimMuon.GEMDigitizer.customizeGEMDigi import customize_digi_addGEM_muon_only
 process = customize_digi_addGEM_muon_only(process)
