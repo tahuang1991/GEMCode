@@ -59,10 +59,6 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100000) )
 
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 
-## GEM geometry customization
-from Geometry.GEMGeometry.gemGeometryCustoms import custom_GE11_6partitions_v1
-process = custom_GE11_6partitions_v1(process)
-
 ## GEM digitizer
 from SimMuon.GEMDigitizer.customizeGEMDigi import customize_digi_addGEM_muon_only
 process = customize_digi_addGEM_muon_only(process)
@@ -82,9 +78,6 @@ process = customise_csc_L1Stubs(process)
 ## GEM-CSC emulator
 from SLHCUpgradeSimulations.Configuration.gemCustoms import customise_L1Emulator as customise_L1EmulatorGEM
 process = customise_L1EmulatorGEM(process, ptdphi)
-tmb = process.simCscTriggerPrimitiveDigis.tmbSLHC
-tmb.me11ILT.runME11ILT = cms.untracked.bool(False)
-tmb.me11ILT.printAvailablePads = cms.untracked.bool(False)
 
 ## RPC-CSC emulator
 from SLHCUpgradeSimulations.Configuration.rpcCustoms import customise_L1Emulator as customise_L1EmulatorRPC
