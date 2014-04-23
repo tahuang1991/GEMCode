@@ -770,6 +770,7 @@ GEMCSCTriggerRateTree::analyzeTFTrackRate(const edm::Event& iEvent)
     tftrack_.pt = myTFTrk.pt;
     tftrack_.eta = myTFTrk.eta;
     tftrack_.phi = myTFTrk.phi;
+    if (tftrack_.pt < 0.001) continue;
     
     for (auto detUnitIt = trk->second.begin(); detUnitIt != trk->second.end(); detUnitIt++) {
       const CSCDetId& id = (*detUnitIt).first;
@@ -849,7 +850,8 @@ GEMCSCTriggerRateTree::analyzeTFCandRate(const edm::Event& iEvent)
     tfcand_.pt = myTFCand.tftrack->pt;
     tfcand_.eta = myTFCand.tftrack->eta;
     tfcand_.phi = myTFCand.tftrack->phi;
- 
+    if (tfcand_.pt < 0.001) continue;
+    
     // stub analysis
     for (auto id : myTFCand.tftrack->trgids){
       if (id.station()==1 and id.ring()==4) tfcand_.hasME1a = 1;
@@ -949,6 +951,7 @@ GEMCSCTriggerRateTree::analyzeGMTRegCandRate(const edm::Event& iEvent, int type)
     if (type == gmtRegCand::DT)   gmtregcand_.isDT   = 1;
     if (type == gmtRegCand::RPCb) gmtregcand_.isRPCb = 1;
     if (type == gmtRegCand::RPCf) gmtregcand_.isRPCf = 1;
+    if (gmtregcand_.pt < 0.001) continue;
     
     // stub analysis
     for (auto id : myGMTREGCand.ids){
@@ -1080,6 +1083,8 @@ GEMCSCTriggerRateTree::analyzeGMTCandRate(const edm::Event& iEvent)
       gmtcand_.eta = myGMTCand.eta;
       gmtcand_.phi = myGMTCand.phi;
       gmtcand_.quality = trk->quality();
+      if (gmtcand_.pt < 0.001) continue;
+      
       if (trk->useInSingleMuonTrigger()) gmtcand_.isGoodSingleMuon = 1;
       if (trk->useInSingleMuonTrigger()) gmtcand_.isGoodDoubleMuon = 1;
       auto trgids(myGMTCand.ids);
