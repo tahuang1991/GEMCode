@@ -37,7 +37,7 @@ class SimHitPlotter():
     self.sel = [muon,nonMuon,all]
     self.pre = ["Muon","Non muon","All"]
     self.suff = ["_muon","_nonmuon","_all"]
-    self.geometry = "custom_GE11_6partitions_v1"
+    self.geometry = "custom_GE11_9-10partitions_v1"
 
     
 class DigiPlotter():
