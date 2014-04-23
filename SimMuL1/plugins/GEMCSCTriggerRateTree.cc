@@ -28,15 +28,25 @@ GEMCSCTriggerRateTree::GEMCSCTriggerRateTree(const edm::ParameterSet& iConfig):
   minBXMPLCT_ = cscMPLCT.getParameter<int>("minBX");
   maxBXMPLCT_ = cscMPLCT.getParameter<int>("maxBX");
   
-  auto tfTrack = simTrackMatching.getParameter<edm::ParameterSet>("tfTrack");
-  verboseTFTrack_ = tfTrack.getParameter<int>("verbose");
-  minBXTFTrack_ = tfTrack.getParameter<int>("minBX");
-  maxBXTFTrack_ = tfTrack.getParameter<int>("maxBX");
+  auto cscTfTrack = simTrackMatching.getParameter<edm::ParameterSet>("cscTfTrack");
+  verboseCSCTFTrack_ = cscTfTrack.getParameter<int>("verbose");
+  minBXCSCTFTrack_ = cscTfTrack.getParameter<int>("minBX");
+  maxBXCSCTFTrack_ = cscTfTrack.getParameter<int>("maxBX");
   
-  auto tfCand = simTrackMatching.getParameter<edm::ParameterSet>("tfCand");
-  verboseTFCand_ = tfCand.getParameter<int>("verbose");
-  minBXTFCand_ = tfCand.getParameter<int>("minBX");
-  maxBXTFCand_ = tfCand.getParameter<int>("maxBX");
+  auto cscTfCand = simTrackMatching.getParameter<edm::ParameterSet>("cscTfCand");
+  verboseCSCTFCand_ = cscTfCand.getParameter<int>("verbose");
+  minBXCSCTFCand_ = cscTfCand.getParameter<int>("minBX");
+  maxBXCSCTFCand_ = cscTfCand.getParameter<int>("maxBX");
+
+  auto rpcfTfCand = simTrackMatching.getParameter<edm::ParameterSet>("rpcfTfCand");
+  verboseRPCfTFCand_ = rpcfTfCand.getParameter<int>("verbose");
+  minBXRPCfTFCand_ = rpcfTfCand.getParameter<int>("minBX");
+  maxBXRPCfTFCand_ = rpcfTfCand.getParameter<int>("maxBX");
+
+  auto rpcbTfCand = simTrackMatching.getParameter<edm::ParameterSet>("rpcbTfCand");
+  verboseRPCbTFCand_ = rpcbTfCand.getParameter<int>("verbose");
+  minBXRPCbTFCand_ = rpcbTfCand.getParameter<int>("minBX");
+  maxBXRPCbTFCand_ = rpcbTfCand.getParameter<int>("maxBX");
 
   auto gmtRegCand = simTrackMatching.getParameter<edm::ParameterSet>("gmtRegCand");
   verboseGMTRegCand_ = gmtRegCand.getParameter<int>("verbose");
@@ -47,6 +57,11 @@ GEMCSCTriggerRateTree::GEMCSCTriggerRateTree(const edm::ParameterSet& iConfig):
   verboseGMTCand_ = gmtCand.getParameter<int>("verbose");
   minBXGMTCand_ = gmtCand.getParameter<int>("minBX");
   maxBXGMTCand_ = gmtCand.getParameter<int>("maxBX");
+
+  auto l1Extra = simTrackMatching.getParameter<edm::ParameterSet>("l1Extra");
+  verboseL1Extra_ = l1Extra.getParameter<int>("verbose");
+  minBXL1Extra_ = l1Extra.getParameter<int>("minBX");
+  maxBXL1Extra_ = l1Extra.getParameter<int>("maxBX");
 
   edm::ParameterSet srLUTset = CSCTFSPset.getParameter<edm::ParameterSet>("SRLUT");
 
