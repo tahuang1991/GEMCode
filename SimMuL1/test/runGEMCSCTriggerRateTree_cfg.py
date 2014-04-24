@@ -86,7 +86,7 @@ process.GEMCSCTriggerRateTree = cms.EDAnalyzer("GEMCSCTriggerRateTree",
 )
 
 ## output
-outputFileName = 'hp_' + sample + "_" + cmssw + "_" + globalTag + "_pu%d"%(pileup) + '_w3' + suffix + '.root'
+outputFileName = 'hp_' + sample + "_" + cmssw + "_" + globalTag + "_pu%d"%(pileup) + '_w3_' + suffix + '.root'
 print "outputFile:", outputFileName
 
 process.TFileService = cms.Service("TFileService",

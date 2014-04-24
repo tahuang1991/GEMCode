@@ -288,7 +288,7 @@ public:
     std::vector < std::pair<float, float> > trgetaphis;
     std::vector < csctf::TrackStub > trgstubs;
     std::vector < MPLCT* > mplcts;
-    std::vector < CSCDetId > ids; // chamber ids
+    std::vector < CSCDetId > ids; // chamber ids -- is this even used?
     unsigned phi_packed;
     unsigned eta_packed;
     unsigned pt_packed;
@@ -297,6 +297,7 @@ public:
     double eta;
     double pt;
     double dr;
+    unsigned nTFStubs;
     bool deltaOk1;
     bool deltaOk2;
     bool deltaOkME1;
@@ -367,6 +368,7 @@ public:
     GMTREGCAND* regcand;
     GMTREGCAND* regcand_rpc;
     std::vector< CSCDetId > ids; // chamber ids
+    std::vector<DetId> detIds; // contains all detids
     double phi;
     double eta;
     double pt;
