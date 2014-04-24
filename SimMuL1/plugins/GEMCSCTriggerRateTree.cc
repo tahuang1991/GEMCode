@@ -1,5 +1,7 @@
 #include "GEMCode/SimMuL1/plugins/GEMCSCTriggerRateTree.h"
 
+using namespace std;
+
 GEMCSCTriggerRateTree::GEMCSCTriggerRateTree(const edm::ParameterSet& iConfig):
   simTrackMatching(iConfig.getParameter<edm::ParameterSet>("simTrackMatching")),
   CSCTFSPset(iConfig.getParameter<edm::ParameterSet>("sectorProcessor")),
@@ -8,57 +10,71 @@ GEMCSCTriggerRateTree::GEMCSCTriggerRateTree(const edm::ParameterSet& iConfig):
   centralBxOnlyGMT_(iConfig.getUntrackedParameter< bool >("centralBxOnlyGMT",false)),
   doSelectEtaForGMTRates_(iConfig.getUntrackedParameter< bool >("doSelectEtaForGMTRates",false))
 {
+  // stubs
   auto cscALCT = simTrackMatching.getParameter<edm::ParameterSet>("cscALCT");
+  inputALCT_ = cscALCT.getParameter<edm::InputTag>("input");
   verboseALCT_ = cscALCT.getParameter<int>("verbose");
   minBXALCT_ = cscALCT.getParameter<int>("minBX");
   maxBXALCT_ = cscALCT.getParameter<int>("maxBX");
 
   auto cscCLCT = simTrackMatching.getParameter<edm::ParameterSet>("cscCLCT");
+  inputCLCT_ = cscCLCT.getParameter<edm::InputTag>("input");
   verboseCLCT_ = cscCLCT.getParameter<int>("verbose");
   minBXCLCT_ = cscCLCT.getParameter<int>("minBX");
   maxBXCLCT_ = cscCLCT.getParameter<int>("maxBX");
 
   auto cscLCT = simTrackMatching.getParameter<edm::ParameterSet>("cscLCT");
+  inputLCT_ = cscLCT.getParameter<edm::InputTag>("input");
   verboseLCT_ = cscLCT.getParameter<int>("verbose");
   minBXLCT_ = cscLCT.getParameter<int>("minBX");
   maxBXLCT_ = cscLCT.getParameter<int>("maxBX");
 
   auto cscMPLCT = simTrackMatching.getParameter<edm::ParameterSet>("cscMPLCT");
+  inputMPLCT_ = cscMPLCT.getParameter<edm::InputTag>("input");
   verboseMPLCT_ = cscMPLCT.getParameter<int>("verbose");
   minBXMPLCT_ = cscMPLCT.getParameter<int>("minBX");
   maxBXMPLCT_ = cscMPLCT.getParameter<int>("maxBX");
   
+  // TFTrack
   auto cscTfTrack = simTrackMatching.getParameter<edm::ParameterSet>("cscTfTrack");
+  inputCSCTFTrack_ = cscTfTrack.getParameter<edm::InputTag>("input");
   verboseCSCTFTrack_ = cscTfTrack.getParameter<int>("verbose");
   minBXCSCTFTrack_ = cscTfTrack.getParameter<int>("minBX");
   maxBXCSCTFTrack_ = cscTfTrack.getParameter<int>("maxBX");
   
+  // TFCand
   auto cscTfCand = simTrackMatching.getParameter<edm::ParameterSet>("cscTfCand");
+  inputCSCTFCand_ = cscTfCand.getParameter<edm::InputTag>("input");
   verboseCSCTFCand_ = cscTfCand.getParameter<int>("verbose");
   minBXCSCTFCand_ = cscTfCand.getParameter<int>("minBX");
   maxBXCSCTFCand_ = cscTfCand.getParameter<int>("maxBX");
 
   auto rpcfTfCand = simTrackMatching.getParameter<edm::ParameterSet>("rpcfTfCand");
+  inputRPCfTFCand_ = rpcfTfCand.getParameter<edm::InputTag>("input");
   verboseRPCfTFCand_ = rpcfTfCand.getParameter<int>("verbose");
   minBXRPCfTFCand_ = rpcfTfCand.getParameter<int>("minBX");
   maxBXRPCfTFCand_ = rpcfTfCand.getParameter<int>("maxBX");
 
   auto rpcbTfCand = simTrackMatching.getParameter<edm::ParameterSet>("rpcbTfCand");
+  inputRPCbTFCand_ = rpcbTfCand.getParameter<edm::InputTag>("input");
   verboseRPCbTFCand_ = rpcbTfCand.getParameter<int>("verbose");
   minBXRPCbTFCand_ = rpcbTfCand.getParameter<int>("minBX");
   maxBXRPCbTFCand_ = rpcbTfCand.getParameter<int>("maxBX");
 
+  // GMT
   auto gmtRegCand = simTrackMatching.getParameter<edm::ParameterSet>("gmtRegCand");
   verboseGMTRegCand_ = gmtRegCand.getParameter<int>("verbose");
   minBXGMTRegCand_ = gmtRegCand.getParameter<int>("minBX");
   maxBXGMTRegCand_ = gmtRegCand.getParameter<int>("maxBX");
 
   auto gmtCand = simTrackMatching.getParameter<edm::ParameterSet>("gmtCand");
+  inputGMTCand_ = gmtCand.getParameter<edm::InputTag>("input"); 
   verboseGMTCand_ = gmtCand.getParameter<int>("verbose");
   minBXGMTCand_ = gmtCand.getParameter<int>("minBX");
   maxBXGMTCand_ = gmtCand.getParameter<int>("maxBX");
 
   auto l1Extra = simTrackMatching.getParameter<edm::ParameterSet>("l1Extra");
+  inputL1Extra_ = l1Extra.getParameter<edm::InputTag>("input"); 
   verboseL1Extra_ = l1Extra.getParameter<int>("verbose");
   minBXL1Extra_ = l1Extra.getParameter<int>("minBX");
   maxBXL1Extra_ = l1Extra.getParameter<int>("maxBX");
@@ -264,6 +280,8 @@ GEMCSCTriggerRateTree::intializeTree()
   gmtregcand_.eta = -999;
   gmtregcand_.phi = -999;
   gmtregcand_.quality = -999;
+  gmtregcand_.nStubs = 0;
+  gmtregcand_.nDetIds = 0;
   gmtregcand_.hasME1a = 0;
   gmtregcand_.hasME1b = 0; 
   gmtregcand_.hasME12 = 0; 
@@ -295,6 +313,8 @@ GEMCSCTriggerRateTree::intializeTree()
   gmtcand_.eta = -999;
   gmtcand_.phi = -999;
   gmtcand_.quality = -999;
+  gmtcand_.nStubs = 0;
+  gmtcand_.nDetIds = 0;
   gmtcand_.hasME1a = 0;
   gmtcand_.hasME1b = 0; 
   gmtcand_.hasME12 = 0; 
@@ -328,12 +348,30 @@ GEMCSCTriggerRateTree::analyze(const edm::Event& iEvent, const edm::EventSetup& 
   // need to reset here
   intializeTree();
 
+  // clear the vectors
+  rtTFTracks_.clear();
+  rtTFCands_.clear();
+  rtGmtRegCscCands_.clear();
+  rtGmtRegRpcfCands_.clear();
+  rtGmtRegRpcbCands_.clear();
+  rtGmtRegDtCands_.clear();
+  rtGmtCands_.clear();
+  rtL1Extras_.clear();
+
+  l1GmtCands_.clear();
+  l1GmtfCands_.clear();
+  l1GmtCSCCands_.clear();
+  l1GmtRPCfCands_.clear();
+  l1GmtRPCbCands_.clear();
+  l1GmtDTCands_.clear();
+  l1GmtCSCCandsInBXs_.clear();
+
 //   // DT primitives for input to TF for debugging
 //   iEvent.getByLabel("simDtTriggerPrimitiveDigis", dttrig_);
 //   const L1MuDTChambPhContainer* dttrigs = dttrig_.product();
 
   // GMT readout collection
-  iEvent.getByLabel("simGmtDigis", hl1GmtCands_);
+  iEvent.getByLabel(inputGMTCand_, hl1GmtCands_);
 
   if (centralBxOnlyGMT_){
     // Get GMT candidates from central bunch crossing only
@@ -384,8 +422,8 @@ GEMCSCTriggerRateTree::analyze(const edm::Event& iEvent, const edm::EventSetup& 
   analyzeMPCLCTRate(iEvent);
   analyzeTFTrackRate(iEvent);
   analyzeTFCandRate(iEvent);
-  analyzeGMTRegCandRate(iEvent);
-  //  analyzeGMTCandRate(iEvent);
+//   analyzeGMTRegCandRate(iEvent);
+//   analyzeGMTCandRate(iEvent);
 }
 
 // ================================================================================================
@@ -532,6 +570,8 @@ GEMCSCTriggerRateTree::bookGMTRegionalTree()
   gmtregcand_tree_->Branch("eta",&gmtregcand_.eta);
   gmtregcand_tree_->Branch("phi",&gmtregcand_.phi);
   gmtregcand_tree_->Branch("quality",&gmtregcand_.quality);
+  gmtregcand_tree_->Branch("nStubs",&gmtregcand_.nStubs);
+  gmtregcand_tree_->Branch("nDetIds",&gmtregcand_.nDetIds);
   gmtregcand_tree_->Branch("hasME1a",&gmtregcand_.hasME1a);
   gmtregcand_tree_->Branch("hasME1b",&gmtregcand_.hasME1b);
   gmtregcand_tree_->Branch("hasME12",&gmtregcand_.hasME12);
@@ -574,6 +614,8 @@ GEMCSCTriggerRateTree::bookGMTCandTree()
   gmtcand_tree_->Branch("eta",&gmtcand_.eta);
   gmtcand_tree_->Branch("phi",&gmtcand_.phi);
   gmtcand_tree_->Branch("quality",&gmtcand_.quality);
+  gmtcand_tree_->Branch("nStubs",&gmtcand_.nStubs);
+  gmtcand_tree_->Branch("nDetIds",&gmtcand_.nDetIds);
   gmtcand_tree_->Branch("hasME1a",&gmtcand_.hasME1a);
   gmtcand_tree_->Branch("hasME1b",&gmtcand_.hasME1b);
   gmtcand_tree_->Branch("hasME12",&gmtcand_.hasME12);
@@ -605,7 +647,7 @@ void
 GEMCSCTriggerRateTree::analyzeALCTRate(const edm::Event& iEvent)
 {
   edm::Handle< CSCALCTDigiCollection > halcts;
-  iEvent.getByLabel("simCscTriggerPrimitiveDigis",  halcts);
+  iEvent.getByLabel(inputALCT_,  halcts);
   const CSCALCTDigiCollection* alcts = halcts.product();
   
   for (CSCALCTDigiCollection::DigiRangeIterator  adetUnitIt = alcts->begin(); adetUnitIt != alcts->end(); ++adetUnitIt)
@@ -641,7 +683,7 @@ void
 GEMCSCTriggerRateTree::analyzeCLCTRate(const edm::Event& iEvent)
 {
   edm::Handle< CSCCLCTDigiCollection > hclcts;
-  iEvent.getByLabel("simCscTriggerPrimitiveDigis",  hclcts);
+  iEvent.getByLabel(inputCLCT_,  hclcts);
   const CSCCLCTDigiCollection* clcts = hclcts.product();
 
   for (CSCCLCTDigiCollection::DigiRangeIterator  adetUnitIt = clcts->begin(); adetUnitIt != clcts->end(); ++adetUnitIt)
@@ -678,7 +720,7 @@ void
 GEMCSCTriggerRateTree::analyzeLCTRate(const edm::Event& iEvent)
 {
   edm::Handle< CSCCorrelatedLCTDigiCollection > lcts_tmb;
-  iEvent.getByLabel("simCscTriggerPrimitiveDigis",  lcts_tmb);
+  iEvent.getByLabel(inputLCT_,  lcts_tmb);
   const CSCCorrelatedLCTDigiCollection* lcts = lcts_tmb.product();
 
   for (CSCCorrelatedLCTDigiCollection::DigiRangeIterator detUnitIt = lcts->begin(); detUnitIt != lcts->end(); detUnitIt++) 
@@ -714,7 +756,7 @@ void
 GEMCSCTriggerRateTree::analyzeMPCLCTRate(const edm::Event& iEvent)
 {
   edm::Handle< CSCCorrelatedLCTDigiCollection > lcts_mpc;
-  iEvent.getByLabel("simCscTriggerPrimitiveDigis", "MPCSORTED", lcts_mpc);
+  iEvent.getByLabel(inputMPLCT_,  lcts_mpc);
   const CSCCorrelatedLCTDigiCollection* mplcts = lcts_mpc.product();
 
   for (auto detUnitIt = mplcts->begin(); detUnitIt != mplcts->end(); detUnitIt++) 
@@ -751,10 +793,17 @@ GEMCSCTriggerRateTree::analyzeMPCLCTRate(const edm::Event& iEvent)
 
 // ================================================================================================
 void  
+GEMCSCTriggerRateTree::analyzeTFTrackRate(const edm::Event& iEvent, int type)
+{
+
+}
+
+// ================================================================================================
+void  
 GEMCSCTriggerRateTree::analyzeTFTrackRate(const edm::Event& iEvent)
 {
   edm::Handle< L1CSCTrackCollection > hl1Tracks;
-  iEvent.getByLabel("simCsctfTrackDigis",hl1Tracks);
+  iEvent.getByLabel(inputCSCTFTrack_,hl1Tracks);
   const L1CSCTrackCollection* l1Tracks = hl1Tracks.product();
 
   for (auto trk = l1Tracks->begin(); trk != l1Tracks->end(); trk++) {
@@ -771,7 +820,7 @@ GEMCSCTriggerRateTree::analyzeTFTrackRate(const edm::Event& iEvent)
     tftrack_.eta = myTFTrk.eta;
     tftrack_.phi = myTFTrk.phi;
     if (tftrack_.pt < 0.001) continue;
-    
+
     for (auto detUnitIt = trk->second.begin(); detUnitIt != trk->second.end(); detUnitIt++) {
       const CSCDetId& id = (*detUnitIt).first;
       auto range = (*detUnitIt).second;
@@ -781,6 +830,7 @@ GEMCSCTriggerRateTree::analyzeTFTrackRate(const edm::Event& iEvent)
         myTFTrk.trgids.push_back(id);
         myTFTrk.trgetaphis.push_back(intersectionEtaPhi(id,(*digiIt).getKeyWG(),(*digiIt).getStrip()));
         myTFTrk.trgstubs.push_back(buildTrackStub((*digiIt),id));
+
         // stub analysis
         if (id.station()==1 and id.ring()==4) tftrack_.hasME1a = 1;
         if (id.station()==1 and id.ring()==1) tftrack_.hasME1b = 1;
@@ -795,11 +845,23 @@ GEMCSCTriggerRateTree::analyzeTFTrackRate(const edm::Event& iEvent)
       }
     }
 
+    // nstubs
+    const int nTrgDigis(myTFTrk.trgdigis.size());
+    const int nTrigIds(myTFTrk.trgids.size());
+    const int nTrgEtaPhis(myTFTrk.trgetaphis.size());
+    const int nTrgStubs(myTFTrk.trgstubs.size());
+
+    if (min({nTrgDigis, nTrigIds, nTrgEtaPhis, nTrgStubs}) != 
+	min({nTrgDigis, nTrigIds, nTrgEtaPhis, nTrgStubs})){
+      cout << "Weird CSC TFTrack! " << endl;
+    }
+
     if (verboseCSCTFTrack_){
       std::cout << "------------------------------------------------------------------------------" << std::endl
                 << "TFTrack " << trk - l1Tracks->begin() << " information" << std::endl
                 << "bx " << tftrack_.bx << ", pt " << tftrack_.pt << ", eta " << tftrack_.eta << ", phi " << tftrack_.phi << std::endl
-                << "Summary of endcap hits: " << myTFTrk.trgstubs.size() << " stubs in " << myTFTrk.trgids.size() << " detIds " << std::endl
+		<< "Summary of endcap hits: nTrgDigis " << nTrgDigis << ", nTrigIds " << nTrigIds 
+		<< ", nTrgEtaPhis " << nTrgEtaPhis << ", nTrgStubs " << nTrgStubs << endl
                 << "Station 0: " << std::endl << "\tME0 " << tftrack_.hasME0 << std::endl
                 << "Station 1: " << std::endl << "\tME1a " << tftrack_.hasME1a << "\tME1b " << tftrack_.hasME1b << "\tME12 " << tftrack_.hasME12 
                 << "\tME13 " << tftrack_.hasME13 << "\tGE11 " << tftrack_.hasGE11 << "\tRE12 " << tftrack_.hasRE12 << "\tRE13 " << tftrack_.hasRE13 << std::endl
@@ -823,7 +885,7 @@ void
 GEMCSCTriggerRateTree::analyzeTFCandRate(const edm::Event& iEvent)
 {
   edm::Handle< std::vector< L1MuRegionalCand > > hl1TfCands;
-  iEvent.getByLabel("simCsctfDigis", "CSC", hl1TfCands);
+  iEvent.getByLabel(inputCSCTFCand_, hl1TfCands);
   const std::vector< L1MuRegionalCand > *l1TfCands = hl1TfCands.product();
 
   for (auto trk = l1TfCands->begin(); trk != l1TfCands->end(); trk++){
@@ -926,19 +988,31 @@ GEMCSCTriggerRateTree::analyzeGMTRegCandRate(const edm::Event& iEvent, int type)
     MatchCSCMuL1::GMTREGCAND myGMTREGCand;
     myGMTREGCand.init( &*trk , muScales, muPtScale);
     myGMTREGCand.tfcand = nullptr;
+
+    if (verboseGMTRegCand_){
+      cout << "track " << trk - collection.begin() << endl 
+	   << "\tnTFCands " << rtTFCands_.size() << endl;
+    }
     for (unsigned i=0; i< rtTFCands_.size(); i++) {
+      // check if this TFCand has stubs or ids
+      int nIds(rtTFCands_[i].ids.size());
+      int nStubs(rtTFCands_[i].nTFStubs);
+      if (nIds == 0 or  nStubs == 0) {
+	if (verboseGMTRegCand_) cout << "nIds " << nIds << " nStubs " << nStubs << endl;
+	continue;
+      }
+      // check if GMTRegCand is compatible 
       if (trk->bx()          != rtTFCands_[i].l1cand->bx()         or
           trk->phi_packed()  != rtTFCands_[i].l1cand->phi_packed() or
-          trk->eta_packed()  != rtTFCands_[i].l1cand->eta_packed()) continue;
+          trk->eta_packed()  != rtTFCands_[i].l1cand->eta_packed()) {
+	if (verboseGMTRegCand_) cout << "bx, eta or phi is incompatible " << endl;
+	continue;
+      }
       myGMTREGCand.tfcand = &(rtTFCands_[i]);
       myGMTREGCand.ids = rtTFCands_[i].ids;
-      myGMTREGCand.nTFStubs = rtTFCands_[i].nTFStubs;
+      myGMTREGCand.nTFStubs = nStubs;
       break;
     }
-    if (type == gmtRegCand::CSC)  rtGmtRegCscCands_.push_back(myGMTREGCand);
-    if (type == gmtRegCand::DT)   rtGmtRegDtCands_.push_back(myGMTREGCand);
-    if (type == gmtRegCand::RPCb) rtGmtRegRpcbCands_.push_back(myGMTREGCand);
-    if (type == gmtRegCand::RPCf) rtGmtRegRpcfCands_.push_back(myGMTREGCand);
 
     // analysis
     gmtregcand_.event = iEvent.id().event();
@@ -946,16 +1020,38 @@ GEMCSCTriggerRateTree::analyzeGMTRegCandRate(const edm::Event& iEvent, int type)
     gmtregcand_.pt = myGMTREGCand.pt;
     gmtregcand_.eta = myGMTREGCand.eta;
     gmtregcand_.phi = myGMTREGCand.phi;
+    gmtregcand_.nStubs = myGMTREGCand.tfcand->ids.size();
+    gmtregcand_.nDetIds = myGMTREGCand.tfcand->nTFStubs;
+    cout << "nStubs " << gmtregcand_.nStubs  << " detIds " << gmtregcand_.nDetIds << endl;
     gmtregcand_.quality = trk->quality();
-    if (gmtregcand_.pt < 0.001) continue;
+    if (gmtregcand_.pt < 0.001) {
+      if (verboseGMTRegCand_) cout << "strange track with extremely low pt" << endl;
+      continue;
+    }
 
-    if (type == gmtRegCand::CSC)  gmtregcand_.isCSC  = 1;
-    if (type == gmtRegCand::DT)   gmtregcand_.isDT   = 1;
-    if (type == gmtRegCand::RPCb) gmtregcand_.isRPCb = 1;
-    if (type == gmtRegCand::RPCf) gmtregcand_.isRPCf = 1;
-    if (gmtregcand_.pt < 0.001) continue;
-    
+    if (type == gmtRegCand::CSC) {
+      rtGmtRegCscCands_.push_back(myGMTREGCand);
+      gmtregcand_.isCSC  = 1;
+      if (verboseGMTRegCand_) cout << "isCSC"<<endl;
+    }
+    if (type == gmtRegCand::DT) {
+      rtGmtRegDtCands_.push_back(myGMTREGCand);
+      gmtregcand_.isDT   = 1;
+      if (verboseGMTRegCand_) cout << "isDT"<<endl;
+    }
+    if (type == gmtRegCand::RPCb) {
+      rtGmtRegRpcbCands_.push_back(myGMTREGCand);
+      gmtregcand_.isRPCb = 1;
+      if (verboseGMTRegCand_) cout << "isRPCb"<<endl;
+    }
+    if (type == gmtRegCand::RPCf) {
+      rtGmtRegRpcfCands_.push_back(myGMTREGCand);
+      gmtregcand_.isRPCf = 1;
+      if (verboseGMTRegCand_) cout << "isRPCf"<<endl;
+    }
+
     // stub analysis
+//     if (verboseGMTRegCand_) cout << "Nstubs " <<  myGMTREGCand.ids.size() << endl;
     for (auto id : myGMTREGCand.ids){
       if (id.station()==1 and id.ring()==4) gmtregcand_.hasME1a = 1;
       if (id.station()==1 and id.ring()==1) gmtregcand_.hasME1b = 1;
@@ -973,7 +1069,8 @@ GEMCSCTriggerRateTree::analyzeGMTRegCandRate(const edm::Event& iEvent, int type)
       std::cout << "------------------------------------------------------------------------------" << std::endl
                 << "GMTRegCand " << trk - collection.begin() << " information" << std::endl
                 << "bx " << gmtregcand_.bx << ", pt " << gmtregcand_.pt << ", eta " << gmtregcand_.eta << ", phi " << gmtregcand_.phi << std::endl
-                << "Summary of endcap hits: " << myGMTREGCand.tfcand->tftrack->trgstubs.size()
+                << "Summary of endcap hits: " << myGMTREGCand.tfcand->tftrack->trgids.size() << endl
+                << "Summary of endcap ids: " << myGMTREGCand.tfcand->tftrack->ids.size() 
                 << " stubs in " << myGMTREGCand.tfcand->tftrack->trgstubs.size() << " detIds " << std::endl
                 << "Station 0: " << std::endl << "\tME0 " << gmtregcand_.hasME0 << std::endl
                 << "Station 1: " << std::endl << "\tME1a " << gmtregcand_.hasME1a << "\tME1b " << gmtregcand_.hasME1b << "\tME12 " << gmtregcand_.hasME12 
@@ -1004,6 +1101,15 @@ GEMCSCTriggerRateTree::analyzeGMTCandRate(const edm::Event& iEvent)
     const std::vector<L1MuRegionalCand> DTCands(rItr->getDTBXCands());
     const std::vector<L1MuRegionalCand> RPCfCands(rItr->getFwdRPCCands());
     const std::vector<L1MuRegionalCand> RPCbCands(rItr->getBrlRPCCands());
+
+    if (verboseGMTCand_){
+      std::cout << "record " << rItr - gmt_records.begin() << endl 
+		<< "\tnGMTCands " << GMTCands.size() << endl
+		<< "\tnCSCCands " << CSCCands.size() << endl
+		<< "\tnDTCands " << DTCands.size() << endl
+		<< "\tnRPCfCands " << RPCfCands.size() << endl
+		<< "\tnRPCbCands " << RPCbCands.size() << endl;
+    }
     
     for (auto trk = GMTCands.begin(); trk != GMTCands.end(); ++trk){
       if(trk->empty()) continue;
@@ -1024,7 +1130,9 @@ GEMCSCTriggerRateTree::analyzeGMTCandRate(const edm::Event& iEvent)
       if (trk->isFwd() && ( trk->isMatchedCand() or !trk->isRPC())) {
         const L1MuRegionalCand rcsc(CSCCands[trk->getDTCSCIndex()]);
         unsigned my_i = 999;
+	std::cout << "number of regional candidates " << rtGmtRegCscCands_.size() << std::endl;
         for (unsigned i=0; i< rtGmtRegCscCands_.size(); i++) {
+	  //  std::cout << i << ": regional dataword " << rcsc.getDataWord() << " gmt data word " << rtGmtRegCscCands_[i].l1reg->getDataWord() <<std::endl;
           if (rcsc.getDataWord()!=rtGmtRegCscCands_[i].l1reg->getDataWord()) continue;
           my_i = i;
           break;
