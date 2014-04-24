@@ -758,7 +758,7 @@ GEMCSCTriggerRateTree::analyzeTFTrackRate(const edm::Event& iEvent)
   const L1CSCTrackCollection* l1Tracks = hl1Tracks.product();
 
   for (auto trk = l1Tracks->begin(); trk != l1Tracks->end(); trk++) {
-    if (trk->first.bx() < minBXTFTrack_ or trk->first.bx() > maxBXTFTrack_) continue;
+    if (trk->first.bx() < minBXCSCTFTrack_ or trk->first.bx() > maxBXCSCTFTrack_) continue;
     const bool endcapOnly(true);
     if (endcapOnly and abs(trk->first.endcap())!=1) continue;
     
@@ -795,7 +795,7 @@ GEMCSCTriggerRateTree::analyzeTFTrackRate(const edm::Event& iEvent)
       }
     }
 
-    if (verboseTFTrack_){
+    if (verboseCSCTFTrack_){
       std::cout << "------------------------------------------------------------------------------" << std::endl
                 << "Track " << trk - l1Tracks->begin() << " information" << std::endl
                 << "bx " << tftrack_.bx << ", pt " << tftrack_.pt << ", eta " << tftrack_.eta << ", phi " << tftrack_.phi << std::endl
@@ -827,7 +827,7 @@ GEMCSCTriggerRateTree::analyzeTFCandRate(const edm::Event& iEvent)
   const std::vector< L1MuRegionalCand > *l1TfCands = hl1TfCands.product();
 
   for (auto trk = l1TfCands->begin(); trk != l1TfCands->end(); trk++){
-    if ( trk->bx() < minBXTFCand_ or trk->bx() > maxBXTFCand_ ) continue;
+    if ( trk->bx() < minBXCSCTFCand_ or trk->bx() > maxBXCSCTFCand_ ) continue;
     //    const int sign_eta(((trk->eta_packed() & 0x20) == 0) ? 1.:-1);
     MatchCSCMuL1::TFCAND myTFCand;
     myTFCand.init( &*trk , ptLUT, muScales, muPtScale);
@@ -866,7 +866,7 @@ GEMCSCTriggerRateTree::analyzeTFCandRate(const edm::Event& iEvent)
       if (id.station()==4 and id.ring()==2) tfcand_.hasME42 = 1;
     }
 
-    if (verboseTFCand_){
+    if (verboseCSCTFCand_){
       std::cout << "------------------------------------------------------------------------------" << std::endl
                 << "Track " << trk - l1TfCands->begin() << " information" << std::endl
                 << "bx " << tfcand_.bx << ", pt " << tfcand_.pt << ", eta " << tfcand_.eta << ", phi " << tfcand_.phi << std::endl
