@@ -294,7 +294,7 @@ class GEMCSCTriggerRateTree : public edm::EDAnalyzer
   std::vector<MatchCSCMuL1::GMTCAND> rtGmtCands_;
   std::vector<MatchCSCMuL1::L1EXTRA> rtL1Extras_;
 
-  edm::Handle< L1MuGMTReadoutCollection > hl1GmtCands_;
+  edm::Handle<L1MuGMTReadoutCollection> hl1GmtCands_;
   edm::Handle<L1MuDTChambPhContainer> dttrig_;
   std::vector<L1MuGMTExtendedCand> l1GmtCands_;
   std::vector<L1MuGMTExtendedCand> l1GmtfCands_;
