@@ -3,9 +3,13 @@ import FWCore.ParameterSet.Config as cms
 SimTrackMatching = cms.PSet(
     # common
     useCSCChamberTypes = cms.untracked.vint32(0,1,2,3,4,5,6,7,8,9,10),
-    cscStations = cms.vstring('ALL','ME11','ME1a','ME1b',
-                              'ME12','ME13','ME21','ME22',
-                              'ME31','ME32','ME41','ME42'),
+    ## endcap stations
+    cscStations = cms.vstring('ALL','ME11','ME1a','ME1b','ME12','ME13',
+                              'ME21','ME22','ME31','ME32','ME41','ME42'),
+    gemStations = cms.vstring('GE11','GE21'),
+    me0Stations = cms.vstring('ME0'),
+    rpcStations = cms.vstring('RE12','RE13','RE22','RE23','RE31',
+                              'RE32','RE33','RE41','RE42','RE43'),
     ntupleTrackChamberDelta = cms.bool(True),
     ntupleTrackEff = cms.bool(True),
     overrideminNHitsChamber = cms.bool(False),
@@ -176,19 +180,75 @@ SimTrackMatching = cms.PSet(
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
     ),
-    ## tracks
-    tfTrack = cms.PSet(
+    ## DT
+    dtSimHit = cms.PSet(
+        verbose = cms.int32(0),
+        input = cms.InputTag('g4SimHits','MuonDTHits'),
+        simMuOnly = cms.bool(True),
+        discardEleHits = cms.bool(True),
+        minNHitsChamber = cms.int32(4),
+    ),
+    dtDigi = cms.PSet(
+        verbose = cms.int32(0),
+        input = cms.InputTag("simMuonDTDigis"),
+        ## not sure which BX is the central one
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+        matchDeltaWire = cms.int32(1),
+        minNHitsChamber = cms.int32(4),
+    ),
+    dtStubs = cms.PSet(
+        verbose = cms.int32(0),
+        input = cms.InputTag("dtTriggerPrimitiveDigis"),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+        minNHitsChamber = cms.int32(4),
+    ),
+    dtRecHit = cms.PSet(
+        verbose = cms.int32(0),
+        input = cms.InputTag("dt2DRecHits"),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+    ),
+    ## TrackFinder tracks
+    cscTfTrack = cms.PSet(
         verbose = cms.int32(0),
         input = cms.InputTag("simCsctfTrackDigis"),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
     ),
-    tfCand = cms.PSet(
+    dtTfTrack = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("simCsctfDigis", "CSC"),
+        input = cms.InputTag("simDttfDigis", "DTTF"),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
     ),
+    ## TrackFinder candidates
+    cscTfCand = cms.PSet(
+        verbose = cms.int32(0),
+        inputCSC = cms.InputTag("simCsctfDigis", "CSC"),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+    ),
+    dtTfCand = cms.PSet(
+        verbose = cms.int32(0),
+        inputCSC = cms.InputTag("simDttfDigis", "DT"),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+    ),
+    rpcfTfCand = cms.PSet(
+        verbose = cms.int32(0),
+        input = cms.InputTag("simRpcTriggerDigis","RPCf"),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+    ),
+    rpcbTfCand = cms.PSet(
+        verbose = cms.int32(0),
+        input = cms.InputTag("simRpcTriggerDigis","RPCb"),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+    ),    
+    ## GMT and L1Extra
     gmtRegCand = cms.PSet(
         verbose = cms.int32(0),
         input = cms.InputTag("simGmtDigis"),

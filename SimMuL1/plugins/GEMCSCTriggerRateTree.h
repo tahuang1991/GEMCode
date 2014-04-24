@@ -238,9 +238,17 @@ class GEMCSCTriggerRateTree : public edm::EDAnalyzer
   int minBXTFTrack_;
   int maxBXTFTrack_;
   
-  int verboseTFCand_;
-  int minBXTFCand_;
-  int maxBXTFCand_;
+  int verboseCSCTFCand_;
+  int minBXCSCTFCand_;
+  int maxBXCSCTFCand_;
+
+  int verboseRPCfTFCand_;
+  int minBXRPCfTFCand_;
+  int maxBXRPCfTFCand_;
+
+  int verboseRPCbTFCand_;
+  int minBXRPCbTFCand_;
+  int maxBXRPCbTFCand_;
 
   int verboseGMTRegCand_;
   int minBXGMTRegCand_;
@@ -249,6 +257,10 @@ class GEMCSCTriggerRateTree : public edm::EDAnalyzer
   int verboseGMTCand_;
   int minBXGMTCand_;
   int maxBXGMTCand_;
+
+  int verboseL1Extra_;
+  int minBXL1Extra_;
+  int maxBXL1Extra_;
 
   bool centralBxOnlyGMT_;
   bool doSelectEtaForGMTRates_;
@@ -282,7 +294,7 @@ class GEMCSCTriggerRateTree : public edm::EDAnalyzer
   std::vector<MatchCSCMuL1::GMTCAND> rtGmtCands_;
   std::vector<MatchCSCMuL1::L1EXTRA> rtL1Extras_;
 
-  edm::Handle< L1MuGMTReadoutCollection > hl1GmtCands_;
+  edm::Handle<L1MuGMTReadoutCollection> hl1GmtCands_;
   edm::Handle<L1MuDTChambPhContainer> dttrig_;
   std::vector<L1MuGMTExtendedCand> l1GmtCands_;
   std::vector<L1MuGMTExtendedCand> l1GmtfCands_;
