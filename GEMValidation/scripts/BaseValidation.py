@@ -1,4 +1,4 @@
-import sys
+import sys,os
 
 from ROOT import *
 
@@ -6,10 +6,7 @@ from cuts import *
 from drawPlots import *
 
 ## run quiet mode
-import sys
 sys.argv.append( '-b' )
-
-import ROOT 
 ROOT.gROOT.SetBatch(1)
 
 def enum(*sequential, **named):
@@ -20,9 +17,9 @@ def enum(*sequential, **named):
 
 class SimHitPlotter():
   def __init__(self):
-    self.inputDir = "/afs/cern.ch/user/d/dildick/work/GEM/testForGeometry/CMSSW_6_2_0_SLHC7/src/"
+    self.inputDir = os.getenv("CMSSW_BASE") + "/src/"
     self.inputFile = "gem_sh_ana.root"
-    self.targetDir = "testDirectory/"
+    self.targetDir = "simHitValidationPlots/"
     self.ext = ".png"
     self.analyzer = "MuonSimHitAnalyzer"
     self.gemSimHits = "GEMSimHits"
@@ -40,14 +37,14 @@ class SimHitPlotter():
     self.sel = [muon,nonMuon,all]
     self.pre = ["Muon","Non muon","All"]
     self.suff = ["_muon","_nonmuon","_all"]
-    self.geometry = "custom_GE11_6partitions_v1"
+    self.geometry = "custom_GE11_9-10partitions_v1"
 
     
 class DigiPlotter():
   def __init__(self):
-    self.inputDir = "/afs/cern.ch/user/d/dildick/work/GEM/testForGeometry/CMSSW_6_2_0_SLHC7/src/"
+    self.inputDir = os.getenv("CMSSW_BASE") + "/src/"
     self.inputFile = "gem_digi_ana.root"
-    self.targetDir = "testDirectory/"
+    self.targetDir = "digiValidationPlots/"
     self.ext = ".png"
     self.analyzer = "MuonDigiAnalyzer"
     self.gemDigis = "GEMDigiTree"
@@ -64,12 +61,12 @@ class DigiPlotter():
     self.treeTracks = (self.dirAna).Get(self.simTracks)
     self.nstripsGE11 = 384
     self.nstripsGE21 = 768
-    self.npadsGE11 = 96
+    self.npadsGE11 = 192
     self.npadsGE21 = 192
 
 class GEMCSCStubPlotter():
   def __init__(self):
-    self.inputDir = "/uscms_data/d3/dildick/work/cscTriggerUpgradeGEMRPC/CMSSW_6_2_0_SLHC9/src/"
+    self.inputDir = os.getenv("CMSSW_BASE") + "/src/"
     self.inputFile = "gem-csc_stub_ana.root"
     self.targetDir = "gem_csc_matching/"
     self.ext = ".png"

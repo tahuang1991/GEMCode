@@ -1,21 +1,3 @@
-// -*- C++ -*-
-//
-// Package:    MuonDigiAnalyzer
-// Class:      MuonDigiAnalyzer
-// 
-/**\class MuonDigiAnalyzer MuonDigiAnalyzer.cc MyAnalyzers/MuonDigiAnalyzer/src/MuonDigiAnalyzer.cc
-
- Description: [one line class summary]
-
- Implementation:
-     [Notes on implementation]
-*/
-//
-// $Id: MuonDigiAnalyzer.cc,v 1.9 2013/04/23 07:40:17 dildick Exp $
-//
-//
-
-
 // system include files
 #include <memory>
 #include <string>
@@ -41,8 +23,12 @@
 #include "DataFormats/GEMDigi/interface/GEMDigiCollection.h"
 #include "DataFormats/GEMDigi/interface/GEMCSCPadDigiCollection.h"
 #include "DataFormats/RPCDigi/interface/RPCDigiCollection.h"
+#include "DataFormats/CSCDigi/interface/CSCALCTDigiCollection.h"
+#include "DataFormats/CSCDigi/interface/CSCCLCTDigiCollection.h"
+#include "DataFormats/CSCDigi/interface/CSCCorrelatedLCTDigiCollection.h"
 #include "DataFormats/MuonDetId/interface/RPCDetId.h"
 #include "DataFormats/MuonDetId/interface/GEMDetId.h"
+#include "DataFormats/MuonDetId/interface/CSCDetId.h"
 #include "DataFormats/GeometrySurface/interface/LocalError.h"
 #include "DataFormats/GeometryVector/interface/LocalPoint.h"
 #include "DataFormats/Scalers/interface/DcsStatus.h"
@@ -77,21 +63,38 @@
 
 struct MyRPCDigi
 {
-   Int_t detId;
-   Short_t region, ring, station, sector, layer, subsector, roll;
-   Short_t strip, bx;
-   Float_t x, y;
-   Float_t g_r, g_eta, g_phi, g_x, g_y, g_z;
+  Int_t detId;
+  Short_t region, ring, station, sector, layer, subsector, roll, chamber;
+  Short_t strip, bx;
+  Float_t x, y;
+  Float_t g_r, g_eta, g_phi, g_x, g_y, g_z;
 };
 
+struct MyCSCWireDigi
+{
+  Int_t detId;
+  Short_t region, ring, station, chamber, layer;
+  Short_t wiregroup, bx;
+  Float_t x, y;
+  Float_t g_r, g_eta, g_phi, g_x, g_y, g_z;
+};
+
+struct MyCSCStripDigi
+{
+  Int_t detId;
+  Short_t region, ring, station, chamber, layer;
+  Short_t halfstrip, bx;
+  Float_t x, y;
+  Float_t g_r, g_eta, g_phi, g_x, g_y, g_z;
+};
 
 struct MyGEMDigi
 {  
-   Int_t detId;
-   Short_t region, ring, station, layer, chamber, roll;
-   Short_t strip, bx;
-   Float_t x, y;
-   Float_t g_r, g_eta, g_phi, g_x, g_y, g_z;
+  Int_t detId;
+  Short_t region, ring, station, layer, chamber, roll;
+  Short_t strip, bx;
+  Float_t x, y;
+  Float_t g_r, g_eta, g_phi, g_x, g_y, g_z;
 };
 
 struct MyGEMCSCPadDigis
@@ -297,11 +300,11 @@ void MuonDigiAnalyzer::beginRun(edm::Run const&, edm::EventSetup const& iSetup)
     chamberHeight_ = gp_top.perp() - gp_bottom.perp();
     
     using namespace std;
-    cout<<"half top "<<top_half_striplength<<" bot "<<lp_bottom<<endl;
-    cout<<"r  top "<<gp_top.perp()<<" bot "<<gp_bottom.perp()<<endl;
+    //cout<<"half top "<<top_half_striplength<<" bot "<<lp_bottom<<endl;
+    //cout<<"r  top "<<gp_top.perp()<<" bot "<<gp_bottom.perp()<<endl;
     LocalPoint p0(0.,0.,0.);
-    cout<<"r0 top "<<top_chamber->toGlobal(p0).perp()<<" bot "<< bottom_chamber->toGlobal(p0).perp()<<endl;
-    cout<<"rch "<<radiusCenter_<<" hch "<<chamberHeight_<<endl;
+    //cout<<"r0 top "<<top_chamber->toGlobal(p0).perp()<<" bot "<< bottom_chamber->toGlobal(p0).perp()<<endl;
+    //cout<<"rch "<<radiusCenter_<<" hch "<<chamberHeight_<<endl;
     
     buildLUT();
   }
@@ -339,6 +342,7 @@ void MuonDigiAnalyzer::bookRPCDigiTree()
   rpc_tree_->Branch("layer", &rpc_digi_.layer);
   rpc_tree_->Branch("subsector", &rpc_digi_.subsector);
   rpc_tree_->Branch("roll", &rpc_digi_.roll);
+  rpc_tree_->Branch("chamber", &rpc_digi_.chamber);
   rpc_tree_->Branch("strip", &rpc_digi_.strip);
   rpc_tree_->Branch("bx", &rpc_digi_.bx);
   rpc_tree_->Branch("x", &rpc_digi_.x);
@@ -486,6 +490,8 @@ void MuonDigiAnalyzer::analyzeRPC()
     rpc_digi_.layer = (Short_t) id.layer();
     rpc_digi_.subsector = (Short_t) id.subsector();
     rpc_digi_.roll = (Short_t) id.roll();
+    const int nSubSectors(id.station()>1 and id.ring()==1 ? 3 : 6); //only works for endcap
+    rpc_digi_.chamber = (id.sector()-1)*nSubSectors + id.subsector();
 
     RPCDigiCollection::const_iterator digiItr;
     //loop over digis of given roll
@@ -730,11 +736,11 @@ void MuonDigiAnalyzer::analyzeTracks(edm::ParameterSet cfg_, const edm::Event& i
     track_.gem_trk_eta = gp_track.eta();
     track_.gem_trk_phi = gp_track.phi();
     track_.gem_trk_rho = gp_track.perp();
-    std::cout << "track eta phi rho = " << track_.gem_trk_eta << " " << track_.gem_trk_phi << " " << track_.gem_trk_rho << std::endl;
+    //std::cout << "track eta phi rho = " << track_.gem_trk_eta << " " << track_.gem_trk_phi << " " << track_.gem_trk_rho << std::endl;
     
     float track_angle = gp_track.phi().degrees();
     if (track_angle < 0.) track_angle += 360.;
-    std::cout << "track angle = " << track_angle << std::endl;
+    //std::cout << "track angle = " << track_angle << std::endl;
     const int track_region = (gp_track.z() > 0 ? 1 : -1);
     
     // closest chambers in phi
@@ -770,8 +776,8 @@ void MuonDigiAnalyzer::analyzeTracks(edm::ParameterSet cfg_, const edm::Event& i
     track_.gem_ly_even = lp_track_even_partition.y() + (gp_even_partition.perp() - radiusCenter_);
     track_.gem_ly_odd = lp_track_odd_partition.y() + (gp_odd_partition.perp() - radiusCenter_);
 
-    std::cout << track_.gem_lx_even << " " << track_.gem_ly_even << std::endl;
-    std::cout << track_.gem_lx_odd << " " << track_.gem_ly_odd << std::endl;
+    //std::cout << track_.gem_lx_even << " " << track_.gem_ly_even << std::endl;
+    //std::cout << track_.gem_lx_odd << " " << track_.gem_ly_odd << std::endl;
 
 
     auto gem_sh_ids_ch = match_sh.chamberIdsGEM();
@@ -915,8 +921,8 @@ MuonDigiAnalyzer::getClosestChambers(int region, float phi)
 {
   auto& phis(positiveLUT_.first);
   auto upper = std::upper_bound(phis.begin(), phis.end(), phi);
-  std::cout << "lower = " << upper - phis.begin()  << std::endl;
-  std::cout << "upper = " << upper - phis.begin() + 1 << std::endl;
+  //std::cout << "lower = " << upper - phis.begin()  << std::endl;
+  //std::cout << "upper = " << upper - phis.begin() + 1 << std::endl;
   auto& LUT = (region == 1 ? positiveLUT_.second : negativeLUT_.second);
   return std::make_pair(LUT.at(upper - phis.begin()), (LUT.at((upper - phis.begin() + 1)%36)));
 }

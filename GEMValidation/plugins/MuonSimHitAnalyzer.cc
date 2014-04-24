@@ -1,14 +1,3 @@
-//
-// Package:    MuonSimHitAnalyzer
-// Class:      MuonSimHitAnalyzer
-// 
-// \class MuonSimHitAnalyzer
-//
-// Description: Analyzer GEM SimHit information
-// To be used for GEM algorithm development.
-//
-//
-
 // system include files
 #include <memory>
 #include <algorithm>
@@ -82,7 +71,7 @@ struct MyRPCSimHit
   Int_t eventNumber;
   Int_t detUnitId, particleType;
   Float_t x, y, energyLoss, pabs, timeOfFlight;
-  Int_t region, ring, station, sector, layer, subsector, roll;
+  Int_t region, ring, station, sector, layer, subsector, roll, chamber;
   Float_t globalR, globalEta, globalPhi, globalX, globalY, globalZ;
   Int_t strip;
 };
@@ -280,11 +269,11 @@ void MuonSimHitAnalyzer::beginRun(const edm::Run &iRun, const edm::EventSetup &i
     chamberHeight_ = gp_top.perp() - gp_bottom.perp();
     
     using namespace std;
-    cout<<"half top "<<top_half_striplength<<" bot "<<lp_bottom<<endl;
-    cout<<"r  top "<<gp_top.perp()<<" bot "<<gp_bottom.perp()<<endl;
+//     cout<<"half top "<<top_half_striplength<<" bot "<<lp_bottom<<endl;
+//     cout<<"r  top "<<gp_top.perp()<<" bot "<<gp_bottom.perp()<<endl;
     LocalPoint p0(0.,0.,0.);
-    cout<<"r0 top "<<top_chamber->toGlobal(p0).perp()<<" bot "<< bottom_chamber->toGlobal(p0).perp()<<endl;
-    cout<<"rch "<<radiusCenter_<<" hch "<<chamberHeight_<<endl;
+//     cout<<"r0 top "<<top_chamber->toGlobal(p0).perp()<<" bot "<< bottom_chamber->toGlobal(p0).perp()<<endl;
+//     cout<<"rch "<<radiusCenter_<<" hch "<<chamberHeight_<<endl;
     
     buildLUT();
   }
@@ -304,7 +293,7 @@ void MuonSimHitAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup
   
   iEvent.getByLabel(rpcSimHitInput_, RPCHits);
   if(hasRPCGeometry_ and RPCHits->size()) analyzeRPC(iEvent);
-
+  
   iEvent.getByLabel(simTrackInput_, simVertices);
   iEvent.getByLabel(simTrackInput_, simTracks);
   if(hasGEMGeometry_ and GEMHits->size()) analyzeTracks(iEvent,iSetup);
@@ -353,9 +342,14 @@ void MuonSimHitAnalyzer::bookRPCSimHitsTree()
   rpc_sh_tree_->Branch("pabs", &rpc_sh.pabs);
   rpc_sh_tree_->Branch("timeOfFlight", &rpc_sh.timeOfFlight);
   rpc_sh_tree_->Branch("timeOfFlight", &rpc_sh.timeOfFlight);
+  rpc_sh_tree_->Branch("region", &rpc_sh.region);
   rpc_sh_tree_->Branch("ring", &rpc_sh.ring);
   rpc_sh_tree_->Branch("station", &rpc_sh.station);
+  rpc_sh_tree_->Branch("sector", &rpc_sh.sector);
   rpc_sh_tree_->Branch("layer", &rpc_sh.layer);
+  rpc_sh_tree_->Branch("subsector", &rpc_sh.subsector);
+  rpc_sh_tree_->Branch("roll", &rpc_sh.roll);
+  rpc_sh_tree_->Branch("chamber", &rpc_sh.chamber);
   rpc_sh_tree_->Branch("globalR", &rpc_sh.globalR);
   rpc_sh_tree_->Branch("globalEta", &rpc_sh.globalEta);
   rpc_sh_tree_->Branch("globalPhi", &rpc_sh.globalPhi);
@@ -551,8 +545,6 @@ void MuonSimHitAnalyzer::analyzeCSC( const edm::Event& iEvent )
   for (edm::PSimHitContainer::const_iterator itHit = CSCHits->begin(); itHit != CSCHits->end(); ++itHit)
   {
     const CSCDetId id(itHit->detUnitId());
-    if (id.station() != 1) continue; // here we care only about station 1
-    
     csc_sh.eventNumber = iEvent.id().event();
     csc_sh.detUnitId = itHit->detUnitId();
     csc_sh.particleType = itHit->particleType();
@@ -600,7 +592,6 @@ void MuonSimHitAnalyzer::analyzeRPC( const edm::Event& iEvent )
   {
     const RPCDetId id(itHit->detUnitId());
     if (id.region() == 0) continue; // we don't care about barrel RPCs
-
     rpc_sh.eventNumber = iEvent.id().event();
     rpc_sh.detUnitId = itHit->detUnitId();
     rpc_sh.particleType = itHit->particleType();
@@ -617,7 +608,8 @@ void MuonSimHitAnalyzer::analyzeRPC( const edm::Event& iEvent )
     rpc_sh.layer = id.layer();
     rpc_sh.subsector = id.subsector();
     rpc_sh.roll = id.roll();
-    
+    const int nSubSectors(id.station()>1 and id.ring()==1 ? 3 : 6);
+    rpc_sh.chamber = (id.sector()-1)*nSubSectors + id.subsector();
     const LocalPoint hitLP(itHit->localPosition());
     const GlobalPoint hitGP(rpc_geometry_->idToDet(itHit->detUnitId())->surface().toGlobal(hitLP));
 
@@ -627,7 +619,6 @@ void MuonSimHitAnalyzer::analyzeRPC( const edm::Event& iEvent )
     rpc_sh.globalX = hitGP.x();
     rpc_sh.globalY = hitGP.y();
     rpc_sh.globalZ = hitGP.z();
-    
     rpc_sh.strip=rpc_geometry_->roll(itHit->detUnitId())->strip(hitLP);
 
     rpc_sh_tree_->Fill();
@@ -698,11 +689,11 @@ void MuonSimHitAnalyzer::analyzeTracks(const edm::Event& iEvent, const edm::Even
     track.gem_trk_eta = gp_track.eta();
     track.gem_trk_phi = gp_track.phi();
     track.gem_trk_rho = gp_track.perp();
-    std::cout << "track eta phi rho = " << track.gem_trk_eta << " " << track.gem_trk_phi << " " << track.gem_trk_rho << std::endl;
+    //std::cout << "track eta phi rho = " << track.gem_trk_eta << " " << track.gem_trk_phi << " " << track.gem_trk_rho << std::endl;
     
     float track_angle = gp_track.phi().degrees();
     if (track_angle < 0.) track_angle += 360.;
-    std::cout << "track angle = " << track_angle << std::endl;
+    //std::cout << "track angle = " << track_angle << std::endl;
     const int track_region = (gp_track.z() > 0 ? 1 : -1);
     
     // closest chambers in phi
@@ -738,8 +729,8 @@ void MuonSimHitAnalyzer::analyzeTracks(const edm::Event& iEvent, const edm::Even
     track.gem_ly_even = lp_track_even_partition.y() + (gp_even_partition.perp() - radiusCenter_);
     track.gem_ly_odd = lp_track_odd_partition.y() + (gp_odd_partition.perp() - radiusCenter_);
 
-    std::cout << track.gem_lx_even << " " << track.gem_ly_even << std::endl;
-    std::cout << track.gem_lx_odd << " " << track.gem_ly_odd << std::endl;
+//     std::cout << track.gem_lx_even << " " << track.gem_ly_even << std::endl;
+//     std::cout << track.gem_lx_odd << " " << track.gem_ly_odd << std::endl;
 
     
     // check for hit chambers
@@ -811,8 +802,8 @@ MuonSimHitAnalyzer::getClosestChambers(int region, float phi)
 {
   auto& phis(positiveLUT_.first);
   auto upper = std::upper_bound(phis.begin(), phis.end(), phi);
-  std::cout << "lower = " << upper - phis.begin()  << std::endl;
-  std::cout << "upper = " << upper - phis.begin() + 1 << std::endl;
+//   std::cout << "lower = " << upper - phis.begin()  << std::endl;
+//   std::cout << "upper = " << upper - phis.begin() + 1 << std::endl;
   auto& LUT = (region == 1 ? positiveLUT_.second : negativeLUT_.second);
   return std::make_pair(LUT.at(upper - phis.begin()), (LUT.at((upper - phis.begin() + 1)%36)));
 }

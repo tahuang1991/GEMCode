@@ -6,9 +6,8 @@ process = cms.Process("MUONSIMANA")
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
-#process.load('Configuration.Geometry.GeometryExtended2019Reco_cff')
-process.load('Configuration.Geometry.GeometryExtended2023HGCalReco_cff')
-process.load('Configuration.Geometry.GeometryExtended2023HGCal_cff')
+process.load('Configuration.Geometry.GeometryExtended2023MuonReco_cff')
+process.load('Configuration.Geometry.GeometryExtended2023Muon_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -19,27 +18,17 @@ process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAl
 
 ## global tag for 2019 upgrade studies
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2019', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgradePLS3', '')
 
 # the analyzer configuration
 from GEMCode.GEMValidation.simTrackMatching_cfi import SimTrackMatching
 process.MuonSimHitAnalyzer = cms.EDAnalyzer("MuonSimHitAnalyzer",
     simTrackMatching = SimTrackMatching
 )
-process.MuonSimHitAnalyzer.simTrackMatching.gemStripDigi.input = ""
-process.MuonSimHitAnalyzer.simTrackMatching.gemPadDigi.input = ""
-process.MuonSimHitAnalyzer.simTrackMatching.gemCoPadDigi.input = ""
-process.MuonSimHitAnalyzer.simTrackMatching.cscStripDigi.input = ""
-process.MuonSimHitAnalyzer.simTrackMatching.cscWireDigi.input = ""
-process.MuonSimHitAnalyzer.simTrackMatching.cscCLCT.input = ""
-process.MuonSimHitAnalyzer.simTrackMatching.cscALCT.input = ""
-process.MuonSimHitAnalyzer.simTrackMatching.cscLCT.input = ""
-process.MuonSimHitAnalyzer.simTrackMatching.cscMPLCT.input = ""
-process.MuonSimHitAnalyzer.simTrackMatching.gemRecHit.input = ""
-process.MuonSimHitAnalyzer.simTrackMatching.tfTrack.input = ""
-process.MuonSimHitAnalyzer.simTrackMatching.tfCand.input = ""
-process.MuonSimHitAnalyzer.simTrackMatching.gmtCand.input = ""
-process.MuonSimHitAnalyzer.simTrackMatching.l1Extra.input = ""
+
+## only simhits
+from GEMCode.GEMValidation.simTrackMatching_cfi import useOnlySimHitCollections
+process.MuonSimHitAnalyzer = useOnlySimHitCollections(process.MuonSimHitAnalyzer)
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
@@ -49,9 +38,24 @@ process.source = cms.Source("PoolSource",
   fileNames = cms.untracked.vstring("file:out_sim.root")                            
 )
 
+## input
+from GEMCode.SimMuL1.GEMCSCTriggerSamplesLib import *
+from GEMCode.GEMValidation.InputFileHelpers import *
+process = useInputDir(process, ['/eos/uscms/store/user/dildick/dildick/SingleMuPt2-50Fwdv2_50k_test5DegBugfix_2/SingleMuPt2-50Fwdv2_50k_test5DegBugfix_2/3e47eaf3967164550497ab5804eb1831/'], True)
+
 process.TFileService = cms.Service("TFileService",
   fileName = cms.string("gem_sh_ana.root")
 )
 
 process.p = cms.Path(process.MuonSimHitAnalyzer)
 
+## messages
+print
+print 'Input files:'
+print '----------------------------------------'
+print process.source.fileNames
+print
+print 'Output file:'
+print '----------------------------------------'
+print process.TFileService.fileName
+print

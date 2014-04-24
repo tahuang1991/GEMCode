@@ -57,6 +57,34 @@ def OR(*arg):
 
 
 #_______________________________________________________________________________
+def re(i):
+    if i==1:
+        return TCut("region==1")
+    else:
+        return TCut("region==-1")
+    
+
+#_______________________________________________________________________________
+def la(i):
+    return TCut("layer==%d"%(i))
+
+
+#_______________________________________________________________________________
+def st(i):
+    return TCut("station==%d"%(i))
+
+
+#_______________________________________________________________________________
+def ri(i):
+    return TCut("ring==%d"%(i))
+
+
+#_______________________________________________________________________________
+def ch(i):
+    return TCut("chamber==%d"%(i))
+
+
+#_______________________________________________________________________________
 nocut = TCut("")
 
 muon = TCut("TMath::Abs(particleType)==13")
@@ -71,6 +99,13 @@ ec1 = TCut("endcap==1")
 
 even = TCut("chamber%2==0")
 odd  = TCut("chamber%2==1")
+evenodd = [even, odd, TCut("")]
+
+rpc_sector_even = TCut("sector%2==0")
+rpc_sector_odd  = TCut("sector%2==1")
+
+rpc_subsector_even = TCut("subsector%2==0")
+rpc_subsector_odd  = TCut("subsector%2==1")
 
 l1 = TCut("layer==1")
 l2 = TCut("layer==2")

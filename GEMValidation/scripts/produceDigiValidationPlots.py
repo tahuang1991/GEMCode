@@ -14,32 +14,34 @@ ROOT.gROOT.SetBatch(1)
 
 from BaseValidation import *
 from GEMDigiValidation import *
-
-
+from RPCDigiValidation import *
+from CSCDigiValidation import *
 
 if __name__ == "__main__":  
 
   ## Style
   gStyle.SetStatStyle(0);
   plotter = DigiPlotter()
-  
-  gemGEMDigiOccupancyXY(plotter)
-  gemGEMDigiOccupancyStripPhi(plotter)
-  gemGEMDigiOccupancyStrip(plotter)
-  gemGEMDigiBX(plotter)
-  gemGEMDigiOccupancyRZ(plotter)
-  
-  gemGEMPadOccupancyXY(plotter)
-  gemGEMPadOccupancyPadPhi(plotter)
-  gemGEMPadOccupancyPad(plotter)
-  gemGEMPadBX(plotter)
-  gemGEMPadOccupancyRZ(plotter)
 
-  gemGEMCoPadOccupancyXY(plotter)
-  gemGEMCoPadOccupancyCoPadPhi(plotter)
-  gemGEMCoPadOccupancyCoPad(plotter)
-  gemGEMCoPadBX(plotter)
-  gemGEMCoPadOccupancyRZ(plotter)
+  rpcDigiOccupancyXY(plotter)
+  """
+  gemDigiOccupancyXY(plotter)
+  gemDigiOccupancyStripPhi(plotter)
+  gemDigiOccupancyStrip(plotter)
+  gemDigiBX(plotter)
+  gemDigiOccupancyRZ(plotter)
+  
+  gemPadOccupancyXY(plotter)
+  gemPadOccupancyPadPhi(plotter)
+  gemPadOccupancyPad(plotter)
+  gemPadBX(plotter)
+  gemPadOccupancyRZ(plotter)
+
+  gemCoPadOccupancyXY(plotter)
+  gemCoPadOccupancyCoPadPhi(plotter)
+  gemCoPadOccupancyCoPad(plotter)
+  gemCoPadBX(plotter)
+  gemCoPadOccupancyRZ(plotter)
   
   simTrackDigiMatchingEta(plotter)
   simTrackDigiMatchingPhi(plotter)
@@ -53,3 +55,4 @@ if __name__ == "__main__":
   simTrackCoPadMatchingPhi(plotter)
   simTrackCoPadMatchingLX(plotter)
   simTrackCoPadMatchingLY(plotter)
+  """

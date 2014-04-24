@@ -13,20 +13,39 @@ from CSCSimHitValidation import *
 from gemChamberNumbering import *
 
 ## run quiet mode
-import sys
 sys.argv.append( '-b' )
-
-import ROOT 
 ROOT.gROOT.SetBatch(1)
 
 #_______________________________________________________________________________
-if __name__ == "__main__":
+def produceOccupanyPlots(plotter):
+  for i in range(len(plotter.sel)):
 
-  ## Style
-  gStyle.SetStatStyle(0);
+    gemSimHitOccupancyXY(plotter,i)
+    gemSimHitOccupancyRZ(plotter,i)
+    gemSimHitTOF(plotter,i)
+    cscSimHitOccupancyXY(plotter,i)
+    rpcSimHitOccupancyXY(plotter,i)
 
-  plotter = SimHitPlotter()
-  simTrackProperties(plotter)
+    me0SimHitOccupancyRZ(plotter,i)
+    me0SimHitTOF(plotter,i)
+    me0SimHitOccupancyXY(plotter,i)
+    #gemSimhitMomentum(plotter,i) 
+    #GEMSimValidation.SimhitMomentum(plotter,i)
+
+    """
+    rpcSimHitOccupancyXY(plotter,i)
+    rpcSimHitOccupancyRZ(plotter,i)
+    rpcSimHitTOF(plotter,i)
+    
+    cscSimHitOccupancyXY(plotter,i)
+    cscSimHitOccupancyRZ(plotter,i)
+    cscSimHitTOF(plotter,i)
+    
+    """
+
+
+#_______________________________________________________________________________
+def produceMatchingPlots(plotter):
   gemSimTrackToSimHitMatchingLX(plotter) 
   gemSimTrackToSimHitMatchingLY(plotter) 
   gemSimTrackToSimHitMatchingEta(plotter) 
@@ -36,26 +55,18 @@ if __name__ == "__main__":
   me0SimTrackToSimHitMatchingEta(plotter) 
   me0SimTrackToSimHitMatchingPhi(plotter)
   
-  for i in range(len(plotter.sel)):
 
-    gemSimHitOccupancyXY(plotter,i)
-    gemSimHitOccupancyRZ(plotter,i)
-    gemSimHitTOF(plotter,i)
-    #   gemSimhitMomentum(plotter,i) 
-    #   GEMSimValidation.SimhitMomentum(plotter,i)
+#_______________________________________________________________________________
+if __name__ == "__main__":
 
-    """      
-    rpcSimHitOccupancyXY(plotter,i)
-    rpcSimHitOccupancyRZ(plotter,i)
-    rpcSimHitTOF(plotter,i)
-    
-    cscSimHitOccupancyXY(plotter,i)
-    cscSimHitOccupancyRZ(plotter,i)
-    cscSimHitTOF(plotter,i)
-    
-    me0SimHitOccupancyXY(plotter,i)
-    me0SimHitOccupancyRZ(plotter,i)
-    me0SimHitTOF(plotter,i)
-    """
-    
+  ## Style
+  gStyle.SetStatStyle(0);
+
+  plotter = SimHitPlotter()
+  """
+  simTrackProperties(plotter)
   gemChamberNumbering(plotter)
+  
+  """
+  produceMatchingPlots(plotter)
+  produceOccupanyPlots(plotter)

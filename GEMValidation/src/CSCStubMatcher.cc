@@ -13,6 +13,7 @@ CSCStubMatcher::CSCStubMatcher(SimHitMatcher& sh, CSCDigiMatcher& dg, GEMDigiMat
 : DigiMatcher(sh)
 , digi_matcher_(&dg)
 , gem_digi_matcher_(&gem_dg)
+, sh_matcher_(&sh)
 {
   auto cscCLCT_ = conf().getParameter<edm::ParameterSet>("cscCLCT");
   clctInput_ = cscCLCT_.getParameter<edm::InputTag>("input");
@@ -35,6 +36,8 @@ CSCStubMatcher::CSCStubMatcher(SimHitMatcher& sh, CSCDigiMatcher& dg, GEMDigiMat
   verboseLCT_ = cscLCT_.getParameter<int>("verbose");
   minNHitsChamberLCT_ = cscLCT_.getParameter<int>("minNHitsChamber");
   addGhostLCTs_ = cscLCT_.getParameter<bool>("addGhosts");
+  matchAlctGem_ = cscLCT_.getParameter<bool>("matchAlctGem");
+  hsFromSimHitMean_ = cscLCT_.getParameter<bool>("hsFromSimHitMean");
 
   auto cscMPLCT_ = conf().getParameter<edm::ParameterSet>("cscMPLCT");
   mplctInput_ = cscMPLCT_.getParameter<edm::InputTag>("input");
@@ -345,21 +348,49 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
     }
 
     // find a matching LCT
-    auto clct = clctInChamber(id);
-    if (!is_valid(clct)) continue;
+    const GEMDetId gemDetId(GEMDetId(ch_id.zendcap(),1,ch_id.station(),1,ch_id.chamber(),0));
 
-    auto alct = alctInChamber(id);
-    if (!is_valid(alct)) continue;
+    auto clct(clctInChamber(id));
+    auto alct(alctInChamber(id));
+    auto pads(gem_digi_matcher_->coPadsInSuperChamber(gemDetId));
+    auto hasPad(pads.size()!=0);
 
-    int my_hs = digi_channel(clct);
-    int my_wg = digi_wg(alct);
-    int my_bx = digi_bx(alct);
+    const bool caseAlctClct(is_valid(alct) and is_valid(clct));
+    const bool caseAlctGem(is_valid(alct) and hasPad and !is_valid(clct));
+    //    const bool caseClctGem(is_valid(clct) and hasPad);
 
+    const CSCChamber* cscChamber(cscGeometry_->chamber(CSCDetId(id)));
+    const CSCLayer* cscKeyLayer(cscChamber->layer(3));
+    const CSCLayerGeometry* cscKeyLayerGeometry(cscKeyLayer->geometry());
+    const int nStrips(cscKeyLayerGeometry->numberOfStrips());
+    const float averageZ((cscKeyLayer->centerOfStrip(0)).z());
+    auto GpME(propagateToZ(averageZ));
+    auto lpME(cscKeyLayer->toLocal(GpME));
+
+    const int my_hs(digi_channel(clct));
+    const int my_wg(digi_wg(alct));
+    const int my_bx(digi_bx(alct));
+    // remember that trigger strips are wrapped-around
+    const int my_hs_gem_propagate((nStrips-cscKeyLayerGeometry->nearestStrip(lpME))*2);
+    
+    const auto hits = sh_matcher_->hitsInChamber(id);
+    const float my_hs_gem_mean(sh_matcher_->simHitsMeanStrip(hits));
+    if (caseAlctClct) std::cout << "caseAlctClct" << std::endl;
+    else if(matchAlctGem_)std::cout << "caseAlctGem" << std::endl;
+    std::cout << "mean half strip from simhits " << sh_matcher_->simHitsMeanStrip(hits) 
+	<<"   half strip by propagating track " << my_hs_gem_propagate << std::endl; 
+    float my_hs_gem;
+    if (hsFromSimHitMean_)  my_hs_gem = my_hs_gem_mean;
+    else my_hs_gem = my_hs_gem_propagate;
     if (verbose()) cout<<"will match hs"<<my_hs<<" wg"<<my_wg<<" bx"<<my_bx<<" to #lct "<<n_lct<<endl;
     for (auto &lct: lcts_tmp)
     {
       if (verbose()) cout<<" corlct "<<lct;
-      if (!(my_bx == digi_bx(lct) and my_hs == digi_channel(lct) and my_wg == digi_wg(lct)) ){
+      if (caseAlctClct and !(my_bx == digi_bx(lct) and my_hs == digi_channel(lct) and my_wg == digi_wg(lct) ) ){
+        if (verbose()) cout<<"  BAD"<<endl;
+        continue;
+      }
+      if (matchAlctGem_ and caseAlctGem and !(my_bx == digi_bx(lct) and std::abs(my_hs_gem - digi_channel(lct))<3 and my_wg == digi_wg(lct) ) ){
         if (verbose()) cout<<"  BAD"<<endl;
         continue;
       }
@@ -367,8 +398,8 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
 
       if (chamber_to_lct_.find(id) != chamber_to_lct_.end())
       {
-        cout<<"ALARM!!! there already was matching LCT "<<chamber_to_lct_[id]<<endl;
-        cout<<"   new digi: "<<lct<<endl;
+        //cout<<"ALARM!!! there already was matching LCT "<<chamber_to_lct_[id]<<endl;
+        //cout<<"   new digi: "<<lct<<endl;
       }
       chamber_to_lct_[id] = lct;
     }
