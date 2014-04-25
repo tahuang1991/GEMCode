@@ -20,18 +20,18 @@ b1 = ROOT.TH1F("b1","b1",40,1.5,2.5)
 b1.GetYaxis().SetRangeUser(0.60,1.02)
 b1.GetYaxis().SetTitleOffset(1.2)
 b1.GetYaxis().SetNdivisions(520)
-b1.GetYaxis().SetTitle("LCT reconstruction efficiency")
+b1.GetYaxis().SetTitle("ALCT reconstruction efficiency")
 b1.GetXaxis().SetTitle("#eta of simulated muon track")
-b1.SetTitle(" "*10+"LCT Reco in ME21"+" "*34 + "CMS Simulation Preliminary")
+b1.SetTitle(" "*10+"ALCT Reco in ME21"+" "*34 + "CMS Simulation Preliminary")
 b1.SetStats(0)
 
 treename = "GEMCSCAnalyzer/trk_eff_ME21"
-den = "has_csc_sh>0 && pt >10"
-num = "has_csc_sh>0 && has_lct>0 && pt>10"
+den = "has_csc_sh>0 "
+num = "has_csc_sh>0 && has_csc_wires>0"
 
 e1 = getEff("GEMCSC_Ana_Test1_CSC4.root",treename,den,num)
 e2 = getEff("GEMCSC_Ana_Test1_step0.root",treename,den,num)
-e3 = getEff("GEMCSC_Ana_Test1_Wg3fixed.root",treename,den,num)
+e3 = getEff("GEMCSC_Ana_Test1_WireDigi4.root",treename,den,num)
 e4 = getEff("GEMCSC_Ana_Test1_all.root",treename,den,num)
 #e5 = getEff("GSA_GEMCSC_Step2_PU0.root",treename,den,num)
 #e6 = getEff("GSA_GEMCSC_Step3_PU0.root",treename,den,num)
@@ -60,18 +60,17 @@ e4.Draw("same")
 #e6.Draw("same")
 #e7.Draw("same")
 
-legend = ROOT.TLegend(0.23,0.13,0.62,0.30)
+legend = ROOT.TLegend(0.23,0.13,0.52,0.40)
 legend.SetFillColor(ROOT.kWhite)
-legend.SetHeader("PU0, with pt>10")
+legend.SetHeader("PU0")
 #legend.AddEntry(e1,"CSC SLHC Algorithm (4 hits)","l")
 #legend.AddEntry(e2,"CSC SLCH Algorithm (3 hits)","l")
-#legend.AddEntry(e3,"GEM-CSC Algorithm including LCT from lowQ alct","l")
-legend.AddEntry(e4,"GEM-CSC Algorithm","l")
-legend.AddEntry(e3,"GEM-CSC Algorithm including LCT from lowQ alct","l")
+legend.AddEntry(e3,"Wire Digi on at least 4 layers","l")
+legend.AddEntry(e4,"Wire Digi on at least 3 layers","l")
 #legend.AddEntry(e5,"GEM-CSC Algorithm (step 2)","l")
 #legend.AddEntry(e6,"GEM-CSC Algorithm (step 3)","l")
 #legend.AddEntry(e7,"GEM-CSC Algorithm (step 4)","l")
 legend.Draw("same")
 
-c1.SaveAs("LCT_ME21_reco_eff_PU0_W3V4.pdf")
-c1.SaveAs("LCT_ME21_reco_eff_PU0_W3V4.png")
+c1.SaveAs("WireDigi_ME21_eff_PU0.pdf")
+c1.SaveAs("WireDigi_ME21_eff_PU0.png")
