@@ -101,6 +101,7 @@ struct MyTFCand
   Int_t event, bx;
   Float_t pt, eta, phi;
   Int_t quality;
+  Int_t nStubs, nDetIds; 
   Int_t hasME1a, hasME1b, hasME12, hasME13;
   Int_t hasME21, hasME22;
   Int_t hasME31, hasME32;
