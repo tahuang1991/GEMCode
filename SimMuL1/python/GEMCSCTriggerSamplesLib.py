@@ -137,7 +137,8 @@ eosfiles['_pt2-50_PU0_SLHC10_2023Muon'] = ['/eos/uscms/store/user/dildick/dildic
 
 
 ## new samples produced with SLHC11 + fix in CSC digitizer (ask Aysen)
-eosfiles['_pt2-50_PU0_SLHC11_2023Muon'] = ['/eos/uscms/store/user/lpcgem/dildick/SingleMuPt2-50_1M_SLHC11_2023Muon/SingleMuPt2-50_1M_SLHC11_2023Muon/c7fc9200318437f38716754e18c29ddf/']
+eosfiles['_pt2-50_SLHC11_2023Muon'] = ['/eos/uscms/store/user/lpcgem/dildick/SingleMuPt2-50_1M_SLHC11_2023Muon/SingleMuPt2-50_1M_SLHC11_2023Muon/c7fc9200318437f38716754e18c29ddf/']
 
-eosfiles['_pt2-50_PU0_SLHC11_2023Muon_PU0'] = ['/eos/uscms/store/user/lpcgem/dildick/SingleMuPt2-50_1M_SLHC11_2023Muon/SingleMuPt2-50_1M_SLHC11_2023Muon_DIGI_PU0/abb92f2d576c84bfcdd5da9b6637acf8/']
-eosfiles['_pt2-50_PU0_SLHC11_2023Muon_PU140'] = ['/eos/uscms/store/user/lpcgem/dildick/SingleMuPt2-50_1M_SLHC11_2023Muon/SingleMuPt2-50_1M_SLHC11_2023Muon_DIGI_PU140/3d13cbaabc944c94dfc4b7e14635daa0/']
+## digi samples 
+eosfiles['_pt2-50_SLHC11_2023Muon_PU0'] = ['/eos/uscms/store/user/lpcgem/dildick/SingleMuPt2-50_1M_SLHC11_2023Muon/SingleMuPt2-50_1M_SLHC11_2023Muon_DIGI_PU0/abb92f2d576c84bfcdd5da9b6637acf8/']
+eosfiles['_pt2-50_SLHC11_2023Muon_PU140'] = ['/eos/uscms/store/user/lpcgem/dildick/SingleMuPt2-50_1M_SLHC11_2023Muon/SingleMuPt2-50_1M_SLHC11_2023Muon_DIGI_PU140/3d13cbaabc944c94dfc4b7e14635daa0/']
