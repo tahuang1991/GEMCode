@@ -77,7 +77,7 @@ process = customise_csc_L1Stubs(process)
 
 ## GEM-CSC emulator
 from SLHCUpgradeSimulations.Configuration.gemCustoms import customise_L1Emulator as customise_L1EmulatorGEM
-#process = customise_L1EmulatorGEM(process, ptdphi)
+process = customise_L1EmulatorGEM(process, 'pt0')
 
 ## RPC-CSC emulator
 from SLHCUpgradeSimulations.Configuration.rpcCustoms import customise_L1Emulator as customise_L1EmulatorRPC
@@ -107,7 +107,7 @@ process.source = cms.Source("PoolSource",
 )
 
 ## input
-from GEMCode.SimMuL1.GEMCSCTriggerSamplesLib import useInputDir
+from GEMCode.SimMuL1.GEMCSCTriggerSamplesLib import *
 from GEMCode.GEMValidation.InputFileHelpers import *
 process = useInputDir(process, eosfiles['_pt2-50_PU0_SLHC10_2023Muon'], True)
 
