@@ -351,6 +351,10 @@ public:
     double pt;
     double dr;
     unsigned nTFStubs;
+/*     unsigned nTFStubs_; */
+/*     unsigned nTrgIds_; */
+/*     const unsigned nTFStubs const {return nTFStubs_}; */
+/*     const unsigned nTrgIds const {return nTrgIds_}; */
   };
   std::vector< GMTREGCAND > GMTREGCANDs;
   std::vector< GMTREGCAND > GMTREGCANDsAll;
@@ -369,6 +373,7 @@ public:
     GMTREGCAND* regcand_rpc;
     std::vector< CSCDetId > ids; // chamber ids
     std::vector<DetId> detIds; // contains all detids
+    unsigned nTFStubs;
     double phi;
     double eta;
     double pt;
