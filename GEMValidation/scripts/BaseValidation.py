@@ -85,3 +85,4 @@ class GEMCSCStubPlotter():
     self.etaMin = 1.5
     self.etaMax = 2.5
     self.pu = 140
+    self.matchAlctGem = True
