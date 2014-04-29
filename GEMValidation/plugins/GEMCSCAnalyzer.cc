@@ -383,11 +383,12 @@ GEMCSCAnalyzer::GEMCSCAnalyzer(const edm::ParameterSet& ps)
   auto cscMPLCT = cfg_.getParameter<edm::ParameterSet>("cscMPLCT");
   minNHitsChamberMPLCT_ = cscMPLCT.getParameter<int>("minNHitsChamber");
 
+  /*
   auto tfTrack = cfg_.getParameter<edm::ParameterSet>("tfTrack");
   auto tfCand = cfg_.getParameter<edm::ParameterSet>("tfCand");
   auto gmtCand = cfg_.getParameter<edm::ParameterSet>("gmtCand");
   auto l1Extra = cfg_.getParameter<edm::ParameterSet>("l1Extra");
-
+  */
   if (ntupleTrackChamberDelta_) bookSimTracksDeltaTree();
   if (ntupleTrackEff_)
   {
