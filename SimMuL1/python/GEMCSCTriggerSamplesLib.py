@@ -134,3 +134,12 @@ eosfiles['_pt2-50_PU140_6part2019'] = ['/eos/uscms/store/user/jdimasva/SingleMuP
 eosfiles['_pt2-50_PU400_6part2019'] = ['/eos/uscms/store/user/aysen/SingleMuPt2-50Fwdv2_100K_DIGI_PU400/aysen/SingleMuPt2-50Fwdv2_1M/SingleMuPt2-50Fwdv2_100K_DIGI_PU400/6bcb78929a3bd07607400097784c7b5b/']
 
 eosfiles['_pt2-50_PU0_SLHC10_2023Muon'] = ['/eos/uscms/store/user/dildick/dildick/SingleMuPt2-50Fwdv2_50k_DIGI_PU0_SLHC10_2023Muon/SingleMuPt2-50Fwdv2_50k_DIGI_PU0_SLHC10_2023Muon/3fc7116e7a0ba79c1b27ffca0468fa34/']
+
+
+## new samples produced with SLHC11 + fix in CSC digitizer (ask Aysen)
+eosfiles['_pt2-50_SLHC11_2023Muon'] = ['/eos/uscms/store/user/lpcgem/dildick/SingleMuPt2-50_1M_SLHC11_2023Muon/SingleMuPt2-50_1M_SLHC11_2023Muon/c7fc9200318437f38716754e18c29ddf/']
+
+## digi samples 
+eosfiles['_pt2-50_SLHC11_2023Muon_PU0'] = ['/eos/uscms/store/user/lpcgem/dildick/SingleMuPt2-50_1M_SLHC11_2023Muon/SingleMuPt2-50_1M_SLHC11_2023Muon_DIGI_PU0/abb92f2d576c84bfcdd5da9b6637acf8/']
+eosfiles['_pt2-50_SLHC11_2023Muon_PU140'] = ['/eos/uscms/store/user/lpcgem/dildick/SingleMuPt2-50_1M_SLHC11_2023Muon/SingleMuPt2-50_1M_SLHC11_2023Muon_DIGI_PU140/3d13cbaabc944c94dfc4b7e14635daa0/']
+eosfiles['_pt2-50_SLHC11_2023Muon_PU200'] = ['/eos/uscms/store/user/lpcgem/dildick/SingleMuPt2-50_1M_SLHC11_2023Muon/SingleMuPt2-50_1M_SLHC11_2023Muon_DIGI_PU200/c92741df1130b71bb884f6fba370a358/']
