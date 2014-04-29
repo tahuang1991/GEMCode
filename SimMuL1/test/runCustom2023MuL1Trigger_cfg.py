@@ -107,8 +107,8 @@ process.source = cms.Source("PoolSource",
 )
 
 ## input
-from GEMCode.SimMuL1.GEMCSCTriggerSamplesLib import *
-from GEMCode.GEMValidation.InputFileHelpers import *
+from GEMCode.SimMuL1.GEMCSCTriggerSamplesLib import eosfiles
+from GEMCode.GEMValidation.InputFileHelpers import useInputDir
 process = useInputDir(process, eosfiles['_pt2-50_PU0_SLHC10_2023Muon'], True)
 
 
