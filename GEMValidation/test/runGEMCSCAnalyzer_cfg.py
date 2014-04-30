@@ -51,10 +51,12 @@ process.GEMCSCAnalyzer = cms.EDAnalyzer("GEMCSCAnalyzer",
 matching = process.GEMCSCAnalyzer.simTrackMatching
 matching.simTrack.minPt = 1.5
 matching.gemRecHit.input = ""
-matching.tfTrack.input = ""
+"""
+matching.cscTfTrack.input = ""
 matching.tfCand.input = ""
 matching.gmtCand.input = ""
 matching.l1Extra.input = ""
+"""
 doGem = True
 if doGem:
   matching.cscSimHit.minNHitsChamber = 3
