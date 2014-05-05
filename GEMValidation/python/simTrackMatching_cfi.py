@@ -311,8 +311,8 @@ def noME0Collections(analyzer):
     return analyzer
 
 def noTrackCollections(analyzer):
-    analyzer.simTrackMatching.tfTrack.input = ""
-    analyzer.simTrackMatching.tfCand.input = ""
+    analyzer.simTrackMatching.cscTfTrack.input = ""
+    analyzer.simTrackMatching.cscTfCand.input = ""
     analyzer.simTrackMatching.gmtRegCand.input = ""
     analyzer.simTrackMatching.gmtCand.input = ""
     analyzer.simTrackMatching.l1Extra.input = ""
