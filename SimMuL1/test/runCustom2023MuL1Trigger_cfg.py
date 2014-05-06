@@ -14,7 +14,6 @@ process.load('Configuration.Geometry.GeometryExtended2023Muon_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
-process.load('Configuration.StandardSequences.Digi_cff')
 process.load("Configuration.StandardSequences.L1Emulator_cff")
 process.load("Configuration.StandardSequences.L1Extra_cff")
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
@@ -52,7 +51,6 @@ if hasattr(sys, "argv") == True:
 #--------------------------------------------------------------------------------
 
 
-## global tag for 2019 upgrade studies
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgradePLS3', '')
 
@@ -60,45 +58,22 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 
-## GEM digitizer
-from SimMuon.GEMDigitizer.customizeGEMDigi import customize_digi_addGEM_muon_only
-process = customize_digi_addGEM_muon_only(process)
+## calibration
+from CalibMuon.CSCCalibration.CSCIndexer_cfi import CSCIndexerESProducer
+process.CSCIndexerESProducer= CSCIndexerESProducer
 
-## upgrade CSC geometry 
-from SLHCUpgradeSimulations.Configuration.muonCustoms import unganged_me1a_geometry
-process = unganged_me1a_geometry(process)
+from CalibMuon.CSCCalibration.CSCChannelMapper_cfi import CSCChannelMapperESProducer
+process.CSCChannelMapperESProducer= CSCChannelMapperESProducer
 
-## upgrade CSC digitizer
-from SLHCUpgradeSimulations.Configuration.muonCustoms import digitizer_timing_pre3_median
-process = digitizer_timing_pre3_median(process)
+## customization
+from SLHCUpgradeSimulations.Configuration.combinedCustoms import cust_2019
+process = cust_2019(process)
 
-## upgrade CSC L1 customizations
-from SLHCUpgradeSimulations.Configuration.muonCustoms import customise_csc_L1Stubs 
-process = customise_csc_L1Stubs(process)
-
-## GEM-CSC emulator
-from SLHCUpgradeSimulations.Configuration.gemCustoms import customise_L1Emulator2023 as customise_L1EmulatorGEM
-process = customise_L1EmulatorGEM(process, 'pt0')
-
-## RPC-CSC emulator
-from SLHCUpgradeSimulations.Configuration.rpcCustoms import customise_L1Emulator as customise_L1EmulatorRPC
-process = customise_L1EmulatorRPC(process)
-
-## upgrade CSC TrackFinder
-from SLHCUpgradeSimulations.Configuration.muonCustoms import customise_csc_L1TrackFinder
-process = customise_csc_L1TrackFinder(process)
-
-## upgrade L1Extra step
-from SLHCUpgradeSimulations.Configuration.muonCustoms import customise_csc_L1Extra_allsim
-process = customise_csc_L1Extra_allsim(process)
+## some extra L1 customs
 process.l1extraParticles.centralBxOnly = cms.bool(True)
 process.l1extraParticles.produceMuonParticles = cms.bool(True)
 process.l1extraParticles.produceCaloParticles = cms.bool(False)
 process.l1extraParticles.ignoreHtMiss = cms.bool(False)
-
-## add pile-up to the digi step
-from GEMCode.GEMValidation.InputFileHelpers import addPileUp
-#process = addPileUp(process, pu)
 
 ## input commands
 process.source = cms.Source("PoolSource",
@@ -169,7 +144,6 @@ if not physics:
 
 ## custom sequences
 process.mul1 = cms.Sequence(
-#  process.pdigi *
   process.SimL1MuTriggerPrimitives *
   process.SimL1MuTrackFinders *
   process.simRpcTriggerDigis *
@@ -178,7 +152,6 @@ process.mul1 = cms.Sequence(
 )
 
 process.muL1Short = cms.Sequence(
-#  process.pdigi *
   process.simCscTriggerPrimitiveDigis * 
   process.SimL1MuTrackFinders *
   process.simGmtDigis *
