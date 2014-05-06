@@ -20,6 +20,7 @@ process.load("Configuration.StandardSequences.L1Extra_cff")
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 
 ################### Take inputs from crab.cfg file ##############
+"""
 from FWCore.ParameterSet.VarParsing import VarParsing
 options = VarParsing ('python')
 options.register ('pu',
@@ -47,7 +48,7 @@ if hasattr(sys, "argv") == True:
     ptdphi = options.ptdphi
     print 'Using pu: %f' % pu
     print 'Using ptdphi: %s GeV' % ptdphi
-    
+"""    
 #--------------------------------------------------------------------------------
 
 
@@ -55,7 +56,7 @@ if hasattr(sys, "argv") == True:
 from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgradePLS3', '')
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 
@@ -76,12 +77,12 @@ from SLHCUpgradeSimulations.Configuration.muonCustoms import customise_csc_L1Stu
 process = customise_csc_L1Stubs(process)
 
 ## GEM-CSC emulator
-from SLHCUpgradeSimulations.Configuration.gemCustoms import customise_L1Emulator as customise_L1EmulatorGEM
-process = customise_L1EmulatorGEM(process, 'pt0')
+from SLHCUpgradeSimulations.Configuration.gemCustoms import customise_L1Emulator2023 as customise_L1EmulatorGEM
+#process = customise_L1EmulatorGEM(process, 'pt0')
 
 ## RPC-CSC emulator
 from SLHCUpgradeSimulations.Configuration.rpcCustoms import customise_L1Emulator as customise_L1EmulatorRPC
-process = customise_L1EmulatorRPC(process)
+#process = customise_L1EmulatorRPC(process)
 
 ## upgrade CSC TrackFinder
 from SLHCUpgradeSimulations.Configuration.muonCustoms import customise_csc_L1TrackFinder
@@ -97,7 +98,7 @@ process.l1extraParticles.ignoreHtMiss = cms.bool(False)
 
 ## add pile-up to the digi step
 from GEMCode.GEMValidation.InputFileHelpers import addPileUp
-process = addPileUp(process, pu)
+#process = addPileUp(process, pu)
 
 ## input commands
 process.source = cms.Source("PoolSource",
@@ -109,7 +110,9 @@ process.source = cms.Source("PoolSource",
 ## input
 from GEMCode.SimMuL1.GEMCSCTriggerSamplesLib import eosfiles
 from GEMCode.GEMValidation.InputFileHelpers import useInputDir
-process = useInputDir(process, eosfiles['_pt2-50_PU0_SLHC10_2023Muon'], True)
+dataset = '_Nu_SLHC12_2023Muon_PU140'
+dataset = "_pt2-50_SLHC11_2023Muon_PU140"
+process = useInputDir(process, eosfiles[dataset], True)
 
 
 physics = False
