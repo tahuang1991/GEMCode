@@ -1,3 +1,10 @@
+## pick your scenario:
+## 1: 2019
+## 2: 2019WithGem
+## 3: 2023Muon
+
+scenario = 2
+
 ## This configuration runs the DIGI+L1Emulator step
 import os
 import FWCore.ParameterSet.Config as cms
@@ -9,95 +16,37 @@ process.load('Configuration.StandardSequences.Services_cff')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
-process.load('Configuration.Geometry.GeometryExtended2023MuonReco_cff')
-process.load('Configuration.Geometry.GeometryExtended2023Muon_cff')
+if scenario is 1 or scenario is 2:
+    process.load('Configuration.Geometry.GeometryExtended2019Reco_cff')
+    process.load('Configuration.Geometry.GeometryExtended2019_cff')
+elif scenario is 3:
+    process.load('Configuration.Geometry.GeometryExtended2023MuonReco_cff')
+    process.load('Configuration.Geometry.GeometryExtended2023Muon_cff')
+else:
+    print 'Something wrong with geometry'
 process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
-process.load('Configuration.StandardSequences.Digi_cff')
-process.load("Configuration.StandardSequences.L1Emulator_cff")
+process.load("Configuration.StandardSequences.SimL1Emulator_cff")
 process.load("Configuration.StandardSequences.L1Extra_cff")
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 
-################### Take inputs from crab.cfg file ##############
-from FWCore.ParameterSet.VarParsing import VarParsing
-options = VarParsing ('python')
-options.register ('pu',
-                  140,
-                  VarParsing.multiplicity.singleton,
-                  VarParsing.varType.float,
-                  "PU: 100  default")
-
-options.register ('ptdphi',
-                  'pt0',
-                  VarParsing.multiplicity.singleton,
-                  VarParsing.varType.string,
-                  "ptdphi: 0 GeV/c default")
-
-import sys
-
-if len(sys.argv) > 0:
-    last = sys.argv.pop()
-    sys.argv.extend(last.split(","))
-    print sys.argv
-    
-if hasattr(sys, "argv") == True:
-    options.parseArguments()
-    pu = options.pu
-    ptdphi = options.ptdphi
-    print 'Using pu: %f' % pu
-    print 'Using ptdphi: %s GeV' % ptdphi
-    
-#--------------------------------------------------------------------------------
-
-
-## global tag for 2019 upgrade studies
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgradePLS3', '')
+if scenario is 1 or scenario is 2:
+    process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2019', '')
+elif scenario is 3:
+    process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgradePLS3', '')    
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 
-## GEM digitizer
-from SimMuon.GEMDigitizer.customizeGEMDigi import customize_digi_addGEM_muon_only
-process = customize_digi_addGEM_muon_only(process)
+## calibration
+from CalibMuon.CSCCalibration.CSCIndexer_cfi import CSCIndexerESProducer
+process.CSCIndexerESProducer= CSCIndexerESProducer
 
-## upgrade CSC geometry 
-from SLHCUpgradeSimulations.Configuration.muonCustoms import unganged_me1a_geometry
-process = unganged_me1a_geometry(process)
-
-## upgrade CSC digitizer
-from SLHCUpgradeSimulations.Configuration.muonCustoms import digitizer_timing_pre3_median
-process = digitizer_timing_pre3_median(process)
-
-## upgrade CSC L1 customizations
-from SLHCUpgradeSimulations.Configuration.muonCustoms import customise_csc_L1Stubs 
-process = customise_csc_L1Stubs(process)
-
-## GEM-CSC emulator
-from SLHCUpgradeSimulations.Configuration.gemCustoms import customise_L1Emulator as customise_L1EmulatorGEM
-process = customise_L1EmulatorGEM(process, 'pt0')
-
-## RPC-CSC emulator
-from SLHCUpgradeSimulations.Configuration.rpcCustoms import customise_L1Emulator as customise_L1EmulatorRPC
-process = customise_L1EmulatorRPC(process)
-
-## upgrade CSC TrackFinder
-from SLHCUpgradeSimulations.Configuration.muonCustoms import customise_csc_L1TrackFinder
-process = customise_csc_L1TrackFinder(process)
-
-## upgrade L1Extra step
-from SLHCUpgradeSimulations.Configuration.muonCustoms import customise_csc_L1Extra_allsim
-process = customise_csc_L1Extra_allsim(process)
-process.l1extraParticles.centralBxOnly = cms.bool(True)
-process.l1extraParticles.produceMuonParticles = cms.bool(True)
-process.l1extraParticles.produceCaloParticles = cms.bool(False)
-process.l1extraParticles.ignoreHtMiss = cms.bool(False)
-
-## add pile-up to the digi step
-from GEMCode.GEMValidation.InputFileHelpers import addPileUp
-process = addPileUp(process, pu)
+from CalibMuon.CSCCalibration.CSCChannelMapper_cfi import CSCChannelMapperESProducer
+process.CSCChannelMapperESProducer= CSCChannelMapperESProducer
 
 ## input commands
 process.source = cms.Source("PoolSource",
@@ -109,7 +58,9 @@ process.source = cms.Source("PoolSource",
 ## input
 from GEMCode.SimMuL1.GEMCSCTriggerSamplesLib import eosfiles
 from GEMCode.GEMValidation.InputFileHelpers import useInputDir
-process = useInputDir(process, eosfiles['_pt2-50_PU0_SLHC10_2023Muon'], True)
+dataset = '_Nu_SLHC12_2023Muon_PU140'
+dataset = "_pt2-50_SLHC11_2023Muon_PU140"
+process = useInputDir(process, eosfiles[dataset], True)
 
 
 physics = False
@@ -166,7 +117,6 @@ if not physics:
 
 ## custom sequences
 process.mul1 = cms.Sequence(
-#  process.pdigi *
   process.SimL1MuTriggerPrimitives *
   process.SimL1MuTrackFinders *
   process.simRpcTriggerDigis *
@@ -175,7 +125,6 @@ process.mul1 = cms.Sequence(
 )
 
 process.muL1Short = cms.Sequence(
-#  process.pdigi *
   process.simCscTriggerPrimitiveDigis * 
   process.SimL1MuTrackFinders *
   process.simGmtDigis *
@@ -185,18 +134,35 @@ process.muL1Short = cms.Sequence(
 ## define path-steps
 shortRun = False
 if shortRun:
-    process.l1emu_step      = cms.Path(process.muL1Short)
+    process.L1simulation_step = cms.Path(process.muL1Short)
 else: 
-    process.l1emu_step      = cms.Path(process.mul1)
-process.endjob_step     = cms.Path(process.endOfProcess)
-process.out_step        = cms.EndPath(process.output)
+    process.L1simulation_step = cms.Path(process.mul1)
+process.endjob_step = cms.Path(process.endOfProcess)
+process.out_step = cms.EndPath(process.output)
 
 ## Schedule definition
 process.schedule = cms.Schedule(
-    process.l1emu_step,
+    process.L1simulation_step,
     process.endjob_step,
     process.out_step
 )
+
+## customization
+if scenario is 1:
+    from SLHCUpgradeSimulations.Configuration.combinedCustoms import cust_2019
+    process = cust_2019(process)
+elif scenario is 2:
+    from SLHCUpgradeSimulations.Configuration.combinedCustoms import cust_2019WithGem
+    process = cust_2019WithGem(process)
+elif scenario is 3:
+    from SLHCUpgradeSimulations.Configuration.combinedCustoms import cust_2023Muon
+    process = cust_2023Muon(process)
+
+## some extra L1 customs
+process.l1extraParticles.centralBxOnly = cms.bool(True)
+process.l1extraParticles.produceMuonParticles = cms.bool(True)
+process.l1extraParticles.produceCaloParticles = cms.bool(False)
+process.l1extraParticles.ignoreHtMiss = cms.bool(False)
 
 ## messages
 print
