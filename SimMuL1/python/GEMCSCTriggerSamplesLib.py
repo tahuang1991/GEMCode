@@ -146,5 +146,5 @@ eosfiles['_pt2-50_SLHC11_2023Muon_PU200'] = ['/eos/uscms/store/user/lpcgem/dildi
 eosfiles['_pt2-50_SLHC11_2023Muon_PU400'] = ['/eos/uscms/store/user/lpcgem/dildick/SingleMuPt2-50_1M_SLHC11_2023Muon/SingleMuPt2-50_1M_SLHC11_2023Muon_DIGI_PU400/be928a0f27846c843481f6720d526da2/']
 
 eosfiles['_Nu_SLHC12_2023Muon_PU140'] = ['/eos/uscms/store/user/lpcgem/jlee/SingleNu_cfi_GEN_SIM/SingleNu_SLHC12_2023Muon_DIGI_PU140/3d13cbaabc944c94dfc4b7e14635daa0/']
-eosfiles['_Nu_SLHC12_2023Muon_PU140_geonmo'] = ['/eos/uscms/store/user/lpcgem/geonmo/SingleNu_cfi_GEN_SIM/SingleNu_SLHC12_2023Muon_DIGI_PU140v2/6b50ed2a008d8a47a360507d169521e1']
+eosfiles['_Nu_SLHC12_2023Muon_PU140_geonmo'] = ['/eos/uscms/store/user/lpcgem/geonmo/SingleNu_cfi_GEN_SIM/SingleNu_SLHC12_2023Muon_DIGI_PU140v2/6b50ed2a008d8a47a360507d169521e1/']
 eosfiles['_Nu_SLHC12_2023Muon_PU400'] = ['/eos/uscms/store/user/lpcgem/aysen/SingleNu_cfi_GEN_SIM/SingleNu_SLHC11_2023Muon_DIGI_PU400_batch01/be928a0f27846c843481f6720d526da2/']
