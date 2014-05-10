@@ -28,13 +28,13 @@ def gemChamberNumbering(plotter):
     XposCSC = 36*[None]
     YposCSC = 36*[None]
 
-    plotter.treeGEMSimHits.Draw("globalY:globalX",AND(rm1,ri1,st1,odd)) 
+    plotter.treeGEMSimHits.Draw("globalY:globalX",AND(re(-1),ri(1),st(1),odd)) 
     h = gPad.FindObject("Graph")
     GEMglobalzx = h.Clone()
     GEMglobalzx.SetMarkerColor(kRed)
     GEMglobalzx.SetMarkerSize(0.1)
               
-    plotter.treeCSCSimHits.Draw("globalY:globalX",AND(ec2,ri1,st1,odd)) 
+    plotter.treeCSCSimHits.Draw("globalY:globalX",AND(re(-1),ri(1),st(1),odd)) 
     h = gPad.FindObject("Graph")
     CSCglobalzx = h.Clone()
     CSCglobalzx.SetMarkerColor(kBlue)
