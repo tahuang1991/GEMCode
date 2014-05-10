@@ -19,7 +19,7 @@ SimTrackMatching = cms.PSet(
     simTrack = cms.PSet(
         verbose = cms.int32(0),
         input = cms.InputTag('g4SimHits'),
-        minPt = cms.double(1.5),
+        minPt = cms.double(20.0),
         maxPt = cms.double(999.),
         minEta = cms.double(1.45),
         maxEta = cms.double(4.0),
@@ -212,7 +212,8 @@ SimTrackMatching = cms.PSet(
     ),
     ## TrackFinder tracks
     cscTfTrack = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
+        run = cms.bool(True),
         input = cms.InputTag("simCsctfTrackDigis"),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
@@ -232,6 +233,7 @@ SimTrackMatching = cms.PSet(
     ## TrackFinder candidates
     cscTfCand = cms.PSet(
         verbose = cms.int32(0),
+        run = cms.bool(True),
         input = cms.InputTag("simCsctfDigis", "CSC"),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
@@ -257,12 +259,14 @@ SimTrackMatching = cms.PSet(
     ## GMT and L1Extra
     gmtRegCand = cms.PSet(
         verbose = cms.int32(0),
+        run = cms.bool(False),
         input = cms.InputTag("simGmtDigis"),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
     ),
     gmtCand = cms.PSet(
         verbose = cms.int32(0),
+        run = cms.bool(False),
         input = cms.InputTag("simGmtDigis"),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
