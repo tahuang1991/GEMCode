@@ -38,6 +38,7 @@ GEMCSCTriggerRateTree::GEMCSCTriggerRateTree(const edm::ParameterSet& iConfig):
   // TFTrack
   auto cscTfTrack = simTrackMatching.getParameter<edm::ParameterSet>("cscTfTrack");
   inputCSCTFTrack_ = cscTfTrack.getParameter<edm::InputTag>("input");
+  runCSCTFTrack_ = cscTfTrack.getParameter<bool>("run");
   verboseCSCTFTrack_ = cscTfTrack.getParameter<int>("verbose");
   minBXCSCTFTrack_ = cscTfTrack.getParameter<int>("minBX");
   maxBXCSCTFTrack_ = cscTfTrack.getParameter<int>("maxBX");
@@ -45,6 +46,7 @@ GEMCSCTriggerRateTree::GEMCSCTriggerRateTree(const edm::ParameterSet& iConfig):
   // TFCand
   auto cscTfCand = simTrackMatching.getParameter<edm::ParameterSet>("cscTfCand");
   inputCSCTFCand_ = cscTfCand.getParameter<edm::InputTag>("input");
+  runCSCTFCand_ = cscTfCand.getParameter<bool>("run");
   verboseCSCTFCand_ = cscTfCand.getParameter<int>("verbose");
   minBXCSCTFCand_ = cscTfCand.getParameter<int>("minBX");
   maxBXCSCTFCand_ = cscTfCand.getParameter<int>("maxBX");
@@ -64,12 +66,14 @@ GEMCSCTriggerRateTree::GEMCSCTriggerRateTree(const edm::ParameterSet& iConfig):
   // GMT
   auto gmtRegCand = simTrackMatching.getParameter<edm::ParameterSet>("gmtRegCand");
   verboseGMTRegCand_ = gmtRegCand.getParameter<int>("verbose");
+  runGMTRegCand_ = gmtRegCand.getParameter<bool>("run");
   minBXGMTRegCand_ = gmtRegCand.getParameter<int>("minBX");
   maxBXGMTRegCand_ = gmtRegCand.getParameter<int>("maxBX");
 
   auto gmtCand = simTrackMatching.getParameter<edm::ParameterSet>("gmtCand");
   inputGMTCand_ = gmtCand.getParameter<edm::InputTag>("input"); 
   verboseGMTCand_ = gmtCand.getParameter<int>("verbose");
+  runGMTCand_ = gmtCand.getParameter<bool>("run");
   minBXGMTCand_ = gmtCand.getParameter<int>("minBX");
   maxBXGMTCand_ = gmtCand.getParameter<int>("maxBX");
 
@@ -422,10 +426,10 @@ GEMCSCTriggerRateTree::analyze(const edm::Event& iEvent, const edm::EventSetup& 
   analyzeCLCTRate(iEvent);
   analyzeLCTRate(iEvent);
   analyzeMPCLCTRate(iEvent);
-  analyzeTFTrackRate(iEvent);
-  analyzeTFCandRate(iEvent);
-  analyzeGMTRegCandRate(iEvent);
-  analyzeGMTCandRate(iEvent);
+  if (runCSCTFTrack_) analyzeTFTrackRate(iEvent);
+  if (runCSCTFTrack_ and runCSCTFCand_) analyzeTFCandRate(iEvent);
+  if (runCSCTFTrack_ and runCSCTFCand_ and runGMTRegCand_) analyzeGMTRegCandRate(iEvent);
+  if (runCSCTFTrack_ and runCSCTFCand_ and runGMTRegCand_ and runGMTCand_) analyzeGMTCandRate(iEvent);
 }
 
 // ================================================================================================
