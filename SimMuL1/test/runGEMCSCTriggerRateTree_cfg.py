@@ -8,7 +8,7 @@ process = cms.Process('GEMCSCTRGANA')
 cmssw = os.getenv( "CMSSW_VERSION" )
 
 ## steering
-pileup = 0
+pileup = 140
 events = 1000000
 #sample = 'dimu'
 sample = 'minbias'
@@ -29,7 +29,7 @@ process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
 process.load('L1TriggerConfig.L1ScalesProducers.L1MuTriggerScalesConfig_cff')
 process.load("SimGeneral.HepPDTESSource.pythiapdt_cfi")
 process.load('Configuration.StandardSequences.Digi_cff')
-process.load("Configuration.StandardSequences.L1Emulator_cff")
+process.load("Configuration.StandardSequences.SimL1Emulator_cff")
 process.load("Configuration.StandardSequences.L1Extra_cff")
 process.load("RecoMuon.TrackingTools.MuonServiceProxy_cff")
 
@@ -64,7 +64,7 @@ process.options = cms.untracked.PSet(
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring(
-        'file:out_L1.root'
+        'file:out_L1_Nu_SLHC12_2023Muon_PU140_geonmo.root'
     )
 )
 
