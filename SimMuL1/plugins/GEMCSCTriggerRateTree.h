@@ -245,11 +245,13 @@ class GEMCSCTriggerRateTree : public edm::EDAnalyzer
   
   edm::InputTag inputCSCTFTrack_;
   int verboseCSCTFTrack_;
+  bool runCSCTFTrack_;
   int minBXCSCTFTrack_;
   int maxBXCSCTFTrack_;
   
   edm::InputTag inputCSCTFCand_;
   int verboseCSCTFCand_;
+  bool runCSCTFCand_;
   int minBXCSCTFCand_;
   int maxBXCSCTFCand_;
 
@@ -265,11 +267,13 @@ class GEMCSCTriggerRateTree : public edm::EDAnalyzer
 
   edm::InputTag inputGMTRegCand_;
   int verboseGMTRegCand_;
+  bool runGMTRegCand_;
   int minBXGMTRegCand_;
   int maxBXGMTRegCand_;
 
   edm::InputTag inputGMTCand_;
   int verboseGMTCand_;
+  bool runGMTCand_;
   int minBXGMTCand_;
   int maxBXGMTCand_;
 
