@@ -2,128 +2,6 @@
 
 files = {}
 
-files['_pat2'] = ['/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/NuGun_PU100_L1_pat2/']
-files['_pat6'] = ['/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/NuGun_PU100_L1_pat6/']
-files['_pat8'] = ['/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/NuGun_PU100_L1_pat8/']
-
-files['_gem_pat2'] = ['/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM_NuGun_PU100_L1_pat2/']
-files['_gem_pat6'] = ['/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM_NuGun_PU100_L1_pat6/']
-files['_gem_pat8'] = ['/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM_NuGun_PU100_L1_pat8/']
-
-files['_def_pat2'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/khotilov/GEN-SIM-NeutrinoGun_v3/GEM_NeutrinoGun_110K_pu100_DIGI_L1/2d6d66b06450f6f4eca385bc78cbc39a/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/khotilov/GEN-SIM-NeutrinoGun_v3/GEM_NeutrinoGun_pu100_DIGI_L1/2d6d66b06450f6f4eca385bc78cbc39a/']
-
-files['_def_pat2_other'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/khotilov/MuomGUN_SIM_Pt2-50_100k/MuonGun_DIGI_L1_Pt2-50_100k/29891ddb18281fff4c42a6e5f5d4bc55/']
-
-files['_def_pat8'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM_NuGun_PU100_L1_def_pat8_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM_NuGun_PU100_L1_def_pat8/']
-
-files['_gem98_pt05_pat2'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt05_pat2_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt05_pat2_128K/']
-files['_gem98_pt06_pat2'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt06_pat2_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt06_pat2_128K/']
-files['_gem98_pt10_pat2'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt10_pat2_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt10_pat2_128K/']
-files['_gem98_pt15_pat2'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt15_pat2_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt15_pat2_128K/']
-files['_gem98_pt20_pat2'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt20_pat2_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt20_pat2_128K/']
-files['_gem98_pt30_pat2'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt30_pat2_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt30_pat2_128K/']
-files['_gem98_pt40_pat2'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt40_pat2_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt40_pat2_128K/']
-
-files['_gem95_pt05_pat2'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_NuGun_PU100_L1_pt05_pat2_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_NuGun_PU100_L1_pt05_pat2_128K/']
-files['_gem95_pt10_pat2'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_NuGun_PU100_L1_pt10_pat2_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_NuGun_PU100_L1_pt10_pat2_128K/']
-files['_gem95_pt15_pat2'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_NuGun_PU100_L1_pt15_pat2_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_NuGun_PU100_L1_pt15_pat2_128K/']
-files['_gem95_pt20_pat2'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_NuGun_PU100_L1_pt20_pat2_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_NuGun_PU100_L1_pt20_pat2_128K/']
-files['_gem95_pt30_pat2'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_NuGun_PU100_L1_pt30_pat2_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_NuGun_PU100_L1_pt30_pat2_128K/']
-files['_gem95_pt40_pat2'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_NuGun_PU100_L1_pt40_pat2_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_NuGun_PU100_L1_pt40_pat2_128K/']
-
-files['_gem98_pt05_pat8'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt05_pat8_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt05_pat8_128K/']
-files['_gem98_pt06_pat8'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt06_pat8_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt06_pat8_128K/']
-files['_gem98_pt10_pat8'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt10_pat8_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt10_pat8_128K/']
-files['_gem98_pt15_pat8'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt15_pat8_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt15_pat8_128K/']
-files['_gem98_pt20_pat8'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt20_pat8_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt20_pat8_128K/']
-files['_gem98_pt30_pat8'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt30_pat8_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt30_pat8_128K/']
-files['_gem98_pt40_pat8'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt40_pat8_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_NuGun_PU100_L1_pt40_pat8_128K/']
-
-files['_gem95_pt05_pat8'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_NuGun_PU100_L1_pt05_pat8_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_NuGun_PU100_L1_pt05_pat8_128K/']
-files['_gem95_pt10_pat8'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_NuGun_PU100_L1_pt10_pat8_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_NuGun_PU100_L1_pt10_pat8_128K/']
-files['_gem95_pt15_pat8'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_NuGun_PU100_L1_pt15_pat8_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_NuGun_PU100_L1_pt15_pat8_128K/']
-files['_gem95_pt20_pat8'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_NuGun_PU100_L1_pt20_pat8_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_NuGun_PU100_L1_pt20_pat8_128K/']
-files['_gem95_pt30_pat8'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_NuGun_PU100_L1_pt30_pat8_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_NuGun_PU100_L1_pt30_pat8_128K/']
-files['_gem95_pt40_pat8'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_NuGun_PU100_L1_pt40_pat8_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_NuGun_PU100_L1_pt40_pat8_128K/']
-
-files['_gem98_pt10_pat2_PU0'] = ['/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_MuGun_PU0_L1_pt10_pat2/']
-files['_gem98_pt15_pat2_PU0'] = ['/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_MuGun_PU0_L1_pt15_pat2/']
-files['_gem98_pt20_pat2_PU0'] = ['/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_MuGun_PU0_L1_pt20_pat2/']
-files['_gem98_pt30_pat2_PU0'] = ['/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_MuGun_PU0_L1_pt30_pat2/']
-files['_gem98_pt40_pat2_PU0'] = ['/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM98_MuGun_PU0_L1_pt40_pat2/']
-
-files['_gem95_pt10_pat2_PU0'] = ['/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_MuGun_PU0_L1_pt10_pat2/']
-files['_gem95_pt20_pat2_PU0'] = ['/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_MuGun_PU0_L1_pt20_pat2/']
-files['_gem95_pt30_pat2_PU0'] = ['/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_MuGun_PU0_L1_pt30_pat2/']
-files['_gem95_pt40_pat2_PU0'] = ['/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM95_MuGun_PU0_L1_pt40_pat2/']
-
-files['_ntup_pt40_pat2'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/yasser1/yasser/muonGun_50k_pT40_lpcgem/MuomGunPt40L1CSC50k_digi/82325e40d6202e6fec2dd983c477f3ca/']
-
-files['_gem_dphi_pat2_PU0'] = ['/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM_MuGun_PU0_L1_dphi_pat2/']
-files['_gem_dphi_pat2_PU100'] = [
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM_NuGun_PU100_L1_dphi_pat2_110K/',
-    '/pnfs/cms/WAX/11/store/user/lpcgem/khotilov/GEM_NuGun_PU100_L1_dphi_pat2_128K/']
-    
-## new batch of samples on EOS
-
 ## produced on top of https://github.com/gem-sw/cmssw/tree/adb1cc3e0fad25bc0da2e4430e3e0965160a58dc
 ## 6 partition geometry + post CSC TF pt bug + detailed GEM digi model
 eosfiles = {}
@@ -140,10 +18,17 @@ eosfiles['_pt2-50_PU0_SLHC10_2023Muon'] = ['/eos/uscms/store/user/dildick/dildic
 eosfiles['_pt2-50_SLHC11_2023Muon'] = ['/eos/uscms/store/user/lpcgem/dildick/SingleMuPt2-50_1M_SLHC11_2023Muon/SingleMuPt2-50_1M_SLHC11_2023Muon/c7fc9200318437f38716754e18c29ddf/']
 
 ## digi samples 
-eosfiles['_pt2-50_SLHC11_2023Muon_PU0'] = ['/eos/uscms/store/user/lpcgem/dildick/SingleMuPt2-50_1M_SLHC11_2023Muon/SingleMuPt2-50_1M_SLHC11_2023Muon_DIGI_PU0/abb92f2d576c84bfcdd5da9b6637acf8/']
-eosfiles['_pt2-50_SLHC11_2023Muon_PU140'] = ['/eos/uscms/store/user/lpcgem/dildick/SingleMuPt2-50_1M_SLHC11_2023Muon/SingleMuPt2-50_1M_SLHC11_2023Muon_DIGI_PU140/3d13cbaabc944c94dfc4b7e14635daa0/']
-eosfiles['_pt2-50_SLHC11_2023Muon_PU200'] = ['/eos/uscms/store/user/lpcgem/dildick/SingleMuPt2-50_1M_SLHC11_2023Muon/SingleMuPt2-50_1M_SLHC11_2023Muon_DIGI_PU200/c92741df1130b71bb884f6fba370a358/']
-eosfiles['_pt2-50_SLHC11_2023Muon_PU400'] = ['/eos/uscms/store/user/lpcgem/dildick/SingleMuPt2-50_1M_SLHC11_2023Muon/SingleMuPt2-50_1M_SLHC11_2023Muon_DIGI_PU400/be928a0f27846c843481f6720d526da2/']
-
 eosfiles['_Nu_SLHC12_2023Muon_PU140'] = ['/eos/uscms/store/user/lpcgem/jlee/SingleNu_cfi_GEN_SIM/SingleNu_SLHC12_2023Muon_DIGI_PU140/3d13cbaabc944c94dfc4b7e14635daa0/']
-eosfiles['_Nu_SLHC12_2023Muon_PU400'] = ['/eos/uscms/store/user/lpcgem/aysen/SingleNu_cfi_GEN_SIM/SingleNu_SLHC11_2023Muon_DIGI_PU400_batch01/be928a0f27846c843481f6720d526da2/']
+eosfiles['_Nu_SLHC12_2023Muon_PU140_geonmo'] = ['/eos/uscms/store/user/lpcgem/geonmo/SingleNu_cfi_GEN_SIM/SingleNu_SLHC12_2023Muon_DIGI_PU140v2/6b50ed2a008d8a47a360507d169521e1/']
+eosfiles['_Nu_SLHC12_2023Muon_PU400'] = ['/eos/uscms/store/user/lpcgem/aysen/SingleNu_cfi_GEN_SIM/SingleNu_SLHC11_2023Muon_DIGI_PU400_v3/6869af1b28a0650484eca6fece69b429/']
+
+
+## Sven's samples for bending angle calculations
+eosfiles['_SingleMuPt3_SLHC12_2023Muon_PU0_L1'] = ['/eos/uscms/store/user/lpcgem/dildick/SingleMuPt3_SLHC12_GEN_SIM_DIGI_L1/SingleMuPt3_SLHC12_GEN_SIM_DIGI_L1/d1c0a6121a5b67989597420fd3bcad81/']
+eosfiles['_SingleMuPt5_SLHC12_2023Muon_PU0_L1'] = ['/eos/uscms/store/user/lpcgem/dildick/SingleMuPt5_SLHC12_GEN_SIM_DIGI_L1/SingleMuPt5_SLHC12_GEN_SIM_DIGI_L1/7bd82d6abf1b247a8e77eabb8d0358b4/']
+eosfiles['_SingleMuPt7_SLHC12_2023Muon_PU0_L1'] = ['/eos/uscms/store/user/lpcgem/dildick/SingleMuPt7_SLHC12_GEN_SIM_DIGI_L1/SingleMuPt7_SLHC12_GEN_SIM_DIGI_L1/82bc934ea88643c7d53d811e1ce09a7e/']
+eosfiles['_SingleMuPt10_SLHC12_2023Muon_PU0_L1'] = ['/eos/uscms/store/user/lpcgem/dildick/SingleMuPt10_SLHC12_GEN_SIM_DIGI_L1/SingleMuPt10_SLHC12_GEN_SIM_DIGI_L1/f216a8c46e3ad5c04305450b1e11f485/']
+eosfiles['_SingleMuPt15_SLHC12_2023Muon_PU0_L1'] = ['/eos/uscms/store/user/lpcgem/dildick/SingleMuPt15_SLHC12_GEN_SIM_DIGI_L1/SingleMuPt15_SLHC12_GEN_SIM_DIGI_L1/1fd2b692590369b313166b87828a5e55/']
+eosfiles['_SingleMuPt20_SLHC12_2023Muon_PU0_L1'] = ['/eos/uscms/store/user/lpcgem/dildick/SingleMuPt20_SLHC12_GEN_SIM_DIGI_L1/SingleMuPt20_SLHC12_GEN_SIM_DIGI_L1/9f43e5aa0db40ecf4c6ad4f76ff3ba57/']
+eosfiles['_SingleMuPt30_SLHC12_2023Muon_PU0_L1'] = ['/eos/uscms/store/user/lpcgem/dildick/SingleMuPt30_SLHC12_GEN_SIM_DIGI_L1/SingleMuPt30_SLHC12_GEN_SIM_DIGI_L1/4c222e5f541a2a909af90d52da92bbae/']
+eosfiles['_SingleMuPt40_SLHC12_2023Muon_PU0_L1'] = ['/eos/uscms/store/user/lpcgem/dildick/SingleMuPt40_SLHC12_GEN_SIM_DIGI_L1/SingleMuPt40_SLHC12_GEN_SIM_DIGI_L1/0f0ae35ebf4e35077884bcb7db7d7ad0/']
