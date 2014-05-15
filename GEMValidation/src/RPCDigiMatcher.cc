@@ -15,6 +15,7 @@ RPCDigiMatcher::RPCDigiMatcher(SimHitMatcher& sh)
   matchDeltaStrip_ = rpcDigi_.getParameter<int>("matchDeltaStrip");
   verboseDigi_ = rpcDigi_.getParameter<int>("verbose");
 
+
   matchDeltaStrip_ = conf().getUntrackedParameter<int>("matchDeltaStripRPC", 1);
 
   setVerbose(conf().getUntrackedParameter<int>("verboseRPCDigi", 0));
@@ -34,6 +35,7 @@ RPCDigiMatcher::init()
   edm::Handle<RPCDigiCollection> rpc_digis;
   event().getByLabel(rpcDigiInput_, rpc_digis);
   matchDigisToSimTrack(*rpc_digis.product());
+
 }
 
 
@@ -66,10 +68,14 @@ RPCDigiMatcher::matchDigisToSimTrack(const RPCDigiCollection& digis)
 
       auto mydigi = make_digi(id, d->strip(), d->bx(), RPC_STRIP);
       detid_to_digis_[id].push_back(mydigi);
-      chamber_to_digis_[ p_id.chamberId().rawId() ].push_back(mydigi);
+      chamber_to_digis_[p_id.chamberId().rawId()].push_back(mydigi);
+      //std::cout << "RPC det id " << (RPCDetId)id << " "<< p_id << std::endl;
+      //std::cout<<"  chamber raw id "<<  p_id.chamberId().rawId()<<""<< p_id.chamberId() << std::endl;
     }
   }
 }
+
+
 
 
 std::set<unsigned int>
@@ -81,13 +87,6 @@ RPCDigiMatcher::detIds() const
 }
 
 
-std::set<unsigned int>
-RPCDigiMatcher::chamberIds() const
-{
-  std::set<unsigned int> result;
-  for (auto& p: chamber_to_digis_) result.insert(p.first);
-  return result;
-}
 
 const matching::DigiContainer&
 RPCDigiMatcher::digisInDetId(unsigned int detid) const
@@ -96,16 +95,36 @@ RPCDigiMatcher::digisInDetId(unsigned int detid) const
   return detid_to_digis_.at(detid);
 }
 
-const matching::DigiContainer&
-RPCDigiMatcher::digisInChamber(unsigned int detid) const
+std::set<unsigned int>
+RPCDigiMatcher::chamberIds() const
 {
-  if (chamber_to_digis_.find(detid) == chamber_to_digis_.end()) return no_digis_;
-  return chamber_to_digis_.at(detid);
+   std::set<unsigned int> result;
+   for (auto& p: chamber_to_digis_) result.insert(p.first);
+   return result;
+}
+
+const matching::DigiContainer&
+RPCDigiMatcher::digisInChamber(unsigned int detid) const  //use chamber raw id here
+{
+   if (chamber_to_digis_.find(detid) == chamber_to_digis_.end()) return no_digis_;
+   return chamber_to_digis_.at(detid);
+}
+
+int
+RPCDigiMatcher::nStrips() const
+{
+  int n = 0;
+  auto ids = detIds();
+  for (auto id: ids)
+  {
+    n += digisInDetId(id).size();
+  }
+  return n;
 }
 
 
 std::set<int>
-RPCDigiMatcher::stripNumbersInDetId(unsigned int detid) const
+RPCDigiMatcher::stripsInDetId(unsigned int detid) const
 {
   set<int> result;
   auto digis = digisInDetId(detid);

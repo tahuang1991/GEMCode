@@ -1,10 +1,11 @@
-#ifndef RPCValidation_RPCDigiMatcher_h
-#define RPCValidation_RPCDigiMatcher_h
+#ifndef GEMValidation_RPCDigiMatcher_h
+#define GEMValidation_RPCDigiMatcher_h
 
 /**\class DigiMatcher
 
- Description: Matching of Digis for SimTrack in RPC
+ Description: Matching of Digis for SimTrack in GEM
 
+ Original Author:  "Vadim Khotilovich"
 */
 
 #include "DigiMatcher.h"
@@ -12,7 +13,7 @@
 #include "FWCore/Utilities/interface/InputTag.h"
 
 #include "DataFormats/Common/interface/DetSetVector.h"
-#include "DataFormats/RPCDigi/interface/RPCDigiCollection.h"
+#include <DataFormats/RPCDigi/interface/RPCDigiCollection.h>
 
 #include <vector>
 #include <map>
@@ -34,14 +35,16 @@ public:
   // chamber detIds with digis
   std::set<unsigned int> chamberIds() const;
 
+
   // RPC digis from a particular partition, chamber or superchamber
   const DigiContainer& digisInDetId(unsigned int) const;
   const DigiContainer& digisInChamber(unsigned int) const;
 
-  // #layers with digis from this simtrack
-  int nLayersWithDigisInSuperChamber(unsigned int) const;
+  /// How many pads in RPC did this simtrack get in total?
+  int nStrips() const;
 
-  std::set<int> stripNumbersInDetId(unsigned int) const;
+
+  std::set<int> stripsInDetId(unsigned int) const;
 
   // what unique partitions numbers with digis from this simtrack?
   std::set<int> partitionNumbers() const;
@@ -60,6 +63,7 @@ private:
 
   std::map<unsigned int, DigiContainer> detid_to_digis_;
   std::map<unsigned int, DigiContainer> chamber_to_digis_;
+
 
   bool verboseDigi_;
 };
