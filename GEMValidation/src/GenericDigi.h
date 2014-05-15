@@ -24,7 +24,7 @@
 
 namespace matching {
 
-typedef enum {INVALID=0, GEM_STRIP, GEM_PAD, GEM_COPAD, CSC_STRIP, CSC_WIRE, CSC_CLCT, CSC_ALCT, CSC_LCT} DigiType;
+typedef enum {INVALID=0, GEM_STRIP, GEM_PAD, GEM_COPAD, CSC_STRIP, CSC_WIRE, CSC_CLCT, CSC_ALCT, CSC_LCT, RPC_STRIP} DigiType;
 
 // digi info keeper: <detid, channel, bx, type, quality, bend, WireGroup>
 typedef std::tuple<unsigned int, int, int, DigiType, int, int, int, float> Digi;
