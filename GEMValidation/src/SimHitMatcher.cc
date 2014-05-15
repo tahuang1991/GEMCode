@@ -208,7 +208,7 @@ SimHitMatcher::matchSimHitsToSimTrack(std::vector<unsigned int> track_ids,
       rpc_detid_to_hits_[ h.detUnitId() ].push_back(h);
       rpc_hits_.push_back(h);
       RPCDetId layer_id( h.detUnitId() );
-      rpc_chamber_to_hits_[ layer_id.rawId() ].push_back(h);
+      rpc_chamber_to_hits_[ layer_id.chamberId().rawId() ].push_back(h);
     }
     for (auto& h: me0_hits)
     {
@@ -479,8 +479,8 @@ SimHitMatcher::hitsInChamber(unsigned int detid) const
   if (is_rpc(detid))
   {
     RPCDetId id(detid);
-    if (rpc_chamber_to_hits_.find(id.rawId()) == gem_chamber_to_hits_.end()) return no_hits_;
-    return rpc_chamber_to_hits_.at(id.rawId());
+    if (rpc_chamber_to_hits_.find(id.chamberId().rawId()) == gem_chamber_to_hits_.end()) return no_hits_;
+    return rpc_chamber_to_hits_.at(id.chamberId().rawId());
   }
   return no_hits_;
 }
