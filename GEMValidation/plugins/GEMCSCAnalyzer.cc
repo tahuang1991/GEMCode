@@ -20,6 +20,7 @@
 #include "DataFormats/MuonDetId/interface/CSCDetId.h"
 #include "DataFormats/MuonDetId/interface/GEMDetId.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
+#include "DataFormats/MuonDetId/interface/CSCTriggerNumbering.h"
 
 #include "SimDataFormats/TrackingHit/interface/PSimHitContainer.h"
 #include "SimDataFormats/Track/interface/SimTrackContainer.h"
@@ -133,6 +134,10 @@ struct MyTrackEff
   Int_t strip_gemdg_odd; // median digis' strip
   Int_t strip_gemdg_even;
 
+  Char_t has_rpc_dg; // bit1: in odd, bit2: even
+  Int_t strip_rpcdg_odd; // median digis' strip
+  Int_t strip_rpcdg_even;
+
   Char_t bx_pad_odd;
   Char_t bx_pad_even;
   Float_t phi_pad_odd;
@@ -201,6 +206,10 @@ void MyTrackEff::init()
   eta_gemsh_even = -9.;
   strip_gemdg_odd = -9;
   strip_gemdg_even = -9;
+
+  has_rpc_dg = 0; // bit1: in odd, bit2: even
+  strip_rpcdg_odd = -9;
+  strip_rpcdg_even = -9;
 
   bx_pad_odd = -9;
   bx_pad_even = -9;
@@ -272,6 +281,10 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("eta_gemsh_even", &eta_gemsh_even);
   t->Branch("strip_gemdg_odd", &strip_gemdg_odd);
   t->Branch("strip_gemdg_even", &strip_gemdg_even);
+
+  t->Branch("has_rpc_dg", &has_rpc_dg);
+  t->Branch("strip_rpcdg_odd", &strip_rpcdg_odd);
+  t->Branch("strip_rpcdg_even", &strip_rpcdg_even);
 
   t->Branch("bx_pad_odd", &bx_pad_odd);
   t->Branch("bx_pad_even", &bx_pad_even);
@@ -528,6 +541,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 {
   const SimHitMatcher& match_sh = match.simhits();
   const GEMDigiMatcher& match_gd = match.gemDigis();
+  const RPCDigiMatcher& match_rd = match.rpcDigis();
   const CSCDigiMatcher& match_cd = match.cscDigis();
   const CSCStubMatcher& match_lct = match.cscStubs();
   //const TrackMatcher& match_track = match.tracks();
@@ -995,6 +1009,30 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     }
   }
  
+  auto rpc_ch_ids = match_rd.detIds();
+  for (auto d:rpc_ch_ids)
+  {
+    RPCDetId id(d);
+    const int st(detIdToMEStation(id.station(), id.ring()));
+    if (stations_to_use_.count(st) == 0) continue;
+    //meanstrip in rpc 
+   auto rpcdigis = match_rd.digisInDetId(id); 
+   int rpc_medianstrip(match_rd.median(rpcdigis));
+   int cscchamber = CSCTriggerNumbering::chamberFromTriggerLabels(id.sector(), 0, id.station(), id.subsector());
+   //std::cout <<"rpc detid " << id << " csc chamebr:"<< cscchamber << std::endl;
+   bool odd(cscchamber%2 == 1);
+   if (odd)
+   {
+      etrk_[st].has_rpc_dg |= 1;
+      etrk_[st].strip_rpcdg_odd = rpc_medianstrip;
+   }
+   else
+   {
+      etrk_[st].has_rpc_dg |= 2;
+      etrk_[st].strip_rpcdg_even = rpc_medianstrip;
+   }
+  }
+
   for (auto s: stations_to_use_)
   {
     tree_eff_[s]->Fill();
@@ -1319,6 +1357,7 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
 {
   const SimHitMatcher& match_sh = match.simhits();
   const GEMDigiMatcher& match_gd = match.gemDigis();
+  const RPCDigiMatcher& match_rd = match.rpcDigis();
   const CSCDigiMatcher& match_cd = match.cscDigis();
   const CSCStubMatcher& match_lct = match.cscStubs();
   //  const TrackMatcher& match_track = match.tracks();
@@ -1343,6 +1382,21 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
       auto gp = match_sh.simHitsMeanPosition(hits);
       float mean_strip = match_sh.simHitsMeanStrip(hits);
       std::cout << "CSC Chamber: "<<d<<" "<<id<<" layerswithhits:"<<nlayers<<" global eta:"<<gp.eta()<<" mean strip:"<<mean_strip<<endl;
+  }     
+  
+  auto rpc_ch_ids = match_sh.chamberIdsRPC();
+  for (auto d: rpc_ch_ids)
+  {
+      RPCDetId id(d);
+    const int st(detIdToMEStation(id.station(), id.ring()));
+    if (stations_to_use_.count(st) == 0) continue;
+      int nlayers = match_sh.nLayersWithHitsInSuperChamber(d);
+      const auto& hits = match_sh.hitsInChamber(d);
+      auto gp = match_sh.simHitsMeanPosition(hits);
+      float mean_strip = match_sh.simHitsMeanStrip(hits);
+      std::cout << "RPC Chamber: "<<d<<" "<<id<<" layerswithhits:"<<nlayers<<" global eta:"<<gp.eta()<<" mean strip:"<<mean_strip<<endl;
+   int cscchamber = CSCTriggerNumbering::chamberFromTriggerLabels(id.sector(), 0, id.station(), id.subsector());
+   std::cout <<"rpc detid " << id << " csc chamebr:"<< cscchamber << std::endl;
   }     
   
   auto gem_superch_ids = match_sh.superChamberIdsGEM();
@@ -1437,6 +1491,22 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
       {  std::cout << "  "<< *p ; }
       std::cout << std::endl;
   }
+
+  
+  std::cout << "######matching RPC Digi to simtrack " << std::endl;
+  rpc_ch_ids = match_rd.detIds();
+  for (auto d:rpc_ch_ids)
+  {
+    RPCDetId id(d);
+    const int st(detIdToMEStation(id.station(), id.ring()));
+    if (stations_to_use_.count(st) == 0) continue;
+    
+    std::cout<< "RPC chamber: "<<d<<" "<<id<<std::endl; 
+    auto rpcdigis = match_rd.digisInDetId(id); 
+    for (auto p : rpcdigis)
+	std::cout << p << std::endl;
+    }
+
 
   std::cout << "######matching CLCT to Simtrack " << std::endl;
   csc_ch_ids = match_lct.chamberIdsAllCLCT(0);

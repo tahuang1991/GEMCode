@@ -208,7 +208,7 @@ SimHitMatcher::matchSimHitsToSimTrack(std::vector<unsigned int> track_ids,
       rpc_detid_to_hits_[ h.detUnitId() ].push_back(h);
       rpc_hits_.push_back(h);
       RPCDetId layer_id( h.detUnitId() );
-      rpc_chamber_to_hits_[ layer_id.chamberId().rawId() ].push_back(h);
+      rpc_chamber_to_hits_[ layer_id.rawId() ].push_back(h);
     }
     for (auto& h: me0_hits)
     {
@@ -479,8 +479,8 @@ SimHitMatcher::hitsInChamber(unsigned int detid) const
   if (is_rpc(detid))
   {
     RPCDetId id(detid);
-    if (rpc_chamber_to_hits_.find(id.chamberId().rawId()) == gem_chamber_to_hits_.end()) return no_hits_;
-    return rpc_chamber_to_hits_.at(id.chamberId().rawId());
+    if (rpc_chamber_to_hits_.find(id.rawId()) == gem_chamber_to_hits_.end()) return no_hits_;
+    return rpc_chamber_to_hits_.at(id.rawId());
   }
   return no_hits_;
 }
@@ -598,6 +598,10 @@ SimHitMatcher::simHitsMeanStrip(const edm::PSimHitContainer& sim_hits) const
       // convert to half-strip:
       s *= 2.;
     }
+    else if (is_rpc(d))
+    {
+      s = rpcGeometry_->roll(d)->strip(lp);
+    }
     else continue;
     sums += s;
     ++n;
@@ -656,6 +660,24 @@ SimHitMatcher::hitStripsInDetId(unsigned int detid, int margin_n_strips) const
       smax = (smax <= max_nstrips) ? smax : max_nstrips;
       for (int ss = smin; ss <= smax; ++ss) result.insert(ss);
     }
+  }
+  else if ( is_rpc(detid) )
+  {
+    RPCDetId id(detid); 
+    int max_nstrips = rpcGeometry_->roll(id)->nstrips();
+    for (auto& h: simhits)
+    {
+      LocalPoint lp = h.entryPoint();
+      int central_strip = 1 + static_cast<int>(rpcGeometry_->roll(id)->topology().channel(lp));
+    //  int central_strip2 = 1 + static_cast<int>(rpcGeometry_->roll(id)->strip(lp));
+    //  std::cout <<"strip from topology"<< central_strip <<" strip from roll" << central_strip2 <<std::endl; 
+      int smin = central_strip - margin_n_strips;
+      smin = (smin > 0) ? smin : 1;
+      int smax = central_strip + margin_n_strips;
+      smax = (smax <= max_nstrips) ? smax : max_nstrips;
+      for (int ss = smin; ss <= smax; ++ss) result.insert(ss);
+    }
+  
   }
   return result;
 }
