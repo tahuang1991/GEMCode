@@ -165,16 +165,20 @@ class GEMCSCTriggerRateTree : public edm::EDAnalyzer
   
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
 
+  virtual void endJob();
+
   enum trig_cscs {MAX_STATIONS = 4, CSC_TYPES = 10};
-  enum gmtRegCand{CSC=0, DT, RPCb, RPCf};
+  enum tfTrack{CSCTF=0, DTTF, RPCPAC};
+  enum tfCand{CSCCand=0, DTCand, RPCbCand, RPCfCand};
+  enum gmtRegCand{CSCGMT=0, DTGMT, RPCbGMT, RPCfGMT};
   
  private:
   
   // functions
-  int getCSCType(CSCDetId &id);
+  int getCSCType(CSCDetId& id);
   int isME11(int t);
-  int getCSCSpecsType(CSCDetId &id);
-  int cscTriggerSubsector(CSCDetId &id);
+  int getCSCSpecsType(CSCDetId& id);
+  int cscTriggerSubsector(CSCDetId& id);
 
   // From Ingo:
   // calculates the weight of the event to reproduce a min bias
@@ -191,7 +195,7 @@ class GEMCSCTriggerRateTree : public edm::EDAnalyzer
   void bookMPCLCTTree();
   void bookTFTrackTree();
   void bookTFCandTree();
-  void bookGMTRegionalTree();
+  void bookGMTRegCandTree();
   void bookGMTCandTree();
 
   void intializeTree();
@@ -200,11 +204,16 @@ class GEMCSCTriggerRateTree : public edm::EDAnalyzer
   void analyzeCLCTRate(const edm::Event&);
   void analyzeLCTRate(const edm::Event&);
   void analyzeMPCLCTRate(const edm::Event&);
+
   void analyzeTFTrackRate(const edm::Event&);
-  void analyzeTFTrackRate(const edm::Event&, int type);
+  void analyzeTFTrackRate(const edm::Event&, enum tfTrack type);
+
   void analyzeTFCandRate(const edm::Event&);
+  void analyzeTFCandRate(const edm::Event&, enum tfCand type);
+
   void analyzeGMTRegCandRate(const edm::Event&);
-  void analyzeGMTRegCandRate(const edm::Event&, int type);
+  void analyzeGMTRegCandRate(const edm::Event&, enum gmtRegCand type);
+
   void analyzeGMTCandRate(const edm::Event&);
 
   // parameters
@@ -323,6 +332,9 @@ class GEMCSCTriggerRateTree : public edm::EDAnalyzer
   std::vector<L1MuRegionalCand>    l1GmtRPCbCands_;
   std::vector<L1MuRegionalCand>    l1GmtDTCands_;
   std::map<int, std::vector<L1MuRegionalCand> > l1GmtCSCCandsInBXs_;
+
+  TH1D * h_events;
+  int n_events;
 };
 
 #endif
