@@ -74,6 +74,8 @@ public:
   std::set<int> padNumbersInDetId(unsigned int) const;
   std::set<int> coPadNumbersInDetId(unsigned int) const;
 
+  int extrapolateHsfromGEMPad(unsigned int , int ) const;
+  int extrapolateHsfromGEMStrip(unsigned int , int ) const;
   // what unique partitions numbers with digis from this simtrack?
   std::set<int> partitionNumbers() const;
   std::set<int> partitionNumbersWithCoPads() const;

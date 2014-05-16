@@ -43,7 +43,9 @@ public:
   /// How many pads in RPC did this simtrack get in total?
   int nStrips() const;
 
+  int extrapolateHsfromRPC(unsigned int, int) const; 
 
+  
   std::set<int> stripsInDetId(unsigned int) const;
 
   // what unique partitions numbers with digis from this simtrack?
