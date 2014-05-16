@@ -17,16 +17,10 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
-#include "DataFormats/MuonDetId/interface/CSCDetId.h"
-#include "DataFormats/MuonDetId/interface/GEMDetId.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
 
 #include "SimDataFormats/TrackingHit/interface/PSimHitContainer.h"
 #include "SimDataFormats/Track/interface/SimTrackContainer.h"
-
-#include "Geometry/Records/interface/MuonGeometryRecord.h"
-#include "Geometry/CSCGeometry/interface/CSCGeometry.h"
-#include "Geometry/GEMGeometry/interface/GEMGeometry.h"
 
 #include "GEMCode/GEMValidation/src/SimTrackMatchManager.h"
 
