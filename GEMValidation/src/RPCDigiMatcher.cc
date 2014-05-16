@@ -1,6 +1,9 @@
 #include "RPCDigiMatcher.h"
 #include "SimHitMatcher.h"
 
+#include "DataFormats/MuonDetId/interface/CSCDetId.h"
+#include "DataFormats/MuonDetId/interface/CSCTriggerNumbering.h"
+
 using namespace std;
 using namespace matching;
 
@@ -148,4 +151,36 @@ RPCDigiMatcher::partitionNumbers() const
   }
   return result;
 }
+
+int 
+RPCDigiMatcher::extrapolateHsfromRPC(unsigned int id, int rpcstrip) const
+{
+  int result = -1 ;
+  
+  RPCDetId rpc_id(id);
+  int endcap = (rpc_id.region()>0 ? 1 : 2);
+  int cscchamber = CSCTriggerNumbering::chamberFromTriggerLabels(rpc_id.sector(), 0, rpc_id.station(), rpc_id.subsector());
+  CSCDetId csc_id(endcap, rpc_id.station(), rpc_id.ring(), cscchamber, 0);
+  
+//  std::cout <<"RPC det" << rpc_id <<"  CSC det " << csc_id << std::endl;
+  const CSCChamber* cscChamber(cscGeometry_->chamber(csc_id));
+  const CSCLayer* cscKeyLayer(cscChamber->layer(3));
+  const CSCLayerGeometry* cscKeyLayerGeometry(cscKeyLayer->geometry());
+
+  const RPCChamber* rpcChamber(rpcGeometry_->chamber(rpc_id));
+  auto rpcRoll(rpcChamber->roll(2));//any roll
+  const int nStrips(rpcRoll->nstrips());
+  if (rpcstrip > nStrips or rpcstrip < 0) return result;
+
+  const LocalPoint lpRPC(rpcRoll->centreOfStrip(rpcstrip));
+  const GlobalPoint gp(rpcRoll->toGlobal(lpRPC));
+  const LocalPoint lpCSC(cscKeyLayer->toLocal(gp));
+  const float strip(cscKeyLayerGeometry->strip(lpCSC));
+  // HS are wrapped-around
+  result = (int) (strip - 0.25)/0.5;
+  return result;
+}
+
+
+
 
