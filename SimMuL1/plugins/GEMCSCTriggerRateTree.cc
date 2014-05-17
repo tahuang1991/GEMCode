@@ -114,10 +114,12 @@ GEMCSCTriggerRateTree::GEMCSCTriggerRateTree(const edm::ParameterSet& iConfig):
   bookCLCTTree();
   bookLCTTree();
   bookMPCLCTTree();
-  bookTFTrackTree();
-  bookTFCandTree();
-  bookGMTRegionalTree();
-  bookGMTCandTree();
+  if (runCSCTFTrack_) bookTFTrackTree();
+  if (runCSCTFTrack_ and runCSCTFCand_) bookTFCandTree();
+  if (runCSCTFTrack_ and runCSCTFCand_ and runGMTRegCand_) bookGMTRegCandTree();
+  if (runCSCTFTrack_ and runCSCTFCand_ and runGMTRegCand_ and runGMTCand_) bookGMTCandTree();
+
+  n_events = 0;
 }
 
 // ================================================================================================
@@ -172,8 +174,16 @@ GEMCSCTriggerRateTree::beginRun(const edm::Run &iRun, const edm::EventSetup &iSe
 void 
 GEMCSCTriggerRateTree::beginJob()
 {
+  edm::Service<TFileService> fs;
+
+  h_events = fs->make<TH1D>("h_events","h_events",1,0,1);
 }
 
+void 
+GEMCSCTriggerRateTree::endJob()
+{
+  h_events->SetBinContent(1,n_events);
+}
 
 void 
 GEMCSCTriggerRateTree::intializeTree()
@@ -351,6 +361,8 @@ GEMCSCTriggerRateTree::intializeTree()
 void 
 GEMCSCTriggerRateTree::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
+  ++n_events;
+
   // need to reset here
   intializeTree();
 
@@ -568,7 +580,7 @@ GEMCSCTriggerRateTree::bookTFCandTree()
 
 // ================================================================================================
 void  
-GEMCSCTriggerRateTree::bookGMTRegionalTree()
+GEMCSCTriggerRateTree::bookGMTRegCandTree()
 {
   edm::Service< TFileService > fs;
   gmtregcand_tree_ = fs->make<TTree>("GMTRegCand", "GMTRegCand");
@@ -801,9 +813,12 @@ GEMCSCTriggerRateTree::analyzeMPCLCTRate(const edm::Event& iEvent)
 
 // ================================================================================================
 void  
-GEMCSCTriggerRateTree::analyzeTFTrackRate(const edm::Event& iEvent, int type)
+GEMCSCTriggerRateTree::analyzeTFTrackRate(const edm::Event& iEvent, enum tfTrack type)
 {
-
+  // CSCTF
+  // DTTF
+  // RPC
+  // RPCf
 }
 
 // ================================================================================================
@@ -969,29 +984,29 @@ GEMCSCTriggerRateTree::analyzeTFCandRate(const edm::Event& iEvent)
 void  
 GEMCSCTriggerRateTree::analyzeGMTRegCandRate(const edm::Event& iEvent)
 {
-  analyzeGMTRegCandRate(iEvent, CSC);
-  analyzeGMTRegCandRate(iEvent, DT);
-  analyzeGMTRegCandRate(iEvent, RPCb);
-  analyzeGMTRegCandRate(iEvent, RPCf);
+  analyzeGMTRegCandRate(iEvent, gmtRegCand::CSCGMT);
+  analyzeGMTRegCandRate(iEvent, gmtRegCand::DTGMT);
+  analyzeGMTRegCandRate(iEvent, gmtRegCand::RPCbGMT);
+  analyzeGMTRegCandRate(iEvent, gmtRegCand::RPCfGMT);
 }
 
 
 // ================================================================================================
 void  
-GEMCSCTriggerRateTree::analyzeGMTRegCandRate(const edm::Event& iEvent, int type)
+GEMCSCTriggerRateTree::analyzeGMTRegCandRate(const edm::Event& iEvent, enum gmtRegCand type)
 {
   std::vector<L1MuRegionalCand> collection;
   switch (type){
-  case CSC:
+  case CSCGMT:
     collection = l1GmtCSCCands_;
     break;
-  case DT:
+  case DTGMT:
     collection = l1GmtDTCands_;
     break;
-  case RPCb:
+  case RPCbGMT:
     collection = l1GmtRPCbCands_;
     break;
-  case RPCf:
+  case RPCfGMT:
     collection = l1GmtRPCfCands_;
     break;
   }
@@ -1036,22 +1051,22 @@ GEMCSCTriggerRateTree::analyzeGMTRegCandRate(const edm::Event& iEvent, int type)
     if (gmtregcand_.nDetIds <= 0 or gmtregcand_.nStubs <= 0) continue;
 
     switch(type) {
-    case gmtRegCand::CSC:
+    case gmtRegCand::CSCGMT:
       rtGmtRegCscCands_.push_back(myGMTREGCand);
       gmtregcand_.isCSC  = 1;
       if (verboseGMTRegCand_) cout << "isCSC"<<endl;
       break;
-    case gmtRegCand::DT:
+    case gmtRegCand::DTGMT:
       rtGmtRegDtCands_.push_back(myGMTREGCand);
       gmtregcand_.isDT   = 1;
       if (verboseGMTRegCand_) cout << "isDT"<<endl;
       break;
-    case gmtRegCand::RPCb:
+    case gmtRegCand::RPCbGMT:
       rtGmtRegRpcbCands_.push_back(myGMTREGCand);
       gmtregcand_.isRPCb = 1;
       if (verboseGMTRegCand_) cout << "isRPCb"<<endl;
       break;
-    case gmtRegCand::RPCf:
+    case gmtRegCand::RPCfGMT:
       rtGmtRegRpcfCands_.push_back(myGMTREGCand);
       gmtregcand_.isRPCf = 1;
       if (verboseGMTRegCand_) cout << "isRPCf"<<endl;

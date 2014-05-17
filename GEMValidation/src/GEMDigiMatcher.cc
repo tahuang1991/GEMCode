@@ -4,6 +4,8 @@
 using namespace std;
 using namespace matching;
 
+#include "DataFormats/MuonDetId/interface/CSCDetId.h"
+#include "DataFormats/MuonDetId/interface/GEMDetId.h"
 
 GEMDigiMatcher::GEMDigiMatcher(SimHitMatcher& sh)
 : DigiMatcher(sh)
@@ -392,3 +394,73 @@ GEMDigiMatcher::partitionNumbersWithCoPads() const
   }
   return result;
 }
+
+int 
+GEMDigiMatcher::extrapolateHsfromGEMPad(unsigned int id, int gempad) const
+{
+  int result = -1 ;
+  
+  GEMDetId gem_id(id);
+  int endcap = (gem_id.region()>0 ? 1 : 2);
+  int station;
+  if (gem_id.station() == 3) station = 2;
+  else if (gem_id.station() == 2) return result;
+  else station = gem_id.station();
+  CSCDetId csc_id(endcap, station, gem_id.ring(), gem_id.chamber(), 0);
+
+//  const CSCGeometry* cscGeometry_(DigiMatcher::getCSCGeometry());
+//  const GEMGeometry* gemGeometry_(DigiMatcher::getGEMGeometry());
+
+  const CSCChamber* cscChamber(cscGeometry_->chamber(csc_id));
+  const CSCLayer* cscKeyLayer(cscChamber->layer(3));
+  const CSCLayerGeometry* cscKeyLayerGeometry(cscKeyLayer->geometry());
+
+  const GEMChamber* gemChamber(gemGeometry_->chamber(id));
+  auto gemRoll(gemChamber->etaPartition(2));//any roll
+  const int nGEMPads(gemRoll->npads());
+  if (gempad > nGEMPads or gempad < 0) result = -1;
+
+  const LocalPoint lpGEM(gemRoll->centreOfPad(gempad));
+  const GlobalPoint gp(gemRoll->toGlobal(lpGEM));
+  const LocalPoint lpCSC(cscKeyLayer->toLocal(gp));
+  const float strip(cscKeyLayerGeometry->strip(lpCSC));
+  // HS are wrapped-around
+  result = (int) (strip - 0.25)/0.5;
+  return result;
+}
+
+
+int 
+GEMDigiMatcher::extrapolateHsfromGEMStrip(unsigned int id, int gemstrip) const
+{
+  int result = -1 ;
+  
+  GEMDetId gem_id(id);//chamberid
+  int endcap = (gem_id.region()>0 ? 1 : 2);
+  int station;
+  if (gem_id.station() == 3) station = 2;
+  else if (gem_id.station() == 2) return result;
+  else station = gem_id.station();
+  CSCDetId csc_id(endcap, station, gem_id.ring(), gem_id.chamber(), 0);
+
+//  const CSCGeometry* cscGeometry_(DigiMatcher::getCSCGeometry());
+//  const GEMGeometry* gemGeometry_(DigiMatcher::getGEMGeometry());
+
+  const CSCChamber* cscChamber(cscGeometry_->chamber(csc_id));
+  const CSCLayer* cscKeyLayer(cscChamber->layer(3));
+  const CSCLayerGeometry* cscKeyLayerGeometry(cscKeyLayer->geometry());
+
+  const GEMChamber* gemChamber(gemGeometry_->chamber(id));
+  auto gemRoll(gemChamber->etaPartition(2));//any roll
+  const int nGEMStrips(gemRoll->nstrips());
+  if (gemstrip > nGEMStrips or gemstrip < 0) result = -1;
+
+  const LocalPoint lpGEM(gemRoll->centreOfStrip(gemstrip));
+  const GlobalPoint gp(gemRoll->toGlobal(lpGEM));
+  const LocalPoint lpCSC(cscKeyLayer->toLocal(gp));
+  const float strip(cscKeyLayerGeometry->strip(lpCSC));
+  // HS are wrapped-around
+  result = (int) (strip - 0.25)/0.5;
+  return result;
+}
+

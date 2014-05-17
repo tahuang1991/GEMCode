@@ -129,3 +129,27 @@ BaseMatcher::gemDetsFromCSCDet(unsigned int id)
 {
   return std::make_pair(gemDetFromCSCDet(id,1),gemDetFromCSCDet(id,2));
 }
+
+
+int 
+chamber(const DetId& id)
+{
+  if (id.det() != DetId::Detector::Muon) return -99;
+  int chamberN = 0;
+  switch(id.subdetId()){
+  case MuonSubdetId::GEM:
+    chamberN = GEMDetId(id).chamber();
+    break;
+  case MuonSubdetId::RPC:
+    // works only for endcap!!
+    chamberN = RPCDetId(id).sector();
+    break;
+  case MuonSubdetId::CSC:
+    chamberN = CSCDetId(id).chamber();
+    break;
+  case MuonSubdetId::ME0:
+    chamberN = ME0DetId(id).chamber();
+    break;
+  };
+  return chamberN;
+}

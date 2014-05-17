@@ -32,6 +32,7 @@ std::ostream & operator<<(std::ostream & o, const matching::Digi& d)
   else if (t == GEM_COPAD) o<<id<<" t: GEM CoPad  pad "<<ch <<" bx "<<bx;
   else if (t == CSC_STRIP) o<<id<<" t: Strip Digi  hs "<<ch <<" bx "<<bx;
   else if (t == CSC_WIRE) o<<id<<" t: Wire Digi  wg "<<ch <<" bx "<<bx;
+  else if (t == RPC_STRIP) o<<id<<" t: RPC Digi strip "<<ch <<" bx "<<bx;
   else o<<id<<" t: "<<t<<" ch "<<ch<<" bx "<<bx;
 
   return o;

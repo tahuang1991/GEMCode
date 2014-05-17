@@ -1,6 +1,9 @@
 #include "RPCDigiMatcher.h"
 #include "SimHitMatcher.h"
 
+#include "DataFormats/MuonDetId/interface/CSCDetId.h"
+#include "DataFormats/MuonDetId/interface/CSCTriggerNumbering.h"
+
 using namespace std;
 using namespace matching;
 
@@ -14,6 +17,7 @@ RPCDigiMatcher::RPCDigiMatcher(SimHitMatcher& sh)
   maxBXRPC_ = rpcDigi_.getParameter<int>("maxBX");
   matchDeltaStrip_ = rpcDigi_.getParameter<int>("matchDeltaStrip");
   verboseDigi_ = rpcDigi_.getParameter<int>("verbose");
+
 
   matchDeltaStrip_ = conf().getUntrackedParameter<int>("matchDeltaStripRPC", 1);
 
@@ -34,6 +38,7 @@ RPCDigiMatcher::init()
   edm::Handle<RPCDigiCollection> rpc_digis;
   event().getByLabel(rpcDigiInput_, rpc_digis);
   matchDigisToSimTrack(*rpc_digis.product());
+
 }
 
 
@@ -66,10 +71,14 @@ RPCDigiMatcher::matchDigisToSimTrack(const RPCDigiCollection& digis)
 
       auto mydigi = make_digi(id, d->strip(), d->bx(), RPC_STRIP);
       detid_to_digis_[id].push_back(mydigi);
-      chamber_to_digis_[ p_id.chamberId().rawId() ].push_back(mydigi);
+      chamber_to_digis_[p_id.chamberId().rawId()].push_back(mydigi);
+      //std::cout << "RPC det id " << (RPCDetId)id << " "<< p_id << std::endl;
+      //std::cout<<"  chamber raw id "<<  p_id.chamberId().rawId()<<""<< p_id.chamberId() << std::endl;
     }
   }
 }
+
+
 
 
 std::set<unsigned int>
@@ -81,13 +90,6 @@ RPCDigiMatcher::detIds() const
 }
 
 
-std::set<unsigned int>
-RPCDigiMatcher::chamberIds() const
-{
-  std::set<unsigned int> result;
-  for (auto& p: chamber_to_digis_) result.insert(p.first);
-  return result;
-}
 
 const matching::DigiContainer&
 RPCDigiMatcher::digisInDetId(unsigned int detid) const
@@ -96,16 +98,36 @@ RPCDigiMatcher::digisInDetId(unsigned int detid) const
   return detid_to_digis_.at(detid);
 }
 
-const matching::DigiContainer&
-RPCDigiMatcher::digisInChamber(unsigned int detid) const
+std::set<unsigned int>
+RPCDigiMatcher::chamberIds() const
 {
-  if (chamber_to_digis_.find(detid) == chamber_to_digis_.end()) return no_digis_;
-  return chamber_to_digis_.at(detid);
+   std::set<unsigned int> result;
+   for (auto& p: chamber_to_digis_) result.insert(p.first);
+   return result;
+}
+
+const matching::DigiContainer&
+RPCDigiMatcher::digisInChamber(unsigned int detid) const  //use chamber raw id here
+{
+   if (chamber_to_digis_.find(detid) == chamber_to_digis_.end()) return no_digis_;
+   return chamber_to_digis_.at(detid);
+}
+
+int
+RPCDigiMatcher::nStrips() const
+{
+  int n = 0;
+  auto ids = detIds();
+  for (auto id: ids)
+  {
+    n += digisInDetId(id).size();
+  }
+  return n;
 }
 
 
 std::set<int>
-RPCDigiMatcher::stripNumbersInDetId(unsigned int detid) const
+RPCDigiMatcher::stripsInDetId(unsigned int detid) const
 {
   set<int> result;
   auto digis = digisInDetId(detid);
@@ -129,4 +151,36 @@ RPCDigiMatcher::partitionNumbers() const
   }
   return result;
 }
+
+int 
+RPCDigiMatcher::extrapolateHsfromRPC(unsigned int id, int rpcstrip) const
+{
+  int result = -1 ;
+  
+  RPCDetId rpc_id(id);
+  int endcap = (rpc_id.region()>0 ? 1 : 2);
+  int cscchamber = CSCTriggerNumbering::chamberFromTriggerLabels(rpc_id.sector(), 0, rpc_id.station(), rpc_id.subsector());
+  CSCDetId csc_id(endcap, rpc_id.station(), rpc_id.ring(), cscchamber, 0);
+  
+//  std::cout <<"RPC det" << rpc_id <<"  CSC det " << csc_id << std::endl;
+  const CSCChamber* cscChamber(cscGeometry_->chamber(csc_id));
+  const CSCLayer* cscKeyLayer(cscChamber->layer(3));
+  const CSCLayerGeometry* cscKeyLayerGeometry(cscKeyLayer->geometry());
+
+  const RPCChamber* rpcChamber(rpcGeometry_->chamber(rpc_id));
+  auto rpcRoll(rpcChamber->roll(2));//any roll
+  const int nStrips(rpcRoll->nstrips());
+  if (rpcstrip > nStrips or rpcstrip < 0) return result;
+
+  const LocalPoint lpRPC(rpcRoll->centreOfStrip(rpcstrip));
+  const GlobalPoint gp(rpcRoll->toGlobal(lpRPC));
+  const LocalPoint lpCSC(cscKeyLayer->toLocal(gp));
+  const float strip(cscKeyLayerGeometry->strip(lpCSC));
+  // HS are wrapped-around
+  result = (int) (strip - 0.25)/0.5;
+  return result;
+}
+
+
+
 

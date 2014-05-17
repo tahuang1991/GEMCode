@@ -598,6 +598,10 @@ SimHitMatcher::simHitsMeanStrip(const edm::PSimHitContainer& sim_hits) const
       // convert to half-strip:
       s *= 2.;
     }
+    else if (is_rpc(d))
+    {
+      s = rpcGeometry_->roll(d)->strip(lp);
+    }
     else continue;
     sums += s;
     ++n;
@@ -656,6 +660,24 @@ SimHitMatcher::hitStripsInDetId(unsigned int detid, int margin_n_strips) const
       smax = (smax <= max_nstrips) ? smax : max_nstrips;
       for (int ss = smin; ss <= smax; ++ss) result.insert(ss);
     }
+  }
+  else if ( is_rpc(detid) )
+  {
+    RPCDetId id(detid); 
+    int max_nstrips = rpcGeometry_->roll(id)->nstrips();
+    for (auto& h: simhits)
+    {
+      LocalPoint lp = h.entryPoint();
+      int central_strip = 1 + static_cast<int>(rpcGeometry_->roll(id)->topology().channel(lp));
+    //  int central_strip2 = 1 + static_cast<int>(rpcGeometry_->roll(id)->strip(lp));
+    //  std::cout <<"strip from topology"<< central_strip <<" strip from roll" << central_strip2 <<std::endl; 
+      int smin = central_strip - margin_n_strips;
+      smin = (smin > 0) ? smin : 1;
+      int smax = central_strip + margin_n_strips;
+      smax = (smax <= max_nstrips) ? smax : max_nstrips;
+      for (int ss = smin; ss <= smax; ++ss) result.insert(ss);
+    }
+  
   }
   return result;
 }

@@ -13,6 +13,7 @@
 #include "GEMCode/GEMValidation/src/BaseMatcher.h"
 #include "GEMCode/GEMValidation/src/SimHitMatcher.h"
 #include "GEMCode/GEMValidation/src/GEMDigiMatcher.h"
+#include "GEMCode/GEMValidation/src/RPCDigiMatcher.h"
 #include "GEMCode/GEMValidation/src/CSCDigiMatcher.h"
 #include "GEMCode/GEMValidation/src/CSCStubMatcher.h"
 #include "GEMCode/GEMValidation/src/TrackMatcher.h"
@@ -29,6 +30,7 @@ public:
 
   const SimHitMatcher& simhits() const {return simhits_;}
   const GEMDigiMatcher& gemDigis() const {return gem_digis_;}
+  const RPCDigiMatcher& rpcDigis() const {return rpc_digis_;}
   const CSCDigiMatcher& cscDigis() const {return csc_digis_;}
   const CSCStubMatcher& cscStubs() const {return stubs_;}
   const TrackMatcher& tracks() const {return tracks_;}
@@ -38,6 +40,7 @@ private:
 
   SimHitMatcher simhits_;
   GEMDigiMatcher gem_digis_;
+  RPCDigiMatcher rpc_digis_;
   CSCDigiMatcher csc_digis_;
   CSCStubMatcher stubs_;
   TrackMatcher tracks_;
