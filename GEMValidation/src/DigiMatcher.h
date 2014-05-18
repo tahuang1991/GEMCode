@@ -48,6 +48,11 @@ public:
   std::pair<Digi, GlobalPoint>
   digiInGEMClosestToCSC(const DigiContainer& gem_digis, const GlobalPoint& csc_gp) const;
 
+  /// for RPC:
+  /// find a RPC digi with its position that is the closest in deltaR to the provided CSC global position
+  std::pair<Digi, GlobalPoint>
+  digiInRPCClosestToCSC(const DigiContainer& rpc_digis, const GlobalPoint& csc_gp) const;
+
 protected:
 
   const SimHitMatcher* simhit_matcher_;
