@@ -353,15 +353,24 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
 
     // find a matching LCT
     const GEMDetId gemDetId(GEMDetId(ch_id.zendcap(),1,ch_id.station(),1,ch_id.chamber(),0));
+    // find matching rpc chamber (only valid for me31 and me41)
+    int sector = 0;
+    int subsector = 0;
+    const RPCDetId rpcDetId(RPCDetId(ch_id.zendcap(),1,ch_id.station(),sector,1,subsector,0));
 
     auto clct(clctInChamber(id));
     auto alct(alctInChamber(id));
     auto pads(gem_digi_matcher_->coPadsInSuperChamber(gemDetId));
+    auto rpcDigis(rpc_digi_matcher_->digisInChamber(rpcDetId));
     auto hasPad(pads.size()!=0);
+    auto hasDigis(rpcDigis.size()!=0);
 
     const bool caseAlctClct(is_valid(alct) and is_valid(clct));
-    const bool caseAlctGem(is_valid(alct) and hasPad and !is_valid(clct));
-    //    const bool caseClctGem(is_valid(clct) and hasPad);
+    const bool caseAlctGem(is_valid(alct) and hasPad and !is_valid(clct) and (ch_id.station() == 1 or ch_id.station() == 2));
+    const bool caseClctGem(is_valid(clct) and hasPad and !is_valid(alct) and (ch_id.station() == 1 or ch_id.station() == 2));
+
+    const bool caseAlctRpc(is_valid(alct) and hasDigis and !is_valid(clct) and (ch_id.station() == 3 or ch_id.station() == 4));
+    const bool caseClctRpc(is_valid(clct) and hasDigis and !is_valid(alct) and (ch_id.station() == 3 or ch_id.station() == 4));
 
     const CSCChamber* cscChamber(cscGeometry_->chamber(CSCDetId(id)));
     const CSCLayer* cscKeyLayer(cscChamber->layer(3));
