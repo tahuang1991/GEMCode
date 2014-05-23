@@ -2,6 +2,7 @@
 #include "GEMCode/GEMValidation/src/SimHitMatcher.h"
 
 #include "DataFormats/MuonDetId/interface/CSCDetId.h"
+#include <DataFormats/MuonDetId/interface/CSCTriggerNumbering.h>
 
 #include <algorithm>
 
@@ -354,9 +355,12 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
     // find a matching LCT
     const GEMDetId gemDetId(GEMDetId(ch_id.zendcap(),1,ch_id.station(),1,ch_id.chamber(),0));
     // find matching rpc chamber (only valid for me31 and me41)
-    int sector = 0;
-    int subsector = 0;
-    const RPCDetId rpcDetId(RPCDetId(ch_id.zendcap(),1,ch_id.station(),sector,1,subsector,0));
+    const int csc_trig_sect(CSCTriggerNumbering::triggerSectorFromLabels(ch_id));
+    const int csc_trig_id( CSCTriggerNumbering::triggerCscIdFromLabels(ch_id));
+    const int csc_trig_chid((3*(csc_trig_sect-1)+csc_trig_id)%18 +1);
+    const int rpc_trig_sect((csc_trig_chid-1)/3+1);
+    const int rpc_trig_subsect((csc_trig_chid-1)%3+1);
+    const RPCDetId rpcDetId(RPCDetId(ch_id.zendcap(),1,ch_id.station(),rpc_trig_sect,1,rpc_trig_subsect,0));
 
     auto clct(clctInChamber(id));
     auto alct(alctInChamber(id));
