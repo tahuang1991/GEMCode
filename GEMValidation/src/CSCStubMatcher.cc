@@ -9,10 +9,11 @@ using namespace std;
 using namespace matching;
 
 
-CSCStubMatcher::CSCStubMatcher(SimHitMatcher& sh, CSCDigiMatcher& dg, GEMDigiMatcher& gem_dg)
+CSCStubMatcher::CSCStubMatcher(SimHitMatcher& sh, CSCDigiMatcher& dg, GEMDigiMatcher& gem_dg, RPCDigiMatcher& rpc_dg)
 : DigiMatcher(sh)
 , digi_matcher_(&dg)
 , gem_digi_matcher_(&gem_dg)
+, rpc_digi_matcher_(&rpc_dg)
 , sh_matcher_(&sh)
 {
   auto cscCLCT_ = conf().getParameter<edm::ParameterSet>("cscCLCT");
@@ -37,6 +38,9 @@ CSCStubMatcher::CSCStubMatcher(SimHitMatcher& sh, CSCDigiMatcher& dg, GEMDigiMat
   minNHitsChamberLCT_ = cscLCT_.getParameter<int>("minNHitsChamber");
   addGhostLCTs_ = cscLCT_.getParameter<bool>("addGhosts");
   matchAlctGem_ = cscLCT_.getParameter<bool>("matchAlctGem");
+  matchClctGem_ = cscLCT_.getParameter<bool>("matchClctGem");
+  matchAlctRpc_ = cscLCT_.getParameter<bool>("matchAlctRpc");
+  matchClctRpc_ = cscLCT_.getParameter<bool>("matchClctRpc");
   hsFromSimHitMean_ = cscLCT_.getParameter<bool>("hsFromSimHitMean");
 
   auto cscMPLCT_ = conf().getParameter<edm::ParameterSet>("cscMPLCT");
