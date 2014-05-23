@@ -611,6 +611,35 @@ SimHitMatcher::simHitsMeanStrip(const edm::PSimHitContainer& sim_hits) const
 }
 
 
+float 
+SimHitMatcher::simHitsMeanWG(const edm::PSimHitContainer& sim_hits) const
+{
+  if (sim_hits.empty()) return -1.f;
+
+  float sums = 0.f;
+  size_t n = 0;
+  for (auto& h: sim_hits)
+  {
+    LocalPoint lp = h.entryPoint();
+    float s;
+    auto d = h.detUnitId();
+    if (is_csc(d))
+    {
+      // find nearest wire
+      int nearestWire(cscGeometry_->layer(d)->geometry()->nearestWire(lp));
+      // then find the corresponding wire group
+      s = cscGeometry_->layer(d)->geometry()->wireGroup(nearestWire);
+    }
+    else continue;
+    sums += s;
+    ++n;
+  }
+  if (n == 0) return -1.f;
+  return sums/n;
+}
+
+
+
 std::set<int> 
 SimHitMatcher::hitStripsInDetId(unsigned int detid, int margin_n_strips) const
 {
