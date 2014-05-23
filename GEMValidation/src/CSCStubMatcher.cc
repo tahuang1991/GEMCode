@@ -2,6 +2,7 @@
 #include "GEMCode/GEMValidation/src/SimHitMatcher.h"
 
 #include "DataFormats/MuonDetId/interface/CSCDetId.h"
+#include <DataFormats/MuonDetId/interface/CSCTriggerNumbering.h>
 
 #include <algorithm>
 
@@ -354,9 +355,12 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
     // find a matching LCT
     const GEMDetId gemDetId(GEMDetId(ch_id.zendcap(),1,ch_id.station(),1,ch_id.chamber(),0));
     // find matching rpc chamber (only valid for me31 and me41)
-    int sector = 0;
-    int subsector = 0;
-    const RPCDetId rpcDetId(RPCDetId(ch_id.zendcap(),1,ch_id.station(),sector,1,subsector,0));
+    const int csc_trig_sect(CSCTriggerNumbering::triggerSectorFromLabels(ch_id));
+    const int csc_trig_id( CSCTriggerNumbering::triggerCscIdFromLabels(ch_id));
+    const int csc_trig_chid((3*(csc_trig_sect-1)+csc_trig_id)%18 +1);
+    const int rpc_trig_sect((csc_trig_chid-1)/3+1);
+    const int rpc_trig_subsect((csc_trig_chid-1)%3+1);
+    const RPCDetId rpcDetId(RPCDetId(ch_id.zendcap(),1,ch_id.station(),rpc_trig_sect,1,rpc_trig_subsect,0));
 
     auto clct(clctInChamber(id));
     auto alct(alctInChamber(id));
@@ -366,6 +370,7 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
     auto hasDigis(rpcDigis.size()!=0);
 
     const bool caseAlctClct(is_valid(alct) and is_valid(clct));
+
     const bool caseAlctGem(is_valid(alct) and hasPad and !is_valid(clct) and (ch_id.station() == 1 or ch_id.station() == 2));
     const bool caseClctGem(is_valid(clct) and hasPad and !is_valid(alct) and (ch_id.station() == 1 or ch_id.station() == 2));
 
@@ -387,16 +392,18 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
     const int my_hs_gem_propagate((nStrips-cscKeyLayerGeometry->nearestStrip(lpME))*2);
     
     const auto hits = sh_matcher_->hitsInChamber(id);
-    const float my_hs_gem_mean(sh_matcher_->simHitsMeanStrip(hits));
+    const float my_hs_gemrpc_mean(sh_matcher_->simHitsMeanStrip(hits));
+    const float my_wg_gemrpc_mean(sh_matcher_->simHitsMeanStrip(hits));
     /*
     if (caseAlctClct) std::cout << "caseAlctClct" << std::endl;
     else if(matchAlctGem_)std::cout << "caseAlctGem" << std::endl;
     std::cout << "mean half strip from simhits " << sh_matcher_->simHitsMeanStrip(hits) 
 	<<"   half strip by propagating track " << my_hs_gem_propagate << std::endl; 
     */
-    float my_hs_gem;
-    if (hsFromSimHitMean_)  my_hs_gem = my_hs_gem_mean;
-    else my_hs_gem = my_hs_gem_propagate;
+    float my_hs_gemrpc;
+    if (hsFromSimHitMean_)  my_hs_gemrpc= my_hs_gemrpc_mean;
+    else my_hs_gemrpc = my_hs_gem_propagate;
+
     if (verbose()) cout<<"will match hs"<<my_hs<<" wg"<<my_wg<<" bx"<<my_bx<<" to #lct "<<n_lct<<endl;
     for (auto &lct: lcts_tmp)
     {
@@ -405,10 +412,23 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
         if (verbose()) cout<<"  BAD"<<endl;
         continue;
       }
-      if (matchAlctGem_ and caseAlctGem and !(my_bx == digi_bx(lct) and std::abs(my_hs_gem - digi_channel(lct))<3 and my_wg == digi_wg(lct) ) ){
+      if (matchAlctGem_ and caseAlctGem and !(my_bx == digi_bx(lct) and std::abs(my_hs_gemrpc - digi_channel(lct))<3 and my_wg == digi_wg(lct) ) ){
         if (verbose()) cout<<"  BAD"<<endl;
         continue;
       }
+      if (matchClctGem_ and caseClctGem and !(my_bx == digi_bx(lct) and my_hs == digi_channel(lct) and std::abs(my_wg_gemrpc_mean - digi_wg(lct))<3) ){
+        if (verbose()) cout<<"  BAD"<<endl;
+        continue;
+      }
+      if (matchAlctRpc_ and caseAlctRpc and !(my_bx == digi_bx(lct) and std::abs(my_hs_gemrpc - digi_channel(lct))<3 and my_wg == digi_wg(lct) ) ){
+        if (verbose()) cout<<"  BAD"<<endl;
+        continue;
+      }
+      if (matchClctRpc_ and caseClctRpc and !(my_bx == digi_bx(lct) and my_hs == digi_channel(lct) and std::abs(my_wg_gemrpc_mean - digi_wg(lct))<3) ){
+        if (verbose()) cout<<"  BAD"<<endl;
+        continue;
+      }
+
       if (verbose()) cout<<"  GOOD"<<endl;
 
       if (chamber_to_lct_.find(id) != chamber_to_lct_.end())
