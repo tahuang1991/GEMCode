@@ -89,12 +89,17 @@ ok_gdg1 = TCut("(has_gem_dg&1) > 0")
 ok_gdg2 = TCut("(has_gem_dg&2) > 0")
 ok_pad1 = TCut("(has_gem_pad&1) > 0")
 ok_pad2 = TCut("(has_gem_pad&2) > 0")
+ok_rpcstrip1 = TCut("(has_rpc_dg&1) > 0")
+ok_rpcstrip2 = TCut("(has_rpc_dg&2) > 0")
 
 ok_dphi1 = TCut("dphi_pad_odd < 10.")
 ok_dphi2 = TCut("dphi_pad_even < 10.")
 
 ok_pad1_lct1 = AND(ok_pad1,ok_lct1)
 ok_pad2_lct2 = AND(ok_pad2,ok_lct2)
+
+ok_rpcstrip1_lct1 = AND(ok_rpcstrip1,ok_lct1)
+ok_rpcstrip2_lct2 = AND(ok_rpcstrip2,ok_lct2)
 
 ok_pad1_dphi1 = AND(ok_pad1,ok_dphi1)
 ok_pad2_dphi2 = AND(ok_pad2,ok_dphi2)

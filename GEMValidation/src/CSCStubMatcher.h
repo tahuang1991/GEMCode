@@ -11,12 +11,14 @@
 
 #include "GEMCode/GEMValidation/src/CSCDigiMatcher.h"
 #include "GEMCode/GEMValidation/src/GEMDigiMatcher.h"
+#include "GEMCode/GEMValidation/src/RPCDigiMatcher.h"
 
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/CSCDigi/interface/CSCALCTDigiCollection.h"
 #include "DataFormats/CSCDigi/interface/CSCCLCTDigiCollection.h"
 #include "DataFormats/CSCDigi/interface/CSCCorrelatedLCTDigiCollection.h"
 #include "DataFormats/GEMDigi/interface/GEMCSCPadDigiCollection.h"
+#include "DataFormats/RPCDigi/interface/RPCDigiCollection.h"
 #include "GEMCode/GEMValidation/src/ALCT.h" 
 #include "GEMCode/GEMValidation/src/CLCT.h" 
 #include "GEMCode/GEMValidation/src/LCT.h" 
@@ -32,17 +34,17 @@ typedef std::vector<const LCT*>   LCTCollection;
 typedef std::vector<const MPLCT*> MPLCTCollection;
 
 class SimHitMatcher;
-class CSCDigiMatcher;
+//class CSCDigiMatcher;
 
 class CSCStubMatcher : public DigiMatcher
 {
 public:
-
+  
   typedef std::map<int, std::vector<std::pair<unsigned int, const GEMCSCPadDigi*> > > GEMPads;
   typedef std::pair<unsigned int, const GEMCSCPadDigi*> GEMPadBX;
   typedef std::vector<GEMPadBX> GEMPadsBX;
 
-  CSCStubMatcher(SimHitMatcher& sh, CSCDigiMatcher& dg, GEMDigiMatcher& gem_dg);
+  CSCStubMatcher(SimHitMatcher& sh, CSCDigiMatcher& dg, GEMDigiMatcher& gem_dg, RPCDigiMatcher& rpc_dg);
   
   ~CSCStubMatcher();
 
@@ -98,6 +100,7 @@ private:
 
   const CSCDigiMatcher* digi_matcher_;
   const GEMDigiMatcher* gem_digi_matcher_;
+  const RPCDigiMatcher* rpc_digi_matcher_;
   const SimHitMatcher* sh_matcher_;
 
   edm::InputTag clctInput_;
@@ -140,6 +143,9 @@ private:
   bool addGhostLCTs_;
   bool addGhostMPLCTs_;
   bool matchAlctGem_;
+  bool matchClctGem_;
+  bool matchAlctRpc_;
+  bool matchClctRpc_;
   bool hsFromSimHitMean_;
 
   int minNHitsChamber_;
