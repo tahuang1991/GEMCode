@@ -3,7 +3,7 @@
 ## 2: 2019WithGem
 ## 3: 2023Muon
 
-scenario = 2
+scenario = 3
 
 ## This configuration runs the DIGI+L1Emulator step
 import os
@@ -60,6 +60,7 @@ from GEMCode.SimMuL1.GEMCSCTriggerSamplesLib import eosfiles
 from GEMCode.GEMValidation.InputFileHelpers import useInputDir
 dataset = '_Nu_SLHC12_2023Muon_PU140'
 dataset = "_pt2-50_SLHC11_2023Muon_PU140"
+dataset = '_Nu_SLHC12_2023Muon_PU140_geonmo'
 process = useInputDir(process, eosfiles[dataset], True)
 
 
@@ -80,7 +81,7 @@ if not physics:
     
 ## output commands 
 theOutDir = ''
-theFileName = 'out_L1.root'
+theFileName = 'out_L1'+ dataset + '.root'
 process.output = cms.OutputModule("PoolOutputModule",
     fileName = cms.untracked.string(theOutDir + theFileName),
     outputCommands = cms.untracked.vstring('keep  *_*_*_*')

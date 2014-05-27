@@ -219,3 +219,42 @@ DigiMatcher::digiInGEMClosestToCSC(const DigiContainer& gem_digis, const GlobalP
   }
   return make_pair(best_digi, gp);
 }
+
+
+std::pair<matching::Digi, GlobalPoint>
+DigiMatcher::digiInRPCClosestToCSC(const DigiContainer& rpc_digis, const GlobalPoint& csc_gp) const
+{
+  GlobalPoint gp;
+  Digi best_digi;
+
+  if (rpc_digis.empty() || std::abs(csc_gp.z()) < 0.001 ) // no digis or bad CSC input
+  {
+    if (rpc_digis.empty()) cout<<"digiInRPCClosestToCSC rpc_digis.empty"<<endl;
+    if (std::abs(csc_gp.z()) < 0.001 ) cout<<"digiInRPCClosestToCSC wire_digis.empty"<<endl;
+    return make_pair(best_digi, gp);
+  }
+
+  float prev_dr2 = 99999.;
+  for (auto& d: rpc_digis)
+  {
+    DigiType t = digi_type(d);
+    if ( !(t == RPC_STRIP) ) continue;
+
+    GlobalPoint curr_gp = digiPosition(d);
+    if (std::abs(curr_gp.z()) < 0.001) continue; // invalid position
+
+    // in deltaR calculation, give x20 larger weight to deltaPhi to make them comparable
+    // but with slight bias towards dphi:
+    float dphi = 20.*deltaPhi(csc_gp.phi(), curr_gp.phi());
+    float deta = csc_gp.eta() - curr_gp.eta();
+    float curr_dr2 = dphi*dphi + deta*deta;
+    if (std::abs(gp.z()) < 000.1 || // gp was not assigned yet
+        curr_dr2 < prev_dr2 ) // current gp is closer in phi then the previous
+    {
+      gp = curr_gp;
+      best_digi = d;
+      prev_dr2 = curr_dr2;
+    }
+  }
+  return make_pair(best_digi, gp);
+}

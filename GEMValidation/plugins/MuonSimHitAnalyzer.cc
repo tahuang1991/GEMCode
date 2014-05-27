@@ -72,7 +72,8 @@ struct MyRPCSimHit
   Int_t eventNumber;
   Int_t detUnitId, particleType;
   Float_t x, y, energyLoss, pabs, timeOfFlight;
-  Int_t region, ring, station, sector, layer, subsector, roll, chamber;
+  Int_t region, ring, station, sector, layer, subsector, roll;
+  Int_t chamber, chamber_type1, chamber_type2;
   Float_t globalR, globalEta, globalPhi, globalX, globalY, globalZ;
   Int_t strip;
 };
@@ -351,6 +352,8 @@ void MuonSimHitAnalyzer::bookRPCSimHitsTree()
   rpc_sh_tree_->Branch("subsector", &rpc_sh.subsector);
   rpc_sh_tree_->Branch("roll", &rpc_sh.roll);
   rpc_sh_tree_->Branch("chamber", &rpc_sh.chamber);
+  rpc_sh_tree_->Branch("chamber_type1", &rpc_sh.chamber_type1);
+  rpc_sh_tree_->Branch("chamber_type2", &rpc_sh.chamber_type2);
   rpc_sh_tree_->Branch("globalR", &rpc_sh.globalR);
   rpc_sh_tree_->Branch("globalEta", &rpc_sh.globalEta);
   rpc_sh_tree_->Branch("globalPhi", &rpc_sh.globalPhi);
@@ -561,6 +564,10 @@ void MuonSimHitAnalyzer::analyzeCSC( const edm::Event& iEvent )
     csc_sh.chamber = id.chamber();
     csc_sh.layer = id.layer();
 
+    if (id.station()==3 and id.ring()==1 and itHit->pabs() > 20 )
+      std::cout << "cscdet " << id <<" " << CSCTriggerNumbering::triggerSectorFromLabels(id) << " " 
+                << CSCTriggerNumbering::triggerCscIdFromLabels(id) << " "
+                << CSCTriggerNumbering::triggerSubSectorFromLabels(id) << std::endl;
     const LocalPoint p0(0., 0., 0.);
     const GlobalPoint Gp0(csc_geometry_->idToDet(itHit->detUnitId())->surface().toGlobal(p0));
     csc_sh.Phi_0 = Gp0.phi();
