@@ -158,11 +158,13 @@ RPCDigiMatcher::extrapolateHsfromRPC(unsigned int id, int rpcstrip) const
   int result = -1 ;
   
   RPCDetId rpc_id(id);
+  if (rpc_id.region() == 0) return result;
   int endcap = (rpc_id.region()>0 ? 1 : 2);
   int cscchamber = CSCTriggerNumbering::chamberFromTriggerLabels(rpc_id.sector(), 0, rpc_id.station(), rpc_id.subsector());
+  cscchamber = (cscchamber==1? 18 : (cscchamber-1));// or cscchamber = (cscchamber+16)%18+1;
   CSCDetId csc_id(endcap, rpc_id.station(), rpc_id.ring(), cscchamber, 0);
   
-//  std::cout <<"RPC det" << rpc_id <<"  CSC det " << csc_id << std::endl;
+  //std::cout <<"RPC det " << rpc_id <<"  CSC det " << csc_id << std::endl;
   const CSCChamber* cscChamber(cscGeometry_->chamber(csc_id));
   const CSCLayer* cscKeyLayer(cscChamber->layer(3));
   const CSCLayerGeometry* cscKeyLayerGeometry(cscKeyLayer->geometry());
