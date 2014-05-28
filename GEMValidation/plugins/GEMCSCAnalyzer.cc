@@ -108,6 +108,18 @@ struct MyTrackEff
   Int_t wiregroup_even;
   Int_t halfstrip_odd;
   Int_t halfstrip_even;
+
+  Int_t quality_clct_odd;
+  Int_t quality_clct_even;
+  Int_t quality_alct_odd;
+  Int_t quality_alct_even;
+
+  Int_t nlayers_csc_sh_odd;
+  Int_t nlayers_wg_dg_odd;
+  Int_t nlayers_st_dg_odd;
+  Int_t nlayers_csc_sh_even;
+  Int_t nlayers_wg_dg_even;
+  Int_t nlayers_st_dg_even;
   Int_t pad_odd;
   Int_t pad_even;
   Int_t Copad_odd;
@@ -130,6 +142,11 @@ struct MyTrackEff
   Int_t strip_gemdg_odd; // median digis' strip
   Int_t strip_gemdg_even;
 
+  Char_t has_rpc_sh; // bit1: in odd, bit2: even
+  Char_t has_rpc_dg; // bit1: in odd, bit2: even
+  Int_t strip_rpcdg_odd; // median digis' strip
+  Int_t strip_rpcdg_even;
+
   Char_t bx_pad_odd;
   Char_t bx_pad_even;
   Float_t phi_pad_odd;
@@ -144,10 +161,6 @@ struct MyTrackEff
 
   Int_t quality_odd;
   Int_t quality_even;
-
-  Char_t has_rpc_dg; // bit1: in odd, bit2: even
-  Int_t strip_rpcdg_odd; // median digis' strip
-  Int_t strip_rpcdg_even;
 
   Int_t hsfromrpc_odd; // extraplotate hs from rpc
   Int_t hsfromrpc_even;
@@ -201,6 +214,16 @@ void MyTrackEff::init()
   wiregroup_even =-1; 
   halfstrip_odd =-1;
   halfstrip_even = -1;
+  quality_clct_odd = -1;
+  quality_clct_even = -1;
+  quality_alct_odd = -1;
+  quality_alct_even = -1;
+  nlayers_csc_sh_odd = -1;
+  nlayers_wg_dg_odd = -1;
+  nlayers_st_dg_odd = -1;
+  nlayers_csc_sh_even = -1;
+  nlayers_wg_dg_even = -1;
+  nlayers_st_dg_even = -1;
   pad_odd = -1;
   pad_even = -1;
   Copad_odd = -1;
@@ -222,13 +245,14 @@ void MyTrackEff::init()
   eta_gemsh_even = -9.;
   strip_gemdg_odd = -9;
   strip_gemdg_even = -9;
-
+ 
+  has_rpc_sh = 0;
   has_rpc_dg = 0; // bit1: in odd, bit2: even
-  strip_rpcdg_odd = -9;
-  strip_rpcdg_even = -9;
+  strip_rpcdg_odd = -1;
+  strip_rpcdg_even = -1;
 
-  hsfromrpc_odd = -9;
-  hsfromrpc_even = -9;
+  hsfromrpc_odd = 0;
+  hsfromrpc_even = 0;
 
   bx_pad_odd = -9;
   bx_pad_even = -9;
@@ -292,6 +316,17 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("wiregroup_even", &wiregroup_even);
   t->Branch("halfstrip_odd", &halfstrip_odd);
   t->Branch("halfstrip_even", &halfstrip_even);
+  t->Branch("quality_clct_odd", &quality_clct_odd);
+  t->Branch("quality_clct_even", &quality_clct_even);
+  t->Branch("quality_alct_odd", &quality_alct_odd);
+  t->Branch("quality_alct_even", &quality_alct_even);
+  t->Branch("nlayers_csc_sh_odd", &nlayers_csc_sh_odd);
+  t->Branch("nlayers_csc_sh_even", &nlayers_csc_sh_even);
+  t->Branch("nlayers_wg_dg_odd", &nlayers_wg_dg_odd);
+  t->Branch("nlayers_wg_dg_even", &nlayers_wg_dg_even);
+  t->Branch("nlayers_st_dg_odd", &nlayers_st_dg_odd);
+  t->Branch("nlayers_st_dg_even", &nlayers_st_dg_even);
+
   t->Branch("pad_odd", &pad_odd);
   t->Branch("pad_even", &pad_even);
   t->Branch("Copad_odd", &Copad_odd);
@@ -314,6 +349,7 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("strip_gemdg_odd", &strip_gemdg_odd);
   t->Branch("strip_gemdg_even", &strip_gemdg_even);
 
+  t->Branch("has_rpc_sh", &has_rpc_sh);
   t->Branch("has_rpc_dg", &has_rpc_dg);
   t->Branch("strip_rpcdg_odd", &strip_rpcdg_odd);
   t->Branch("strip_rpcdg_even", &strip_rpcdg_even);
@@ -616,10 +652,19 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     if (odd) etrk_[st].has_csc_sh |= 1;
     else etrk_[st].has_csc_sh |= 2;
 
+    if (odd) etrk_[st].nlayers_csc_sh_odd = nlayers;
+    else etrk_[st].nlayers_csc_sh_even = nlayers;
+    
+    // std::cout<<"nlayer "<<nlayers <<" odd: "<< etrk_[st].nlayers_csc_sh_odd<<" even: "<<etrk_[st].nlayers_csc_sh_even
+//	 <<" "<< (odd ? "odd":"even")<<" csc det " <<id <<std::endl;
+  //  std::cout<<" "<<((etrk_[st].has_csc_sh&1)>0 ? "odd true":"odd false" ) <<" "<<((etrk_[st].has_csc_sh&2)>0 ? "even true":"even false")<<std::endl;
     // case ME11
     if (st==2 or st==3){
       if (odd) etrk_[1].has_csc_sh |= 1;
       else etrk_[1].has_csc_sh |= 2;
+
+      if (odd) etrk_[1].nlayers_csc_sh_odd = nlayers;
+      else etrk_[1].nlayers_csc_sh_even = nlayers;
     }  
   }
 
@@ -635,12 +680,18 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
     const bool odd(id.chamber()%2==1);
     if (odd) etrk_[st].has_csc_strips |= 1;
-    else etrk_[st].has_csc_strips |= 2; 
+    else etrk_[st].has_csc_strips |= 2;
+
+    if (odd) etrk_[st].nlayers_st_dg_odd = nlayers;
+    else etrk_[st].nlayers_st_dg_even = nlayers;
     
     // case ME11
     if (st==2 or st==3){
       if (odd) etrk_[1].has_csc_strips |= 1;
       else etrk_[1].has_csc_strips |= 2;
+
+      if (odd) etrk_[1].nlayers_st_dg_odd = nlayers;
+      else etrk_[1].nlayers_st_dg_even = nlayers;
     }  
   }
 
@@ -658,10 +709,16 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     if (odd) etrk_[st].has_csc_wires |= 1;
     else etrk_[st].has_csc_wires |= 2;
 
+    if (odd) etrk_[st].nlayers_wg_dg_odd = nlayers;
+    else etrk_[st].nlayers_wg_dg_even = nlayers;
+
     // case ME11
     if (st==2 or st==3){
       if (odd) etrk_[1].has_csc_wires |= 1;
       else etrk_[1].has_csc_wires |= 2;
+
+      if (odd) etrk_[1].nlayers_wg_dg_odd = nlayers;
+      else etrk_[1].nlayers_wg_dg_even = nlayers;
     }  
   }
 
@@ -678,6 +735,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     if (odd) etrk_[st].halfstrip_odd = digi_channel(clct);
     else etrk_[st].halfstrip_even = digi_channel(clct);
 
+    if (odd) etrk_[st].quality_clct_odd = digi_quality(clct);
+    else etrk_[st].quality_clct_even = digi_quality(clct);
+
     if (odd) etrk_[st].has_clct |= 1;
     else etrk_[st].has_clct |= 2;
 
@@ -685,6 +745,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     if (st==2 or st==3){
       if (odd) etrk_[1].halfstrip_odd = digi_channel(clct);
       else etrk_[1].halfstrip_even = digi_channel(clct);
+
+      if (odd) etrk_[1].quality_clct_odd = digi_quality(clct);
+      else etrk_[1].quality_clct_even = digi_quality(clct);
       
       if (odd) etrk_[1].has_clct |= 1;
       else etrk_[1].has_clct |= 2;
@@ -704,6 +767,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     if (odd) etrk_[st].wiregroup_odd = digi_channel(alct);
     else etrk_[st].wiregroup_even = digi_channel(alct);
 
+    if (odd) etrk_[st].quality_alct_odd = digi_quality(alct);
+    else etrk_[st].quality_alct_even = digi_quality(alct);
+
     if (odd) etrk_[st].has_alct |= 1;
     else etrk_[st].has_alct |= 2;
 
@@ -711,6 +777,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     if (st==2 or st==3){
       if (odd) etrk_[1].wiregroup_odd = digi_channel(alct);
       else etrk_[1].wiregroup_even = digi_channel(alct);
+
+      if (odd) etrk_[1].quality_alct_odd = digi_quality(alct);
+      else etrk_[1].quality_alct_even = digi_quality(alct);
       
       if (odd) etrk_[1].has_alct |= 1;
       else etrk_[1].has_alct |= 2;      
@@ -1060,7 +1129,26 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   GlobalPoint best_rpcstrip_odd[12];
   GlobalPoint best_rpcstrip_even[12];
 
-  for (auto d : match_rd.detIds())
+  auto rpc_ch_ids = match_sh.chamberIdsRPC();
+  for (auto d:rpc_ch_ids)
+  {
+    RPCDetId id(d);
+    const int st(detIdToMEStation(id.station(), id.ring()));
+    if (stations_to_use_.count(st) == 0) continue;
+    int cscchamber = CSCTriggerNumbering::chamberFromTriggerLabels(id.sector(), 0, id.station(), id.subsector());
+    cscchamber = (cscchamber+16)%18+1; 
+    if ( (match_sh.hitsInChamber(d)).size() >0 )
+    {
+      bool odd(cscchamber%2 == 1);
+      if (odd)   etrk_[st].has_rpc_sh |= 1;
+      else etrk_[st].has_rpc_sh |=2;  
+    }	
+  }
+
+
+  rpc_ch_ids = match_rd.detIds(); 
+  //rpc_ch_ids = match_rd.chamberIds(); 
+  for (auto d:rpc_ch_ids)
   {
     RPCDetId id(d);
     const int st(detIdToMEStation(id.station(), id.ring()));
