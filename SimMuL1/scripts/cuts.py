@@ -105,13 +105,18 @@ eta_partitions = {
         5: {'even' : {'min' : 2.32986, 'max' : 2.47251}, 'odd' : {'min' : 2.32577, 'max' : 2.46841} },
     },
 }
-    
 
 #_______________________________________________________________________________
 nocut = TCut("")
 
 ok_eta = TCut("TMath::Abs(eta)>1.64 && TMath::Abs(eta)<2.14")
 ok_pt = TCut("pt > 20.")
+
+def ok_partition(station, p, even):
+    stationStrings = {'ME1b' : 'GE11-9-10', 'ME21' : 'GE21L', 'ME31' : 'RE31', 'ME41' : 'RE41' }
+    eta_min = eta_partitions[stationStrings[station]][p][even]['min']
+    eta_max = eta_partitions[stationStrings[station]][p][even]['max']
+    return TCut('TMath::Abs(eta) >= %f && TMath::Abs(eta) <= %f'%(eta_min, eta_max))
 
 ## CSC simhits & digis
 ok_sh1 = TCut("(has_csc_sh&1) > 0")
