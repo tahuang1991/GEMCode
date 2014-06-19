@@ -32,14 +32,14 @@ c1.SetTicky()
 def getEff(file,dir,den,num):
     f = ROOT.TFile(file)
     t = f.Get(dir)
-    xbins=[0.0 for x in range(32)]
-    xbins[0] = float(1.650)
-    xbins[1] = float(1.725)
-    for x in range(1,31):
+    xbins=[0.0 for x in range(28)]
+    xbins[0] = float(1.750)
+    xbins[1] = float(1.825)
+    for x in range(1,27):
 	xbins[x+1] = float(xbins[x]+0.025)
 	print "x ",x, " xbins  ",xbins[x]
-    xbins[31] = 2.45
-    print "x  32  xbins", xbins[31]
+    xbins[27] = 2.45
+    print "x  32  xbins", xbins[27]
     mybins = np.asarray(xbins)
     print "mybins ", mybins, mybins.dtype
     h1 = ROOT.TH1F("h1","h1",len(mybins)-1,mybins)
@@ -49,17 +49,17 @@ def getEff(file,dir,den,num):
     e = ROOT.TEfficiency(h2,h1)
     return e
 
-b1 = ROOT.TH1F("b1","b1",36,1.6,2.5)
+b1 = ROOT.TH1F("b1","b1",32,1.7,2.5)
 b1.GetYaxis().SetRangeUser(0.0,1.02)
 b1.GetYaxis().SetNdivisions(520)
 b1.GetYaxis().SetTitle("Efficiency")
 b1.GetYaxis().SetTitleSize(0.05)
 b1.GetXaxis().SetTitle("Simulated muon #eta")
 b1.GetXaxis().SetTitleSize(0.05)
-b1.SetTitle(" "*12 +"YE3/1 stub reconstruction"+" "*14 + "CMS Phase-II Simulation Preliminary")
+b1.SetTitle(" "*12 +"YE4/1 stub reconstruction"+" "*14 + "CMS Phase-II Simulation Preliminary")
 b1.SetStats(0)
 
-treename = "GEMCSCAnalyzer/trk_eff_ME31"
+treename = "GEMCSCAnalyzer/trk_eff_ME41"
 den = "has_csc_sh>0 && pt >10"
 num = "has_csc_sh>0 && has_lct>0 && pt>10"
 num1 = "has_csc_sh>0 && pt>10 && ((has_lct>0)||((has_alct>0 || has_clct>0)&&(has_rpc_dg>0)))"
@@ -89,7 +89,7 @@ e4.Draw("e3same")
 #e6.Draw("same")
 #e7.Draw("same")
 
-legend = ROOT.TLegend(0.20,0.20,.89,0.46, "", "brNDC")
+legend = ROOT.TLegend(0.20,0.20,.89,0.45, "", "brNDC")
 legend.SetBorderSize(0)
 #legend.SetFillStyle(0)
 legend.SetFillColor(ROOT.kWhite)
@@ -110,6 +110,6 @@ tex.SetTextSize(0.05)
 tex.SetNDC()
 tex.Draw("same")
 
-c1.SaveAs("LCT_100k_ME31_reco_eff_Negative_com_TP_PU140_newbins.pdf")
-c1.SaveAs("LCT_100k_ME31_reco_eff_Negative_com_TP_PU140_newbins.png")
-c1.SaveAs("LCT_100k_ME31_reco_eff_Negative_com_TP_PU140_newbins.eps")
+c1.SaveAs("LCT_100k_ME41_reco_eff_Negative_com_TP_PU140_newbins.pdf")
+c1.SaveAs("LCT_100k_ME41_reco_eff_Negative_com_TP_PU140_newbins.png")
+c1.SaveAs("LCT_100k_ME41_reco_eff_Negative_com_TP_PU140_newbins.eps")
