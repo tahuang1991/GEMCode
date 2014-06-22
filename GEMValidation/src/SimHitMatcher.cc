@@ -27,6 +27,7 @@ SimHitMatcher::SimHitMatcher(const SimTrack& t, const SimVertex& v,
   me0SimHitInput_ = me0SimHit_.getParameter<edm::InputTag>("input");
   simMuOnlyME0_ = me0SimHit_.getParameter<bool>("simMuOnly");
   discardEleHitsME0_ = me0SimHit_.getParameter<bool>("discardEleHits");
+  runME0SimHit_ = me0SimHit_.getParameter<bool>("run");
 
   auto rpcSimHit_ = conf().getParameter<edm::ParameterSet>("rpcSimHit");
   verboseRPC_ = rpcSimHit_.getParameter<int>("verbose");
@@ -60,7 +61,7 @@ SimHitMatcher::init()
   event().getByLabel(cscSimHitInput_, csc_hits);
   event().getByLabel(gemSimHitInput_, gem_hits);
   event().getByLabel(rpcSimHitInput_, rpc_hits);
-  event().getByLabel(me0SimHitInput_, me0_hits);
+  if (runME0SimHit_) event().getByLabel(me0SimHitInput_, me0_hits);
 
   // fill trkId2Index associoation:
   int no = 0;

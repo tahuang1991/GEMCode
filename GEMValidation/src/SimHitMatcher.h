@@ -136,6 +136,8 @@ private:
   bool discardEleHitsRPC_;
   bool discardEleHitsME0_;
 
+  bool runME0SimHit_;
+
   std::string simInputLabel_;
 
   std::map<unsigned int, unsigned int> trkid_to_index_;
