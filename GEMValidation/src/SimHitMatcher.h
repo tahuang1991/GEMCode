@@ -176,6 +176,13 @@ private:
   edm::InputTag cscSimHitInput_;
   edm::InputTag rpcSimHitInput_;
   edm::InputTag me0SimHitInput_;
+
+  edm::Handle<edm::PSimHitContainer> csc_hits;
+  edm::Handle<edm::PSimHitContainer> gem_hits;
+  edm::Handle<edm::PSimHitContainer> rpc_hits;
+  edm::Handle<edm::PSimHitContainer> me0_hits;
+  edm::Handle<edm::SimTrackContainer> sim_tracks;
+  edm::Handle<edm::SimVertexContainer> sim_vertices;
 };
 
 #endif
