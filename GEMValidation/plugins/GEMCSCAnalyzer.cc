@@ -76,6 +76,10 @@ struct MyTrackEff
   void init(); // initialize to default values
   TTree* book(TTree *t, const std::string & name = "trk_eff");
 
+  Int_t lumi;
+  Int_t run;
+  Int_t event;
+
   Float_t pt, eta, phi;
   Char_t charge;
   Char_t endcap;
@@ -181,6 +185,10 @@ struct MyTrackEff
 
 void MyTrackEff::init()
 {
+  lumi = -99;
+  run = -99;
+  event = -99;
+
   pt = 0.;
   phi = 0.;
   eta = -9.;
@@ -282,6 +290,10 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
 {
   edm::Service< TFileService > fs;
   t = fs->make<TTree>(name.c_str(), name.c_str());
+
+  t->Branch("lumi", &lumi);
+  t->Branch("run", &run);
+  t->Branch("event", &event);
 
   t->Branch("pt", &pt);
   t->Branch("eta", &eta);
@@ -630,6 +642,10 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
    
   for (auto s: stations_to_use_)
   {
+    etrk_[s].run = match.simhits().event().id().run();
+    etrk_[s].lumi = match.simhits().event().id().luminosityBlock();
+    etrk_[s].event = match.simhits().event().id().event();
+
     etrk_[s].init();
     etrk_[s].pt = t.momentum().pt();
     etrk_[s].phi = t.momentum().phi();
