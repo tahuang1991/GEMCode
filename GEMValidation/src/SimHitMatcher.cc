@@ -15,12 +15,14 @@ SimHitMatcher::SimHitMatcher(const SimTrack& t, const SimVertex& v,
   gemSimHitInput_ = gemSimHit_.getParameter<edm::InputTag>("input");
   simMuOnlyGEM_ = gemSimHit_.getParameter<bool>("simMuOnly");
   discardEleHitsGEM_ = gemSimHit_.getParameter<bool>("discardEleHits");
+  runGEMSimHit_ = gemSimHit_.getParameter<bool>("run");
 
   auto cscSimHit_= conf().getParameter<edm::ParameterSet>("cscSimHit");
   verboseCSC_ = cscSimHit_.getParameter<int>("verbose");
   cscSimHitInput_ = cscSimHit_.getParameter<edm::InputTag>("input");
   simMuOnlyCSC_ = cscSimHit_.getParameter<bool>("simMuOnly");
   discardEleHitsCSC_ = cscSimHit_.getParameter<bool>("discardEleHits");
+  runCSCSimHit_ = cscSimHit_.getParameter<bool>("run");
 
   auto me0SimHit_ = conf().getParameter<edm::ParameterSet>("me0SimHit");
   verboseME0_ = me0SimHit_.getParameter<int>("verbose");
@@ -34,6 +36,7 @@ SimHitMatcher::SimHitMatcher(const SimTrack& t, const SimVertex& v,
   rpcSimHitInput_ = rpcSimHit_.getParameter<edm::InputTag>("input");
   simMuOnlyRPC_ = rpcSimHit_.getParameter<bool>("simMuOnly");
   discardEleHitsRPC_ = rpcSimHit_.getParameter<bool>("discardEleHits");
+  runRPCSimHit_ = rpcSimHit_.getParameter<bool>("run");
 
   simInputLabel_ = conf().getUntrackedParameter<std::string>("simInputLabel", "g4SimHits");
 
@@ -51,9 +54,9 @@ SimHitMatcher::init()
 {
   event().getByLabel(simInputLabel_, sim_tracks);
   event().getByLabel(simInputLabel_, sim_vertices);
-  event().getByLabel(cscSimHitInput_, csc_hits);
-  event().getByLabel(gemSimHitInput_, gem_hits);
-  event().getByLabel(rpcSimHitInput_, rpc_hits);
+  if (runCSCSimHit_) event().getByLabel(cscSimHitInput_, csc_hits);
+  if (runGEMSimHit_) event().getByLabel(gemSimHitInput_, gem_hits);
+  if (runRPCSimHit_) event().getByLabel(rpcSimHitInput_, rpc_hits);
   if (runME0SimHit_) event().getByLabel(me0SimHitInput_, me0_hits);
 
   // fill trkId2Index associoation:
@@ -163,7 +166,7 @@ SimHitMatcher::matchSimHitsToSimTrack(std::vector<unsigned int> track_ids,
 {
   for (auto& track_id: track_ids)
   {
-    for (auto& h: csc_hits)
+    if (runCSCSimHit_) for (auto& h: csc_hits)
     {
       if (h.trackId() != track_id) continue;
       int pdgid = h.particleType();
@@ -176,7 +179,7 @@ SimHitMatcher::matchSimHitsToSimTrack(std::vector<unsigned int> track_ids,
       CSCDetId layer_id( h.detUnitId() );
       csc_chamber_to_hits_[ layer_id.chamberId().rawId() ].push_back(h);
     }
-    for (auto& h: gem_hits)
+    if (runGEMSimHit_) for (auto& h: gem_hits)
     {
       if (h.trackId() != track_id) continue;
       int pdgid = h.particleType();
@@ -191,7 +194,7 @@ SimHitMatcher::matchSimHitsToSimTrack(std::vector<unsigned int> track_ids,
       GEMDetId superch_id(p_id.region(), p_id.ring(), p_id.station(), 1, p_id.chamber(), 0);
       gem_superchamber_to_hits_[ superch_id() ].push_back(h);
     }
-    for (auto& h: rpc_hits)
+    if (runRPCSimHit_) for (auto& h: rpc_hits)
     {
       if (h.trackId() != track_id) continue;
       int pdgid = h.particleType();
