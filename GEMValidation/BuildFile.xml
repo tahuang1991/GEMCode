@@ -26,6 +26,16 @@
 <use   name="SimGeneral/HepPDTRecord"/>
 <use   name="CommonTools/UtilAlgos"/>
 <use   name="Utilities/General"/>
+<use   name="L1Trigger/CSCCommonTrigger"/>
+<use   name="L1Trigger/CSCTrackFinder"/>
+<use   name="L1Trigger/CSCTriggerPrimitives"/>
+<use   name="L1Trigger/DTUtilities"/>
+<use   name="L1Trigger/DTBti"/>
+<use   name="L1Trigger/DTTraco"/>
+<use   name="L1Trigger/DTTrackFinder"/>
+<use   name="L1Trigger/DTTriggerServerPhi"/>
+<use   name="L1Trigger/DTTriggerServerTheta"/>
+<use   name="L1Trigger/DTSectorCollector"/>
 <export>
   <lib   name="1"/>
 </export>

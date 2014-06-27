@@ -181,6 +181,12 @@ struct MyTrackEff
   Float_t deta_rpcstrip_odd;
   Float_t deta_rpcstrip_even;
 
+  // Track properties
+  Int_t has_tfTrack;
+  Int_t has_tfCand;
+  Int_t has_gmtRegCand;
+  Int_t has_gmtCand;
+  Int_t has_l1Extra;
 };
 
 void MyTrackEff::init()
@@ -283,6 +289,13 @@ void MyTrackEff::init()
   dphi_rpcstrip_even = -9.;
   deta_rpcstrip_odd = -9.;
   deta_rpcstrip_even = -9.;
+
+  // Track properties
+  has_tfTrack = -99;
+  has_tfCand = -99;
+  has_gmtRegCand = -99;
+  has_gmtCand = -99;
+  has_l1Extra = -99;
 }
 
 
@@ -322,7 +335,6 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("eta_lct_even", &eta_lct_even);
   t->Branch("dphi_lct_odd", &dphi_lct_odd);
   t->Branch("dphi_lct_even", &dphi_lct_even);
-
   
   t->Branch("wiregroup_odd", &wiregroup_odd);
   t->Branch("wiregroup_even", &wiregroup_even);
@@ -391,6 +403,11 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("deta_rpcstrip_even", &deta_rpcstrip_even);
 
   //t->Branch("", &);
+  t->Branch("has_tfTrack", &has_tfTrack);
+  t->Branch("has_tfCand", &has_tfCand);
+  t->Branch("has_gmtRegCand", &has_gmtRegCand);
+  t->Branch("has_gmtCand", &has_gmtCand);
+  t->Branch("has_l1Extra", &has_l1Extra);
   
   return t;
 }
@@ -449,6 +466,23 @@ private:
   int minNHitsChamberALCT_;
   int minNHitsChamberLCT_;
   int minNHitsChamberMPLCT_;
+
+  // Track stuff
+//   edm::InputTag cscTfTrackInputLabel_;
+//   edm::InputTag cscTfCandInputLabel_;
+//   edm::InputTag gmtRegCandInputLabel_;
+//   edm::InputTag gmtCandInputLabel_;
+//   edm::InputTag l1ExtraInputLabel_;
+
+  CSCTFPtLUT* ptLUT;
+  CSCTFSectorProcessor* my_SPs[2][6];
+  CSCSectorReceiverLUT* srLUTs_[5][6][2];
+  CSCTFDTReceiver* my_dtrc;
+  unsigned long long  muScalesCacheID_;
+  unsigned long long  muPtScaleCacheID_;
+
+  edm::ESHandle< L1MuTriggerScales > muScales;
+  edm::ESHandle< L1MuTriggerPtScale > muPtScale;
 };
 
 
@@ -489,12 +523,6 @@ GEMCSCAnalyzer::GEMCSCAnalyzer(const edm::ParameterSet& ps)
   auto cscMPLCT = cfg_.getParameter<edm::ParameterSet>("cscMPLCT");
   minNHitsChamberMPLCT_ = cscMPLCT.getParameter<int>("minNHitsChamber");
 
-  /*
-  auto tfTrack = cfg_.getParameter<edm::ParameterSet>("tfTrack");
-  auto tfCand = cfg_.getParameter<edm::ParameterSet>("tfCand");
-  auto gmtCand = cfg_.getParameter<edm::ParameterSet>("gmtCand");
-  auto l1Extra = cfg_.getParameter<edm::ParameterSet>("l1Extra");
-  */
   if (ntupleTrackChamberDelta_) bookSimTracksDeltaTree();
   if (ntupleTrackEff_)
   {
@@ -533,7 +561,6 @@ int GEMCSCAnalyzer::detIdToMEStation(int st, int ri)
 
 void GEMCSCAnalyzer::beginRun(const edm::Run &iRun, const edm::EventSetup &iSetup)
 {
-  //
 }
 
 
@@ -637,7 +664,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   const RPCDigiMatcher& match_rd = match.rpcDigis();
   const CSCDigiMatcher& match_cd = match.cscDigis();
   const CSCStubMatcher& match_lct = match.cscStubs();
-  //const TrackMatcher& match_track = match.tracks();
+  //  const TrackMatcher& match_track = match.tracks();
   const SimTrack &t = match_sh.trk();
    
   for (auto s: stations_to_use_)
@@ -1035,7 +1062,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     }
   }
 
-//ME11Case
+  //ME11Case
   for(auto d: match_gd.superChamberIds())
   {
     GEMDetId id(d);
@@ -1145,8 +1172,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   GlobalPoint best_rpcstrip_odd[12];
   GlobalPoint best_rpcstrip_even[12];
 
-  auto rpc_ch_ids = match_sh.chamberIdsRPC();
-  for (auto d:rpc_ch_ids)
+  for (auto d: match_sh.chamberIdsRPC())
   {
     RPCDetId id(d);
     const int st(detIdToMEStation(id.station(), id.ring()));
@@ -1161,20 +1187,17 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     }	
   }
 
-
-  rpc_ch_ids = match_rd.detIds(); 
-  //rpc_ch_ids = match_rd.chamberIds(); 
-  for (auto d:rpc_ch_ids)
+  for (auto d: match_rd.detIds())
   {
     RPCDetId id(d);
     const int st(detIdToMEStation(id.station(), id.ring()));
     if (stations_to_use_.count(st) == 0) continue;
     //meanstrip in rpc 
     auto rpcdigis = match_rd.digisInDetId(id); 
-    int rpc_medianstrip(match_rd.median(rpcdigis));
-    int cscchamber = CSCTriggerNumbering::chamberFromTriggerLabels(id.sector(), 0, id.station(), id.subsector());
+    const int rpc_medianstrip(match_rd.median(rpcdigis));
+    const int cscchamber = CSCTriggerNumbering::chamberFromTriggerLabels(id.sector(), 0, id.station(), id.subsector());
     //std::cout <<"rpc detid " << id << " csc chamebr:"<< cscchamber << std::endl;
-    bool odd(cscchamber%2 == 1);
+    const bool odd(cscchamber%2 == 1);
     if (odd)
     {
       etrk_[st].has_rpc_dg |= 1;
@@ -1210,7 +1233,29 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       }
     }
   }
+  
+  // not sure how to fill this - per station and per muon?
+//   for (auto d: match_track.tfTracks())
+//   {
+//     etrk_[st].has_tfTrack = 1;
+//   }
 
+  /*
+  for (auto d: match_track.tfCand())
+  {
+    etrk_[st].has_tfCand = 1;
+  }
+
+  for (auto d: match_track.gmtRegCand())
+  {
+    etrk_[st].has_gmtRegCand = 1;
+  }
+
+  for (auto d: match_track.gmtCand())
+  {
+    etrk_[st].has_gmtCand = 1;
+  }
+  */
   for (auto s: stations_to_use_)
   {
     tree_eff_[s]->Fill();

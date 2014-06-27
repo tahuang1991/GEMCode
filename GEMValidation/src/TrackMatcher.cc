@@ -1,17 +1,92 @@
 #include "GEMCode/GEMValidation/src/TrackMatcher.h"
 
-TrackMatcher::TrackMatcher() 
+TrackMatcher::TrackMatcher(SimHitMatcher& sh, CSCDigiMatcher& csc_dg, 
+                           GEMDigiMatcher& gem_dg, RPCDigiMatcher& rpc_dg, 
+                           CSCStubMatcher& csc_st)
+: CSCStubMatcher(sh, csc_dg, gem_dg, rpc_dg)
+, sh_matcher_(&sh)
+, gem_digi_matcher_(&gem_dg)
+, csc_digi_matcher_(&csc_dg)
+, rpc_digi_matcher_(&rpc_dg)                 
 {
-}
-
-TrackMatcher::TrackMatcher(const TrackMatcher& rhs) 
-{
+  auto tfTrack = conf().getParameter<edm::ParameterSet>("tfTrack");
+  cscTfTrackInputLabel_ = tfTrack.getParameter<edm::InputTag>("input");
+  minBXTFTrack_ = tfTrack.getParameter<int>("minBX");
+  maxBXTFTrack_ = tfTrack.getParameter<int>("minBX");
+  
+  auto tfCand = conf().getParameter<edm::ParameterSet>("tfCand");
+  cscTfCandInputLabel_ = tfCand.getParameter<edm::InputTag>("input");
+  minBXTFCand_ = tfCand.getParameter<int>("minBX");
+  maxBXTFCand_ = tfCand.getParameter<int>("minBX");
+  
+  auto gmtRegCand = conf().getParameter<edm::ParameterSet>("gmtRegCand");
+  gmtRegCandInputLabel_ = gmtRegCand.getParameter<edm::InputTag>("input");
+  minBXGMTRegCand_ = gmtRegCand.getParameter<int>("minBX");
+  maxBXGMTRegCand_ = gmtRegCand.getParameter<int>("minBX");
+  
+  auto gmtCand = conf().getParameter<edm::ParameterSet>("gmtCand");
+  gmtCandInputLabel_ = gmtCand.getParameter<edm::InputTag>("input");
+  minBXGMTCand_ = gmtCand.getParameter<int>("minBX");
+  maxBXGMTCand_ = gmtCand.getParameter<int>("minBX");
+  
+  auto l1Extra = conf().getParameter<edm::ParameterSet>("l1Extra");
+  l1ExtraInputLabel_ = l1Extra.getParameter<edm::InputTag>("input");
+  minBXL1Extra_ = l1Extra.getParameter<int>("minBX");
+  maxBXL1Extra_ = l1Extra.getParameter<int>("minBX");
+  
+  clear();
+  init();
 }
 
 TrackMatcher::~TrackMatcher() 
 {
 }
 
+void TrackMatcher::clear()
+{
+  tfTracks_.clear();
+  tfCands_.clear();
+  gmtRegCands_.clear();
+  gmtCands_.clear();
+  l1Extras_.clear();
+}
+
+void TrackMatcher::init()
+{
+  if (eventSetup().get<L1MuTriggerScalesRcd>().cacheIdentifier() != muScalesCacheID_ or
+      eventSetup().get<L1MuTriggerPtScaleRcd>().cacheIdentifier() != muPtScaleCacheID_) {
+    eventSetup().get<L1MuTriggerScalesRcd>().get(muScales);
+    eventSetup().get<L1MuTriggerPtScaleRcd>().get(muPtScale);
+    if (ptLUT) delete ptLUT;  
+    ptLUT = new CSCTFPtLUT(ptLUTset, muScales.product(), muPtScale.product());
+    
+    for(int e=0; e<2; e++) for (int s=0; s<6; s++){
+      if  (my_SPs[e][s]) delete my_SPs[e][s];
+      my_SPs[e][s] = new CSCTFSectorProcessor(e+1, s+1, CSCTFSPset, true, muScales.product(), muPtScale.product());
+      my_SPs[e][s]->initialize(eventSetup());
+    }
+    muScalesCacheID_  = eventSetup().get<L1MuTriggerScalesRcd>().cacheIdentifier();
+    muPtScaleCacheID_ = eventSetup().get<L1MuTriggerPtScaleRcd>().cacheIdentifier();
+  } 
+}
+
+
+void matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
+{
+  
+}
+
+void matchTfCandToSimTrack(const L1CSCTrackCollection& tracks)
+{
+}
+
+void matchGmtRegCandToSimTrack(const L1MuRegionalCand& tracks)
+{
+}
+
+void matchGmtCandToSimTrack(const L1MuGMTExtendedCand& tracks)
+{
+}
 
 TFTrack* 
 TrackMatcher::bestTFTrack(bool sortPtFirst)
@@ -112,7 +187,7 @@ TrackMatcher::bestTFCand(bool sortPtFirst)
         double rr = qBase*cands[i].l1cand->quality_packed() + ptBase*cands[i].l1cand->pt_packed() + 1./(0.01 + cands[i].dr);
         if (rr > maxRank) { maxRank = rr; maxI = i;}
     }
-    if (maxI==99) return NULL;
+OB    if (maxI==99) return NULL;
     return &(cands[maxI]);
   */
   return 0;
