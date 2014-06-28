@@ -54,10 +54,10 @@ SimHitMatcher::init()
 {
   event().getByLabel(simInputLabel_, sim_tracks);
   event().getByLabel(simInputLabel_, sim_vertices);
-  if (runCSCSimHit_) event().getByLabel(cscSimHitInput_, csc_hits);
-  if (runGEMSimHit_) event().getByLabel(gemSimHitInput_, gem_hits);
-  if (runRPCSimHit_) event().getByLabel(rpcSimHitInput_, rpc_hits);
-  if (runME0SimHit_) event().getByLabel(me0SimHitInput_, me0_hits);
+  event().getByLabel(cscSimHitInput_, csc_hits);
+  event().getByLabel(gemSimHitInput_, gem_hits);
+  event().getByLabel(rpcSimHitInput_, rpc_hits);
+  event().getByLabel(me0SimHitInput_, me0_hits);
 
   // fill trkId2Index associoation:
   int no = 0;
@@ -240,39 +240,39 @@ SimHitMatcher::matchSimHitsToSimTrack(std::vector<unsigned int> track_ids,
     gem_detids_to_pads_[d] = pads;
   }
 
-  // find 2-layer coincidence pads with hits
-  for (auto d: detids)
-  {
-    GEMDetId id1(d);
-    if (id1.layer() != 1) continue;
-    GEMDetId id2(id1.region(), id1.ring(), id1.station(), 2, id1.chamber(), id1.roll());
-    // does layer 2 has simhits?
-    if (detids.find(id2()) == detids.end()) continue;
-
-    // find pads with hits in layer1
-    auto hits1 = hitsInDetId(d);
-    auto roll1 = gemGeometry_->etaPartition(id1);
-    set<int> pads1;
-    for (auto& h: hits1)
-    {
-      LocalPoint lp = h.entryPoint();
-      pads1.insert( 1 + static_cast<int>(roll1->padTopology().channel(lp)) );
+  if (runGEMSimHit_) {
+    // find 2-layer coincidence pads with hits
+    for (auto d: detids) {
+      
+      GEMDetId id1(d);
+      if (id1.layer() != 1) continue;
+      GEMDetId id2(id1.region(), id1.ring(), id1.station(), 2, id1.chamber(), id1.roll());
+      // does layer 2 has simhits?
+      if (detids.find(id2()) == detids.end()) continue;
+      
+      // find pads with hits in layer1
+      auto hits1 = hitsInDetId(d);
+      auto roll1 = gemGeometry_->etaPartition(id1);
+      set<int> pads1;
+      for (auto& h: hits1) {
+	LocalPoint lp = h.entryPoint();
+	pads1.insert( 1 + static_cast<int>(roll1->padTopology().channel(lp)) );
+      }
+      
+      // find pads with hits in layer2
+      auto hits2 = hitsInDetId(id2());
+      auto roll2 = gemGeometry_->etaPartition(id2);
+      set<int> pads2;
+      for (auto& h: hits2) {
+	LocalPoint lp = h.entryPoint();
+	pads2.insert( 1 + static_cast<int>(roll2->padTopology().channel(lp)) );
+      }
+      
+      set<int> copads;
+      std::set_intersection(pads1.begin(), pads1.end(), pads2.begin(), pads2.end(), std::inserter(copads, copads.begin()));
+      if (copads.empty()) continue;
+      gem_detids_to_copads_[d] = copads;
     }
-
-    // find pads with hits in layer2
-    auto hits2 = hitsInDetId(id2());
-    auto roll2 = gemGeometry_->etaPartition(id2);
-    set<int> pads2;
-    for (auto& h: hits2)
-    {
-      LocalPoint lp = h.entryPoint();
-      pads2.insert( 1 + static_cast<int>(roll2->padTopology().channel(lp)) );
-    }
-
-    set<int> copads;
-    std::set_intersection(pads1.begin(), pads1.end(), pads2.begin(), pads2.end(), std::inserter(copads, copads.begin()));
-    if (copads.empty()) continue;
-    gem_detids_to_copads_[d] = copads;
   }
 }
 
