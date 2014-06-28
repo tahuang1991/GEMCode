@@ -222,28 +222,25 @@ SimHitMatcher::matchSimHitsToSimTrack(std::vector<unsigned int> track_ids,
     }
   }
 
-  // find pads with hits
-  auto detids = detIdsGEM();
-  // find 2-layer coincidence pads with hits
-  for (auto d: detids)
-  {
-    GEMDetId id(d);
-    auto hits = hitsInDetId(d);
-    auto roll = gemGeometry_->etaPartition(id);
-    //int max_npads = roll->npads();
-    set<int> pads;
-    for (auto& h: hits)
-    {
-      LocalPoint lp = h.entryPoint();
-      pads.insert( 1 + static_cast<int>(roll->padTopology().channel(lp)) );
-    }
-    gem_detids_to_pads_[d] = pads;
-  }
-
   if (runGEMSimHit_) {
+    // find pads with hits
+    auto detids = detIdsGEM();
     // find 2-layer coincidence pads with hits
     for (auto d: detids) {
-      
+      GEMDetId id(d);
+      auto hits = hitsInDetId(d);
+      auto roll = gemGeometry_->etaPartition(id);
+      //int max_npads = roll->npads();
+      set<int> pads;
+      for (auto& h: hits) {
+	LocalPoint lp = h.entryPoint();
+	pads.insert( 1 + static_cast<int>(roll->padTopology().channel(lp)) );
+      }
+      gem_detids_to_pads_[d] = pads;
+    }
+    
+    // find 2-layer coincidence pads with hits
+    for (auto d: detids) {
       GEMDetId id1(d);
       if (id1.layer() != 1) continue;
       GEMDetId id2(id1.region(), id1.ring(), id1.station(), 2, id1.chamber(), id1.roll());
