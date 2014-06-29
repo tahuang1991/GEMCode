@@ -33,6 +33,10 @@
 #include "CondFormats/DataRecord/interface/L1MuTriggerScalesRcd.h"
 #include "CondFormats/DataRecord/interface/L1MuTriggerPtScaleRcd.h"
 
+#include "DataFormats/L1CSCTrackFinder/interface/L1CSCTrackCollection.h"
+#include "DataFormats/L1Trigger/interface/L1MuonParticleFwd.h"
+#include "DataFormats/L1Trigger/interface/L1MuonParticle.h"
+
 
 class TrackMatcher : public CSCStubMatcher
 {
@@ -62,9 +66,12 @@ class TrackMatcher : public CSCStubMatcher
   void clear();
 
   void matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks);
-  void matchTfCandToSimTrack(const L1CSCTrackCollection& tracks);
+  void matchTfCandToSimTrack(const std::vector<L1MuRegionalCand>& tracks);
   void matchGmtRegCandToSimTrack(const L1MuRegionalCand& tracks);
   void matchGmtCandToSimTrack(const L1MuGMTExtendedCand& tracks);
+
+  csctf::TrackStub buildTrackStub(const CSCCorrelatedLCTDigi& d, CSCDetId id);
+  std::pair<float, float> intersectionEtaPhi(CSCDetId id, int wg, int hs);
 
   const SimHitMatcher* sh_matcher_;
   const GEMDigiMatcher* gem_digi_matcher_;
@@ -90,17 +97,17 @@ class TrackMatcher : public CSCStubMatcher
   std::vector<GMTCand*> gmtCands_;
   std::vector<L1Extra*> l1Extras_;
 
-  edm::ParameterSet ptLUTset;
-  edm::ParameterSet CSCTFSPset;
-  CSCTFPtLUT* ptLUT;
-  CSCTFSectorProcessor* my_SPs[2][6];
+  edm::ParameterSet ptLUTset_;
+  edm::ParameterSet CSCTFSPset_;
+  CSCTFPtLUT* ptLUT_;
+  CSCTFSectorProcessor* my_SPs_[2][6];
   CSCSectorReceiverLUT* srLUTs_[5][6][2];
-  CSCTFDTReceiver* my_dtrc;
+  CSCTFDTReceiver* my_dtrc_;
   unsigned long long  muScalesCacheID_;
   unsigned long long  muPtScaleCacheID_;
 
-  edm::ESHandle< L1MuTriggerScales > muScales;
-  edm::ESHandle< L1MuTriggerPtScale > muPtScale;
+  edm::ESHandle< L1MuTriggerScales > muScales_;
+  edm::ESHandle< L1MuTriggerPtScale > muPtScale_;
 };
 
 #endif

@@ -56,22 +56,11 @@
 
 /* #include "SimMuon/CSCDigitizer/src/CSCDbStripConditions.h" */
 
-/* #include <Geometry/CSCGeometry/interface/CSCChamberSpecs.h> */
-/* #include "Geometry/GEMGeometry/interface/GEMGeometry.h" */
 
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
-
-/* #include "FWCore/Framework/interface/Event.h" */
-/* #include "FWCore/Framework/interface/MakerMacros.h" */
-/* #include "FWCore/Framework/interface/ESHandle.h" */
-
-/* #include "FWCore/ParameterSet/interface/ParameterSet.h" */
-/* #include "FWCore/Utilities/interface/InputTag.h" */
-/* #include "FWCore/ServiceRegistry/interface/Service.h" */
-/* #include "CommonTools/UtilAlgos/interface/TFileService.h" */
 
 //#include "TLorentzVector.h"
 //#include "DataFormats/Math/interface/LorentzVector.h"
@@ -79,9 +68,11 @@
 
 /* #include "Geometry/Records/interface/MuonGeometryRecord.h" */
 /* #include "Geometry/CSCGeometry/interface/CSCGeometry.h" */
-/* //#include <Geometry/CSCGeometry/interface/CSCLayer.h> */
+/* #include <Geometry/CSCGeometry/interface/CSCLayer.h> */
 /* #include "Geometry/DTGeometry/interface/DTGeometry.h" */
 /* #include "Geometry/RPCGeometry/interface/RPCGeometry.h" */
+/* #include <Geometry/CSCGeometry/interface/CSCChamberSpecs.h> */
+/* #include "Geometry/GEMGeometry/interface/GEMGeometry.h" */
 
 /* #include "TrackingTools/GeomPropagators/interface/Propagator.h" */
 /* #include "TrackingTools/TrajectoryState/interface/TrajectoryStateOnSurface.h" */
@@ -107,7 +98,7 @@ class TFTrack
 {
  public:
   /// constructor
-  TFTrack(const csc::L1Track *t);
+  TFTrack(const csc::L1Track*);
   /// copy constructor
   TFTrack(const TFTrack&);
   /// destructor
@@ -117,16 +108,23 @@ class TFTrack
 	    edm::ESHandle< L1MuTriggerScales > &muScales,
 	    edm::ESHandle< L1MuTriggerPtScale > &muPtScale);
   
+  void setDR(const SimTrack&);
+
   /// L1 track
   const csc::L1Track* getL1Track() const {return l1track_;}
   /// collection of trigger digis
-  const std::vector<const CSCCorrelatedLCTDigi* >& getTriggerDigis() const {return triggerDigis_;} 
+  const std::vector<const CSCCorrelatedLCTDigi*>& getTriggerDigis() const {return triggerDigis_;} 
   /// collection of MPC LCTs
   const std::vector<CSCDetId>& getTriggerDigisIds() const {return triggerIds_;}
   const std::vector<std::pair<float, float>>& getTriggerEtaPhis() {return triggerEtaPhis_;}
   const std::vector<csctf::TrackStub>& getTriggerStubs() const {return triggerStubs_;}
   const std::vector<matching::Digi*>& getTriggerMPLCTs() const {return mplcts_;}
   const std::vector<CSCDetId>& getChamberIds() const {return ids_;}
+
+  void addTriggerDigi(const CSCCorrelatedLCTDigi*);
+  void addTriggerDigiId(const CSCDetId&);
+  void addTriggerEtaPhi(const std::pair<float,float>&);
+  void addTriggerStub(const csctf::TrackStub&);
 
   /// track sign
   bool sign() const {return l1track_->sign();}

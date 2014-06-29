@@ -33,6 +33,9 @@ TrackMatcher::TrackMatcher(SimHitMatcher& sh, CSCDigiMatcher& csc_dg,
   l1ExtraInputLabel_ = l1Extra.getParameter<edm::InputTag>("input");
   minBXL1Extra_ = l1Extra.getParameter<int>("minBX");
   maxBXL1Extra_ = l1Extra.getParameter<int>("minBX");
+
+  CSCTFSPset_ = conf().getParameter<edm::ParameterSet>("sectorProcessor");
+  ptLUTset_ = CSCTFSPset_.getParameter<edm::ParameterSet>("PTLUT");
   
   clear();
   init();
@@ -42,7 +45,8 @@ TrackMatcher::~TrackMatcher()
 {
 }
 
-void TrackMatcher::clear()
+void 
+TrackMatcher::clear()
 {
   tfTracks_.clear();
   tfCands_.clear();
@@ -51,40 +55,77 @@ void TrackMatcher::clear()
   l1Extras_.clear();
 }
 
-void TrackMatcher::init()
+void 
+TrackMatcher::init()
 {
   if (eventSetup().get<L1MuTriggerScalesRcd>().cacheIdentifier() != muScalesCacheID_ or
       eventSetup().get<L1MuTriggerPtScaleRcd>().cacheIdentifier() != muPtScaleCacheID_) {
-    eventSetup().get<L1MuTriggerScalesRcd>().get(muScales);
-    eventSetup().get<L1MuTriggerPtScaleRcd>().get(muPtScale);
-    if (ptLUT) delete ptLUT;  
-    ptLUT = new CSCTFPtLUT(ptLUTset, muScales.product(), muPtScale.product());
+    eventSetup().get<L1MuTriggerScalesRcd>().get(muScales_);
+    eventSetup().get<L1MuTriggerPtScaleRcd>().get(muPtScale_);
+    if (ptLUT_) delete ptLUT_;  
+    ptLUT_ = new CSCTFPtLUT(ptLUTset_, muScales_.product(), muPtScale_.product());
     
-    for(int e=0; e<2; e++) for (int s=0; s<6; s++){
-      if  (my_SPs[e][s]) delete my_SPs[e][s];
-      my_SPs[e][s] = new CSCTFSectorProcessor(e+1, s+1, CSCTFSPset, true, muScales.product(), muPtScale.product());
-      my_SPs[e][s]->initialize(eventSetup());
+    for(int e=0; e<2; e++) {
+      for (int s=0; s<6; s++){
+        if  (my_SPs_[e][s]) delete my_SPs_[e][s];
+        my_SPs_[e][s] = new CSCTFSectorProcessor(e+1, s+1, CSCTFSPset_, true, muScales_.product(), muPtScale_.product());
+        my_SPs_[e][s]->initialize(eventSetup());
+      }
     }
     muScalesCacheID_  = eventSetup().get<L1MuTriggerScalesRcd>().cacheIdentifier();
     muPtScaleCacheID_ = eventSetup().get<L1MuTriggerPtScaleRcd>().cacheIdentifier();
   } 
-}
-
-
-void matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
-{
   
+  // tracks produced by TF
+  edm::Handle<L1CSCTrackCollection> hl1Tracks;
+  event().getByLabel(cscTfTrackInputLabel_,hl1Tracks);
+  matchTfTrackToSimTrack(*hl1Tracks.product());
+  
+  // L1 muon candidates after CSC sorter
+  edm::Handle<std::vector<L1MuRegionalCand> > hl1TfCands;
+  event().getByLabel("simCsctfDigis", "CSC", hl1TfCands);
+  matchTfCandToSimTrack(*hl1TfCands.product());
 }
 
-void matchTfCandToSimTrack(const L1CSCTrackCollection& tracks)
+void 
+TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
+{
+  for (L1CSCTrackCollection::const_iterator trk = tracks.begin(); trk != tracks.end(); trk++) {
+    TFTrack track(&trk->first);
+    track.init(ptLUT_, muScales_, muPtScale_);
+    // calculate the DR
+    track.setDR(this->trk());
+
+    // check the stubs
+    for (CSCCorrelatedLCTDigiCollection::DigiRangeIterator detUnitIt = trk->second.begin(); 
+         detUnitIt != trk->second.end(); detUnitIt++) {
+      const CSCDetId& id = (*detUnitIt).first;
+      const CSCCorrelatedLCTDigiCollection::Range& range = (*detUnitIt).second;
+      for (CSCCorrelatedLCTDigiCollection::const_iterator digiIt = range.first; digiIt != range.second; digiIt++) {
+        auto lct(*digiIt);
+        // check for valid stubs
+        if (!(lct.isValid())) continue;
+        track.addTriggerDigi(&lct);
+        track.addTriggerDigiId(id);
+        track.addTriggerEtaPhi(intersectionEtaPhi(id, lct.getKeyWG(), lct.getStrip()));
+        track.addTriggerStub(buildTrackStub(lct, id));
+      }
+    }
+  }
+}
+
+void 
+TrackMatcher::matchTfCandToSimTrack(const std::vector<L1MuRegionalCand>& tracks)
 {
 }
 
-void matchGmtRegCandToSimTrack(const L1MuRegionalCand& tracks)
+void 
+TrackMatcher::matchGmtRegCandToSimTrack(const L1MuRegionalCand& tracks)
 {
 }
 
-void matchGmtCandToSimTrack(const L1MuGMTExtendedCand& tracks)
+void 
+TrackMatcher::matchGmtCandToSimTrack(const L1MuGMTExtendedCand& tracks)
 {
 }
 
@@ -237,4 +278,39 @@ L1Extra*
 TrackMatcher::bestL1Extra(bool sortPtFirst)
 {
   return 0;
+}
+
+csctf::TrackStub 
+TrackMatcher::buildTrackStub(const CSCCorrelatedLCTDigi &d, CSCDetId id)
+{
+  const unsigned fpga((id.station() == 1) ? CSCTriggerNumbering::triggerSubSectorFromLabels(id) - 1 : id.station());
+  CSCSectorReceiverLUT* srLUT = srLUTs_[fpga][id.triggerSector()-1][id.endcap()-1];
+  const unsigned cscid(CSCTriggerNumbering::triggerCscIdFromLabels(id));
+  const unsigned cscid_special((id.station()==1 && id.ring()==4) ? cscid + 9 : cscid);
+  const lclphidat lclPhi(srLUT->localPhi(d.getStrip(), d.getPattern(), d.getQuality(), d.getBend()));
+  const gblphidat gblPhi(srLUT->globalPhiME(lclPhi.phi_local, d.getKeyWG(), cscid_special));
+  const gbletadat gblEta(srLUT->globalEtaME(lclPhi.phi_bend_local, lclPhi.phi_local, d.getKeyWG(), cscid));
+
+  return csctf::TrackStub(d, id, gblPhi.global_phi, gblEta.global_eta);
+}
+
+
+
+std::pair<float, float> 
+TrackMatcher::intersectionEtaPhi(CSCDetId id, int wg, int hs)
+{
+  const CSCDetId layerId(id.endcap(), id.station(), id.ring(), id.chamber(), CSCConstants::KEY_CLCT_LAYER);
+  const CSCLayer* csclayer(cscGeometry_->layer(layerId));
+  const CSCLayerGeometry* layer_geo(csclayer->geometry());
+
+  // LCT::getKeyWG() starts from 0
+  const float wire(layer_geo->middleWireOfGroup(wg + 1));
+
+  // half-strip to strip
+  // note that LCT's HS starts from 0, but in geometry strips start from 1
+  const float fractional_strip(0.5 * (hs + 1) - 0.25);
+  const LocalPoint csc_intersect(layer_geo->intersectionOfStripAndWire(fractional_strip, wire));
+  const GlobalPoint csc_gp(cscGeometry_->idToDet(layerId)->surface().toGlobal(csc_intersect));
+
+  return std::make_pair(csc_gp.eta(), csc_gp.phi());
 }
