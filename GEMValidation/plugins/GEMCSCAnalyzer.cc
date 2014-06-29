@@ -466,23 +466,6 @@ private:
   int minNHitsChamberALCT_;
   int minNHitsChamberLCT_;
   int minNHitsChamberMPLCT_;
-
-  // Track stuff
-//   edm::InputTag cscTfTrackInputLabel_;
-//   edm::InputTag cscTfCandInputLabel_;
-//   edm::InputTag gmtRegCandInputLabel_;
-//   edm::InputTag gmtCandInputLabel_;
-//   edm::InputTag l1ExtraInputLabel_;
-
-  CSCTFPtLUT* ptLUT;
-  CSCTFSectorProcessor* my_SPs[2][6];
-  CSCSectorReceiverLUT* srLUTs_[5][6][2];
-  CSCTFDTReceiver* my_dtrc;
-  unsigned long long  muScalesCacheID_;
-  unsigned long long  muPtScaleCacheID_;
-
-  edm::ESHandle< L1MuTriggerScales > muScales;
-  edm::ESHandle< L1MuTriggerPtScale > muPtScale;
 };
 
 
@@ -664,7 +647,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   const RPCDigiMatcher& match_rd = match.rpcDigis();
   const CSCDigiMatcher& match_cd = match.cscDigis();
   const CSCStubMatcher& match_lct = match.cscStubs();
-  //  const TrackMatcher& match_track = match.tracks();
+  //const TrackMatcher& match_track = match.tracks();
   const SimTrack &t = match_sh.trk();
    
   for (auto s: stations_to_use_)

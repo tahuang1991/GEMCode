@@ -91,6 +91,12 @@ class TrackMatcher : public CSCStubMatcher
   int minBXGMTCand_, maxBXGMTCand_;
   int minBXL1Extra_, maxBXL1Extra_;
 
+  int verboseTFTrack_;
+  int verboseTFCand_;
+  int verboseGMTRegCand_;
+  int verboseGMTCand_;
+  int verboseL1Extra_;
+
   std::vector<TFTrack*> tfTracks_;
   std::vector<TFCand*> tfCands_;
   std::vector<GMTRegCand*> gmtRegCands_;
@@ -106,8 +112,11 @@ class TrackMatcher : public CSCStubMatcher
   unsigned long long  muScalesCacheID_;
   unsigned long long  muPtScaleCacheID_;
 
-  edm::ESHandle< L1MuTriggerScales > muScales_;
-  edm::ESHandle< L1MuTriggerPtScale > muPtScale_;
+  edm::ESHandle<L1MuTriggerScales> muScales_;
+  edm::ESHandle<L1MuTriggerPtScale> muPtScale_;
+
+  bool hasMuScales_;
+  bool hasMuPtScale_;
 };
 
 #endif
