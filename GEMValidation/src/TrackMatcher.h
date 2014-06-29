@@ -29,8 +29,8 @@
 #include "L1Trigger/CSCTrackFinder/src/CSCTFDTReceiver.h"
 
 #include "CondFormats/L1TObjects/interface/L1MuTriggerScales.h"
-#include "CondFormats/L1TObjects/interface/L1MuTriggerPtScale.h"
 #include "CondFormats/DataRecord/interface/L1MuTriggerScalesRcd.h"
+#include "CondFormats/L1TObjects/interface/L1MuTriggerPtScale.h"
 #include "CondFormats/DataRecord/interface/L1MuTriggerPtScaleRcd.h"
 
 #include "DataFormats/L1CSCTrackFinder/interface/L1CSCTrackCollection.h"
@@ -105,18 +105,24 @@ class TrackMatcher : public CSCStubMatcher
 
   edm::ParameterSet ptLUTset_;
   edm::ParameterSet CSCTFSPset_;
+  edm::ParameterSet srLUTset_;
+
   CSCTFPtLUT* ptLUT_;
   CSCTFSectorProcessor* my_SPs_[2][6];
   CSCSectorReceiverLUT* srLUTs_[5][6][2];
-  CSCTFDTReceiver* my_dtrc_;
+  CSCTFDTReceiver* dtrc_;
+
   unsigned long long  muScalesCacheID_;
   unsigned long long  muPtScaleCacheID_;
 
-  edm::ESHandle<L1MuTriggerScales> muScales_;
-  edm::ESHandle<L1MuTriggerPtScale> muPtScale_;
+  edm::ESHandle<L1MuTriggerScales> muScalesHd_;
+  edm::ESHandle<L1MuTriggerPtScale> muPtScaleHd_;
 
   bool hasMuScales_;
   bool hasMuPtScale_;
+
+  const L1MuTriggerScales* muScales_;
+  const L1MuTriggerPtScale* muPtScale_;
 };
 
 #endif

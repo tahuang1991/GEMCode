@@ -9,12 +9,18 @@ process.load('Configuration.EventContent.EventContent_cff')
 process.load('Configuration.Geometry.GeometryExtended2023TTI_cff')
 process.load('Configuration.Geometry.GeometryExtended2023TTIReco_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
+process.load('Configuration.StandardSequences.Digi_cff')
+process.load("Configuration.StandardSequences.L1Emulator_cff")
+process.load("Configuration.StandardSequences.L1Extra_cff")
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
 ## TrackingComponentsRecord required for matchers
 process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorOpposite_cfi')
 process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAlong_cfi')
+
+## Trigger scales
+process.load('L1TriggerConfig.L1ScalesProducers.L1MuTriggerScalesConfig_cff')
 
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring('file:out_L1.root')

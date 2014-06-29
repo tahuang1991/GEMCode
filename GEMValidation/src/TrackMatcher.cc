@@ -41,13 +41,37 @@ TrackMatcher::TrackMatcher(SimHitMatcher& sh, CSCDigiMatcher& csc_dg,
 
   CSCTFSPset_ = conf().getParameter<edm::ParameterSet>("sectorProcessor");
   ptLUTset_ = CSCTFSPset_.getParameter<edm::ParameterSet>("PTLUT");
+  srLUTset_ = CSCTFSPset_.getParameter<edm::ParameterSet>("SRLUT");
   
+  hasMuScales_ = true;
+  hasMuPtScale_ = true;
+
+  ptLUT_ = nullptr;
+  for(int e=0; e<2; e++) for (int s=0; s<6; s++) my_SPs_[e][s] = nullptr;
+  //  CSCSectorReceiverLUT* srLUTs_[5][6][2];
+  dtrc_ = nullptr;
+
   clear();
   init();
 }
 
 TrackMatcher::~TrackMatcher() 
 {
+  if(ptLUT_) delete ptLUT_;
+  ptLUT_ = nullptr;
+  
+  for(int e=0; e<2; e++) for (int s=0; s<6; s++){
+    if  (my_SPs_[e][s]) delete my_SPs_[e][s];
+    my_SPs_[e][s] = nullptr;
+    
+    for(int fpga=0; fpga<5; fpga++) {
+      if (srLUTs_[fpga][s][e]) delete srLUTs_[fpga][s][e];
+      srLUTs_[fpga][s][e] = nullptr;
+    }
+  }
+
+  if(dtrc_) delete dtrc_;
+  dtrc_ = nullptr;
 }
 
 void 
@@ -63,21 +87,47 @@ TrackMatcher::clear()
 void 
 TrackMatcher::init()
 {  
-  // Trigger scales
-  eventSetup().get<L1MuTriggerScalesRcd>().get(muScales_);
-  eventSetup().get<L1MuTriggerPtScaleRcd>().get(muPtScale_);
-  
-  if (ptLUT_) delete ptLUT_;  
-  ptLUT_ = new CSCTFPtLUT(ptLUTset_, muScales_.product(), muPtScale_.product());
-  
+  try {
+    eventSetup().get<L1MuTriggerScalesRcd>().get(muScalesHd_);
+    muScales_ = &*muScalesHd_;
+  } catch (edm::eventsetup::NoProxyException<L1MuTriggerScalesRcd>& e) {
+    hasMuScales_ = false;
+    LogDebug("TrackMatcher") << "+++ Info: L1MuTriggerScalesRcd is unavailable. +++\n";
+  }
+
+  try {
+    eventSetup().get<L1MuTriggerPtScaleRcd>().get(muPtScaleHd_);
+    muPtScale_ = &*muPtScaleHd_;
+  } catch (edm::eventsetup::NoProxyException<L1MuTriggerPtScaleRcd>& e) {
+    hasMuPtScale_ = false;
+    LogDebug("TrackMatcher") << "+++ Info: L1MuTriggerPtScaleRcd is unavailable. +++\n";
+  }
+
+  if (ptLUT_) delete ptLUT_;
+  ptLUT_ = new CSCTFPtLUT(ptLUTset_, muScalesHd_.product(), muPtScaleHd_.product());
+
+  // Sector Processor and Receiver
   for(int e=0; e<2; e++) {
     for (int s=0; s<6; s++){
-      if  (my_SPs_[e][s]) delete my_SPs_[e][s];
-      my_SPs_[e][s] = new CSCTFSectorProcessor(e+1, s+1, CSCTFSPset_, true, muScales_.product(), muPtScale_.product());
+      my_SPs_[e][s] = new CSCTFSectorProcessor(e+1, s+1, CSCTFSPset_, true, muScalesHd_.product(), muPtScaleHd_.product());
       my_SPs_[e][s]->initialize(eventSetup());
     }
   }
 
+  const bool TMB07(true);  
+  for(int endcap = 1; endcap<=2; endcap++) {
+    for(int sector=1; sector<=6; sector++) {
+      for(int station=1,fpga=0; station<=4 && fpga<5; station++) {
+        if(station==1) for(int subSector=0; subSector<2; subSector++)
+          srLUTs_[fpga++][sector-1][endcap-1] = new CSCSectorReceiverLUT(endcap, sector, subSector+1, station, srLUTset_, TMB07);
+        else
+          srLUTs_[fpga++][sector-1][endcap-1] = new CSCSectorReceiverLUT(endcap, sector, 0, station, srLUTset_, TMB07);
+      }
+    }
+  }
+
+  dtrc_ = new CSCTFDTReceiver();
+  
   // tracks produced by TF
   edm::Handle<L1CSCTrackCollection> hl1Tracks;
   event().getByLabel(cscTfTrackInputLabel_,hl1Tracks);
@@ -94,7 +144,7 @@ TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
 {
   for (L1CSCTrackCollection::const_iterator trk = tracks.begin(); trk != tracks.end(); trk++) {
     TFTrack track(&trk->first);
-    track.init(ptLUT_, muScales_, muPtScale_);
+    track.init(ptLUT_, muScalesHd_, muPtScaleHd_);
     // calculate the DR
     track.setDR(this->trk());
 
