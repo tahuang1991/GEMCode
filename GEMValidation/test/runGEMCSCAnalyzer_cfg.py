@@ -31,10 +31,10 @@ process.source = cms.Source("PoolSource",
 ## input
 from MuonJetTrigger.Configuration.inputFiles import *
 from GEMCode.GEMValidation.InputFileHelpers import *
-process = useInputDir(process, eosfiles['mGammaD_0400_DIGI_RECO'])
+process = useInputDir(process, eosfiles['mGammaD_0400_ctau_05_DIGI_RECO'])
 
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string("gem-csc_stub_ana.root")
+    fileName = cms.string("gem-csc_stub_ana_mGammaD_0400_ctau_05_DIGI_RECO.root")
 )
 
 ## global tag for upgrade studies
@@ -56,16 +56,10 @@ process.GEMCSCAnalyzer = cms.EDAnalyzer("GEMCSCAnalyzer",
     simTrackMatching = SimTrackMatching,   
 )
 matching = process.GEMCSCAnalyzer.simTrackMatching
-#print process.csctfTrackDigisUngangedME1a
 matching.sectorProcessor = csctfTrackDigisUngangedME1a.SectorProcessor
 matching.simTrack.minPt = 1.5
 matching.gemRecHit.input = ""
-"""
-matching.cscTfTrack.input = ""
-matching.tfCand.input = ""
-matching.gmtCand.input = ""
-matching.l1Extra.input = ""
-"""
+
 doGem = False
 if doGem:
   matching.cscSimHit.minNHitsChamber = 3

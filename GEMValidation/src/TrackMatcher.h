@@ -66,7 +66,7 @@ class TrackMatcher : public CSCStubMatcher
   void clear();
 
   void matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks);
-  void matchTfCandToSimTrack(const std::vector<L1MuRegionalCand>& tracks);
+  void matchTfCandToSimTrack(const std::vector<L1MuRegionalCand>* tracks);
   void matchGmtRegCandToSimTrack(const L1MuRegionalCand& tracks);
   void matchGmtCandToSimTrack(const L1MuGMTExtendedCand& tracks);
 
@@ -96,6 +96,12 @@ class TrackMatcher : public CSCStubMatcher
   int verboseGMTRegCand_;
   int verboseGMTCand_;
   int verboseL1Extra_;
+
+  double deltaRTFTrack_;
+  double deltaRTFCand_;
+  double deltaRGMTRegCand_;
+  double deltaRGMTCand_;
+  double deltaRL1Extra_;
 
   std::vector<TFTrack*> tfTracks_;
   std::vector<TFCand*> tfCands_;

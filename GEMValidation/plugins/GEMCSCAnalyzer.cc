@@ -441,6 +441,7 @@ private:
   
   edm::ParameterSet cfg_;
   edm::InputTag simInputLabel_;
+  int verboseSimTrack_;
   double simTrackMinPt_;
   double simTrackMinEta_;
   double simTrackMaxEta_;
@@ -479,6 +480,7 @@ GEMCSCAnalyzer::GEMCSCAnalyzer(const edm::ParameterSet& ps)
   matchprint_ = false; //cfg_.getParameter<bool>("matchprint");
 
   auto simTrack = cfg_.getParameter<edm::ParameterSet>("simTrack");
+  verboseSimTrack_ = simTrack.getParameter<int>("verbose");
   simInputLabel_ = simTrack.getParameter<edm::InputTag>("input");
   simTrackMinPt_ = simTrack.getParameter<double>("minPt");
   simTrackMinEta_ = simTrack.getParameter<double>("minEta");
@@ -566,74 +568,43 @@ bool GEMCSCAnalyzer::isSimTrackGood(const SimTrack &t)
 void GEMCSCAnalyzer::analyze(const edm::Event& ev, const edm::EventSetup& es)
 {
   edm::Handle<edm::SimTrackContainer> sim_tracks;
-  edm::Handle<edm::SimVertexContainer> sim_vertices;
-
   ev.getByLabel(simInputLabel_, sim_tracks);
+  const edm::SimTrackContainer & sim_track = *sim_tracks.product();
+
+  edm::Handle<edm::SimVertexContainer> sim_vertices;
   ev.getByLabel(simInputLabel_, sim_vertices);
   const edm::SimVertexContainer & sim_vert = *sim_vertices.product();
 
-  /*
-  {  // print out 1st strip coordinates for rolls in GE1/1 chamber
-    edm::ESHandle<GEMGeometry> gem_g;
-    es.get<MuonGeometryRecord>().get(gem_g);
-    const GEMGeometry * gem_geo = &*gem_g;
-    for (int r=1; r<7; ++r)
-    {
-      GEMDetId p(1, 1, 1, 1, 1, r);
-      auto roll = gem_geo->etaPartition(p);
-      auto lp = roll->centreOfStrip(1);
-      GlobalPoint gp = gem_geo->idToDet(p())->surface().toGlobal(lp);
-      cout<<setprecision(9)<<"rollp "<<r<<" "<<gp.phi()<<" "<<gp.perp()<<" "<<roll->localPitch(lp)<<" "<<roll->localPitch(lp)/gp.perp()<<endl;
-    }
+  if (verboseSimTrack_){
+    std::cout << "Total number of SimTrack in this event: " << sim_track.size() << std::endl;      
   }
-  */
-
-  /*
-  // print out 1st strip coordinates for ME1/b chamber
-  edm::ESHandle<CSCGeometry> csc_g;
-  es.get<MuonGeometryRecord>().get(csc_g);
-  const CSCGeometry * csc_geo = &*csc_g;
-  for (int nmb=0;nmb<4;++nmb) for (int la=1; la<7; ++la){
-    CSCDetId id(1, 1, 1, 1, la);
-    if (nmb==1) id = CSCDetId(1,1,4,1,la);
-    if (nmb==2) id = CSCDetId(1,1,2,1,la);
-    if (nmb==3) id = CSCDetId(1,2,1,1,la);
-    auto strip_topo = csc_geo->layer(id)->geometry()->topology();
-    MeasurementPoint mp_top(0.25, 0.5);
-    MeasurementPoint mp_bot(0.25, -0.5);
-    LocalPoint lp = strip_topo->localPosition(0.25);
-    LocalPoint lp_top = strip_topo->localPosition(mp_top);
-    LocalPoint lp_bot = strip_topo->localPosition(mp_bot);
-    GlobalPoint gp = csc_geo->idToDet(id)->surface().toGlobal(lp);
-    GlobalPoint gp_top = csc_geo->idToDet(id)->surface().toGlobal(lp_top);
-    GlobalPoint gp_bot = csc_geo->idToDet(id)->surface().toGlobal(lp_bot);
-    cout<<id<<endl;
-    cout<<setprecision(6)<<"glayer "<<la<<" "<<gp.phi()<<" "<<gp.perp()<<" "<<strip_topo->localPitch(lp)<<" "<<strip_topo->localPitch(lp)/gp.perp()
-        <<"  "<<gp_top.phi()<<" "<<gp_top.perp()<<" "<<strip_topo->localPitch(lp_top)<<" "<<strip_topo->localPitch(lp_top)/gp_top.perp()
-        <<"  "<<gp_bot.phi()<<" "<<gp_bot.perp()<<" "<<strip_topo->localPitch(lp_bot)<<" "<<strip_topo->localPitch(lp_bot)/gp_bot.perp()
-        <<endl;
-  }
-  */
+    
   int trk_no=0;
-  for (auto& t: *sim_tracks.product())
+  for (auto& t: sim_track)
   {
     if (!isSimTrackGood(t)) continue;
-
+    if (verboseSimTrack_){
+      std::cout << "Processing SimTrack " << trk_no + 1 << std::endl;      
+      std::cout << "pt(GeV/c) = " << t.momentum().pt() << ", eta = " << t.momentum().eta()  
+                << ", phi = " << t.momentum().phi() << ", Q = " << t.charge() << std::endl;
+    }
+ 
     // match hits and digis to this SimTrack
     SimTrackMatchManager match(t, sim_vert[t.vertIndex()], cfg_, ev, es);
 
     if (ntupleTrackChamberDelta_) analyzeTrackChamberDeltas(match, trk_no);
     if (ntupleTrackEff_) analyzeTrackEff(match, trk_no);
-    // if (matchprint_) printout(match, trk_no);
-    
+    ++trk_no;
+
+    // if (matchprint_) printout(match, trk_no);    
     /*    
-          bool has_csc_sh_odd(etrk_[1].has_csc_sh&1) ; bool has_csc_sh_even(etrk_[1].has_csc_sh&2);
-          bool has_alct_odd(etrk_[1].has_alct&1); bool has_alct_even(etrk_[1].has_alct&2) ;
-          // if (has_csc_sh_odd || has_csc_sh_even)  std::cout <<"st1 has_csc_sh " << std::endl;
-          // if (has_alct_odd || has_alct_even)   std::cout <<"  st1 has_alct " << std::endl;
-          bool Debug((has_csc_sh_odd and !has_alct_odd) || (has_csc_sh_even and !has_alct_even));
-          if (matchprint_ and Debug ) printout(match, trk_no);
-          trk_no++;
+    bool has_csc_sh_odd(etrk_[1].has_csc_sh&1) ; bool has_csc_sh_even(etrk_[1].has_csc_sh&2);
+    bool has_alct_odd(etrk_[1].has_alct&1); bool has_alct_even(etrk_[1].has_alct&2) ;
+    // if (has_csc_sh_odd || has_csc_sh_even)  std::cout <<"st1 has_csc_sh " << std::endl;
+    // if (has_alct_odd || has_alct_even)   std::cout <<"  st1 has_alct " << std::endl;
+    bool Debug((has_csc_sh_odd and !has_alct_odd) || (has_csc_sh_even and !has_alct_even));
+    if (matchprint_ and Debug ) printout(match, trk_no);
+    trk_no++;
     */
   }
 }
@@ -647,7 +618,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   const RPCDigiMatcher& match_rd = match.rpcDigis();
   const CSCDigiMatcher& match_cd = match.cscDigis();
   const CSCStubMatcher& match_lct = match.cscStubs();
-  //const TrackMatcher& match_track = match.tracks();
+  const TrackMatcher& match_track = match.tracks();
   const SimTrack &t = match_sh.trk();
    
   for (auto s: stations_to_use_)
@@ -1217,28 +1188,27 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     }
   }
   
-  // not sure how to fill this - per station and per muon?
-//   for (auto d: match_track.tfTracks())
-//   {
-//     etrk_[st].has_tfTrack = 1;
-//   }
-
-  /*
-  for (auto d: match_track.tfCand())
-  {
-    etrk_[st].has_tfCand = 1;
+  
+  if (match_track.tfTracks().size()) {
+    etrk_[0].has_tfTrack = 1;
+    std::cout << "SimTrack has matched CSCTF track" << std::endl;
+  }
+  
+  if (match_track.tfCands().size()) {
+    etrk_[0].has_tfCand = 1;
+    std::cout << "SimTrack has matched CSCTF Cand" << std::endl;
+  }
+  
+  if (match_track.gmtRegCands().size()) {
+    etrk_[0].has_gmtRegCand = 1;
+    std::cout << "SimTrack has GMTRegCand" << std::endl;
   }
 
-  for (auto d: match_track.gmtRegCand())
-  {
-    etrk_[st].has_gmtRegCand = 1;
+  if (match_track.gmtCands().size()) {
+    etrk_[0].has_gmtCand = 1;
+    std::cout << "SimTrack has GMTCand" << std::endl;
   }
 
-  for (auto d: match_track.gmtCand())
-  {
-    etrk_[st].has_gmtCand = 1;
-  }
-  */
   for (auto s: stations_to_use_)
   {
     tree_eff_[s]->Fill();
