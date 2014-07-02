@@ -50,7 +50,7 @@ class TFTrack
 	    edm::ESHandle< L1MuTriggerScales > &muScales,
 	    edm::ESHandle< L1MuTriggerPtScale > &muPtScale);
   
-  void setDR(const SimTrack&);
+  void setDR(double dr);
 
   /// L1 track
   const csc::L1Track* getL1Track() const {return l1track_;}

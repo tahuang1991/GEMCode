@@ -77,9 +77,9 @@ TFTrack::init(CSCTFPtLUT* ptLUT,
 }
 
 void 
-TFTrack::setDR(const SimTrack& st)
+TFTrack::setDR(double dr)
 {
-  dr_ = deltaR(st.momentum().eta(), st.momentum().phi(), eta_, phi_);
+  dr_ = dr;
 }
 
 bool 

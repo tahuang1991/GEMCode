@@ -17,7 +17,7 @@ class TFCand
 	    edm::ESHandle< L1MuTriggerScales > &muScales, 
  	    edm::ESHandle< L1MuTriggerPtScale > &muPtScale); 
 
-  void setDR(const SimTrack&);
+  void setDR(double);
 
   const L1MuRegionalCand * l1Cand() const {return l1Cand_;}
 

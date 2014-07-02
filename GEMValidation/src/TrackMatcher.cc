@@ -151,8 +151,31 @@ TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
   for (L1CSCTrackCollection::const_iterator trk = tracks.begin(); trk != tracks.end(); trk++) {
     TFTrack track(&trk->first);
     track.init(ptLUT_, muScalesHd_, muPtScaleHd_);
-    // calculate the DR
-    track.setDR(this->trk());
+
+    // calculate the deltaR using the simhits in the 2nd CSC station -- reference station
+    auto p(sh_matcher_->chamberIdsCSC(CSC_ME21));  
+    auto pp(sh_matcher_->chamberIdsCSC(CSC_ME22));  
+    p.insert(pp.begin(),pp.end());
+    
+    std::cout << "----------------------------------------------------------" << std::endl;
+    std::cout << "detids " << std::endl;
+    
+    if (p.size()!=0) {
+      std::cout << CSCDetId(*p.begin()) << std::endl;  
+      auto hits(sh_matcher_->hitsInChamber(*p.begin()));
+      auto gp(sh_matcher_->simHitsMeanPosition(hits));
+      std::cout << gp << std::endl;
+    }
+    std::cout << "----------------------------------------------------------" << std::endl;
+    
+    //calculate the dphi with respect to the average simhit position in the 1st station
+    // if 1st station not available, pick 2nd station
+    
+    //deltaR(st.momentum().eta(), st.momentum().phi(), eta_, phi_);
+    //find all detids hit by this simtrack
+    
+    
+    //track.setDR(deltaR);
 
     // debugging
     if (verboseTFTrack_){
@@ -200,7 +223,7 @@ TrackMatcher::matchTfCandToSimTrack(const std::vector<L1MuRegionalCand>* tracks)
     TFCand track(&*trk);
     track.init(ptLUT_, muScalesHd_, muPtScaleHd_);
     // calculate the DR
-    track.setDR(this->trk());
+//     track.setDR(this->trk());
 
     // debugging
     if (verboseTFCand_){
@@ -208,11 +231,11 @@ TrackMatcher::matchTfCandToSimTrack(const std::vector<L1MuRegionalCand>* tracks)
       std::cout << "\tpt (GeV/c) = " << track.pt() << ", eta = " << track.eta() 
                 << "\t, phi = " << track.phi() << ", dR(sim,L1) = " << track.dr() << std::endl;      
     }
-
-    // match this one if the dR < matchDeltaR
-    if (track.dr() < deltaRTFCand_) {
-      tfCands_.push_back(track);
-    }
+    
+//     // match this one if the dR < matchDeltaR
+//     if (track.dr() < deltaRTFCand_) {
+//       tfCands_.push_back(track);
+//     }
   }
 }
 

@@ -47,7 +47,7 @@ TFCand::init(CSCTFPtLUT* ptLUT,
 }
 
 void 
-TFCand::setDR(const SimTrack& st)
+TFCand::setDR(double dr)
 {
-  dr_ = deltaR(st.momentum().eta(), st.momentum().phi(), eta_, phi_);
+  dr_ = dr;
 }
