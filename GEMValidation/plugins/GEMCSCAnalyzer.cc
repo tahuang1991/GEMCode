@@ -447,7 +447,7 @@ GEMCSCAnalyzer::GEMCSCAnalyzer(const edm::ParameterSet& ps)
   cscStations_ = cfg_.getParameter<std::vector<string> >("cscStations");
   ntupleTrackChamberDelta_ = cfg_.getParameter<bool>("ntupleTrackChamberDelta");
   ntupleTrackEff_ = cfg_.getParameter<bool>("ntupleTrackEff");
-  matchprint_ = false; //cfg_.getParameter<bool>("matchprint");
+  matchprint_ = cfg_.getParameter<bool>("matchprint");
 
   auto simTrack = cfg_.getParameter<edm::ParameterSet>("simTrack");
   simInputLabel_ = simTrack.getParameter<edm::InputTag>("input");
@@ -604,15 +604,17 @@ void GEMCSCAnalyzer::analyze(const edm::Event& ev, const edm::EventSetup& es)
     if (ntupleTrackEff_) analyzeTrackEff(match, trk_no);
     // if (matchprint_) printout(match, trk_no);
     
-    /*    
-          bool has_csc_sh_odd(etrk_[1].has_csc_sh&1) ; bool has_csc_sh_even(etrk_[1].has_csc_sh&2);
-          bool has_alct_odd(etrk_[1].has_alct&1); bool has_alct_even(etrk_[1].has_alct&2) ;
+        
+          int st = detIdToMEStation(2, 1);
+          //bool has_alct(etrk_[st].has_alct>0); bool has_clct(etrk_[st].has_clct>0) ;
+	  bool has_stubs(etrk_[st].has_alct>0 && etrk_[st].has_gem_copad>0);
+	  bool no_lct(etrk_[st].has_lct==0);
           // if (has_csc_sh_odd || has_csc_sh_even)  std::cout <<"st1 has_csc_sh " << std::endl;
           // if (has_alct_odd || has_alct_even)   std::cout <<"  st1 has_alct " << std::endl;
-          bool Debug((has_csc_sh_odd and !has_alct_odd) || (has_csc_sh_even and !has_alct_even));
+          bool Debug(has_stubs && no_lct);
           if (matchprint_ and Debug ) printout(match, trk_no);
           trk_no++;
-    */
+   
   }
 }
 
@@ -1028,7 +1030,11 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     else if (id.station() == 2) continue;
     else MEStation = id.station();
 
-    const int st(detIdToMEStation(MEStation,id.ring()));
+    const int stations(detIdToMEStation(MEStation,id.ring()));
+    int st;
+    if (stations==2 or stations==3) st=1;
+    else continue;
+
     if (stations_to_use_.count(st) == 0) continue;
 
     const bool odd(id.chamber()%2==1);
@@ -1157,6 +1163,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     auto rpcdigis = match_rd.digisInDetId(id); 
     int rpc_medianstrip(match_rd.median(rpcdigis));
     int cscchamber = CSCTriggerNumbering::chamberFromTriggerLabels(id.sector(), 0, id.station(), id.subsector());
+    cscchamber = (cscchamber+16)%18+1;
     //std::cout <<"rpc detid " << id << " csc chamebr:"<< cscchamber << std::endl;
     bool odd(cscchamber%2 == 1);
     if (odd)
@@ -1645,7 +1652,7 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
     auto Copads = match_gd.coPadsInSuperChamber(d);
     // std::cout <<"GEM Copads:"  ;
     for ( auto p=Copads.begin(); p != Copads.end(); p++)
-      {  std::cout << "  "<< *p ; }
+      {  std::cout <<"  "<< *p ; }
     std::cout << std::endl;
   }
 
@@ -1677,7 +1684,7 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
 //    if (std::find(clcts.begin(),clcts.end(),clct) != clcts.end())  std::cout<<"the matching clct ";
 //    else std::cout <<" another clct "; 
     for (auto p : clcts)    
-       std::cout<< p <<std::endl;
+       std::cout<<id<<" "<< p <<std::endl;
     
   }
 
@@ -1689,7 +1696,7 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
     if (stations_to_use_.count(st) == 0) continue;
     auto alcts = match_lct.allALCTsInChamber(d);
     for (auto p : alcts)    
-       std::cout<< p <<std::endl;
+       std::cout<<id<<" "<< p <<std::endl;
     
   }
 
@@ -1701,7 +1708,7 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
     if (stations_to_use_.count(st) == 0) continue;
     auto lcts = match_lct.allLCTsInChamber(d);
     for (auto p : lcts)    
-       std::cout<< p <<std::endl;
+       std::cout<<id<<" " <<p <<std::endl;
     
   }
 
