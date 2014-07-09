@@ -179,6 +179,35 @@ struct MyTrackEff
 
 };
 
+struct AllLCT
+{
+    
+  void init(); // initialize to default values
+  TTree* bookLCTTree(TTree *t);
+
+  Float_t phi;
+  Float_t eta;
+  Float_t pt;
+  Float_t charge;
+
+  Bool_t match;
+  Bool_t passdphicut;
+
+  Int_t station;
+  Int_t chamber;
+  Int_t ring;
+  Int_t endcap;
+
+  Float_t dphi;
+  Int_t hs;
+  Int_t wg;
+  Int_t bx;
+  Int_t pattern;
+  Int_t quality;
+  
+};
+
+
 void MyTrackEff::init()
 {
   pt = 0.;
@@ -277,6 +306,30 @@ void MyTrackEff::init()
   deta_rpcstrip_even = -9.;
 }
 
+    
+void AllLCT::init(){ // initialize to default values
+
+  phi=0.0;
+  eta=0.0;
+  pt=0.0;
+  charge=0.0;
+ 
+  match=false;
+  passdphicut=false;
+
+  station=-1;
+  chamber=-1;
+  ring=-1;
+  endcap=-2;
+
+  dphi=-99.0;
+  hs=-1;
+  wg=-1;
+  bx=-1;
+  pattern=-1;
+  quality=-1;
+
+  }
 
 TTree* MyTrackEff::book(TTree *t, const std::string & name)
 {
@@ -383,6 +436,33 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   return t;
 }
 
+TTree* AllLCT::bookLCTTree(TTree *t)
+{
+
+  edm::Service< TFileService > fs;
+  t = fs->make<TTree>("LCTTree", "LCTTree");
+
+  t->Branch("pt", &pt);
+  t->Branch("eta", &eta);
+  t->Branch("phi", &phi);
+  t->Branch("match", &match);
+  t->Branch("passdphicut", &passdphicut);
+  t->Branch("charge", &charge);
+  t->Branch("endcap", &endcap);
+  t->Branch("station", &station);
+  t->Branch("chamber", &chamber);
+  t->Branch("ring", &ring);
+  t->Branch("endcap", &endcap);
+  t->Branch("dphi", &dphi);
+  t->Branch("hs", &hs);
+  t->Branch("wg", &wg);
+  t->Branch("bx", &bx);
+  t->Branch("pattern", &pattern);
+  t->Branch("quality", &quality);
+
+  return t;
+}
+
 // --------------------------- GEMCSCAnalyzer ---------------------------
 
 class GEMCSCAnalyzer : public edm::EDAnalyzer
@@ -401,6 +481,30 @@ public:
   
 private:
   
+
+  const double ME11GEMdPhi[9][3] = {
+    {-2 , 1.0, 1.0 },
+    {3 , 0.03971647, 0.01710244 },
+    {5 , 0.02123785, 0.00928431 },
+    {7 , 0.01475524, 0.00650928 },
+    {10, 0.01023299, 0.00458796 },
+    {15, 0.00689220, 0.00331313 },
+    {20, 0.00535176, 0.00276152 },
+    {30, 0.00389050, 0.00224959 },
+    {40, 0.00329539, 0.00204670 }
+  };
+  const double ME21GEMdPhi[9][3] = {
+    {-2 , 1.0, 1.0 },
+    {3 , 0.01832829, 0.01003643 },
+    {5 , 0.01095490, 0.00631625 },
+    {7 , 0.00786026, 0.00501017 },
+    {10, 0.00596349, 0.00414560 },
+    {15, 0.00462411, 0.00365550 },
+    {20, 0.00435298, 0.00361550 },
+    {30, 0.00465160, 0.00335700 },
+    {40, 0.00372145, 0.00366262 }
+  };
+
   void bookSimTracksDeltaTree();
 
   void analyzeTrackChamberDeltas(SimTrackMatchManager& match, int trk_no);
@@ -426,9 +530,12 @@ private:
 
   TTree *tree_eff_[12]; // for up to 9 stations
   TTree *tree_delta_;
-  
+  TTree *tree_lct;
+    
   MyTrackEff  etrk_[12];
   MyTrackChamberDelta dtrk_;
+
+  AllLCT LCTStub;
 
   int minNHitsChamberCSCSimHit_;
   int minNHitsChamberCSCWireDigi_;
@@ -484,6 +591,7 @@ GEMCSCAnalyzer::GEMCSCAnalyzer(const edm::ParameterSet& ps)
   auto l1Extra = cfg_.getParameter<edm::ParameterSet>("l1Extra");
   */
   if (ntupleTrackChamberDelta_) bookSimTracksDeltaTree();
+  tree_lct = LCTStub.bookLCTTree(tree_lct);
   if (ntupleTrackEff_)
   {
     vector<int> stations = ps.getParameter<vector<int> >("stationsToUse");
@@ -893,8 +1001,10 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     if (id.station() == 3) MEStation = 2;
     else if (id.station() == 2) continue;
     else MEStation = id.station();
-
-    const int st(detIdToMEStation(MEStation,id.ring()));
+    
+    int ring = id.ring();
+    if (std::fabs(t.momentum().eta())>2.1 && MEStation==1) ring = 4;
+    const int st(detIdToMEStation(MEStation,ring));
     if (stations_to_use_.count(st) == 0) continue;
 
     const bool odd(id.chamber()%2==1);
@@ -953,8 +1063,10 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     if (id.station() == 3) MEStation = 2;
     else if (id.station() == 2) continue;
     else MEStation = id.station();
-
-    const int st(detIdToMEStation(MEStation,id.ring()));
+   
+    int ring = id.ring(); 
+    if (std::fabs(t.momentum().eta())>2.1 && MEStation==1) ring = 4;
+    const int st(detIdToMEStation(MEStation,ring));
     if (stations_to_use_.count(st) == 0) continue;
 
     const bool odd(id.chamber()%2==1);
@@ -990,7 +1102,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       etrk_[st].has_gem_pad |= 1;
       etrk_[st].chamber_odd |= 1;
       etrk_[st].pad_odd = digi_channel(pads.at(0));
-      etrk_[st].hsfromgem_odd = match_gd.extrapolateHsfromGEMPad( d, digi_channel(pads.at(0)));
+      etrk_[st].hsfromgem_odd = match_gd.extrapolateHsfromGEMPad( d, ring, digi_channel(pads.at(0)));
       if (is_valid(lct_odd[st]))
       {
         auto gem_dg_and_gp = match_gd.digiInGEMClosestToCSC(pads, gp_lct_odd[st]);
@@ -1007,7 +1119,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       etrk_[st].has_gem_pad |= 2;
       etrk_[st].chamber_even |= 1;
       etrk_[st].pad_even = digi_channel(pads.at(0));
-      etrk_[st].hsfromgem_even = match_gd.extrapolateHsfromGEMPad( d, digi_channel(pads.at(0)));
+      etrk_[st].hsfromgem_even = match_gd.extrapolateHsfromGEMPad( d, ring, digi_channel(pads.at(0)));
       if (is_valid(lct_even[st]))
       {
         auto gem_dg_and_gp = match_gd.digiInGEMClosestToCSC(pads, gp_lct_even[st]);
@@ -1029,8 +1141,10 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     if (id.station() == 3) MEStation = 2;
     else if (id.station() == 2) continue;
     else MEStation = id.station();
-
-    const int stations(detIdToMEStation(MEStation,id.ring()));
+    
+    int ring = id.ring();
+    if (std::fabs(t.momentum().eta())>2.1 && MEStation==1) ring = 4;
+    const int stations(detIdToMEStation(MEStation,ring));
     int st;
     if (stations==2 or stations==3) st=1;
     else continue;
@@ -1106,8 +1220,10 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     if (id.station() == 3) MEStation = 2;
     else if (id.station() == 2) continue;
     else MEStation = id.station();
-
-    const int st(detIdToMEStation(MEStation,id.ring()));
+    
+    int ring = id.ring();
+    if (std::fabs(t.momentum().eta())>2.1 && MEStation==1) ring = 4;
+    const int st(detIdToMEStation(MEStation,ring));
     if (stations_to_use_.count(st) == 0) continue;
 
     const bool odd(id.chamber()%2==1);
@@ -1201,6 +1317,76 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       }
     }
   }
+
+//fill tree_lct
+  for(auto d: match_lct.chamberIdsAllLCT(0))
+  {
+    CSCDetId id(d);
+    
+    //if (t.momentum().eta()*id.endcap()<0) continue;
+    //std::cout<<"eta "<<t.momentum().eta()<<" endcap "<<id.endcap()<<std::endl;
+    const int st(detIdToMEStation(id.station(),id.ring()));
+    if (stations_to_use_.count(st) == 0) continue;
+
+    auto lcts = match_lct.allLCTsInChamber(d);
+    auto lct = match_lct.lctInChamber(d);
+    for (auto p : lcts)   
+    {
+      LCTStub.init();
+      if (p==lct)  LCTStub.match = true;
+      else LCTStub.match = false;
+      LCTStub.eta = t.momentum().eta();
+      LCTStub.phi = t.momentum().phi();
+      LCTStub.pt = t.momentum().pt();
+      LCTStub.charge = t.charge();
+
+      LCTStub.endcap = id.endcap();
+      LCTStub.station = id.station();
+      LCTStub.chamber = id.chamber();
+      LCTStub.ring = id.ring();
+
+      LCTStub.dphi = digi_dphi(p);
+      LCTStub.bx = digi_bx(p);
+      LCTStub.hs = digi_channel(p);
+      LCTStub.wg = digi_wg(p);
+      LCTStub.quality = digi_quality(p);
+      bool is_odd = (LCTStub.chamber%2==1);
+     if (LCTStub.station == 1)
+     {
+      for (int b = 0; b < 9; b++)
+      { // cutting on gem csc dPhi
+	 if (double(LCTStub.pt) >= ME11GEMdPhi[b][0])
+	 {
+             if ((is_odd && ME11GEMdPhi[b][1] > fabs(LCTStub.dphi)) || 
+		    (!is_odd && ME11GEMdPhi[b][2] > fabs(LCTStub.dphi)))
+		  LCTStub.passdphicut = true;
+	     else LCTStub.passdphicut = false;
+	 }
+      }
+      if (LCTStub.dphi<-50)  LCTStub.passdphicut = true;
+      if (!LCTStub.passdphicut && std::abs(LCTStub.eta)>2.05 && LCTStub.match>0) printout(match, trk_no); 
+     }
+
+     if (LCTStub.station == 2)
+     {
+      for (int b = 0; b < 9; b++)
+      { // cutting on gem csc dPhi
+	 if (double(LCTStub.pt) >= ME21GEMdPhi[b][0])
+	 {
+             if ((is_odd && ME21GEMdPhi[b][1] > fabs(LCTStub.dphi)) || 
+		    (!is_odd && ME21GEMdPhi[b][2] > fabs(LCTStub.dphi)))
+		  LCTStub.passdphicut = true;
+	     else LCTStub.passdphicut = false;
+	 }
+      }
+      if (LCTStub.dphi<-50)  LCTStub.passdphicut = true;
+     }
+     
+      tree_lct->Fill(); 
+    }	
+    
+  }
+
 
   for (auto s: stations_to_use_)
   {
@@ -1621,13 +1807,15 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
     else if (id.station() == 2) continue;
     else MEStation = id.station();
     
-    const int st(detIdToMEStation(MEStation,id.ring()));
+    int ring = id.ring();
+    if (std::fabs(t.momentum().eta())>2.1 && MEStation==1) ring = 4;
+    const int st(detIdToMEStation(MEStation,ring));
     if (stations_to_use_.count(st) == 0) continue;
     
     int nlayers = match_gd.nLayersWithDigisInSuperChamber(d);
     auto digis = match_gd.digisInSuperChamber(d);
     int median_strip = match_gd.median(digis);
-    int hs = match_gd.extrapolateHsfromGEMStrip( d, median_strip);
+    int hs = match_gd.extrapolateHsfromGEMStrip( d, ring, median_strip);
     std::cout <<"GEM Chamber: "<<d<<" "<<id<<" layerswithhits:"<<nlayers
               <<" Medianstrip in Digi:" <<median_strip<<" hs:" << hs<<std::endl;
     // std::cout <<"GEM Pads:"  ;
