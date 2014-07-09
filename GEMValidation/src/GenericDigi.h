@@ -63,5 +63,6 @@ inline float digi_dphi(const Digi& d) { return std::get<7>(d); }
 }
 
 std::ostream & operator<<(std::ostream & o, const matching::Digi& d);
+bool operator==(const matching::Digi& d1, const matching::Digi& d2);
 
 #endif

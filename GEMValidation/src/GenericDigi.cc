@@ -37,3 +37,14 @@ std::ostream & operator<<(std::ostream & o, const matching::Digi& d)
 
   return o;
 }
+
+
+
+bool operator==(const matching::Digi& d1, const matching::Digi& d2)
+{
+    return ((digi_type(d1)==digi_type(d2)) && (digi_id(d1)==digi_id(d2)) && (digi_bx(d1)==digi_bx(d2)) 
+	    && (digi_quality(d1)==digi_quality(d2)) && (digi_wg(d1)==digi_wg(d2))
+	    && (digi_channel(d1)==digi_channel(d2)));
+
+}
+
