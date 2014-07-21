@@ -35,9 +35,11 @@ TFTrack::init(CSCTFPtLUT* ptLUT,
   pt_packed_ = gpt & 0x1f;
   
   //pt = muPtScale->getPtScale()->getLowEdge(pt_packed) + 1.e-6;
-  eta_ = muScales->getRegionalEtaScale(2)->getCenter(l1track_->eta_packed());
-  phi_ = normalizedPhi( muScales->getPhiScale()->getLowEdge(phi_packed_));
-  
+
+  // calculate eta and phi (don't forget to store the sign)
+  eta_ = muScales->getRegionalEtaScale(2)->getCenter(l1track_->eta_packed()) * l1track_->endcap();
+  phi_ = normalizedPhi(muScales->getPhiScale()->getLowEdge(phi_packed_));
+   
   //Pt needs some more workaround since it is not in the unpacked data
   //  PtAddress gives an handle on other parameters
   ptadd thePtAddress(l1track_->ptLUTAddress());

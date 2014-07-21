@@ -157,16 +157,16 @@ TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
     auto pp(sh_matcher_->chamberIdsCSC(CSC_ME22));  
     p.insert(pp.begin(),pp.end());
     
-    std::cout << "----------------------------------------------------------" << std::endl;
-    std::cout << "detids " << std::endl;
+    if (verboseTFTrack_ > 1) std::cout << "----------------------------------------------------------" << std::endl;
+    if (verboseTFTrack_ > 1) std::cout << "detids " << std::endl;
     
     if (p.size()!=0) {
-      std::cout << CSCDetId(*p.begin()) << std::endl;  
+      if (verboseTFTrack_ > 1) std::cout << CSCDetId(*p.begin()) << std::endl;  
       auto hits(sh_matcher_->hitsInChamber(*p.begin()));
       auto gp(sh_matcher_->simHitsMeanPosition(hits));
-      std::cout << gp << std::endl;
+      if (verboseTFTrack_ > 1) std::cout << gp << std::endl;
     }
-    std::cout << "----------------------------------------------------------" << std::endl;
+    if (verboseTFTrack_ > 1) std::cout << "----------------------------------------------------------" << std::endl;
     
     //calculate the dphi with respect to the average simhit position in the 1st station
     // if 1st station not available, pick 2nd station

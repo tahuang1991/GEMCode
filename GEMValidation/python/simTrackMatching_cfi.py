@@ -216,7 +216,7 @@ SimTrackMatching = cms.PSet(
     ),
     ## TrackFinder tracks
     cscTfTrack = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         run = cms.bool(True),
         input = cms.InputTag("simCsctfTrackDigis"),
         minBX = cms.int32(-1),
