@@ -548,8 +548,9 @@ SimHitMatcher::simHitsMeanPosition(const edm::PSimHitContainer& sim_hits) const
     if ( is_gem(h.detUnitId()) )
     {
       gp = gemGeometry_->idToDet(h.detUnitId())->surface().toGlobal(lp);
+  //    std::cout<<"gem simhit eta:"<<gp.eta()<<"  phi:"<<gp.phi()<<std::endl;
     }
-    if ( is_me0(h.detUnitId()) )
+    else if ( is_me0(h.detUnitId()) )
     {
       gp = me0Geometry_->idToDet(h.detUnitId())->surface().toGlobal(lp);
     }
