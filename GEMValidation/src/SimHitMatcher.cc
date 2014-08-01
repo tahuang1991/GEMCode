@@ -467,13 +467,13 @@ SimHitMatcher::hitsInChamber(unsigned int detid) const
   if (is_csc(detid))
   {
     CSCDetId id(detid);
-    if (csc_chamber_to_hits_.find(id.chamberId().rawId()) == gem_chamber_to_hits_.end()) return no_hits_;
+    if (csc_chamber_to_hits_.find(id.chamberId().rawId()) == csc_chamber_to_hits_.end()) return no_hits_;
     return csc_chamber_to_hits_.at(id.chamberId().rawId());
   }
   if (is_rpc(detid))
   {
     RPCDetId id(detid);
-    if (rpc_chamber_to_hits_.find(id.chamberId().rawId()) == gem_chamber_to_hits_.end()) return no_hits_;
+    if (rpc_chamber_to_hits_.find(id.chamberId().rawId()) == rpc_chamber_to_hits_.end()) return no_hits_;
     return rpc_chamber_to_hits_.at(id.chamberId().rawId());
   }
   return no_hits_;
