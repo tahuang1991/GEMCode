@@ -1,8 +1,22 @@
 #include "GEMCode/GEMValidation/src/TFTrack.h"
 
-TFTrack::TFTrack(const csc::L1Track* t)
+TFTrack::TFTrack(const csc::L1Track* t, const CSCCorrelatedLCTDigiCollection* lcts)
 {
   l1track_ = t;
+  triggerDigis_.clear();
+  triggerIds_.clear();
+  
+  for (auto detUnitIt = lcts->begin(); detUnitIt != lcts->end(); detUnitIt++) {
+    const CSCDetId& id = (*detUnitIt).first;
+    //std::cout << "DetId " << id << std::endl;
+    const auto range = (*detUnitIt).second;
+    for (auto digiIt = range.first; digiIt != range.second; digiIt++) {
+      if (!(*digiIt).isValid()) continue;
+      //std::cout << "Digi " << *digiIt << std::endl;
+      addTriggerDigi(&(*digiIt));
+      addTriggerDigiId(id);
+    }
+  }
 }
 
 TFTrack::TFTrack(const TFTrack& rhs)
@@ -85,7 +99,7 @@ TFTrack::setDR(double dr)
 }
 
 bool 
-TFTrack::hasStubEndcap(int st)
+TFTrack::hasStubEndcap(int st) const
 {
   if(st==1 and l1track_->me1ID() > 0) return true;
   if(st==2 and l1track_->me2ID() > 0) return true;
@@ -95,13 +109,13 @@ TFTrack::hasStubEndcap(int st)
 }
 
 bool
-TFTrack::hasStubBarrel()
+TFTrack::hasStubBarrel() const
 {
   return l1track_->mb1ID() > 0;
 }
 
 bool 
-TFTrack::hasStubStation(int st)
+TFTrack::hasStubStation(int st) const
 {
   if(st==0 and hasStubBarrel())       return true;
   if(st==1 and l1track_->me1ID() > 0) return true;
@@ -113,7 +127,7 @@ TFTrack::hasStubStation(int st)
 
 
 bool 
-TFTrack::hasStubCSCOk(int st)
+TFTrack::hasStubCSCOk(int st) const
 {
 //   if (!hasStubStation(st)) return false;
 //   bool cscok = 0;
@@ -129,7 +143,7 @@ TFTrack::hasStubCSCOk(int st)
 
 
 unsigned int 
-TFTrack::nStubs(bool mb1, bool me1, bool me2, bool me3, bool me4)
+TFTrack::nStubs(bool mb1, bool me1, bool me2, bool me3, bool me4) const
 {
   return ( (mb1 and hasStubStation(0)) + (me1 and hasStubStation(1)) + 
 	   (me2 and hasStubStation(2)) + (me3 and hasStubStation(3)) + 
@@ -138,7 +152,7 @@ TFTrack::nStubs(bool mb1, bool me1, bool me2, bool me3, bool me4)
 
 
 unsigned int 
-TFTrack::nStubsCSCOk(bool me1, bool me2, bool me3, bool me4)
+TFTrack::nStubsCSCOk(bool me1, bool me2, bool me3, bool me4) const
 {
   return ( (me1 and hasStubCSCOk(1)) + (me2 and hasStubCSCOk(2)) + 
 	   (me3 and hasStubCSCOk(3)) + (me4 and hasStubCSCOk(4)) );
@@ -146,7 +160,7 @@ TFTrack::nStubsCSCOk(bool me1, bool me2, bool me3, bool me4)
 
 
 bool 
-TFTrack::passStubsMatch(double steta, int minLowHStubs, int minMidHStubs, int minHighHStubs)
+TFTrack::passStubsMatch(double steta, int minLowHStubs, int minMidHStubs, int minHighHStubs) const
 {
 //    const double steta(match->strk->momentum().eta());
   const int nstubs(nStubs(1,1,1,1,1));

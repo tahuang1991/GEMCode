@@ -40,7 +40,7 @@ class TFTrack
 {
  public:
   /// constructor
-  TFTrack(const csc::L1Track* t);
+  TFTrack(const csc::L1Track* t, const CSCCorrelatedLCTDigiCollection*);
   /// copy constructor
   TFTrack(const TFTrack&);
   /// destructor
@@ -55,13 +55,13 @@ class TFTrack
   /// L1 track
   const csc::L1Track* getL1Track() const {return l1track_;}
   /// collection of trigger digis
-  const std::vector<const CSCCorrelatedLCTDigi*>& getTriggerDigis() const {return triggerDigis_;} 
+  std::vector<const CSCCorrelatedLCTDigi*> getTriggerDigis() const {return triggerDigis_;} 
   /// collection of MPC LCTs
-  const std::vector<CSCDetId>& getTriggerDigisIds() const {return triggerIds_;}
-  const std::vector<std::pair<float, float>>& getTriggerEtaPhis() {return triggerEtaPhis_;}
-  const std::vector<csctf::TrackStub>& getTriggerStubs() const {return triggerStubs_;}
-  const std::vector<matching::Digi*>& getTriggerMPLCTs() const {return mplcts_;}
-  const std::vector<CSCDetId>& getChamberIds() const {return ids_;}
+  std::vector<CSCDetId> getTriggerDigisIds() const {return triggerIds_;}
+  std::vector<std::pair<float, float>> getTriggerEtaPhis() {return triggerEtaPhis_;}
+  std::vector<csctf::TrackStub> getTriggerStubs() const {return triggerStubs_;}
+  std::vector<matching::Digi*> getTriggerMPLCTs() const {return mplcts_;}
+  std::vector<CSCDetId> getChamberIds() const {return ids_;}
 
   void addTriggerDigi(const CSCCorrelatedLCTDigi*);
   void addTriggerDigiId(const CSCDetId&);
@@ -73,19 +73,19 @@ class TFTrack
   /// bunch crossing 
   int bx() const {return l1track_->bx();}
   /// how many stubs?
-  unsigned int nStubs(bool mb1, bool me1, bool me2, bool me3, bool me4);
+  unsigned int nStubs(bool mb1, bool me1, bool me2, bool me3, bool me4) const;
   /// how many stubs in CSC? 
-  unsigned int nStubsCSCOk(bool me1, bool me2, bool me3, bool me4);
+  unsigned int nStubsCSCOk(bool me1, bool me2, bool me3, bool me4) const;
   /// has stub in muon barrel/endcap
-  bool hasStubStation(int wheel);  
+  bool hasStubStation(int wheel) const; 
   /// has stub in muon barrel?
-  bool hasStubBarrel();  
+  bool hasStubBarrel() const;  
   /// has stub in muon endcap?
-  bool hasStubEndcap(int station);
+  bool hasStubEndcap(int station) const;
   /// matches CSC stubs?
-  bool hasStubCSCOk(int st);
+  bool hasStubCSCOk(int st) const;
   /// has stubs that pass match?
-  bool passStubsMatch(double eta, int minLowHStubs, int minMidHStubs, int minHighHStubs);
+  bool passStubsMatch(double eta, int minLowHStubs, int minMidHStubs, int minHighHStubs) const;
   /// print some information
   void print();
 

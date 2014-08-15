@@ -149,7 +149,7 @@ void
 TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
 {
   for (L1CSCTrackCollection::const_iterator trk = tracks.begin(); trk != tracks.end(); trk++) {
-    TFTrack track(&trk->first);
+    TFTrack track(&trk->first,&trk->second);
     track.init(ptLUT_, muScalesHd_, muPtScaleHd_);
 
     // calculate the deltaR using the simhits in the 2nd CSC station -- reference station
