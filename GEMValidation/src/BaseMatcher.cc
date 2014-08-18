@@ -21,24 +21,24 @@ BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
   if (csc_types.empty()) useCSCChamberTypes_[CSC_ALL] = 1;
 
   // Get the magnetic field
-  es.get< IdealMagneticFieldRecord >().get(magfield_);
+  es.get<IdealMagneticFieldRecord>().get(magfield_);
 
   // Get the propagators                                                                                  
-  es.get< TrackingComponentsRecord >().get("SteppingHelixPropagatorAlong", propagator_);
-  es.get< TrackingComponentsRecord >().get("SteppingHelixPropagatorOpposite", propagatorOpposite_);
+  es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator_);
+  es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorOpposite", propagatorOpposite_);
 
   /// get the geometry
-  hasGEMGeometry_ = false;
-  hasRPCGeometry_ = false;
-  hasCSCGeometry_ = false;
-  hasME0Geometry_ = false;
+  hasGEMGeometry_ = true;
+  hasRPCGeometry_ = true;
+  hasCSCGeometry_ = true;
+  hasME0Geometry_ = true;
 
   try {
     es.get<MuonGeometryRecord>().get(gem_geom);
     gemGeometry_ = &*gem_geom;
   } catch (edm::eventsetup::NoProxyException<GEMGeometry>& e) {
     hasGEMGeometry_ = false;
-    LogDebug("MuonSimHitAnalyzer") << "+++ Info: GEM geometry is unavailable. +++\n";
+    LogDebug("BaseMatcher") << "+++ Info: GEM geometry is unavailable. +++\n";
   }
 
   try {
@@ -46,7 +46,7 @@ BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
     me0Geometry_ = &*me0_geom;
   } catch (edm::eventsetup::NoProxyException<ME0Geometry>& e) {
     hasME0Geometry_ = false;
-    LogDebug("MuonSimHitAnalyzer") << "+++ Info: ME0 geometry is unavailable. +++\n";
+    LogDebug("BaseMatcher") << "+++ Info: ME0 geometry is unavailable. +++\n";
   }
 
   try {
@@ -54,7 +54,7 @@ BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
     cscGeometry_ = &*csc_geom;
   } catch (edm::eventsetup::NoProxyException<CSCGeometry>& e) {
     hasCSCGeometry_ = false;
-    LogDebug("MuonSimHitAnalyzer") << "+++ Info: CSC geometry is unavailable. +++\n";
+    LogDebug("BaseMatcher") << "+++ Info: CSC geometry is unavailable. +++\n";
   }
 
   try {
@@ -62,7 +62,7 @@ BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
     rpcGeometry_ = &*rpc_geom;
   } catch (edm::eventsetup::NoProxyException<RPCGeometry>& e) {
     hasRPCGeometry_ = false;
-    LogDebug("MuonSimHitAnalyzer") << "+++ Info: RPC geometry is unavailable. +++\n";
+    LogDebug("BaseMatcher") << "+++ Info: RPC geometry is unavailable. +++\n";
   }
 }
 

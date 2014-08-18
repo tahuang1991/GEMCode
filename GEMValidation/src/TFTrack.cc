@@ -1,8 +1,22 @@
 #include "GEMCode/GEMValidation/src/TFTrack.h"
 
-TFTrack::TFTrack(const csc::L1Track *t)
+TFTrack::TFTrack(const csc::L1Track* t, const CSCCorrelatedLCTDigiCollection* lcts)
 {
-  //  init(t);
+  l1track_ = t;
+  triggerDigis_.clear();
+  triggerIds_.clear();
+  
+  for (auto detUnitIt = lcts->begin(); detUnitIt != lcts->end(); detUnitIt++) {
+    const CSCDetId& id = (*detUnitIt).first;
+    //std::cout << "DetId " << id << std::endl;
+    const auto range = (*detUnitIt).second;
+    for (auto digiIt = range.first; digiIt != range.second; digiIt++) {
+      if (!(*digiIt).isValid()) continue;
+      //std::cout << "Digi " << *digiIt << std::endl;
+      addTriggerDigi(&(*digiIt));
+      addTriggerDigiId(id);
+    }
+  }
 }
 
 TFTrack::TFTrack(const TFTrack& rhs)
@@ -16,17 +30,16 @@ TFTrack::init(CSCTFPtLUT* ptLUT,
 	      edm::ESHandle< L1MuTriggerScales > &muScales,
 	      edm::ESHandle< L1MuTriggerPtScale > &muPtScale)
 {
-  /*
   //for now, convert using this. LUT in the future
-  const unsigned gbl_phi(t->localPhi() + ((t->sector() - 1)*24) + 6);
+  unsigned gbl_phi(l1track_->localPhi() + ((l1track_->sector() - 1)*24) + 6);
   if(gbl_phi > 143) gbl_phi -= 143;
   phi_packed_ = gbl_phi & 0xff;
   
-  const unsigned eta_sign(t->endcap() == 1 ? 0 : 1);
-  const int gbl_eta_(t->eta_packed() | eta_sign << (L1MuRegionalCand::ETA_LENGTH - 1));
+  const unsigned eta_sign(l1track_->endcap() == 1 ? 0 : 1);
+  const int gbl_eta(l1track_->eta_packed() | eta_sign << (L1MuRegionalCand::ETA_LENGTH - 1));
   eta_packed_  = gbl_eta & 0x3f;
   
-  const unsigned rank(t->rank(), gpt = 0, quality = 0);
+  unsigned rank = l1track_->rank(), gpt = 0, quality = 0;
   //if (rank != 0 ) {
   //  quality = rank >> L1MuRegionalCand::PT_LENGTH;
   //  gpt = rank & ( (1<<L1MuRegionalCand::PT_LENGTH) - 1);
@@ -36,19 +49,20 @@ TFTrack::init(CSCTFPtLUT* ptLUT,
   pt_packed_ = gpt & 0x1f;
   
   //pt = muPtScale->getPtScale()->getLowEdge(pt_packed) + 1.e-6;
-  eta_ = muScales->getRegionalEtaScale(2)->getCenter(t->eta_packed());
-  phi_ = normalizedPhi( muScales->getPhiScale()->getLowEdge(phi_packed));
-  
+
+  // calculate eta and phi (don't forget to store the sign)
+  eta_ = muScales->getRegionalEtaScale(2)->getCenter(l1track_->eta_packed()) * l1track_->endcap();
+  phi_ = normalizedPhi(muScales->getPhiScale()->getLowEdge(phi_packed_));
+   
   //Pt needs some more workaround since it is not in the unpacked data
   //  PtAddress gives an handle on other parameters
-  ptadd thePtAddress(t->ptLUTAddress());
+  ptadd thePtAddress(l1track_->ptLUTAddress());
   ptdat thePtData  = ptLUT->Pt(thePtAddress);
   // front or rear bit? 
   unsigned trPtBit = (thePtData.rear_rank&0x1f);
   if (thePtAddress.track_fr) trPtBit = (thePtData.front_rank&0x1f);
   // convert the Pt in human readable values (GeV/c)
   pt_ = muPtScale->getPtScale()->getLowEdge(trPtBit); 
-  */
   
   //if (trPtBit!=pt_packed) std::cout<<" trPtBit!=pt_packed: "<<trPtBit<<"!="<<pt_packed<<"  pt="<<pt<<" eta="<<eta<<std::endl;
   
@@ -71,15 +85,21 @@ TFTrack::init(CSCTFPtLUT* ptLUT,
     
 //     double old_pt = muPtScale->getPtScale()->getLowEdge(pt_packed) + 1.e-6;
 //     if (fabs(pt - old_pt)>0.005) { debug = 1;std::cout<<"lut pt diff: old "<<old_pt<<" lut "<<pt<<"  eta "<<eta<<" phi "<<phi<<"   mc: pt "<<stpt<<"  eta "<<steta<<" phi "<<stphi<<std::endl;}
-//     double lcl_phi = normalizedPhi( fmod( muScales->getPhiScale()->getLowEdge(t->localPhi()) + 
-// 					  (t->sector()-1)*M_PI/3. + //sector 1 starts at 15 degrees 
+//     double lcl_phi = normalizedPhi( fmod( muScales->getPhiScale()->getLowEdge(l1track_->localPhi()) + 
+// 					  (l1track_->sector()-1)*M_PI/3. + //sector 1 starts at 15 degrees 
 // 					  M_PI/12. , 2.*M_PI) );
 //     if (fabs(deltaPhi(phi,lcl_phi))>0.03) std::cout<<"lcl phi diff: lcl "<<lcl_phi<<" sc "<<phi<<"  mc: pt "<<stpt<<"  eta "<<steta<<" phi "<<stphi<<std::endl;
 //   }
 }
 
+void 
+TFTrack::setDR(double dr)
+{
+  dr_ = dr;
+}
+
 bool 
-TFTrack::hasStubEndcap(int st)
+TFTrack::hasStubEndcap(int st) const
 {
   if(st==1 and l1track_->me1ID() > 0) return true;
   if(st==2 and l1track_->me2ID() > 0) return true;
@@ -89,13 +109,13 @@ TFTrack::hasStubEndcap(int st)
 }
 
 bool
-TFTrack::hasStubBarrel()
+TFTrack::hasStubBarrel() const
 {
   return l1track_->mb1ID() > 0;
 }
 
 bool 
-TFTrack::hasStubStation(int st)
+TFTrack::hasStubStation(int st) const
 {
   if(st==0 and hasStubBarrel())       return true;
   if(st==1 and l1track_->me1ID() > 0) return true;
@@ -107,7 +127,7 @@ TFTrack::hasStubStation(int st)
 
 
 bool 
-TFTrack::hasStubCSCOk(int st)
+TFTrack::hasStubCSCOk(int st) const
 {
 //   if (!hasStubStation(st)) return false;
 //   bool cscok = 0;
@@ -123,7 +143,7 @@ TFTrack::hasStubCSCOk(int st)
 
 
 unsigned int 
-TFTrack::nStubs(bool mb1, bool me1, bool me2, bool me3, bool me4)
+TFTrack::nStubs(bool mb1, bool me1, bool me2, bool me3, bool me4) const
 {
   return ( (mb1 and hasStubStation(0)) + (me1 and hasStubStation(1)) + 
 	   (me2 and hasStubStation(2)) + (me3 and hasStubStation(3)) + 
@@ -132,7 +152,7 @@ TFTrack::nStubs(bool mb1, bool me1, bool me2, bool me3, bool me4)
 
 
 unsigned int 
-TFTrack::nStubsCSCOk(bool me1, bool me2, bool me3, bool me4)
+TFTrack::nStubsCSCOk(bool me1, bool me2, bool me3, bool me4) const
 {
   return ( (me1 and hasStubCSCOk(1)) + (me2 and hasStubCSCOk(2)) + 
 	   (me3 and hasStubCSCOk(3)) + (me4 and hasStubCSCOk(4)) );
@@ -140,7 +160,7 @@ TFTrack::nStubsCSCOk(bool me1, bool me2, bool me3, bool me4)
 
 
 bool 
-TFTrack::passStubsMatch(double steta, int minLowHStubs, int minMidHStubs, int minHighHStubs)
+TFTrack::passStubsMatch(double steta, int minLowHStubs, int minMidHStubs, int minHighHStubs) const
 {
 //    const double steta(match->strk->momentum().eta());
   const int nstubs(nStubs(1,1,1,1,1));
@@ -188,4 +208,28 @@ TFTrack::print()
     std::cout<<std::endl;
     std::cout<<"#### TFTRACK END PRINT #####"<<std::endl;
   */
+}
+
+void 
+TFTrack::addTriggerDigi(const CSCCorrelatedLCTDigi* digi)
+{
+  triggerDigis_.push_back(digi);
+}
+
+void 
+TFTrack::addTriggerDigiId(const CSCDetId& id)
+{
+  triggerIds_.push_back(id);
+}
+
+void 
+TFTrack::addTriggerEtaPhi(const std::pair<float,float>& p)
+{
+  triggerEtaPhis_.push_back(p);
+}
+
+void 
+TFTrack::addTriggerStub(const csctf::TrackStub& st)
+{
+  triggerStubs_.push_back(st);
 }
