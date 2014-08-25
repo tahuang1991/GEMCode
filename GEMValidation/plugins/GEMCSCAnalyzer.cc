@@ -98,8 +98,12 @@ struct MyTrackEff
   Char_t bend_lct_even;
   Char_t bx_lct_odd;
   Char_t bx_lct_even;
+
+
   UChar_t hs_lct_odd;
+  UChar_t wg_lct_odd;
   UChar_t hs_lct_even;
+  UChar_t wg_lct_even;
 
   Float_t phi_lct_odd;
   Float_t phi_lct_even;
@@ -211,6 +215,8 @@ void MyTrackEff::init()
   bx_lct_even = -9;
   hs_lct_odd = 0;
   hs_lct_even = 0;
+  wg_lct_odd = 0;
+  wg_lct_even = 0;
   phi_lct_odd = -9.;
   phi_lct_even = -9.;
   eta_lct_odd = -9.;
@@ -316,6 +322,8 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("bx_lct_even", &bx_lct_even);
   t->Branch("hs_lct_odd", &hs_lct_odd);
   t->Branch("hs_lct_even", &hs_lct_even);
+  t->Branch("wg_lct_even", &wg_lct_even);
+  t->Branch("wg_lct_odd", &wg_lct_odd);
   t->Branch("phi_lct_odd", &phi_lct_odd);
   t->Branch("phi_lct_even", &phi_lct_even);
   t->Branch("eta_lct_odd", &eta_lct_odd);
@@ -642,11 +650,11 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
    
   for (auto s: stations_to_use_)
   {
+
+    etrk_[s].init();
     etrk_[s].run = match.simhits().event().id().run();
     etrk_[s].lumi = match.simhits().event().id().luminosityBlock();
     etrk_[s].event = match.simhits().event().id().event();
-
-    etrk_[s].init();
     etrk_[s].pt = t.momentum().pt();
     etrk_[s].phi = t.momentum().phi();
     etrk_[s].eta = t.momentum().eta();
@@ -658,6 +666,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   auto csc_simhits(match_sh.chamberIdsCSC(0));
   for(auto d: csc_simhits)
   {
+
     CSCDetId id(d);
     const int st(detIdToMEStation(id.station(),id.ring()));
     if (stations_to_use_.count(st) == 0) continue;
@@ -670,13 +679,17 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       CSCDetId co_id(id.endcap(), id.station(), other_ring, id.chamber());
       // check if co_id occurs in the list
       // add the hit layers
+     
       auto rawId(co_id.rawId());
       if (csc_simhits.find(rawId) != csc_simhits.end()) {
-	nlayers += match_sh.nLayersWithHitsInSuperChamber(rawId);
-      }
-    }
+	nlayers = nlayers+match_sh.nLayersWithHitsInSuperChamber(rawId);
 
+      } 
+      
+    }
+    
     if (nlayers < minNHitsChamberCSCSimHit_) continue;
+    
 
     const bool odd(id.chamber()%2==1);
     if (odd) etrk_[st].has_csc_sh |= 1;
@@ -695,7 +708,43 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
       if (odd) etrk_[1].nlayers_csc_sh_odd = nlayers;
       else etrk_[1].nlayers_csc_sh_even = nlayers;
-    }  
+
+    }
+    bool debuggjs=false;
+
+    if(debuggjs){
+  //  std::cout<<"@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@Printing Information from the Denominator. @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@"<<std::endl;
+
+          if (t.momentum().pt()>10 and id.station()==1 and (id.ring()==4 or id.ring()==1) and t.momentum().eta()>2.35 ) {
+
+            std::cout<<"Denominator:: Event: "<<match.simhits().event().id().event()<<" Luminosity: "<<match.simhits().event().id().luminosityBlock();
+            std::cout<<" Run: "<<match.simhits().event().id().run();
+
+            auto csc_csh_ch_ids = match_sh.chamberIdsCSC();
+            std::cout<<" SimTrack Pt: "<<t.momentum().pt()<<" SimTrack eta: "<<t.momentum().eta()<<" SimTrack phi: "<<t.momentum().phi()<<std::endl;
+
+                auto lcts = match_lct.allLCTsInChamber(d);
+                    for (auto p : lcts)
+                        std::cout<< p <<" ";
+
+
+                 auto alcts = match_lct.allALCTsInChamber(d);
+                    for (auto p : alcts)
+                        std::cout<< p <<" ";
+
+                 auto clcts = match_lct.allCLCTsInChamber(d);
+                     for (auto p : clcts)
+                        std::cout<< p <<" ";
+             
+                std::cout<<" "<<std::endl;
+
+         }
+
+//    std::cout<<" @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@ End of Den @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@2@@@@@@@@@@ "<<std::endl;
+
+    }
+
+      
   }
 
   // CSC strip digis
@@ -849,6 +898,32 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       if (odd) etrk_[1].has_lct |= 1;
       else etrk_[1].has_lct |= 2;
     }
+        /*
+          if (t.momentum().pt()>10 and id.station()==1 and (id.ring()==4 or id.ring()==1) ) {
+
+            std::cout<<"Numerator:: Event: "<<match.simhits().event().id().event()<<" Luminosity: "<<match.simhits().event().id().luminosityBlock();
+            std::cout<<" Run: "<<match.simhits().event().id().run();
+
+            auto csc_csh_ch_ids = match_sh.chamberIdsCSC();
+            std::cout<<" SimTrack Pt: "<<t.momentum().pt()<<" SimTrack eta: "<<t.momentum().eta()<<" SimTrack phi: "<<t.momentum().phi()<<" ";
+
+                 auto lcts = match_lct.allLCTsInChamber(d);
+                    for (auto p : lcts)
+                        std::cout<< p <<" ";
+
+
+                 auto alcts = match_lct.allALCTsInChamber(d);
+                    for (auto p : alcts)
+                        std::cout<< p <<" ";
+
+                 auto clcts = match_lct.allCLCTsInChamber(d);
+                     for (auto p : clcts)
+                        std::cout<< p <<" ";
+                std::cout<<" "<<std::endl;
+
+    }
+
+    */
     
     auto lct = match_lct.lctInChamber(d);
     const int bend(LCT_BEND_PATTERN[digi_pattern(lct)]);
@@ -864,6 +939,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       etrk_[st].dphi_lct_odd = digi_dphi(lct);
       etrk_[st].bx_lct_odd = digi_bx(lct);
       etrk_[st].hs_lct_odd = digi_channel(lct);
+      etrk_[st].wg_lct_odd = digi_wg(lct);
       etrk_[st].chamber_odd |= 2;
       etrk_[st].quality_odd = digi_quality(lct);
     }
@@ -877,6 +953,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       etrk_[st].dphi_lct_even = digi_dphi(lct);
       etrk_[st].bx_lct_even = digi_bx(lct);
       etrk_[st].hs_lct_even = digi_channel(lct);
+      etrk_[st].wg_lct_even = digi_wg(lct);
       etrk_[st].chamber_even |= 2;
       etrk_[st].quality_even = digi_quality(lct);
     }
@@ -893,6 +970,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         etrk_[1].dphi_lct_odd = digi_dphi(lct);
         etrk_[1].bx_lct_odd = digi_bx(lct);
         etrk_[1].hs_lct_odd = digi_channel(lct);
+        etrk_[1].wg_lct_odd = digi_wg(lct);
         etrk_[1].chamber_odd |= 2;
         etrk_[1].quality_odd = digi_quality(lct);
       }
@@ -906,6 +984,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         etrk_[1].dphi_lct_even = digi_dphi(lct);
         etrk_[1].bx_lct_even = digi_bx(lct);
         etrk_[1].hs_lct_even = digi_channel(lct);
+        etrk_[1].wg_lct_even = digi_wg(lct);
         etrk_[1].chamber_even |= 2;
         etrk_[1].quality_even = digi_quality(lct);
       }
@@ -1232,6 +1311,45 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   for (auto s: stations_to_use_)
   {
     tree_eff_[s]->Fill();
+
+
+        //Printing section when we fill the tree.
+
+    int tmpa=0; // change to -1 to let quality zero pass or not.
+    bool exer=false;// Run it?a
+    if (s==1 and exer ){// and etrk_[s].event==788 and etrk_[s].lumi==200 and etrk_[s].run==1) // s=1 implies ME11
+
+                                    //only add etrk_[1].has_lct>0 for numerator (CSC4)
+
+
+          if (etrk_[s].pt>10 ) {
+            int hsa=0, lhs=0, lwg=0;
+            int quuality=0, wga=0;
+            if (etrk_[s].has_csc_sh==1) quuality=etrk_[s].quality_odd, hsa=etrk_[s].halfstrip_odd, wga=etrk_[s].wiregroup_odd, lhs=etrk_[s].hs_lct_odd,lwg=etrk_[s].wg_lct_odd;
+            else quuality=etrk_[s].quality_even, hsa=etrk_[s].halfstrip_even, wga=etrk_[s].wiregroup_even, lhs=etrk_[s].hs_lct_even, lwg=etrk_[s].wg_lct_even;
+
+            if (quuality>tmpa){
+                std::cout<<"Filling the Tree:: Event: "<<etrk_[s].event<<" Luminosity: "<<etrk_[s].lumi<<" Run: "<<etrk_[s].run;
+                cout<<" SimTrack Pt: "<<etrk_[s].pt<<" SimTrack eta: "<<etrk_[s].eta<<" SimTrack phi: "<<etrk_[s].phi;
+              //  std::cout<<" Station: "<<s<<" Parity: ";
+
+             //   if(etrk_[s].has_csc_sh==1) std::cout<<" Odd ";
+             //   else std::cout<<" Even ";
+                hsa++;
+                std::cout<<" LCT Quality "<<quuality<<" LCT HS: "<<lhs<<" LCT WG: "<<lwg;
+                std::cout<<" ALCT WG: "<<wga<<" Alct Quality: ";
+                if (etrk_[s].has_csc_sh==1){
+                        std::cout<<etrk_[s].quality_alct_odd<<std::endl; //<<" CLCT Strip: "<<hsa<<" Clct Quality: "<<etrk_[s].quality_clct_odd<<std::endl;
+                } else{
+                        std::cout<<etrk_[s].quality_alct_even<<std::endl; //<<" CLCT Strip: "<<hsa<<" Clct Quality: "<<etrk_[s].quality_clct_even<<std::endl;
+                }
+                
+            }
+        }
+    } // Until here for printing
+
+
+
   }
 }
 
