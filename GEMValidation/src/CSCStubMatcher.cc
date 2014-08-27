@@ -381,34 +381,10 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
     auto rpcDigis(rpc_digi_matcher_->digisInChamber(rpcDetId));
     const auto hits = sh_matcher_->hitsInChamber(id);
 
-    bool debuggjs=false;
-        //The above one is to chose if or not print the information
-
-    bool caseAlctClct[4][4];
     for (unsigned int i=0; i<clct.size();i++){
 
         
         for (unsigned int j=0; j<alct.size();j++){
-
-            if (debuggjs) {
-              std::cout<<" Clct Number: "<<i;
-               if (is_valid(clct[i])) std::cout<<" is Valid."<<std::endl;
-               else std::cout<<" is Not valid."<<std::endl;
-
-               std::cout<<" Alct Number: "<<j;
-               if (is_valid(alct[j])) std::cout<<" is Valid."<<std::endl;
-               else std::cout<<" is Not valid."<<std::endl;
-            }
-
-            if (is_valid(clct[i]) and is_valid(alct[j])) {
-                caseAlctClct[i][j]=true;
-                if (debuggjs) std::cout<<" Thus both are Valid "<<std::endl;
-            }else{
-                if (debuggjs)std::cout<<" Not a valid pair Clct and Alct "<<std::endl;
-                caseAlctClct[i][j]=false;
-                }
-
-            //Now we have the possible values for caseAlctClct [i][j]
 
            auto hasPad(pads.size()!=0);
            auto hasDigis(rpcDigis.size()!=0);
@@ -452,28 +428,12 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
                  auto digi_strips = digi_matcher_->stripsInChamber(id, 1);
                  const int my_hs(digi_channel(clct[i]));
 
-                if (debuggjs){
-                     std::cout<<" Digi Strips: ";
-                     copy(digi_strips.begin(), digi_strips.end(), ostream_iterator<int>(cout, " ")); cout<<endl;
-                }
                 const int my_wg(digi_wg(alct[j]));
                 const int my_bx(digi_bx(alct[j]));
                 auto digi_wgs = digi_matcher_->wiregroupsInChamber(id,1);
 
-                if (debuggjs) {
-                    cout<<"Digi WGs ";
-                    copy(digi_wgs.begin(), digi_wgs.end(), ostream_iterator<int>(cout, " ")); cout<<endl;
-                }
 
-                
-            if (debuggjs){
-                std::cout<<" LCT info: "<<lct<<std::endl;
-                std::cout<<" CLCT: "<<clct[i]<<std::endl;
-                std::cout<<" ALCT: "<<alct[j]<<std::endl;
-            }
-
-
-               if (caseAlctClct[i][j] and !(my_bx == digi_bx(lct) and my_hs == digi_channel(lct) and my_wg == digi_wg(lct))){
+               if ( is_valid(clct[i]) and is_valid(alct[j]) and !(my_bx == digi_bx(lct) and my_hs == digi_channel(lct) and my_wg == digi_wg(lct))){
                     if (verbose()) cout<<"  BAD"<<endl;
                     continue;
                 }
@@ -499,9 +459,6 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
               }
 
 
-
-             if (debuggjs) std::cout<<" Matched! "<<std::endl;
-
              if (chamber_to_lct_.find(id) != chamber_to_lct_.end()){
                        //  cout<<"ALARM!!! here already was matching LCT "<<chamber_to_lct_[id]<<endl;
                        //  cout<<"   new digi: "<<lct<<endl;
@@ -509,16 +466,12 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
              
               chamber_to_lct_[id] = lct;
               chamber_to_lcts_[id].push_back(lct);
-             if (debuggjs) std::cout<<" Stored lct: "<<lct<<std::endl;
-
-
 
 
             } //Until here
         }
 
     }
-    //std::cout<<"  ----------------------- End Shuffling ------------------------------------- "<<std::endl;
 
   }
 
@@ -633,7 +586,6 @@ CSCStubMatcher::matchMPLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& mplc
     auto clct(clctsInChamber(id));
     auto alct(alctsInChamber(id));
 
-    bool caseAlctClct[4][4];
     for (unsigned int i=0; i<clct.size();i++){
 
         if (!is_valid(clct[i])) continue;
@@ -641,13 +593,6 @@ CSCStubMatcher::matchMPLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& mplc
 
         for (unsigned int j=0; j<alct.size();j++){
             if(!is_valid(alct[j])) continue;
-
-
-            if (is_valid(clct[i]) and is_valid(alct[j])) {
-                caseAlctClct[i][j]=true;
-            }else{
-                caseAlctClct[i][j]=false;
-           }
 
 
             int my_hs = digi_channel(clct[i]);
@@ -658,7 +603,7 @@ CSCStubMatcher::matchMPLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& mplc
             for (auto &lct: mplcts_tmp)
             {
               if (verbose()) cout<<" corlct "<<lct;
-              if ( caseAlctClct[i][j] and !(my_bx == digi_bx(lct) and my_hs == digi_channel(lct) and my_wg == digi_wg(lct)) ){
+              if ( is_valid(alct[j]) and is_valid(clct[i]) and !(my_bx == digi_bx(lct) and my_hs == digi_channel(lct) and my_wg == digi_wg(lct)) ){
               if (verbose()) cout<<"  BAD"<<endl;
                 continue;
                  }  
