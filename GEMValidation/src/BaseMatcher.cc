@@ -153,3 +153,48 @@ chamber(const DetId& id)
   };
   return chamberN;
 }
+
+
+double BaseMatcher::phiHeavyCorr(double pt, double eta, double phi, double charge) const
+{
+    // float resEta = eta;
+    float etaProp = std::abs(eta);
+    if (etaProp< 1.1) etaProp = 1.1;
+    float resPhi = phi - 1.464*charge*cosh(1.7)/cosh(etaProp)/pt - M_PI/144.;
+    if (resPhi > M_PI) resPhi -= 2.*M_PI;
+    if (resPhi < -M_PI) resPhi += 2.*M_PI;
+    return resPhi;
+}
+
+
+
+bool BaseMatcher::passDPhicut(CSCDetId id, float dPhi, float pt) const
+{
+  //  const double GEMdPhi[9][3];
+  if (!(id.station()==1 and (id.ring()==1 or id.ring()==4)) &&
+	!(id.station()==2 and id.ring()==1))  return true;
+   
+  auto GEMdPhi( id.station()==1 ? ME11GEMdPhi : ME21GEMdPhi);
+   // std::copy(&ME11GEMdPhi[0][0], &ME11GEMdPhi[0][0]+9*3,&GEMdPhi[0][0]);
+   //else if (id.station()==2 and id.ring()==1) 
+   // std::copy(&ME21GEMdPhi[0][0], &ME21GEMdPhi[0][0]+9*3,&GEMdPhi[0][0]);
+   
+   bool is_odd(id.chamber()%2==1);
+   bool pass = false;
+
+   for (int b = 0; b < 9; b++)
+   {
+	if (double(pt) >= GEMdPhi[b][0])
+	{
+		
+	    if ((is_odd && GEMdPhi[b][1] > fabs(dPhi)) ||
+		(!is_odd && GEMdPhi[b][2] > fabs(dPhi)))
+		    pass = true;
+	    else    pass = false;
+	}
+    }
+   if (dPhi < -50) pass = true;
+
+   return pass;
+
+}

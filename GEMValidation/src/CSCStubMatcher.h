@@ -70,6 +70,7 @@ public:
   const DigiContainer& lctsInChamber(unsigned int) const;
   const DigiContainer& mplctsInChamber(unsigned int) const;
 
+  const DigiContainer lctsInStation(int) const;
   /// How many CSC chambers with matching stubs of some minimal quality did this SimTrack hit?
   int nChambersWithCLCT(int min_quality = 0) const;
   int nChambersWithALCT(int min_quality = 0) const;

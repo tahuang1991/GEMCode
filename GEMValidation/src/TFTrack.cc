@@ -3,9 +3,8 @@
 TFTrack::TFTrack(const csc::L1Track* t, const CSCCorrelatedLCTDigiCollection* lcts)
 {
   l1track_ = t;
-  triggerDigis_.clear();
-  triggerIds_.clear();
-  
+  nstubs = 0;
+
   for (auto detUnitIt = lcts->begin(); detUnitIt != lcts->end(); detUnitIt++) {
     const CSCDetId& id = (*detUnitIt).first;
     //std::cout << "DetId " << id << std::endl;
@@ -15,15 +14,27 @@ TFTrack::TFTrack(const csc::L1Track* t, const CSCCorrelatedLCTDigiCollection* lc
       //std::cout << "Digi " << *digiIt << std::endl;
       addTriggerDigi(&(*digiIt));
       addTriggerDigiId(id);
+      nstubs++;
     }
   }
+  
+
 }
 
 TFTrack::TFTrack(const TFTrack& rhs)
 {}
 
 TFTrack::~TFTrack()
-{}
+{
+//  std::cout<<" deconstrcution of TFTrack"<< std::endl;
+  triggerDigis_.clear();
+  triggerIds_.clear();
+  triggerEtaPhis_.clear();
+  triggerStubs_.clear();
+  mplcts_.clear();
+  ids_.clear(); // chamber ids
+
+}
 
 void 
 TFTrack::init(CSCTFPtLUT* ptLUT,
@@ -51,7 +62,8 @@ TFTrack::init(CSCTFPtLUT* ptLUT,
   //pt = muPtScale->getPtScale()->getLowEdge(pt_packed) + 1.e-6;
 
   // calculate eta and phi (don't forget to store the sign)
-  eta_ = muScales->getRegionalEtaScale(2)->getCenter(l1track_->eta_packed()) * l1track_->endcap();
+  //  eta_ = muScales->getRegionalEtaScale(2)->getCenter(l1track_->eta_packed()) * l1track_->endcap();
+  eta_ = muScales->getRegionalEtaScale(2)->getCenter( ((l1track_->eta_packed()) | (eta_sign<<5)) & 0x3f );
   phi_ = normalizedPhi(muScales->getPhiScale()->getLowEdge(phi_packed_));
    
   //Pt needs some more workaround since it is not in the unpacked data
@@ -129,7 +141,7 @@ TFTrack::hasStubStation(int st) const
 bool 
 TFTrack::hasStubCSCOk(int st) const
 {
-//   if (!hasStubStation(st)) return false;
+   if (!hasStubEndcap(st)) return false;
 //   bool cscok = 0;
 //   for (size_t s=0; s<ids_.size(); s++) {
 //     if (ids_[s].station() == st and mplcts_[s]->deltaOk) { 
@@ -208,6 +220,19 @@ TFTrack::print()
     std::cout<<std::endl;
     std::cout<<"#### TFTRACK END PRINT #####"<<std::endl;
   */
+}
+
+unsigned int TFTrack::digiInME(int st, int ring)
+{
+  if (triggerDigis_.size() != triggerIds_.size()) std::cout<<" BUG " <<std::endl;
+  for (unsigned int i=0; i<triggerDigis_.size(); i++)
+  {
+     auto id(triggerIds_.at(i));
+     if (id.station()==st && id.ring()==ring) return i;
+     else continue;  
+  }
+  return 999;//invalid return, larger than triggerDigis_.size();
+
 }
 
 void 

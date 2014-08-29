@@ -63,6 +63,8 @@ class TFTrack
   std::vector<matching::Digi*> getTriggerMPLCTs() const {return mplcts_;}
   std::vector<CSCDetId> getChamberIds() const {return ids_;}
 
+  unsigned int digiInME(int st, int ring);
+
   void addTriggerDigi(const CSCCorrelatedLCTDigi*);
   void addTriggerDigiId(const CSCDetId&);
   void addTriggerEtaPhi(const std::pair<float,float>&);
@@ -74,6 +76,7 @@ class TFTrack
   int bx() const {return l1track_->bx();}
   /// how many stubs?
   unsigned int nStubs(bool mb1, bool me1, bool me2, bool me3, bool me4) const;
+  unsigned int nStubs() const {return nstubs;}
   /// how many stubs in CSC? 
   unsigned int nStubsCSCOk(bool me1, bool me2, bool me3, bool me4) const;
   /// has stub in muon barrel/endcap
@@ -122,6 +125,7 @@ class TFTrack
   double eta_;
   double pt_;
   double dr_;
+  unsigned int nstubs;
   std::vector<bool> deltaOk_;
   bool debug_;
 };

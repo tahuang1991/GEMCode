@@ -742,6 +742,22 @@ CSCStubMatcher::lctsInChamber(unsigned int detid) const
   return chamber_to_lcts_.at(detid);
 }
 
+
+const matching::DigiContainer
+CSCStubMatcher::lctsInStation(int st) const
+{
+    DigiContainer lcts;
+    for (auto p : chamber_to_lcts_)
+    {
+       CSCDetId id(p.first);
+       if (id.station() == st) lcts.insert(lcts.end(), (p.second).begin(), (p.second).end());
+       else continue; 
+    }
+
+    return lcts;
+}
+
+
 const matching::DigiContainer&
 CSCStubMatcher::mplctsInChamber(unsigned int detid) const
 {

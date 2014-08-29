@@ -187,6 +187,18 @@ struct MyTrackEff
   Int_t has_gmtRegCand;
   Int_t has_gmtCand;
   Int_t has_l1Extra;
+  //csctf
+  Float_t trackpt, tracketa, trackphi;
+  UInt_t quality_packed, pt_packed, eta_packed, phi_packed;
+  UInt_t rank;
+  UInt_t nstubs;
+  UInt_t deltaphi12, deltaphi23; 
+  Bool_t hasME1,hasME2;
+  Float_t dphiGE11,dphiGE21;
+  Bool_t passGE11,passGE21;
+  Float_t deltaR;
+  Float_t lctdphi12;
+
 };
 
 void MyTrackEff::init()
@@ -296,6 +308,28 @@ void MyTrackEff::init()
   has_gmtRegCand = -99;
   has_gmtCand = -99;
   has_l1Extra = -99;
+
+  //csctf
+  trackpt = 0 ;
+  tracketa = 0;
+  trackphi = -9;
+  quality_packed = 0;
+  pt_packed = 0;
+  eta_packed = 0;
+  phi_packed = 0;
+  rank = 0;
+  deltaphi12 = 0;
+  deltaphi23 = 0;; 
+  hasME1 = false;
+  hasME2 = false;
+  dphiGE11 = -99.0;
+  dphiGE21 = -99.0;
+  passGE11 = false;
+  passGE21 = false;
+  nstubs = 0;
+  deltaR = 10;
+  lctdphi12 = -99;
+
 }
 
 
@@ -408,7 +442,27 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("has_gmtRegCand", &has_gmtRegCand);
   t->Branch("has_gmtCand", &has_gmtCand);
   t->Branch("has_l1Extra", &has_l1Extra);
-  
+  //csctftrack
+  t->Branch("trackpt", &trackpt);
+  t->Branch("tracketa", &tracketa);
+  t->Branch("trackphi", &trackphi);
+  t->Branch("quality_packed",&quality_packed);
+  t->Branch("rank",&rank);
+  t->Branch("pt_packed",&pt_packed);
+  t->Branch("eta_packed",&eta_packed);
+  t->Branch("phi_packed",&phi_packed);
+  t->Branch("deltaphi12",&deltaphi12);
+  t->Branch("deltaphi23",&deltaphi23);
+  t->Branch("hasME1",&hasME1);
+  t->Branch("hasME2",&hasME2);
+  t->Branch("dphiGE11",&dphiGE11);
+  t->Branch("dphiGE21",&dphiGE21);
+  t->Branch("passGE11",&passGE11);
+  t->Branch("passGE21",&passGE21);
+  t->Branch("nstubs",&nstubs);
+  t->Branch("deltaR",&deltaR);
+  t->Branch("lctdphi12",&lctdphi12);
+
   return t;
 }
 
@@ -588,7 +642,8 @@ void GEMCSCAnalyzer::analyze(const edm::Event& ev, const edm::EventSetup& es)
       std::cout << "pt(GeV/c) = " << t.momentum().pt() << ", eta = " << t.momentum().eta()  
                 << ", phi = " << t.momentum().phi() << ", Q = " << t.charge() << std::endl;
     }
- 
+    
+//    std::cout<< " initialize SimTrackMatcherManager "<< std::endl;  
     // match hits and digis to this SimTrack
     SimTrackMatchManager match(t, sim_vert[t.vertIndex()], cfg_, ev, es);
 
@@ -604,8 +659,8 @@ void GEMCSCAnalyzer::analyze(const edm::Event& ev, const edm::EventSetup& es)
     // if (has_alct_odd || has_alct_even)   std::cout <<"  st1 has_alct " << std::endl;
     bool Debug((has_csc_sh_odd and !has_alct_odd) || (has_csc_sh_even and !has_alct_even));
     if (matchprint_ and Debug ) printout(match, trk_no);
-    trk_no++;
     */
+    
   }
 }
 
@@ -1209,7 +1264,52 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   
   if (match_track.tfTracks().size()) {
     etrk_[0].has_tfTrack = 1;
-    std::cout << "SimTrack has matched CSCTF track" << std::endl;
+    TFTrack* besttrack = match_track.bestTFTrack();
+    etrk_[0].trackpt = besttrack->pt();
+    etrk_[0].tracketa = besttrack->eta();
+    etrk_[0].trackphi = besttrack->phi();
+  //  quality_packed;
+   etrk_[0].pt_packed = besttrack->ptPacked();
+   etrk_[0].eta_packed = besttrack->etaPacked();
+   etrk_[0].phi_packed = besttrack->phiPacked();
+   etrk_[0].quality_packed = besttrack->qPacked();
+ // rank = 0;
+   etrk_[0].deltaphi12 = besttrack->dPhi12();
+   etrk_[0].deltaphi23 = besttrack->dPhi23();
+   etrk_[0].hasME1 = besttrack->hasStubEndcap(1);
+   etrk_[0].hasME2 = besttrack->hasStubEndcap(2);
+   etrk_[0].nstubs = besttrack->nStubs();
+   etrk_[0].deltaR = besttrack->dr();
+   unsigned int lct1 = 999;
+   auto me1b(besttrack->digiInME(1,1));
+   auto me1a(besttrack->digiInME(1,4));
+   if (me1a != 999) lct1 = me1a;
+   if (me1b != 999) lct1 = me1b;
+
+   if (lct1 < (besttrack->getTriggerDigis()).size()) 
+   {
+       etrk_[0].passGE11 = match_track.passDPhicut((besttrack->getTriggerDigisIds()).at(lct1), 
+		((besttrack->getTriggerDigis()).at(lct1))->getGEMDPhi(), besttrack->pt()); 
+       etrk_[0].dphiGE11 = ((besttrack->getTriggerDigis()).at(lct1))->getGEMDPhi();
+   }
+
+   unsigned int lct2 = besttrack->digiInME(2,1);
+
+   if (lct2 < (besttrack->getTriggerDigis()).size()) 
+   {
+       etrk_[0].passGE21 = match_track.passDPhicut((besttrack->getTriggerDigisIds()).at(lct2), 
+		((besttrack->getTriggerDigis()).at(lct2))->getGEMDPhi(), besttrack->pt()); 
+       etrk_[0].dphiGE21 = ((besttrack->getTriggerDigis()).at(lct2))->getGEMDPhi();
+   }
+    auto triggerDigiEtaPhi(besttrack->getTriggerEtaPhis());
+    if (triggerDigiEtaPhi.size()>1)
+    {
+         auto etaphi1(triggerDigiEtaPhi.at(0));
+	 auto etaphi2(triggerDigiEtaPhi.at(1));
+	 etrk_[0].lctdphi12 = etaphi1.second-etaphi2.second;
+    
+    }	
+     //    std::cout << "SimTrack has matched CSCTF track" << std::endl;
   }
   
   if (match_track.tfCands().size()) {

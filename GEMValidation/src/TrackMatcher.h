@@ -48,22 +48,31 @@ class TrackMatcher : public CSCStubMatcher
   /// destructor
   ~TrackMatcher();
 
-  const std::vector<TFTrack*>& tfTracks() const {return tfTracks_;}
+  const std::vector<TFTrack*> tfTracks() const {return tfTracks_;}
   const std::vector<TFCand*>& tfCands() const {return tfCands_;}
   const std::vector<GMTRegCand*>& gmtRegCands() const {return gmtRegCands_;}
   const std::vector<GMTCand*>& gmtCands() const {return gmtCands_;}
   const std::vector<L1Extra*>& l1Extras() const {return l1Extras_;}
-
-  TFTrack* bestTFTrack(bool sortPtFirst=1);
-  TFCand* bestTFCand(bool sortPtFirst=1);
-  GMTRegCand* bestGMTRegCand(bool sortPtFirst=1);
-  GMTCand* bestGMTCand(bool sortPtFirst=1);
-  L1Extra* bestL1Extra(bool sortPtFirst=1);
+  
+  
+  TFTrack* bestTFTrack(bool sortPtFirst=1) const;
+  TFCand* bestTFCand(bool sortPtFirst=1) const;
+  GMTRegCand* bestGMTRegCand(bool sortPtFirst=1) const;
+  GMTCand* bestGMTCand(bool sortPtFirst=1) const;
+  L1Extra* bestL1Extra(bool sortPtFirst=1) const;
   
  private:
 
   void init();
   void clear();
+
+
+  //const SimTrack simtrk_;
+  float simPt;
+  float simEta;
+  float simPhi;
+  float simE;
+  float simCharge;
 
   void matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks);
   void matchTfCandToSimTrack(const std::vector<L1MuRegionalCand>* tracks);
@@ -108,6 +117,7 @@ class TrackMatcher : public CSCStubMatcher
   std::vector<GMTRegCand*> gmtRegCands_;
   std::vector<GMTCand*> gmtCands_;
   std::vector<L1Extra*> l1Extras_;
+
 
   edm::ParameterSet ptLUTset_;
   edm::ParameterSet CSCTFSPset_;
