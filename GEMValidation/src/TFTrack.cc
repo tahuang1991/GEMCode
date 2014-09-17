@@ -186,40 +186,38 @@ TFTrack::passStubsMatch(double steta, int minLowHStubs, int minMidHStubs, int mi
 void 
 TFTrack::print()
 {
-  /*
-    std::cout<<"#### TFTRACK PRINT: "<<msg<<" #####"<<std::endl;
+  
+//    std::cout<<"#### TFTRACK PRINT: "<<msg<<" #####"<<std::endl;
     //std::cout<<"## L1MuRegionalCand print: ";
     //l1track_->print();
     //std::cout<<"\n## L1Track Print: ";
     //l1track_->Print();
     //std::cout<<"## TFTRACK:  
-    std::cout<<"\tpt_packed: "<<pt_packed<<"  eta_packed: " << eta_packed<<"  phi_packed: " << phi_packed<<"  q_packed: "<< q_packed<<"  bx: "<<l1track_->bx()<<std::endl;
-    std::cout<<"\tpt: "<<pt<<"  eta: "<<eta<<"  phi: "<<phi<<"  sector: "<<l1track_->sector()<<"  dr: "<<dr<<"   ok1: "<<deltaOk1<<"  ok2: "<<deltaOk2<<"  okME1: "<<deltaOkME1<<std::endl;
-    std::cout<<"\tMB1 ME1 ME2 ME3 ME4 = "<<l1track_->mb1ID()<<" "<<l1track_->me1ID()<<" "<<l1track_->me2ID()<<" "<<l1track_->me3ID()<<" "<<l1track_->me4ID()
+    std::cout<<"\tpt_packed: "<<pt_packed_<<"  eta_packed: " << eta_packed_<<"  phi_packed: " << phi_packed_<<"  q_packed: "<< q_packed_<<"  bx: "<<l1track_->bx()<<std::endl;
+    std::cout<<"\tpt: "<<pt_<<"  eta: "<<eta_<<"  phi: "<<phi_<<"  sector: "<<l1track_->sector()<<"  dr: "<<dr_<<std::endl;
+  /*  std::cout<<"\tMB1 ME1 ME2 ME3 ME4 = "<<l1track_->mb1ID()<<" "<<l1track_->me1ID()<<" "<<l1track_->me2ID()<<" "<<l1track_->me3ID()<<" "<<l1track_->me4ID()
         <<" ("<<hasStub(0)<<" "<<hasStub(1)<<" "<<hasStub(2)<<" "<<hasStub(3)<<" "<<hasStub(4)<<")  "
-        <<" ("<<hasStubCSCOk(1)<<" "<<hasStubCSCOk(2)<<" "<<hasStubCSCOk(3)<<" "<<hasStubCSCOk(4)<<")"<<std::endl;
-    std::cout<<"\tptAddress: 0x"<<std::hex<<l1track_->ptLUTAddress()<<std::dec<<"  mode: "<<mode()<<"  sign: "<<sign()<<"  dphi12: "<<dPhi12()<<"  dphi23: "<<dPhi23()<<std::endl;
-    std::cout<<"\thas "<<trgdigis.size()<<" stubs in ";
-    for (size_t s=0; s<trgids.size(); s++) 
-        std::cout<<trgids[s]<<" w:"<<trgdigis[s]->getKeyWG()<<" s:"<<trgdigis[s]->getStrip()/2 + 1<<" p:"<<trgdigis[s]->getPattern()<<" bx:"<<trgdigis[s]->getBX()<<"; ";
-    std::cout<<std::endl;
+        <<" ("<<hasStubCSCOk(1)<<" "<<hasStubCSCOk(2)<<" "<<hasStubCSCOk(3)<<" "<<hasStubCSCOk(4)<<")"<<std::endl;*/
+    std::cout<<"\tptAddress: 0x"<<std::hex<<l1track_->ptLUTAddress()<<std::dec<<"  dphi12: "<<dPhi12()<<"  dphi23: "<<dPhi23()<<std::endl;
+    std::cout<<"\thas "<<triggerDigis_.size()<<" stubs in ";
+    for (size_t s=0; s<triggerDigis_.size(); s++) 
+        std::cout<<triggerDigis_[s]<<" w:"<<triggerDigis_[s]->getKeyWG()<<" s:"<<triggerDigis_[s]->getStrip()/2 + 1<<" p:"<<triggerDigis_[s]->getPattern()<<" bx:"<<triggerDigis_[s]->getBX()<<"; " << std::endl;
+   
     std::cout<<"\tstub_etaphis:";
-    for (size_t s=0; s<trgids.size(); s++)
-        std::cout<<"  "<<trgetaphis[s].first<<" "<<trgetaphis[s].second;
-    std::cout<<std::endl;
-    std::cout<<"\tstub_petaphis:";
-    for (size_t s=0; s<trgstubs.size(); s++)
-        std::cout<<"  "<<trgstubs[s].etaPacked()<<" "<<trgstubs[s].phiPacked();
-    std::cout<<std::endl;
-    std::cout<<"\thas "<<mplcts.size()<<" associated MPCs in ";
-    for (size_t s=0; s<ids.size(); s++) 
-        std::cout<<ids[s]<<" w:"<<mplcts[s]->trgdigi->getKeyWG()<<" s:"<<mplcts[s]->trgdigi->getStrip()/2 + 1<<" Ok="<<mplcts[s]->deltaOk<<"; ";
-    std::cout<<std::endl;
+    for (size_t s=0; s<triggerEtaPhis_.size(); s++)
+        std::cout<<" eta: "<<triggerEtaPhis_[s].first<<" phi: "<<triggerEtaPhis_[s].second << std::endl;
+    /*std::cout<<"\tstub_petaphis:";
+    for (size_t s=0; s<triggerStubs_.size(); s++)
+        std::cout<<"  "<<triggerStubs_[s].etaPacked()<<" "<<triggerStubs_[s].phiPacked();
+    std::cout<<std::endl;*/
+/*    std::cout<<"\thas "<<mplcts_.size()<<" associated MPCs in ";
+    for (size_t s=0; s<ids_.size(); s++) 
+        std::cout<<ids_[s]<<" w:"<<mplcts_[s]->trgdigi->getKeyWG()<<" s:"<<mplcts_[s]->trgdigi->getStrip()/2 + 1<<" Ok="<<mplcts_[s]->deltaOk<<"; " << std::endl;
     std::cout<<"\tMPCs meEtap and mePhip: ";
-    for (size_t s=0; s<ids.size(); s++) std::cout<<mplcts[s]->meEtap<<", "<<mplcts[s]->mePhip<<";  ";
-    std::cout<<std::endl;
+    for (size_t s=0; s<ids_.size(); s++) std::cout<<mplcts_[s]->meEtap<<", "<<mplcts_[s]->mePhip<<";  ";
+    std::cout<<std::endl;*/
     std::cout<<"#### TFTRACK END PRINT #####"<<std::endl;
-  */
+  
 }
 
 unsigned int TFTrack::digiInME(int st, int ring)

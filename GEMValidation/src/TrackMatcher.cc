@@ -236,24 +236,24 @@ TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
     track->setDR(dR);
 
     // debugging
-    if (track->nStubs()==0)
+    /*if (track->nStubs()==0)
     {
         std::cout << "nstubs == 0" << std::endl;
 	verboseTFTrack_ = 2;
-    }
+    }*/
     //debug
-    if (!(track->hasStubEndcap(1) and track->hasStubEndcap(2)) and track->dr()< deltaRTFTrack_)
-    {
-         std::cout <<"no stubs in station 1 or 2" << std::endl;
-	 verboseTFTrack_ = 2;
-    }
+    //if (!(track->hasStubEndcap(1) and track->hasStubEndcap(2)) and track->dr()< deltaRTFTrack_)
+   // {
+    //     std::cout <<"no stubs in station 1 or 2" << std::endl;
+//	 verboseTFTrack_ = 2;
+  //  }
 
     if (verboseTFTrack_){
       std::cout << "\tL1CSC TFTrack "<< trk-tracks.begin() << " information:" << std::endl;
       std::cout << "\tpt (GeV/c) = " << track->pt() << ", eta = " << track->eta() 
                 << "\t, phi = " << track->phi() << ", dR(sim,L1) = " << track->dr() 
 		<<" nStubs = "<< track->nStubs() << ", deltaphi12 = "<< track->dPhi12() <<", deltaphi23 = "<<track->dPhi23() <<std::endl;
-            
+      std::cout << " pt_packed " << track->ptPacked()  << " eta_packed " << track->etaPacked() << " phi_packed " << track->phiPacked() << std::endl;        
       std::cout << "simTrack \t simpt " << simPt << " simeta "<< simEta << " simPhi "<< simPhi <<" simenergy "<< simE << std::endl;
     }
     
