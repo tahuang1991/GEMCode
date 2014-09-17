@@ -6,9 +6,12 @@ process = cms.Process("GEMCSCANA")
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
-process.load('Configuration.Geometry.GeometryExtended2023Muon_cff')
-process.load('Configuration.Geometry.GeometryExtended2023MuonReco_cff')
+process.load('Configuration.Geometry.GeometryExtended2023TTI_cff')
+process.load('Configuration.Geometry.GeometryExtended2023TTIReco_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
+process.load('Configuration.StandardSequences.Digi_cff')
+process.load("Configuration.StandardSequences.L1Emulator_cff")
+process.load("Configuration.StandardSequences.L1Extra_cff")
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
@@ -16,24 +19,27 @@ process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorOpposite_cfi')
 process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAlong_cfi')
 
+## Trigger scales
+process.load('L1TriggerConfig.L1ScalesProducers.L1MuTriggerScalesConfig_cff')
+
 process.source = cms.Source("PoolSource",
     fileNames = cms.untracked.vstring('file:out_L1.root')
 )
 
-process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(100)
+#process.MessageLogger.cerr.FwkReport.reportEvery = cms.untracked.int32(100)
 
 ## input
-from GEMCode.SimMuL1.GEMCSCTriggerSamplesLib import *
+from MuonJetTrigger.Configuration.inputFiles import *
 from GEMCode.GEMValidation.InputFileHelpers import *
-#process = useInputDir(process, files['_gem98_pt2-50_PU0_pt0_new'], False)
+process = useInputDir(process, eosfiles['mGammaD_0400_ctau_05_DIGI_RECO'])
 
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string("gem-csc_stub_ana.root")
+    fileName = cms.string("gem-csc_stub_ana_mGammaD_0400_ctau_05_DIGI_RECO.root")
 )
 
 ## global tag for upgrade studies
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgradePLS3', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'PH2_1K_FB_V3::All', '')
 
 # the analyzer configuration
 def enum(*sequential, **named):
@@ -42,22 +48,19 @@ def enum(*sequential, **named):
 Stations = enum('ALL','ME11','ME1a','ME1b','ME12','ME13','ME21','ME22','ME31','ME32','ME41','ME42')
 
 from GEMCode.GEMValidation.simTrackMatching_cfi import SimTrackMatching
+from L1Trigger.CSCTrackFinder.csctfTrackDigisUngangedME1a_cfi import csctfTrackDigisUngangedME1a
 process.GEMCSCAnalyzer = cms.EDAnalyzer("GEMCSCAnalyzer",
     verbose = cms.untracked.int32(0),
     stationsToUse = cms.vint32(Stations.ME11,Stations.ME1a,Stations.ME1b,
                                Stations.ME21,Stations.ME31,Stations.ME41),
-    simTrackMatching = SimTrackMatching
+    simTrackMatching = SimTrackMatching,   
 )
 matching = process.GEMCSCAnalyzer.simTrackMatching
+matching.sectorProcessor = csctfTrackDigisUngangedME1a.SectorProcessor
 matching.simTrack.minPt = 1.5
 matching.gemRecHit.input = ""
-"""
-matching.cscTfTrack.input = ""
-matching.tfCand.input = ""
-matching.gmtCand.input = ""
-matching.l1Extra.input = ""
-"""
-doGem = True
+
+doGem = False
 if doGem:
   matching.cscSimHit.minNHitsChamber = 3
   matching.cscStripDigi.minNHitsChamber = 3
