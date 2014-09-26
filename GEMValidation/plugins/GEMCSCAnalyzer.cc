@@ -98,8 +98,12 @@ struct MyTrackEff
   Char_t bend_lct_even;
   Char_t bx_lct_odd;
   Char_t bx_lct_even;
+
+
   UChar_t hs_lct_odd;
+  UChar_t wg_lct_odd;
   UChar_t hs_lct_even;
+  UChar_t wg_lct_even;
 
   Float_t phi_lct_odd;
   Float_t phi_lct_even;
@@ -229,6 +233,8 @@ void MyTrackEff::init()
   bx_lct_even = -9;
   hs_lct_odd = 0;
   hs_lct_even = 0;
+  wg_lct_odd = 0;
+  wg_lct_even = 0;
   phi_lct_odd = -9.;
   phi_lct_even = -9.;
   eta_lct_odd = -9.;
@@ -363,6 +369,8 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("bx_lct_even", &bx_lct_even);
   t->Branch("hs_lct_odd", &hs_lct_odd);
   t->Branch("hs_lct_even", &hs_lct_even);
+  t->Branch("wg_lct_even", &wg_lct_even);
+  t->Branch("wg_lct_odd", &wg_lct_odd);
   t->Branch("phi_lct_odd", &phi_lct_odd);
   t->Branch("phi_lct_even", &phi_lct_even);
   t->Branch("eta_lct_odd", &eta_lct_odd);
@@ -678,11 +686,11 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
    
   for (auto s: stations_to_use_)
   {
+
+    etrk_[s].init();
     etrk_[s].run = match.simhits().event().id().run();
     etrk_[s].lumi = match.simhits().event().id().luminosityBlock();
     etrk_[s].event = match.simhits().event().id().event();
-
-    etrk_[s].init();
     etrk_[s].pt = t.momentum().pt();
     etrk_[s].phi = t.momentum().phi();
     etrk_[s].eta = t.momentum().eta();
@@ -694,6 +702,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   auto csc_simhits(match_sh.chamberIdsCSC(0));
   for(auto d: csc_simhits)
   {
+
     CSCDetId id(d);
     const int st(detIdToMEStation(id.station(),id.ring()));
     if (stations_to_use_.count(st) == 0) continue;
@@ -706,13 +715,17 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       CSCDetId co_id(id.endcap(), id.station(), other_ring, id.chamber());
       // check if co_id occurs in the list
       // add the hit layers
+     
       auto rawId(co_id.rawId());
       if (csc_simhits.find(rawId) != csc_simhits.end()) {
-	nlayers += match_sh.nLayersWithHitsInSuperChamber(rawId);
-      }
-    }
+	nlayers = nlayers+match_sh.nLayersWithHitsInSuperChamber(rawId);
 
+      } 
+      
+    }
+    
     if (nlayers < minNHitsChamberCSCSimHit_) continue;
+    
 
     const bool odd(id.chamber()%2==1);
     if (odd) etrk_[st].has_csc_sh |= 1;
@@ -731,7 +744,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
       if (odd) etrk_[1].nlayers_csc_sh_odd = nlayers;
       else etrk_[1].nlayers_csc_sh_even = nlayers;
-    }  
+
+    }
+
   }
 
   // CSC strip digis
@@ -900,6 +915,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       etrk_[st].dphi_lct_odd = digi_dphi(lct);
       etrk_[st].bx_lct_odd = digi_bx(lct);
       etrk_[st].hs_lct_odd = digi_channel(lct);
+      etrk_[st].wg_lct_odd = digi_wg(lct);
       etrk_[st].chamber_odd |= 2;
       etrk_[st].quality_odd = digi_quality(lct);
     }
@@ -913,6 +929,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       etrk_[st].dphi_lct_even = digi_dphi(lct);
       etrk_[st].bx_lct_even = digi_bx(lct);
       etrk_[st].hs_lct_even = digi_channel(lct);
+      etrk_[st].wg_lct_even = digi_wg(lct);
       etrk_[st].chamber_even |= 2;
       etrk_[st].quality_even = digi_quality(lct);
     }
@@ -929,6 +946,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         etrk_[1].dphi_lct_odd = digi_dphi(lct);
         etrk_[1].bx_lct_odd = digi_bx(lct);
         etrk_[1].hs_lct_odd = digi_channel(lct);
+        etrk_[1].wg_lct_odd = digi_wg(lct);
         etrk_[1].chamber_odd |= 2;
         etrk_[1].quality_odd = digi_quality(lct);
       }
@@ -942,6 +960,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         etrk_[1].dphi_lct_even = digi_dphi(lct);
         etrk_[1].bx_lct_even = digi_bx(lct);
         etrk_[1].hs_lct_even = digi_channel(lct);
+        etrk_[1].wg_lct_even = digi_wg(lct);
         etrk_[1].chamber_even |= 2;
         etrk_[1].quality_even = digi_quality(lct);
       }
@@ -1330,6 +1349,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   for (auto s: stations_to_use_)
   {
     tree_eff_[s]->Fill();
+
+
   }
 }
 
