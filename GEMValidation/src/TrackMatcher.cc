@@ -531,3 +531,33 @@ TrackMatcher::intersectionEtaPhi(CSCDetId id, int wg, int hs)
 
   return std::make_pair(csc_gp.eta(), csc_gp.phi());
 }
+
+
+
+
+void TrackMatcher::propagateSimTrack()
+{
+   int endcap = (simEta>0? 1 : -1);
+   int ring = 1;
+  for (int st=1; st<5; st++)
+  {
+     int chamber = 1;
+     const CSCDetId layerId(endcap, st, ring, chamber, CSCConstants::KEY_CLCT_LAYER);
+     const CSCLayer* csclayer(cscGeometry_->layer(layerId));
+     GlobalPoint gp = csclayer->centerOfWireGroup(10);
+     std::cout <<" layerId " << layerId << "z position: " << gp.z() << std::endl;
+     GlobalPoint gp_propagate(propagateToZ(gp.z()));
+     simTrackPropagateGPs_odd_.push_back(std::make_pair(st, gp_propagate));
+    }
+  for (int st=1; st<5; st++)
+  {
+     int chamber = 2;
+     const CSCDetId layerId(endcap, st, ring, chamber, CSCConstants::KEY_CLCT_LAYER);
+     const CSCLayer* csclayer(cscGeometry_->layer(layerId));
+     GlobalPoint gp = csclayer->centerOfWireGroup(10);
+     std::cout <<" layerId " << layerId << "z position: " << gp.z() << std::endl;
+     GlobalPoint gp_propagate(propagateToZ(gp.z()));
+     simTrackPropagateGPs_even_.push_back(std::make_pair(st, gp_propagate));
+    }
+
+} 
