@@ -1,5 +1,6 @@
 #include "GEMCode/GEMValidation/src/TrackMatcher.h"
 #include "TLorentzVector.h"
+#include <map>
 
 TrackMatcher::TrackMatcher(SimHitMatcher& sh, CSCDigiMatcher& csc_dg, 
                            GEMDigiMatcher& gem_dg, RPCDigiMatcher& rpc_dg, 
@@ -165,6 +166,7 @@ TrackMatcher::init()
   edm::Handle<L1CSCTrackCollection> hl1Tracks;
   event().getByLabel(cscTfTrackInputLabel_,hl1Tracks);
   matchTfTrackToSimTrack(*hl1Tracks.product());
+  propagateSimTrack();
   
   // L1 muon candidates after CSC sorter
   edm::Handle<std::vector<L1MuRegionalCand> > hl1TfCands;
@@ -537,17 +539,21 @@ TrackMatcher::intersectionEtaPhi(CSCDetId id, int wg, int hs)
 
 void TrackMatcher::propagateSimTrack()
 {
-   int endcap = (simEta>0? 1 : -1);
+   int endcap = (simEta>0? 1 : 2);
    int ring = 1;
+ //  auto it_odd(simTrackPropagateGPs_odd_.begin());
   for (int st=1; st<5; st++)
   {
      int chamber = 1;
      const CSCDetId layerId(endcap, st, ring, chamber, CSCConstants::KEY_CLCT_LAYER);
      const CSCLayer* csclayer(cscGeometry_->layer(layerId));
-     GlobalPoint gp = csclayer->centerOfWireGroup(10);
-     std::cout <<" layerId " << layerId << "z position: " << gp.z() << std::endl;
+     const GlobalPoint gp = csclayer->centerOfWireGroup(10);
+   //  std::cout <<" layerId " << layerId << "z position: " << gp.z() << std::endl;
      GlobalPoint gp_propagate(propagateToZ(gp.z()));
-     simTrackPropagateGPs_odd_.push_back(std::make_pair(st, gp_propagate));
+     //std::cout << "propagate z in TFMatcher:" <<gp_propagate.z() << std::endl;
+     //simTrackDummy_[st]=st;
+     simTrackPropagateGPs_odd_.push_back(std::make_pair(gp_propagate.eta(), gp_propagate.phi()));
+     //simTrackPropagateGPs_odd_[st] = gp_propagate;
     }
   for (int st=1; st<5; st++)
   {
@@ -555,9 +561,9 @@ void TrackMatcher::propagateSimTrack()
      const CSCDetId layerId(endcap, st, ring, chamber, CSCConstants::KEY_CLCT_LAYER);
      const CSCLayer* csclayer(cscGeometry_->layer(layerId));
      GlobalPoint gp = csclayer->centerOfWireGroup(10);
-     std::cout <<" layerId " << layerId << "z position: " << gp.z() << std::endl;
+     //std::cout <<" layerId " << layerId << "z position: " << gp.z() << std::endl;
      GlobalPoint gp_propagate(propagateToZ(gp.z()));
-     simTrackPropagateGPs_even_.push_back(std::make_pair(st, gp_propagate));
+     simTrackPropagateGPs_even_.push_back(std::make_pair(gp_propagate.eta(), gp_propagate.phi()));
     }
 
 } 

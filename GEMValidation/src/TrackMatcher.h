@@ -38,6 +38,8 @@
 #include "DataFormats/L1Trigger/interface/L1MuonParticle.h"
 
 
+typedef std::pair<float, float> EtaPhi;
+
 class TrackMatcher : public CSCStubMatcher
 {
  public:
@@ -54,8 +56,8 @@ class TrackMatcher : public CSCStubMatcher
   const std::vector<GMTCand*>& gmtCands() const {return gmtCands_;}
   const std::vector<L1Extra*>& l1Extras() const {return l1Extras_;}
   
-  const std::vector<std::pair<int, GlobalPoint>> simTrackPropagateGPs_odd() const {return simTrackPropagateGPs_odd_;}
-  const std::vector<std::pair<int, GlobalPoint>> simTrackPropagateGPs_even() const {return simTrackPropagateGPs_even_;}
+  const std::vector< EtaPhi > simTrackPropagateGPs_odd() const {return simTrackPropagateGPs_odd_;}
+  const std::vector< EtaPhi > simTrackPropagateGPs_even() const {return simTrackPropagateGPs_even_;}
   void propagateSimTrack(); 
 
   TFTrack* bestTFTrack(bool sortPtFirst=1) const;
@@ -84,8 +86,9 @@ class TrackMatcher : public CSCStubMatcher
 
   csctf::TrackStub buildTrackStub(const CSCCorrelatedLCTDigi& d, CSCDetId id);
   std::pair<float, float> intersectionEtaPhi(CSCDetId id, int wg, int hs);
-  std::vector<std::pair<int, GlobalPoint>> simTrackPropagateGPs_even_;
-  std::vector<std::pair<int, GlobalPoint>> simTrackPropagateGPs_odd_;
+  std::vector< EtaPhi > simTrackPropagateGPs_even_;
+  std::vector< EtaPhi > simTrackPropagateGPs_odd_;
+  //std::map<int, int > simTrackDummy_;
 
   const SimHitMatcher* sh_matcher_;
   const GEMDigiMatcher* gem_digi_matcher_;

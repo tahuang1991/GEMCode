@@ -9,6 +9,11 @@ SimTrackMatchManager::SimTrackMatchManager(const SimTrack& t, const SimVertex& v
 , stubs_(simhits_, csc_digis_, gem_digis_, rpc_digis_)
 , gem_rechits_(simhits_)
 , tracks_(simhits_, csc_digis_, gem_digis_, rpc_digis_, stubs_)
-{}
+{
+  //std::cout <<" simTrackMatcherManager constructor " << std::endl;
+}
 
-SimTrackMatchManager::~SimTrackMatchManager() {}
+SimTrackMatchManager::~SimTrackMatchManager() {
+ // std::cout <<" simTrackMatcherManager destructor " << std::endl;
+
+}

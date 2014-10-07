@@ -32,7 +32,7 @@ TFTrack::~TFTrack()
   triggerEtaPhis_.clear();
   triggerStubs_.clear();
   mplcts_.clear();
-  ids_.clear(); // chamber ids
+  ids_.clear(); // chamber ids_
 
 }
 
@@ -143,8 +143,8 @@ TFTrack::hasStubCSCOk(int st) const
 {
    if (!hasStubEndcap(st)) return false;
 //   bool cscok = 0;
-//   for (size_t s=0; s<ids_.size(); s++) {
-//     if (ids_[s].station() == st and mplcts_[s]->deltaOk) { 
+//   for (size_t s=0; s<ids__.size(); s++) {
+//     if (ids__[s].station() == st and mplcts__[s]->deltaOk) { 
 //       cscok = 1; 
 //       break; 
 //     }

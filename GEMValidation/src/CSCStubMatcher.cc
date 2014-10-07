@@ -742,6 +742,7 @@ CSCStubMatcher::allLCTsInChamber(unsigned int detid) const
   return chamber_to_lcts_all_.at(detid);
 }
 
+
 const matching::DigiContainer&
 CSCStubMatcher::allMPLCTsInChamber(unsigned int detid) const
 {
