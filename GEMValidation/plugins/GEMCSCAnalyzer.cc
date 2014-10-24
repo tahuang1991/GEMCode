@@ -219,7 +219,12 @@ struct MyTrackEff
   Float_t phi_ME3_TF;
   Float_t phi_ME4_TF;
 
-
+  Float_t eta_interStat12;
+  Float_t phi_interStat12;
+  Float_t eta_interStat23;
+  Float_t phi_interStat23;
+  Float_t eta_interStat13;
+  Float_t phi_interStat13;
 };
 
 void MyTrackEff::init()
@@ -369,7 +374,14 @@ void MyTrackEff::init()
   phi_ME2_TF = -9;
   phi_ME3_TF = -9;
   phi_ME4_TF = -9;
-
+ 
+  eta_interStat12 = -9;
+  phi_interStat12 = -9;
+  eta_interStat23 = -9;
+  phi_interStat23 = -9;
+  eta_interStat13 = -9;
+  phi_interStat13 = -9;
+   
 }
 
 
@@ -521,6 +533,13 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("phi_ME2_TF",&phi_ME2_TF);
   t->Branch("phi_ME3_TF",&phi_ME3_TF);
   t->Branch("phi_ME4_TF",&phi_ME4_TF);
+
+  t->Branch("eta_interStat12",&eta_interStat12);
+  t->Branch("phi_interStat12",&phi_interStat12);
+  t->Branch("eta_interStat23",&eta_interStat23);
+  t->Branch("phi_interStat23",&phi_interStat23);
+  t->Branch("eta_interStat13",&eta_interStat13);
+  t->Branch("phi_interStat13",&phi_interStat13);
 
   return t;
 }
@@ -1373,6 +1392,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
    }
      auto propagate_odd_gp(match_track.simTrackPropagateGPs_odd());
      auto propagate_even_gp(match_track.simTrackPropagateGPs_even());
+     auto propagate_interstat_odd(match_track.interStatPropagation_odd());
+     auto propagate_interstat_even(match_track.interStatPropagation_even());
   /* for (int st=1; st<5; st++)
    {
      auto even(propagate_even_gp.at(st-1));
@@ -1391,6 +1412,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	{
 	  auto id(triggerDigiIds.at(i));
 	  auto etaphi(triggerDigiEtaPhi.at(i));
+
+	   //std::cout << " CSCDetId " << id << " to fill Tree, Phi " << etaphi.second << std::endl;
 	  int st = id.station();
 	  bool IsOdd(id.chamber()%2==1);
 	  if (IsOdd)
@@ -1400,6 +1423,13 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
           if (st==2)  {etrk_[0].eta_propagated_ME2 = odd.first; etrk_[0].phi_propagated_ME2 = odd.second;}
           if (st==3)  {etrk_[0].eta_propagated_ME3 = odd.first; etrk_[0].phi_propagated_ME3 = odd.second;}
           if (st==4)  {etrk_[0].eta_propagated_ME4 = odd.first; etrk_[0].phi_propagated_ME4 = odd.second;}
+	  
+	  if (st==2)  {etrk_[0].eta_interStat12 = propagate_interstat_odd[12].eta(); 
+	               etrk_[0].phi_interStat12 = propagate_interstat_odd[12].phi();}
+	  if (st==3)  {etrk_[0].eta_interStat23 = propagate_interstat_odd[23].eta(); 
+	               etrk_[0].phi_interStat23 = propagate_interstat_odd[23].phi();
+	               etrk_[0].eta_interStat13 = propagate_interstat_odd[13].eta();
+	               etrk_[0].phi_interStat13 = propagate_interstat_odd[13].phi();}
 	  }
 	  else {
           auto even(propagate_even_gp.at(st-1));
@@ -1407,6 +1437,13 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
           if (st==2)  {etrk_[0].eta_propagated_ME2 = even.first; etrk_[0].phi_propagated_ME2 = even.second;}
           if (st==3)  {etrk_[0].eta_propagated_ME3 = even.first; etrk_[0].phi_propagated_ME3 = even.second;}
           if (st==4)  {etrk_[0].eta_propagated_ME4 = even.first; etrk_[0].phi_propagated_ME4 = even.second;}
+	  
+	  if (st==2)  {etrk_[0].eta_interStat12 = propagate_interstat_even[12].eta(); 
+	               etrk_[0].phi_interStat12 = propagate_interstat_even[12].phi();}
+	  if (st==3)  {etrk_[0].eta_interStat23 = propagate_interstat_even[23].eta(); 
+	               etrk_[0].phi_interStat23 = propagate_interstat_even[23].phi();
+	               etrk_[0].eta_interStat13 = propagate_interstat_even[13].eta();
+	               etrk_[0].phi_interStat13 = propagate_interstat_even[13].phi();}
 	  }
           if (st==1)  {etrk_[0].eta_ME1_TF = etaphi.first; etrk_[0].phi_ME1_TF = etaphi.second;}
           if (st==2)  {etrk_[0].eta_ME2_TF = etaphi.first; etrk_[0].phi_ME2_TF = etaphi.second;}

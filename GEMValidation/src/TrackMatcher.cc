@@ -167,6 +167,7 @@ TrackMatcher::init()
   event().getByLabel(cscTfTrackInputLabel_,hl1Tracks);
   matchTfTrackToSimTrack(*hl1Tracks.product());
   propagateSimTrack();
+  propagationInterStation();
   
   // L1 muon candidates after CSC sorter
   edm::Handle<std::vector<L1MuRegionalCand> > hl1TfCands;
@@ -276,10 +277,11 @@ TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
         if (!(lct.isValid())) continue;
       //  track.addTriggerDigi(&lct);
       //  track.addTriggerDigiId(id);
-        track->addTriggerEtaPhi(intersectionEtaPhi(id, lct.getKeyWG(), lct.getStrip()));
+	auto EtaPhi(intersectionEtaPhi(id, lct.getKeyWG(), lct.getStrip()));
+        track->addTriggerEtaPhi(EtaPhi);
         track->addTriggerStub(buildTrackStub(lct, id));
-        if (verboseTFTrack_ > 1){
-	    auto EtaPhi(intersectionEtaPhi(id, lct.getKeyWG(), lct.getStrip()));
+        if (verboseTFTrack_ > 1 ){
+	//    auto EtaPhi(intersectionEtaPhi(id, lct.getKeyWG(), lct.getStrip()));
           std::cout << "\t\tLCT" << digiIt-range.first<<" eta:"<< EtaPhi.first
 	      <<" phi:"<< EtaPhi.second << ": " << lct << std::endl;
         }
@@ -530,7 +532,7 @@ TrackMatcher::intersectionEtaPhi(CSCDetId id, int wg, int hs)
   const float fractional_strip(0.5 * (hs + 1) - 0.25);
   const LocalPoint csc_intersect(layer_geo->intersectionOfStripAndWire(fractional_strip, wire));
   const GlobalPoint csc_gp(cscGeometry_->idToDet(layerId)->surface().toGlobal(csc_intersect));
-
+  //std::cout << " simcharge " << simCharge << "  CSCDet Id  " << id << "   csc_gp.phi" << csc_gp.phi() << std::endl;
   return std::make_pair(csc_gp.eta(), csc_gp.phi());
 }
 
@@ -553,6 +555,7 @@ void TrackMatcher::propagateSimTrack()
      //std::cout << "propagate z in TFMatcher:" <<gp_propagate.z() << std::endl;
      //simTrackDummy_[st]=st;
      simTrackPropagateGPs_odd_.push_back(std::make_pair(gp_propagate.eta(), gp_propagate.phi()));
+    // std::cout << " CSCDet Id " << layerId << "  propageted_phi " << gp_propagate.phi() << std::endl;
      //simTrackPropagateGPs_odd_[st] = gp_propagate;
     }
   for (int st=1; st<5; st++)
@@ -564,6 +567,56 @@ void TrackMatcher::propagateSimTrack()
      //std::cout <<" layerId " << layerId << "z position: " << gp.z() << std::endl;
      GlobalPoint gp_propagate(propagateToZ(gp.z()));
      simTrackPropagateGPs_even_.push_back(std::make_pair(gp_propagate.eta(), gp_propagate.phi()));
+     //std::cout << " CSCDet Id " << layerId << "  propageted_phi " << gp_propagate.phi() << std::endl;
     }
 
 } 
+
+
+
+
+GlobalPoint TrackMatcher::propagationInterStation(int firstSt, int SecondSt, bool odd)
+{
+
+  for (auto d: sh_matcher_->chamberIdsCSC(0))
+  {
+    CSCDetId id(d);
+    int chamber(odd ? 1:2);
+    const CSCDetId layerId(id.endcap(), SecondSt, 1, chamber, CSCConstants::KEY_CLCT_LAYER);
+    const CSCLayer* csclayer(cscGeometry_->layer(layerId));
+    const GlobalPoint gpAtSecondSt = csclayer->centerOfWireGroup(10);
+    if (id.station()==firstSt)
+    {
+        const auto& hits = sh_matcher_->hitsInChamber(d);
+	if (hits.size()==0) continue;
+	//pick up one hit to do propagation
+	auto onehit(hits.at(0));
+	std::cout <<" detId " << onehit.detUnitId() << "  momentu "<< onehit.momentumAtEntry() <<" entry point " << onehit.entryPoint() << std::endl;
+        LocalPoint lp(onehit.entryPoint());
+	GlobalPoint gp(cscGeometry_->idToDet(onehit.detUnitId())->surface().toGlobal(lp));
+        LocalVector lv(onehit.momentumAtEntry());
+        GlobalVector gv(cscGeometry_->idToDet(onehit.detUnitId())->surface().toGlobal(lv));
+
+        GlobalPoint gp_propagate(propagateToZ(gp, gv, gpAtSecondSt.z()));
+	return gp_propagate;
+    }
+  }
+  //error return 
+  return  GlobalPoint();
+}
+
+ 
+void TrackMatcher::propagationInterStation()
+{
+
+  //auto p(propagationInterStation(1,2, true));
+  //std::cout << "propagated global point " << p << std::endl;
+  interStatPropagation_odd_[12] = propagationInterStation(1,2,true);
+  interStatPropagation_odd_[23] = propagationInterStation(2,3,true);
+  interStatPropagation_odd_[13] = propagationInterStation(1,3,true);
+  //interStatPropagation_.insert(propagationInterStation(2,3)); 
+  interStatPropagation_even_[12] = propagationInterStation(1,2,false);
+  interStatPropagation_even_[23] = propagationInterStation(2,3,false);
+  interStatPropagation_even_[13] = propagationInterStation(1,3,false);
+
+}
