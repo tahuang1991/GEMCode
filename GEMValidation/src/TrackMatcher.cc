@@ -591,7 +591,7 @@ GlobalPoint TrackMatcher::propagationInterStation(int firstSt, int SecondSt, boo
 	if (hits.size()==0) continue;
 	//pick up one hit to do propagation
 	auto onehit(hits.at(0));
-	std::cout <<" detId " << onehit.detUnitId() << "  momentu "<< onehit.momentumAtEntry() <<" entry point " << onehit.entryPoint() << std::endl;
+	//std::cout <<" detId " << onehit.detUnitId() << "  momentu "<< onehit.momentumAtEntry() <<" entry point " << onehit.entryPoint() << std::endl;
         LocalPoint lp(onehit.entryPoint());
 	GlobalPoint gp(cscGeometry_->idToDet(onehit.detUnitId())->surface().toGlobal(lp));
         LocalVector lv(onehit.momentumAtEntry());

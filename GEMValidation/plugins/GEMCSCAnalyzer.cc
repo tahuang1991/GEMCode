@@ -225,6 +225,9 @@ struct MyTrackEff
   Float_t phi_interStat23;
   Float_t eta_interStat13;
   Float_t phi_interStat13;
+
+  Bool_t allstubs_matched_TF;
+
 };
 
 void MyTrackEff::init()
@@ -381,7 +384,8 @@ void MyTrackEff::init()
   phi_interStat23 = -9;
   eta_interStat13 = -9;
   phi_interStat13 = -9;
-   
+  
+  allstubs_matched_TF = false; 
 }
 
 
@@ -540,6 +544,8 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("phi_interStat23",&phi_interStat23);
   t->Branch("eta_interStat13",&eta_interStat13);
   t->Branch("phi_interStat13",&phi_interStat13);
+  
+  t->Branch("allstubs_matched_TF",&allstubs_matched_TF);
 
   return t;
 }
@@ -1404,11 +1410,13 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
    
    }*/
     auto triggerDigiIds(besttrack->getTriggerDigisIds()); 
+    auto triggerDigis(besttrack->getTriggerDigis()); 
 
     auto triggerDigiEtaPhi(besttrack->getTriggerEtaPhis());
-    if (triggerDigiIds.size() == triggerDigiEtaPhi.size())
+    if (triggerDigiIds.size() == triggerDigiEtaPhi.size() && triggerDigis.size() == triggerDigiIds.size())
      {
-        for (unsigned int i=0; i<triggerDigiIds.size(); i++)
+        bool stub_Good_ME[4] = {true};
+	for (unsigned int i=0; i<triggerDigiIds.size(); i++)
 	{
 	  auto id(triggerDigiIds.at(i));
 	  auto etaphi(triggerDigiEtaPhi.at(i));
@@ -1430,7 +1438,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	               etrk_[0].phi_interStat23 = propagate_interstat_odd[23].phi();
 	               etrk_[0].eta_interStat13 = propagate_interstat_odd[13].eta();
 	               etrk_[0].phi_interStat13 = propagate_interstat_odd[13].phi();}
-	  }
+           }
 	  else {
           auto even(propagate_even_gp.at(st-1));
           if (st==1)  {etrk_[0].eta_propagated_ME1 = even.first; etrk_[0].phi_propagated_ME1 = even.second;}
@@ -1445,11 +1453,20 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	               etrk_[0].eta_interStat13 = propagate_interstat_even[13].eta();
 	               etrk_[0].phi_interStat13 = propagate_interstat_even[13].phi();}
 	  }
-          if (st==1)  {etrk_[0].eta_ME1_TF = etaphi.first; etrk_[0].phi_ME1_TF = etaphi.second;}
-          if (st==2)  {etrk_[0].eta_ME2_TF = etaphi.first; etrk_[0].phi_ME2_TF = etaphi.second;}
-          if (st==3)  {etrk_[0].eta_ME3_TF = etaphi.first; etrk_[0].phi_ME3_TF = etaphi.second;}
-          if (st==4)  {etrk_[0].eta_ME4_TF = etaphi.first; etrk_[0].phi_ME4_TF = etaphi.second;}
+          if (st==1)  {etrk_[0].eta_ME1_TF = etaphi.first; etrk_[0].phi_ME1_TF = etaphi.second;
+	               stub_Good_ME[0] = match_lct.checkStubInChamber(id,*triggerDigis.at(i));}
+          if (st==2)  {etrk_[0].eta_ME2_TF = etaphi.first; etrk_[0].phi_ME2_TF = etaphi.second;
+	               stub_Good_ME[1] = match_lct.checkStubInChamber(id,*triggerDigis.at(i));}
+          if (st==3)  {etrk_[0].eta_ME3_TF = etaphi.first; etrk_[0].phi_ME3_TF = etaphi.second;
+	               stub_Good_ME[2] = match_lct.checkStubInChamber(id,*triggerDigis.at(i));}
+          if (st==4)  {etrk_[0].eta_ME4_TF = etaphi.first; etrk_[0].phi_ME4_TF = etaphi.second;
+	               stub_Good_ME[3] = match_lct.checkStubInChamber(id,*triggerDigis.at(i));}
+
+	  
+	  //if ( match_lct.checkStubInChamber(id,*triggerDigis.at(i))) std::cout << "stub in TF can be matched to simtrack" << std::endl;
+	  //else std::cout << "stub in TF can NOT be matched to simtrack" << std::endl;
 	}
+         etrk_[0].allstubs_matched_TF = (stub_Good_ME[0] and stub_Good_ME[1] and stub_Good_ME[2] and stub_Good_ME[3]);
      }
 
     if (triggerDigiEtaPhi.size()>1)

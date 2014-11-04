@@ -17,6 +17,7 @@
 #include "DataFormats/CSCDigi/interface/CSCALCTDigiCollection.h"
 #include "DataFormats/CSCDigi/interface/CSCCLCTDigiCollection.h"
 #include "DataFormats/CSCDigi/interface/CSCCorrelatedLCTDigiCollection.h"
+#include "DataFormats/CSCDigi/interface/CSCCorrelatedLCTDigi.h"
 #include "DataFormats/GEMDigi/interface/GEMCSCPadDigiCollection.h"
 #include "DataFormats/RPCDigi/interface/RPCDigiCollection.h"
 
@@ -44,7 +45,7 @@ public:
   std::set<unsigned int> chamberIdsAllALCT(int csc_type = CSC_ME1b) const;
   std::set<unsigned int> chamberIdsAllLCT(int csc_type = CSC_ME1b) const;
   std::set<unsigned int> chamberIdsAllMPLCT(int csc_type = CSC_ME1b) const;
-
+ 
   /// chamber detIds with matching stubs
   /// by default, only returns those from ME1b; use al chambers if csc_type=0
   std::set<unsigned int> chamberIdsCLCT(int csc_type = CSC_ME1b) const;
@@ -77,6 +78,7 @@ public:
   int nChambersWithLCT(int min_quality = 0) const;
   int nChambersWithMPLCT(int min_quality = 0) const;
 
+  bool checkStubInChamber(CSCDetId id, CSCCorrelatedLCTDigi lct) const;
 private:
 
   void init();
