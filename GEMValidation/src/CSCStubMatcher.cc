@@ -742,6 +742,7 @@ CSCStubMatcher::allLCTsInChamber(unsigned int detid) const
   return chamber_to_lcts_all_.at(detid);
 }
 
+
 const matching::DigiContainer&
 CSCStubMatcher::allMPLCTsInChamber(unsigned int detid) const
 {
@@ -848,3 +849,31 @@ CSCStubMatcher::nChambersWithMPLCT(int min_quality) const
   }
   return result;
 }
+
+
+
+bool 
+CSCStubMatcher::checkStubInChamber(CSCDetId id, CSCCorrelatedLCTDigi lct) const
+{
+  
+  //    int hs = lct->getStrip() + 1; // LCT halfstrip and wiregoup numbers start from 0
+  //    int wg = lct->getKeyWG() + 1;
+  //    float dphi = lct->getGEMDPhi();
+
+  auto mydigi = make_digi(id.rawId(), lct.getStrip()+1, lct.getBX(), CSC_LCT, lct.getQuality(), lct.getPattern(),lct.getKeyWG()+1,lct.getGEMDPhi());
+  try{
+  auto alldigis(chamber_to_lcts_all_.at(id.rawId()));
+//  std::cout << "in checkstub, mydigi  " << mydigi << std::endl;
+  for (auto p : alldigis) 
+  {   
+  //    std::cout << " digi matched to simtrack " << p << std::endl;
+      if (p==mydigi) return true;
+   }
+  }
+  catch (exception& e)
+    {
+//	return false;
+    }
+ return false;
+}
+
