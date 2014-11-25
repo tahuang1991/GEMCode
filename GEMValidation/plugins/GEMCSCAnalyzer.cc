@@ -1415,7 +1415,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     auto triggerDigiEtaPhi(besttrack->getTriggerEtaPhis());
     if (triggerDigiIds.size() == triggerDigiEtaPhi.size() && triggerDigis.size() == triggerDigiIds.size())
      {
-        bool stub_Good_ME[4] = {true};
+        bool stub_Good_ME[4] = {1,1,1,1};
+
 	for (unsigned int i=0; i<triggerDigiIds.size(); i++)
 	{
 	  auto id(triggerDigiIds.at(i));
@@ -1829,7 +1830,7 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
   const RPCDigiMatcher& match_rd = match.rpcDigis();
   const CSCDigiMatcher& match_cd = match.cscDigis();
   const CSCStubMatcher& match_lct = match.cscStubs();
-  //  const TrackMatcher& match_track = match.tracks();
+  const TrackMatcher& match_track = match.tracks();
   const SimTrack &t = match_sh.trk();
 
   
@@ -2011,6 +2012,17 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
        std::cout<<id<< p <<std::endl;
     
   }
+
+
+  std::cout << "######  matching Tracks to Simtrack " << std::endl;
+  if (match_track.tfTracks().size()) {
+    TFTrack* besttrack = match_track.bestTFTrack();
+    std::cout << "       Best TFTrack                  " << std::endl;
+    besttrack->print();
+
+
+  }
+  else std::cout << "NO matched TFtracks"  << std::endl;
 
 
   std::cout << "==========================  end of printing ========================\n\n" << std::endl;

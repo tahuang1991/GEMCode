@@ -199,11 +199,11 @@ TFTrack::print()
         <<" ("<<hasStub(0)<<" "<<hasStub(1)<<" "<<hasStub(2)<<" "<<hasStub(3)<<" "<<hasStub(4)<<")  "
         <<" ("<<hasStubCSCOk(1)<<" "<<hasStubCSCOk(2)<<" "<<hasStubCSCOk(3)<<" "<<hasStubCSCOk(4)<<")"<<std::endl;*/
     std::cout<<"\tptAddress: 0x"<<std::hex<<l1track_->ptLUTAddress()<<std::dec<<"  dphi12: "<<dPhi12()<<"  dphi23: "<<dPhi23()<<std::endl;
-    std::cout<<"\thas "<<triggerDigis_.size()<<" stubs in ";
+    std::cout<<"\thas "<<triggerDigis_.size()<<" stubs in " << std::endl;
     for (size_t s=0; s<triggerDigis_.size(); s++) 
-        std::cout<<triggerDigis_[s]<<" w:"<<triggerDigis_[s]->getKeyWG()<<" s:"<<triggerDigis_[s]->getStrip()/2 + 1<<" p:"<<triggerDigis_[s]->getPattern()<<" bx:"<<triggerDigis_[s]->getBX()<<"; " << std::endl;
+        std::cout<<CSCDetId(triggerIds_[s])<<" w:"<<triggerDigis_[s]->getKeyWG()+1<<" hs:"<<triggerDigis_[s]->getStrip()+1 <<" p:"<<triggerDigis_[s]->getPattern()<<" bx:"<<triggerDigis_[s]->getBX()<<"; " << std::endl;
    
-    std::cout<<"\tstub_etaphis:";
+    std::cout<<"\tstub_etaphis:" << std::endl;
     for (size_t s=0; s<triggerEtaPhis_.size(); s++)
         std::cout<<" eta: "<<triggerEtaPhis_[s].first<<" phi: "<<triggerEtaPhis_[s].second << std::endl;
     /*std::cout<<"\tstub_petaphis:";

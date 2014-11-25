@@ -430,15 +430,16 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
 
 
                if ( caseAlctClct and !(my_bx == digi_bx(lct) and my_hs == digi_channel(lct) and my_wg == digi_wg(lct))){
-                    if (verbose()) cout<<"  BAD"<<endl;
+                    if (verbose()) cout<<"  BAD LCT in caseAlctClct"<<endl;
                     continue;
                 }
 
 
                if (matchAlctGem_ and caseAlctGem and !(my_bx == digi_bx(lct) and std::abs(my_hs_gemrpc - digi_channel(lct))<3 and my_wg == digi_wg(lct) ) ){
-                    if (verbose()) cout<<"  BAD"<<endl;
+                    if (verbose()) cout<<"  BAD LCT in matchAlctGem"<<endl;
                     continue;
                }
+	       else if (caseAlctGem and !matchAlctGem_) continue;
 
               /* if (matchClctGem_ and caseClctGem and !(my_bx == digi_bx(lct) and my_hs == digi_channel(lct) and std::abs(my_wg_gemrpc_mean - digi_wg(lct))<3) ){
                     if (verbose()) cout<<"  BAD"<<endl;
@@ -446,9 +447,10 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
                }*/
 
               if (matchAlctRpc_ and caseAlctRpc and !(my_bx == digi_bx(lct) and std::abs(my_hs_gemrpc - digi_channel(lct))<3 and my_wg == digi_wg(lct) ) ){
-                   if (verbose()) cout<<"  BAD"<<endl;
+                   if (verbose()) cout<<"  BAD LCT in matchAlctRpc"<<endl;
                    continue;
               }
+	      else if (caseAlctRpc and !matchAlctRpc_) continue;
              /* if (matchClctRpc_ and caseClctRpc and !(my_bx == digi_bx(lct) and my_hs == digi_channel(lct) and std::abs(my_wg_gemrpc_mean - digi_wg(lct))<3) ){
                     if (verbose()) cout<<"  BAD"<<endl;
                     continue;
@@ -462,12 +464,12 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
              
               chamber_to_lct_[id] = lct;
               chamber_to_lcts_[id].push_back(lct);
+              //std::cout << " this LCT is matched to simtrack!! " << std::endl;
+              break;
+            } //clct loop over
+        }// alct loop over
 
-
-            } //Until here
-        }
-
-    }
+    } // lct loop over
 
   }
 
