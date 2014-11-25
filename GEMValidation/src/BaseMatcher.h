@@ -83,6 +83,29 @@ public:
   enum RPCType {RPC_ALL = 0, RPC_ME12, RPC_ME13, RPC_ME22, RPC_ME23, 
                 RPC_ME31, RPC_ME32, RPC_ME33, RPC_ME41, RPC_ME42, RPC_ME43};
 
+  const double ME11GEMdPhi[9][3] = {
+    {-2 , 1.0, 1.0 },
+    {3 , 0.03971647, 0.01710244 },
+    {5 , 0.02123785, 0.00928431 },
+    {7 , 0.01475524, 0.00650928 },
+    {10, 0.01023299, 0.00458796 },
+    {15, 0.00689220, 0.00331313 },
+    {20, 0.00535176, 0.00276152 },
+    {30, 0.00389050, 0.00224959 },
+    {40, 0.00329539, 0.00204670 }
+  };
+  const double ME21GEMdPhi[9][3] = {
+    {-2 , 1.0, 1.0 },
+    {3 , 0.01832829, 0.01003643 },
+    {5 , 0.01095490, 0.00631625 },
+    {7 , 0.00786026, 0.00501017 },
+    {10, 0.00596349, 0.00414560 },
+    {15, 0.00462411, 0.00365550 },
+    {20, 0.00435298, 0.00361550 },
+    {30, 0.00465160, 0.00335700 },
+    {40, 0.00372145, 0.00366262 }
+  };
+
   BaseMatcher(const SimTrack& t, const SimVertex& v,
       const edm::ParameterSet& ps, const edm::Event& ev, const edm::EventSetup& es);
 
@@ -129,6 +152,8 @@ public:
   unsigned int gemDetFromCSCDet(unsigned int id,int layer);
 
   std::pair<unsigned int, unsigned int> gemDetsFromCSCDet(unsigned int id);
+  double phiHeavyCorr(double pt, double eta, double phi, double charge) const;
+  bool passDPhicut(CSCDetId id, float dphi, float pt) const;
 
  protected:
   
