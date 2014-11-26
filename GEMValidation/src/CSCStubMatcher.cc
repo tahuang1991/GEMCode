@@ -382,10 +382,13 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
     const auto hits = sh_matcher_->hitsInChamber(id);
     
     for (auto &lct: lcts_tmp)
-     {
+     {  
+	 //std::cout << " LCT " << lct << std::endl;
         for (unsigned int j=0; j<alct.size();j++){
         for (unsigned int i=0; i<clct.size()+1;i++){
-
+           //if (i < clct.size()) 
+	   //std::cout << " ALCT " << alct[j] << " CLCT " << clct[i] << std::endl;
+	   //else std::cout << " NO CLCT case " << " ALCT " << alct[j] << std::endl;
            auto hasPad(pads.size()!=0);
            auto hasDigis(rpcDigis.size()!=0);
 
@@ -864,11 +867,11 @@ CSCStubMatcher::checkStubInChamber(CSCDetId id, CSCCorrelatedLCTDigi lct) const
 
   auto mydigi = make_digi(id.rawId(), lct.getStrip()+1, lct.getBX(), CSC_LCT, lct.getQuality(), lct.getPattern(),lct.getKeyWG()+1,lct.getGEMDPhi());
   try{
-  auto alldigis(chamber_to_lcts_all_.at(id.rawId()));
+  auto alldigis(chamber_to_lcts_.at(id.rawId()));
 //  std::cout << "in checkstub, mydigi  " << mydigi << std::endl;
   for (auto p : alldigis) 
   {   
-  //    std::cout << " digi matched to simtrack " << p << std::endl;
+ //     std::cout << " digi matched to simtrack " << p << std::endl;
       if (p==mydigi) return true;
    }
   }
@@ -876,6 +879,7 @@ CSCStubMatcher::checkStubInChamber(CSCDetId id, CSCCorrelatedLCTDigi lct) const
     {
 //	return false;
     }
+  //std::cout << "   matching failed   " << std::endl;
  return false;
 }
 

@@ -1,5 +1,6 @@
 import ROOT
 ROOT.gROOT.SetBatch(1)
+#gStyle from TStyle
 ROOT.gStyle.SetStatW(0.07)
 ROOT.gStyle.SetStatH(0.06)
 
@@ -9,6 +10,9 @@ ROOT.gStyle.SetTitleAlign(13) ## coord in top left
 ROOT.gStyle.SetTitleX(0.)
 ROOT.gStyle.SetTitleY(1.)
 ROOT.gStyle.SetTitleW(1)
+#ROOT.gStyle.SetTitleTextColor(4)
+ROOT.gStyle.SetTitleXSize(0.05)
+ROOT.gStyle.SetTitleYSize(0.05)
 ROOT.gStyle.SetTitleH(0.058)
 ROOT.gStyle.SetTitleBorderSize(0)
 
@@ -114,7 +118,7 @@ def draw2D(file,dir,num,xaxis,yaxis,x_bins,y_bins):
     b1.GetXaxis().SetTitle("%s"%xaxis)
     b1.SetTitle("TFTrack reco , PU140"+" "*16 + "CMS Simulation Preliminary")
     b1.SetStats(0)
-    todraw = "%s"%yaxis+":"+"abs(%s)>>b1"%xaxis
+    todraw = "(%s)"%yaxis+":"+"(%s)>>b1"%xaxis
     t.Draw(todraw,num,"colz")
     b1.SetMaximum(150)
     b1.Draw("colz")
@@ -124,14 +128,19 @@ def draw2D(file,dir,num,xaxis,yaxis,x_bins,y_bins):
     legend.SetHeader("PU140")
 #legend.AddEntry(e1,"","l")
 # legend.Draw("same")
-    tex = ROOT.TLatex(0.20,0.30,"p_{T}^{sim}>10Gev")
+    Num = b1.GetEntries()
+    print "number of event ", Num
+
+#    tex = ROOT.TLatex(0.15,0.30,"p_{T}^{sim}>20GeV, #frac{(pt-trackpt)}{pt}<-0.5, Entries %s"%Num)
+#    tex = ROOT.TLatex(0.20,0.30,"#frac{(pt-trackpt)}{pt}>0.5, Entries %s"%Num)
+    tex = ROOT.TLatex(.2,0.3,"p_{T}^{sim}>20GeV, required matched simhits and stubs")
     tex.SetTextSize(0.05)
     tex.SetTextFont(42)
     tex.SetNDC()
     tex.Draw("same")
 	
-    c1.SaveAs("TFTrack_reco_%s"%xaxis+"_VS_%s_pt10-50_PU140.pdf"%yaxis)
-    c1.SaveAs("TFTrack_reco_%s"%xaxis+"_VS_%s_pt10-50_PU140.png"%yaxis)
+    c1.SaveAs("TFTrack_reco_%s"%xaxis+"_VS_%s_matchedhitsandstubs_PU140.pdf"%yaxis)
+    c1.SaveAs("TFTrack_reco_%s"%xaxis+"_VS_%s_matchedhitsandstubs_PU140.png"%yaxis)
 
 
 
@@ -189,23 +198,26 @@ if __name__ == "__main__":
 
 #file = "PU140_10k_Pt20_2023_update_GEMCSC.root"
 #   file = "PU140_200k_Pt2-50_2023_lct_GEMCSC.root"
-    file = "PU140_200k_Pt2-50_2023_test_GEMCSC.root"
+    file = "PU140_200k_Pt2-50_propagated_GEMCSC.root"
     dir = "GEMCSCAnalyzer/trk_eff_ALL"
     den = " pt>15 && eta<-1.60 && eta>-2.4 && has_tfTrack>0"
     num = " pt>15 && eta<-1.60 && eta>-2.4 && has_tfTrack>0 && passGE11"
 
     xaxis1 = "pt"
-    Pt_bins = "(20,0,50)"
+    Pt_bins = "(50,0,50)"
     Pt_bins2 = "(145,0,145)"
-    getPurity(file,dir,den,num,xaxis1,Pt_bins)
+#   getPurity(file,dir,den,num,xaxis1,Pt_bins)
 
     xaxis2 = "eta"
     Eta_bins = "(50,1.6,2.4)"
-    getPurity(file,dir,den,num,xaxis2,Eta_bins)
+#    getPurity(file,dir,den,num,xaxis2,Eta_bins)
     
     Eta_bins1 = "(40,-2.5,-1.5)"
+    Eta_bins2 = "(40,1.5,2.5)"
+    Phi_bins = "(60,-3.14,3.14)"
     DPhi_bins = "(100,-0.25,0.25)"
     DPhi12_bins = "(260,0,260)"
+    TrackPt_bins = "(50,0,100)"
     xaxis = "pt"
     yaxis = "deltaphi12"
     cut1 = "pt>10 && has_tfTrack>0 "
@@ -216,6 +228,51 @@ if __name__ == "__main__":
     yaxis_pt = "trackpt"
     cut2 ="has_tfTrack>0"
 #    draw2D(file,dir,cut2,xaxis_pt,yaxis_pt,Pt_bins,Pt_bins)
+    
+#for PU140, use negative endcap only 
+    xaxis_tf_eta = "-eta_ME1_TF"
+    yaxis_propagate_eta = "-eta_propagated_ME1"
+    xaxis_tf_phi = "phi_ME1_TF"
+    yaxis_propagate_phi = "phi_propagated_ME1"
+    cut1 = "eta<0 && pt>20 && has_tfTrack>0 &&  phi_ME1_TF != -9 && (has_csc_sh&1)>0 && allstubs_matched_TF>0"
+    cut2 = "eta<0 && pt>20 && has_tfTrack>0 &&  phi_ME2_TF != -9 && (has_csc_sh&2)>0 && allstubs_matched_TF>0"
+    cut3 = "eta<0 && pt>20 && has_tfTrack>0 &&  phi_ME3_TF != -9 && (has_csc_sh&4)>0 && allstubs_matched_TF>0"
+    cut4 = "eta<0 && pt>20 && has_tfTrack>0 &&  phi_ME1_TF != -9 && (pt-trackpt)/pt<-0.5 && allstubs_matched_TF>0"
+    cut5 = "eta<0 && pt>20 && has_tfTrack>0 &&  phi_ME2_TF != -9 && (pt-trackpt)/pt<-0.5 && allstubs_matched_TF>0"
+    cut6 = "eta<0 && pt>20 && has_tfTrack>0 &&  phi_ME3_TF != -9 && (pt-trackpt)/pt<-0.5 && allstubs_matched_TF>0"
+    cut7 = "pt>20 && has_tfTrack>0 &&  phi_ME1_TF != -9 && abs(pt-trackpt)/pt<0.5 && allstubs_matched_TF>0"
+    cut8 = "pt>20 && has_tfTrack>0 &&  phi_ME2_TF != -9 && abs(pt-trackpt)/pt<0.5 && allstubs_matched_TF>0"
+    cut9 = "pt>20 && has_tfTrack>0 &&  phi_ME3_TF != -9 && abs(pt-trackpt)/pt<0.5 && allstubs_matched_TF>0"
+    
+    DeltaPt_bins = "(150,-100,50)"
+    DeltaPhi_bins = "(40,-0.15,0.15)"
+#draw2D(file,dir,cut1,xaxis_tf_eta,yaxis_propagate_eta,Eta_bins2,Eta_bins2)
+# draw2D(file,dir,cut1,xaxis_tf_phi,yaxis_propagate_phi,Phi_bins,Phi_bins)
+    draw2D(file,dir,cut1,"-eta_ME1_TF","-eta_propagated_ME1",Eta_bins2,Eta_bins2) 
+    draw2D(file,dir,cut1,"phi_ME1_TF","phi_propagated_ME1",Phi_bins,Phi_bins)
+    draw2D(file,dir,cut2,"-eta_ME2_TF","-eta_propagated_ME2",Eta_bins2,Eta_bins2) 
+    draw2D(file,dir,cut2,"phi_ME2_TF","phi_propagated_ME2",Phi_bins,Phi_bins)
+    draw2D(file,dir,cut3,"-eta_ME3_TF","-eta_propagated_ME3",Eta_bins2,Eta_bins2)
+    draw2D(file,dir,cut3,"phi_ME3_TF","phi_propagated_ME3",Phi_bins,Phi_bins)
+#    draw2D(file,dir,cut4,"phi_ME1_TF-phi_propagated_ME1","pt-trackpt",DeltaPhi_bins,DeltaPt_bins)
+#draw2D(file,dir,cut5,"phi_ME2_TF-phi_propagated_ME2","pt-trackpt",DeltaPhi_bins,DeltaPt_bins)
+#    draw2D(file,dir,cut6,"phi_ME3_TF-phi_propagated_ME3","pt-trackpt",DeltaPhi_bins,DeltaPt_bins)
+#    draw2D(file,dir,cut5,"phi_ME2_TF-phi_interStat12","pt-trackpt",DeltaPhi_bins,DeltaPt_bins)
+#    draw2D(file,dir,cut6,"phi_ME3_TF-phi_interStat23","pt-trackpt",DeltaPhi_bins,DeltaPt_bins)
+#    draw2D(file,dir,cut4,"phi_ME1_TF-phi_propagated_ME1","phi_ME2_TF-phi_propagated_ME2",DeltaPhi_bins,DeltaPhi_bins)
+# draw2D(file,dir,cut5,"phi_ME2_TF-phi_propagated_ME2","phi_ME3_TF-phi_interStat23",DeltaPhi_bins,DeltaPhi_bins)
+#   draw2D(file,dir,cut4,"phi_ME1_TF-phi_propagated_ME1","phi_ME2_TF-phi_interStat12",DeltaPhi_bins,DeltaPhi_bins)
+#   draw2D(file,dir,cut6,"phi_ME2_TF-phi_interStat12","phi_ME3_TF-phi_interStat13",DeltaPhi_bins,DeltaPhi_bins)
+#    draw2D(file,dir,cut5,"phi_ME2_TF-phi_interStat12","phi_ME3_TF-phi_interStat23",DeltaPhi_bins,DeltaPhi_bins)
+ 
+#    draw2D(file,dir,cut6,"phi_ME2_TF-phi_propagated_ME2","phi_ME3_TF-phi_interStat23",DeltaPhi_bins,DeltaPhi_bins)
+    
+#    draw2D(file,dir,cut4,"pt","phi_ME1_TF-phi_propagated_ME1",Pt_bins,DeltaPhi_bins)
+#    draw2D(file,dir,cut5,"pt","phi_ME2_TF-phi_propagated_ME2",Pt_bins,DeltaPhi_bins)
+#   draw2D(file,dir,cut5,"pt","phi_ME2_TF-phi_interStat12",Pt_bins,DeltaPhi_bins)
+#   draw2D(file,dir,cut6,"pt","phi_ME3_TF-phi_interStat23",Pt_bins,DeltaPhi_bins)
+#   draw2D(file,dir,cut6,"pt","phi_ME3_TF-phi_propagated_ME3",Pt_bins,DeltaPhi_bins)
+#   draw2D(file,dir,cut6,"pt","phi_ME3_TF-phi_interStat13",Pt_bins,DeltaPhi_bins)
     
     xaxis_eta = "eta"
     yaxis_eta = "tracketa"
