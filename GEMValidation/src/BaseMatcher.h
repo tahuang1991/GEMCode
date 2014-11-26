@@ -28,11 +28,17 @@
 #include "Geometry/RPCGeometry/interface/RPCGeometry.h"
 #include "Geometry/CSCGeometry/interface/CSCGeometry.h"
 #include "Geometry/CSCGeometry/interface/CSCLayerGeometry.h"
+#include "Geometry/DTGeometry/interface/DTGeometry.h"
 
 #include "DataFormats/MuonDetId/interface/CSCDetId.h"
 #include "DataFormats/MuonDetId/interface/GEMDetId.h"
 #include "DataFormats/MuonDetId/interface/RPCDetId.h"
 #include "DataFormats/MuonDetId/interface/ME0DetId.h"
+#include "DataFormats/MuonDetId/interface/DTWireId.h"
+
+inline bool is_dt(unsigned int detId) {
+  return (DetId(detId)).subdetId() == MuonSubdetId::DT;
+}
 
 inline bool is_gem(unsigned int detId) {
   return (DetId(detId)).subdetId() == MuonSubdetId::GEM;
@@ -82,6 +88,10 @@ public:
   /// RPC endcap chamber types
   enum RPCType {RPC_ALL = 0, RPC_ME12, RPC_ME13, RPC_ME22, RPC_ME23, 
                 RPC_ME31, RPC_ME32, RPC_ME33, RPC_ME41, RPC_ME42, RPC_ME43};
+
+  /// DT chamber types
+  enum DTType { DT_ALL = 0, DT_MB10, DT_MB11, DT_MB12, DT_MB20, DT_MB21, 
+		DT_MB22, DT_MB30, DT_MB31, DT_MB32, DT_MB40, DT_MB41, DT_MB42};
 
   const double ME11GEMdPhi[9][3] = {
     {-2 , 1.0, 1.0 },
@@ -143,11 +153,13 @@ public:
   void setRPCGeometry(const RPCGeometry *geom) {rpcGeometry_ = geom;}
   void setME0Geometry(const ME0Geometry *geom) {me0Geometry_ = geom;}
   void setCSCGeometry(const CSCGeometry *geom) {cscGeometry_ = geom;}
+  void setDTGeometry(const DTGeometry *geom) {dtGeometry_ = geom;}
 
   const GEMGeometry* getGEMGeometry() const {return gemGeometry_;}
   const RPCGeometry* getRPCGeometry() const {return rpcGeometry_;}
   const ME0Geometry* getME0Geometry() const {return me0Geometry_;}
   const CSCGeometry* getCSCGeometry() const {return cscGeometry_;}
+  const DTGeometry* getDTGeometry() const {return dtGeometry_;}
 
   unsigned int gemDetFromCSCDet(unsigned int id,int layer);
 
@@ -161,11 +173,13 @@ public:
   const RPCGeometry* rpcGeometry_;
   const GEMGeometry* gemGeometry_;
   const ME0Geometry* me0Geometry_;
+  const DTGeometry* dtGeometry_;
 
   bool hasGEMGeometry_;
   bool hasRPCGeometry_;
   bool hasME0Geometry_;
   bool hasCSCGeometry_;
+  bool hasDTGeometry_; 
   
  private:
 
@@ -189,6 +203,7 @@ public:
   edm::ESHandle<RPCGeometry> rpc_geom;
   edm::ESHandle<GEMGeometry> gem_geom;
   edm::ESHandle<ME0Geometry> me0_geom;
+  edm::ESHandle<DTGeometry> dt_geom;
 };
 
 #endif

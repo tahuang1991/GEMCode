@@ -3,6 +3,7 @@
 <use   name="DataFormats/GEMDigi"/>
 <use   name="DataFormats/RPCDigi"/>
 <use   name="DataFormats/CSCDigi"/>
+<use   name="DataFormats/DTDigi"/>
 <use   name="DataFormats/GEMRecHit"/>
 <use   name="DataFormats/L1GlobalMuonTrigger"/>
 <use   name="DataFormats/L1CSCTrackFinder"/>
@@ -22,6 +23,7 @@
 <use   name="Geometry/RPCGeometry"/>
 <use   name="Geometry/CSCGeometry"/>
 <use   name="Geometry/GEMGeometry"/>
+<use   name="Geometry/DTGeometry"/>
 <use   name="SimDataFormats/CrossingFrame"/>
 <use   name="SimDataFormats/TrackerDigiSimLink"/>
 <use   name="SimDataFormats/TrackingHit"/>

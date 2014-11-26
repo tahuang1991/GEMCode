@@ -32,6 +32,7 @@ BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
   hasRPCGeometry_ = true;
   hasCSCGeometry_ = true;
   hasME0Geometry_ = true;
+  hasDTGeometry_ = true;
 
   try {
     es.get<MuonGeometryRecord>().get(gem_geom);
@@ -63,6 +64,14 @@ BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
   } catch (edm::eventsetup::NoProxyException<RPCGeometry>& e) {
     hasRPCGeometry_ = false;
     LogDebug("BaseMatcher") << "+++ Info: RPC geometry is unavailable. +++\n";
+  }
+
+  try {
+    es.get<MuonGeometryRecord>().get(dt_geom);
+    dtGeometry_ = &*dt_geom;
+  } catch (edm::eventsetup::NoProxyException<DTGeometry>& e) {
+    hasDTGeometry_ = false;
+    LogDebug("BaseMatcher") << "+++ Info: DT geometry is unavailable. +++\n";
   }
 }
 
