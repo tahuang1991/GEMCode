@@ -30,6 +30,8 @@
 #include <iomanip>
 #include <sstream>
 #include <memory>
+#include <math.h>
+#include <bitset>
 
 using namespace std;
 using namespace matching;
@@ -572,7 +574,7 @@ private:
 
   void analyzeTrackChamberDeltas(SimTrackMatchManager& match, int trk_no);
   void analyzeTrackEff(SimTrackMatchManager& match, int trk_no);
-  void printout(SimTrackMatchManager& match, int trk_no);
+  void printout(SimTrackMatchManager& match, int trk_no, const char msg[300]);
 
   bool isSimTrackGood(const SimTrack &t);
   int detIdToMEStation(int st, int ri);
@@ -1428,31 +1430,41 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	  if (IsOdd)
 	  {
           auto odd(propagate_odd_gp.at(st-1));
+	 // std::cout <<"  propagated position in odd chamber eta:"  << odd.first << "  phi:" << odd.second << std::endl;
           if (st==1)  {etrk_[0].eta_propagated_ME1 = odd.first; etrk_[0].phi_propagated_ME1 = odd.second;}
           if (st==2)  {etrk_[0].eta_propagated_ME2 = odd.first; etrk_[0].phi_propagated_ME2 = odd.second;}
           if (st==3)  {etrk_[0].eta_propagated_ME3 = odd.first; etrk_[0].phi_propagated_ME3 = odd.second;}
           if (st==4)  {etrk_[0].eta_propagated_ME4 = odd.first; etrk_[0].phi_propagated_ME4 = odd.second;}
 	  
-	  if (st==2)  {etrk_[0].eta_interStat12 = propagate_interstat_odd[12].eta(); 
+	  if (st==2 && !isnan(propagate_interstat_odd[12].eta()))  
+	              {etrk_[0].eta_interStat12 = propagate_interstat_odd[12].eta(); 
 	               etrk_[0].phi_interStat12 = propagate_interstat_odd[12].phi();}
-	  if (st==3)  {etrk_[0].eta_interStat23 = propagate_interstat_odd[23].eta(); 
-	               etrk_[0].phi_interStat23 = propagate_interstat_odd[23].phi();
-	               etrk_[0].eta_interStat13 = propagate_interstat_odd[13].eta();
+	  if (st==3 && !isnan(propagate_interstat_odd[23].eta()))  
+	              {etrk_[0].eta_interStat23 = propagate_interstat_odd[23].eta(); 
+	               etrk_[0].phi_interStat23 = propagate_interstat_odd[23].phi();}
+	  if (st==3 && !isnan(propagate_interstat_odd[13].eta()))  
+	              {etrk_[0].eta_interStat13 = propagate_interstat_odd[13].eta();
 	               etrk_[0].phi_interStat13 = propagate_interstat_odd[13].phi();}
            }
 	  else {
           auto even(propagate_even_gp.at(st-1));
+	  //std::cout <<"  propagated position in even chamber eta:"  << even.first << "  phi:" << even.second << std::endl;
           if (st==1)  {etrk_[0].eta_propagated_ME1 = even.first; etrk_[0].phi_propagated_ME1 = even.second;}
           if (st==2)  {etrk_[0].eta_propagated_ME2 = even.first; etrk_[0].phi_propagated_ME2 = even.second;}
           if (st==3)  {etrk_[0].eta_propagated_ME3 = even.first; etrk_[0].phi_propagated_ME3 = even.second;}
           if (st==4)  {etrk_[0].eta_propagated_ME4 = even.first; etrk_[0].phi_propagated_ME4 = even.second;}
 	  
-	  if (st==2)  {etrk_[0].eta_interStat12 = propagate_interstat_even[12].eta(); 
+	  if (st==2 && !isnan(propagate_interstat_even[12].eta()))  
+	              {etrk_[0].eta_interStat12 = propagate_interstat_even[12].eta(); 
 	               etrk_[0].phi_interStat12 = propagate_interstat_even[12].phi();}
-	  if (st==3)  {etrk_[0].eta_interStat23 = propagate_interstat_even[23].eta(); 
-	               etrk_[0].phi_interStat23 = propagate_interstat_even[23].phi();
-	               etrk_[0].eta_interStat13 = propagate_interstat_even[13].eta();
+	  if (st==3 && !isnan(propagate_interstat_even[23].eta()))  
+	              {etrk_[0].eta_interStat23 = propagate_interstat_even[23].eta(); 
+	               etrk_[0].phi_interStat23 = propagate_interstat_even[23].phi();}
+	  if (st==3 && !isnan(propagate_interstat_even[13].eta()))  
+	              {etrk_[0].eta_interStat13 = propagate_interstat_even[13].eta();
 	               etrk_[0].phi_interStat13 = propagate_interstat_even[13].phi();}
+		       
+
 	  }
           if (st==1)  {etrk_[0].eta_ME1_TF = etaphi.first; etrk_[0].phi_ME1_TF = etaphi.second;
 	               stub_Good_ME[0] = match_lct.checkStubInChamber(id,*triggerDigis.at(i));}
@@ -1468,7 +1480,33 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	  //else std::cout << "stub in TF can NOT be matched to simtrack" << std::endl;
 	}
          etrk_[0].allstubs_matched_TF = (stub_Good_ME[0] and stub_Good_ME[1] and stub_Good_ME[2] and stub_Good_ME[3]);
-     }
+	
+	 /*if (!stub_Good_ME[0]) std::cout << "In station1 stub can not be matched to simTrack" << std::endl; 
+	 if (!stub_Good_ME[1]) std::cout << "In station2 stub can not be matched to simTrack" << std::endl; 
+	 if (!stub_Good_ME[2]) std::cout << "In station3 stub can not be matched to simTrack" << std::endl; 
+	 if (!stub_Good_ME[3]) std::cout << "In station4 stub can not be matched to simTrack" << std::endl; 
+	 //for debug
+	if (!etrk_[0].allstubs_matched_TF && abs(etrk_[0].eta)>1.65 && abs(etrk_[0].eta)<1.85)
+	 for (unsigned int i=0; i<triggerDigiIds.size(); i++)
+	 {
+	  auto id(triggerDigiIds.at(i));
+          std::cout << "stub in TF DetId " << triggerDigiIds.at(i) << "  " << *triggerDigis.at(i) << std::endl;
+	  std::cout << "matched stub in this Detid " << std::endl;
+	  for (auto p : match_lct.lctsInChamber(id.rawId()))  std::cout << "  " << p << std::endl;
+	  if ( match_lct.checkStubInChamber(id,*triggerDigis.at(i))) std::cout << "stub in TF can be matched to simtrack" << std::endl;
+	  else std::cout << "stub in TF can NOT be matched to simtrack" << std::endl;
+
+	   }*/
+         // check simhit in each station, station1->bit1, station2->bit2
+	 if (etrk_[1].has_csc_sh>0 or etrk_[4].has_csc_sh>0 or etrk_[5].has_csc_sh>0) etrk_[0].has_csc_sh |= 1;
+	 //std::cout << "simhits in station1 " << (std::bitset<8>)etrk_[0].has_csc_sh  << std::endl;
+	 if (etrk_[6].has_csc_sh>0 or etrk_[7].has_csc_sh>0) etrk_[0].has_csc_sh |= 2;
+	 //std::cout << "simhits in station12 " << (std::bitset<8>)etrk_[0].has_csc_sh  << std::endl;
+	 if (etrk_[8].has_csc_sh>0 or etrk_[9].has_csc_sh>0) etrk_[0].has_csc_sh |= 4;
+	 //std::cout << "simhits in station123 " << (std::bitset<8>)etrk_[0].has_csc_sh  << std::endl;
+	 if (etrk_[10].has_csc_sh>0 or etrk_[11].has_csc_sh>0) etrk_[0].has_csc_sh |= 8;
+	 //std::cout << "simhits in each station1234 " << (std::bitset<8>)etrk_[0].has_csc_sh  << std::endl;
+     }//end if 
 
     if (triggerDigiEtaPhi.size()>1)
     {
@@ -1823,7 +1861,7 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
 }
 
 
- void GEMCSCAnalyzer::printout(SimTrackMatchManager& match, int trk_no)
+ void GEMCSCAnalyzer::printout(SimTrackMatchManager& match, int trk_no, const char msg[300])
 {
   const SimHitMatcher& match_sh = match.simhits();
   const GEMDigiMatcher& match_gd = match.gemDigis();
@@ -1835,6 +1873,7 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
 
   
   std::cout << "======================== matching information ========================= " << std::endl;
+  std::cout << msg << std::endl;
   std::cout << "  pt:"<<t.momentum().pt()
             << "  phi:"<<t.momentum().phi()
             << "  eta:"<<t.momentum().eta()
@@ -2010,15 +2049,37 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
     auto lcts = match_lct.allLCTsInChamber(d);
     for (auto p : lcts)    
        std::cout<<id<< p <<std::endl;
+    std::cout << "-------matched lcts-------" << std::endl;
+    auto lcts_matched = match_lct.lctsInChamber(d);
+    for (auto q : lcts_matched)    
+       std::cout<<id<< q <<std::endl;
+    std::cout << "-------    end     -------" << std::endl;
     
   }
 
 
   std::cout << "######  matching Tracks to Simtrack " << std::endl;
   if (match_track.tfTracks().size()) {
-    TFTrack* besttrack = match_track.bestTFTrack();
-    std::cout << "       Best TFTrack                  " << std::endl;
-    besttrack->print();
+     TFTrack* besttrack = match_track.bestTFTrack();
+     std::cout << "       Best TFTrack                  " << std::endl;
+     besttrack->print();
+	 /*for (unsigned int i=0; i<triggerDigiIds.size(); i++)
+	 {
+	  auto id(triggerDigiIds.at(i));
+          std::cout << "stub in TF DetId " << triggerDigiIds.at(i) << "  " << *triggerDigis.at(i) << std::endl;
+	  std::cout << "matched stub in this Detid " << std::endl;
+	  for (auto p : match_lct.lctsInChamber(id.rawId()))  std::cout << "  " << p << std::endl;
+	  if ( match_lct.checkStubInChamber(id,*triggerDigis.at(i))) std::cout << "stub in TF can be matched to simtrack" << std::endl;
+	  else std::cout << "stub in TF can NOT be matched to simtrack" << std::endl;
+
+	   }*/
+     std::cout << " propagated information " << std::endl;
+    // std::cout << " eta " << etrk_[0].eta_propagated_ME1 << " phi " << etrk_[0].phi_propagated_ME1 << std::endl;
+    // std::cout << " eta " << etrk_[0].eta_propagated_ME2 << " phi " << etrk_[0].phi_propagated_ME2 << std::endl;
+    // std::cout << " eta " << etrk_[0].eta_propagated_ME3 << " phi " << etrk_[0].phi_propagated_ME3 << std::endl;
+     std::cout << " propagated phi in  ME1 " << etrk_[0].phi_propagated_ME1 <<" stub phi in ME1 " <<etrk_[0].phi_ME1_TF << std::endl; 
+     std::cout << " propagated phi in  ME2 " << etrk_[0].phi_interStat12 <<" stub phi in ME2 " << etrk_[0].phi_ME2_TF << std::endl; 
+     std::cout << " propagated phi in  ME3 " << etrk_[0].phi_interStat23 <<" stub phi in ME3 " << etrk_[0].phi_ME3_TF << std::endl; 
 
 
   }
