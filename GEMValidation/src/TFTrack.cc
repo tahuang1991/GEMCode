@@ -56,8 +56,9 @@ TFTrack::init(CSCTFPtLUT* ptLUT,
   pt_packed_ = gpt & 0x1f;
 
   // calculate pt, eta and phi (don't forget to store the sign)                                                                                   
+  const int sign(l1track_->endcap()==1 ? 1 : -1);
   pt_ = muPtScale->getPtScale()->getLowEdge(pt_packed_) + 1.e-6;
-  eta_ = muScales->getRegionalEtaScale(2)->getCenter(l1track_->eta_packed()) * l1track_->endcap();
+  eta_ = muScales->getRegionalEtaScale(2)->getCenter(l1track_->eta_packed()) * sign;
   phi_ = normalizedPhi(muScales->getPhiScale()->getLowEdge(phi_packed_));
 }
 
