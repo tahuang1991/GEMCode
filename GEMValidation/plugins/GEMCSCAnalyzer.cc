@@ -617,7 +617,8 @@ GEMCSCAnalyzer::GEMCSCAnalyzer(const edm::ParameterSet& ps)
   cscStations_ = cfg_.getParameter<std::vector<string> >("cscStations");
   ntupleTrackChamberDelta_ = cfg_.getParameter<bool>("ntupleTrackChamberDelta");
   ntupleTrackEff_ = cfg_.getParameter<bool>("ntupleTrackEff");
-  matchprint_ = false; //cfg_.getParameter<bool>("matchprint");
+  //matchprint_ = false; 
+  matchprint_ =  cfg_.getParameter<bool>("matchprint");
 
   auto simTrack = cfg_.getParameter<edm::ParameterSet>("simTrack");
   verboseSimTrack_ = simTrack.getParameter<int>("verbose");
@@ -738,14 +739,18 @@ void GEMCSCAnalyzer::analyze(const edm::Event& ev, const edm::EventSetup& es)
     ++trk_no;
 
     // if (matchprint_) printout(match, trk_no);    
-    /*    
-    bool has_csc_sh_odd(etrk_[1].has_csc_sh&1) ; bool has_csc_sh_even(etrk_[1].has_csc_sh&2);
-    bool has_alct_odd(etrk_[1].has_alct&1); bool has_alct_even(etrk_[1].has_alct&2) ;
+        
+   // bool has_tftracks(etrk_[0].has_tfTrack>0 && !etrk_[0].allstubs_matched_TF && etrk_[0].nstubs>2);
+    //bool phi_diff_ME1(abs(etrk_[0].phi_propagated_ME1-etrk_[0].phi_ME1_TF) < 0.02); 
+    //bool phi_diff_ME2(abs(etrk_[0].phi_interStat12-etrk_[0].phi_ME2_TF) < 0.02); 
+    //bool phi_diff_ME3(abs(etrk_[0].phi_interStat23-etrk_[0].phi_ME3_TF) < 0.02); 
     // if (has_csc_sh_odd || has_csc_sh_even)  std::cout <<"st1 has_csc_sh " << std::endl;
     // if (has_alct_odd || has_alct_even)   std::cout <<"  st1 has_alct " << std::endl;
-    bool Debug((has_csc_sh_odd and !has_alct_odd) || (has_csc_sh_even and !has_alct_even));
-    if (matchprint_ and Debug ) printout(match, trk_no);
-    */
+    //bool Debug (etrk_[10].has_alct>0 && (etrk_[10].has_clct>0 || etrk_[10].has_rpc_dg>0) && etrk_[10].has_lct == 0);
+    //bool Debug (etrk_[0].allstubs_matched_TF==0);
+    bool Debug (abs(etrk_[1].dphi_lct_odd)>0.004 && etrk_[1].pt>30 && abs(etrk_[1].dphi_lct_odd)<1);
+    if (matchprint_ and Debug) printout(match, trk_no, " To debug dphi_lct_odd");
+   
     
   }
 }

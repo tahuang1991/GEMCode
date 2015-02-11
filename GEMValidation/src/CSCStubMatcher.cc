@@ -465,14 +465,15 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
                     if (verbose()) cout<<"  BAD"<<endl;
                     continue;
               }*/
-
-
-             if (chamber_to_lct_.find(id) != chamber_to_lct_.end()){
-                       //  cout<<"ALARM!!! here already was matching LCT "<<chamber_to_lct_[id]<<endl;
-                       //  cout<<"   new digi: "<<lct<<endl;
-             }
+ 
              
-              chamber_to_lct_[id] = lct;
+             if (chamber_to_lct_.find(id) == chamber_to_lct_.end())   chamber_to_lct_[id] = lct;
+             else if (chamber_to_lct_.find(id) != chamber_to_lct_.end() && abs(digi_dphi(chamber_to_lct_[id])) > abs(digi_dphi(lct))){
+                         cout<<"ALARM!!! here already was matching LCT "<<chamber_to_lct_[id]<<endl;
+                         cout<<"   new digi: "<<lct<<endl;
+                   chamber_to_lct_[id] = lct;
+             }
+	     
               chamber_to_lcts_[id].push_back(lct);
 	      lct_matched = true;
 	      
@@ -877,21 +878,22 @@ CSCStubMatcher::checkStubInChamber(CSCDetId id, CSCCorrelatedLCTDigi lct) const
   //    int hs = lct->getStrip() + 1; // LCT halfstrip and wiregoup numbers start from 0
   //    int wg = lct->getKeyWG() + 1;
   //    float dphi = lct->getGEMDPhi();
-
+//  std::cout << " checks Stubs, DetId " << id << std::endl;
   auto mydigi = make_digi(id.rawId(), lct.getStrip()+1, lct.getBX(), CSC_LCT, lct.getQuality(), lct.getPattern(),lct.getKeyWG()+1,lct.getGEMDPhi());
+//      std::cout << "                   mydigi " << mydigi << std::endl;
   try{
   auto alldigis(chamber_to_lcts_all_.at(id.rawId()));
-//  std::cout << "in checkstub, mydigi  " << mydigi << std::endl;
   for (auto p : alldigis) 
   {   
-  //    std::cout << " digi matched to simtrack " << p << std::endl;
+//      std::cout << " digi matched to simtrack " << p << std::endl;
       if (p==mydigi) return true;
    }
   }
   catch (exception& e)
     {
-//	return false;
+//	std::cout << " exception happens! " << std::endl;
     }
+// std::cout << " matching is failed " << std::endl;
  return false;
 }
 
