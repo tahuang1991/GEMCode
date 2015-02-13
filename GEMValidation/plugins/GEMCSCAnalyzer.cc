@@ -1383,18 +1383,18 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
    if (lct1 < (besttrack->getTriggerDigis()).size()) 
    {
-       etrk_[0].passGE11 = match_track.passDPhicut((besttrack->getTriggerDigisIds()).at(lct1), 
-		((besttrack->getTriggerDigis()).at(lct1))->getGEMDPhi(), besttrack->pt()); 
-       etrk_[0].dphiGE11 = ((besttrack->getTriggerDigis()).at(lct1))->getGEMDPhi();
+       etrk_[0].passGE11 = match_track.passDPhicut((besttrack->getTriggerDigisIds()).at(lct1), 0
+						   /*((besttrack->getTriggerDigis()).at(lct1))->getGEMDPhi()*/, besttrack->pt()); 
+       etrk_[0].dphiGE11 = 0;//((besttrack->getTriggerDigis()).at(lct1))->getGEMDPhi();
    }
 
    unsigned int lct2 = besttrack->digiInME(2,1);
 
    if (lct2 < (besttrack->getTriggerDigis()).size()) 
    {
-       etrk_[0].passGE21 = match_track.passDPhicut((besttrack->getTriggerDigisIds()).at(lct2), 
-		((besttrack->getTriggerDigis()).at(lct2))->getGEMDPhi(), besttrack->pt()); 
-       etrk_[0].dphiGE21 = ((besttrack->getTriggerDigis()).at(lct2))->getGEMDPhi();
+     etrk_[0].passGE21 = match_track.passDPhicut((besttrack->getTriggerDigisIds()).at(lct2), 0
+						   /*((besttrack->getTriggerDigis()).at(lct2))->getGEMDPhi()*/, besttrack->pt()); 
+       etrk_[0].dphiGE21 = 0;//((besttrack->getTriggerDigis()).at(lct2))->getGEMDPhi();
    }
      auto propagate_odd_gp(match_track.simTrackPropagateGPs_odd());
      auto propagate_even_gp(match_track.simTrackPropagateGPs_even());

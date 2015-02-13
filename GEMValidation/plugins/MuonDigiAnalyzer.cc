@@ -21,7 +21,8 @@
 
 ///Data Format
 #include "DataFormats/GEMDigi/interface/GEMDigiCollection.h"
-#include "DataFormats/GEMDigi/interface/GEMCSCPadDigiCollection.h"
+#include "DataFormats/GEMDigi/interface/GEMPadDigiCollection.h"
+#include "DataFormats/GEMDigi/interface/GEMCoPadDigiCollection.h"
 #include "DataFormats/RPCDigi/interface/RPCDigiCollection.h"
 #include "DataFormats/CSCDigi/interface/CSCALCTDigiCollection.h"
 #include "DataFormats/CSCDigi/interface/CSCCLCTDigiCollection.h"
@@ -97,7 +98,7 @@ struct MyGEMDigi
   Float_t g_r, g_eta, g_phi, g_x, g_y, g_z;
 };
 
-struct MyGEMCSCPadDigis
+struct MyGEMPadDigis
 {
   Int_t detId;
   Short_t region, ring, station, layer, chamber, roll;
@@ -106,7 +107,7 @@ struct MyGEMCSCPadDigis
   Float_t g_r, g_eta, g_phi, g_x, g_y, g_z;
 };
 
-struct MyGEMCSCCoPadDigis
+struct MyGEMCoPadDigis
 {
   Int_t detId;
   Short_t region, ring, station, layer, chamber, roll;
@@ -157,14 +158,14 @@ private:
   
   void bookRPCDigiTree();
   void bookGEMDigiTree();
-  void bookGEMCSCPadDigiTree();
-  void bookGEMCSCCoPadDigiTree();
+  void bookGEMPadDigiTree();
+  void bookGEMCoPadDigiTree();
   void bookSimTracksTree();
 
   void analyzeRPC();
   void analyzeGEM();
-  void analyzeGEMCSCPad();  
-  void analyzeGEMCSCCoPad();  
+  void analyzeGEMPad();  
+  void analyzeGEMCoPad();  
   bool isSimTrackGood(const SimTrack &);
   void analyzeTracks(edm::ParameterSet, const edm::Event&, const edm::EventSetup&);
   void buildLUT();
@@ -172,14 +173,14 @@ private:
 
   TTree* rpc_tree_;
   TTree* gem_tree_;
-  TTree* gemcscpad_tree_;
-  TTree* gemcsccopad_tree_;
+  TTree* gempad_tree_;
+  TTree* gemcopad_tree_;
   TTree* track_tree_;
 
   edm::Handle<RPCDigiCollection> rpc_digis;
   edm::Handle<GEMDigiCollection> gem_digis;  
-  edm::Handle<GEMCSCPadDigiCollection> gemcscpad_digis;
-  edm::Handle<GEMCSCPadDigiCollection> gemcsccopad_digis;
+  edm::Handle<GEMPadDigiCollection> gempad_digis;
+  edm::Handle<GEMCoPadDigiCollection> gemcopad_digis;
   edm::Handle<edm::SimTrackContainer> sim_tracks;
   edm::Handle<edm::SimVertexContainer> sim_vertices;
   edm::ESHandle<GEMGeometry> gem_geo_;
@@ -204,8 +205,8 @@ private:
 
   MyRPCDigi rpc_digi_;
   MyGEMDigi gem_digi_;
-  MyGEMCSCPadDigis gemcscpad_digi_;
-  MyGEMCSCCoPadDigis gemcsccopad_digi_;
+  MyGEMPadDigis gempad_digi_;
+  MyGEMCoPadDigis gemcopad_digi_;
   MySimTrack track_;
 
   float radiusCenter_;
@@ -252,8 +253,8 @@ MuonDigiAnalyzer::MuonDigiAnalyzer(const edm::ParameterSet& ps)
 
   bookRPCDigiTree();
   bookGEMDigiTree();
-  bookGEMCSCPadDigiTree();
-  bookGEMCSCCoPadDigiTree();
+  bookGEMPadDigiTree();
+  bookGEMCoPadDigiTree();
   bookSimTracksTree();
 }
 
@@ -318,11 +319,11 @@ void MuonDigiAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& 
   iEvent.getByLabel(gemDigiInput_, gem_digis);
   if(hasGEMGeometry_) analyzeGEM();
   
-  iEvent.getByLabel(gemPadDigiInput_, gemcscpad_digis);
-  if(hasGEMGeometry_) analyzeGEMCSCPad();  
+  iEvent.getByLabel(gemPadDigiInput_, gempad_digis);
+  if(hasGEMGeometry_) analyzeGEMPad();  
   
-  iEvent.getByLabel(gemCoPadDigiInput_, gemcsccopad_digis);
-  if(hasGEMGeometry_) analyzeGEMCSCCoPad();  
+  iEvent.getByLabel(gemCoPadDigiInput_, gemcopad_digis);
+  if(hasGEMGeometry_) analyzeGEMCoPad();  
 
   iEvent.getByLabel(simTrackInput_, sim_tracks);
   iEvent.getByLabel(simTrackInput_, sim_vertices);
@@ -378,50 +379,50 @@ void MuonDigiAnalyzer::bookGEMDigiTree()
   gem_tree_->Branch("g_z", &gem_digi_.g_z);
 }
 
-void MuonDigiAnalyzer::bookGEMCSCPadDigiTree()
+void MuonDigiAnalyzer::bookGEMPadDigiTree()
 {
   edm::Service<TFileService> fs;
-  gemcscpad_tree_ = fs->make<TTree>("GEMCSCPadDigiTree", "GEMCSCPadDigiTree");
-  gemcscpad_tree_->Branch("detId", &gemcscpad_digi_.detId);
-  gemcscpad_tree_->Branch("region", &gemcscpad_digi_.region);
-  gemcscpad_tree_->Branch("ring", &gemcscpad_digi_.ring);
-  gemcscpad_tree_->Branch("station", &gemcscpad_digi_.station);
-  gemcscpad_tree_->Branch("layer", &gemcscpad_digi_.layer);
-  gemcscpad_tree_->Branch("chamber", &gemcscpad_digi_.chamber);
-  gemcscpad_tree_->Branch("roll", &gemcscpad_digi_.roll);
-  gemcscpad_tree_->Branch("pad", &gemcscpad_digi_.pad);
-  gemcscpad_tree_->Branch("bx", &gemcscpad_digi_.bx);
-  gemcscpad_tree_->Branch("x", &gemcscpad_digi_.x);
-  gemcscpad_tree_->Branch("y", &gemcscpad_digi_.y);
-  gemcscpad_tree_->Branch("g_r", &gemcscpad_digi_.g_r);
-  gemcscpad_tree_->Branch("g_eta", &gemcscpad_digi_.g_eta);
-  gemcscpad_tree_->Branch("g_phi", &gemcscpad_digi_.g_phi);
-  gemcscpad_tree_->Branch("g_x", &gemcscpad_digi_.g_x);
-  gemcscpad_tree_->Branch("g_y", &gemcscpad_digi_.g_y);
-  gemcscpad_tree_->Branch("g_z", &gemcscpad_digi_.g_z);
+  gempad_tree_ = fs->make<TTree>("GEMPadDigiTree", "GEMPadDigiTree");
+  gempad_tree_->Branch("detId", &gempad_digi_.detId);
+  gempad_tree_->Branch("region", &gempad_digi_.region);
+  gempad_tree_->Branch("ring", &gempad_digi_.ring);
+  gempad_tree_->Branch("station", &gempad_digi_.station);
+  gempad_tree_->Branch("layer", &gempad_digi_.layer);
+  gempad_tree_->Branch("chamber", &gempad_digi_.chamber);
+  gempad_tree_->Branch("roll", &gempad_digi_.roll);
+  gempad_tree_->Branch("pad", &gempad_digi_.pad);
+  gempad_tree_->Branch("bx", &gempad_digi_.bx);
+  gempad_tree_->Branch("x", &gempad_digi_.x);
+  gempad_tree_->Branch("y", &gempad_digi_.y);
+  gempad_tree_->Branch("g_r", &gempad_digi_.g_r);
+  gempad_tree_->Branch("g_eta", &gempad_digi_.g_eta);
+  gempad_tree_->Branch("g_phi", &gempad_digi_.g_phi);
+  gempad_tree_->Branch("g_x", &gempad_digi_.g_x);
+  gempad_tree_->Branch("g_y", &gempad_digi_.g_y);
+  gempad_tree_->Branch("g_z", &gempad_digi_.g_z);
 }
 
-void MuonDigiAnalyzer::bookGEMCSCCoPadDigiTree()
+void MuonDigiAnalyzer::bookGEMCoPadDigiTree()
 {
   edm::Service<TFileService> fs;
-  gemcsccopad_tree_ = fs->make<TTree>("GEMCSCCoPadDigiTree", "GEMCSCCoPadDigiTree");
-  gemcsccopad_tree_->Branch("detId", &gemcsccopad_digi_.detId);
-  gemcsccopad_tree_->Branch("region", &gemcsccopad_digi_.region);
-  gemcsccopad_tree_->Branch("ring", &gemcsccopad_digi_.ring);
-  gemcsccopad_tree_->Branch("station", &gemcsccopad_digi_.station);
-  gemcsccopad_tree_->Branch("layer", &gemcsccopad_digi_.layer);
-  gemcsccopad_tree_->Branch("chamber", &gemcsccopad_digi_.chamber);
-  gemcsccopad_tree_->Branch("roll", &gemcsccopad_digi_.roll);
-  gemcsccopad_tree_->Branch("pad", &gemcsccopad_digi_.pad);
-  gemcsccopad_tree_->Branch("bx", &gemcsccopad_digi_.bx);
-  gemcsccopad_tree_->Branch("x", &gemcsccopad_digi_.x);
-  gemcsccopad_tree_->Branch("y", &gemcsccopad_digi_.y);
-  gemcsccopad_tree_->Branch("g_r", &gemcsccopad_digi_.g_r);
-  gemcsccopad_tree_->Branch("g_eta", &gemcsccopad_digi_.g_eta);
-  gemcsccopad_tree_->Branch("g_phi", &gemcsccopad_digi_.g_phi);
-  gemcsccopad_tree_->Branch("g_x", &gemcsccopad_digi_.g_x);
-  gemcsccopad_tree_->Branch("g_y", &gemcsccopad_digi_.g_y);
-  gemcsccopad_tree_->Branch("g_z", &gemcsccopad_digi_.g_z);
+  gemcopad_tree_ = fs->make<TTree>("GEMCoPadDigiTree", "GEMCoPadDigiTree");
+  gemcopad_tree_->Branch("detId", &gemcopad_digi_.detId);
+  gemcopad_tree_->Branch("region", &gemcopad_digi_.region);
+  gemcopad_tree_->Branch("ring", &gemcopad_digi_.ring);
+  gemcopad_tree_->Branch("station", &gemcopad_digi_.station);
+  gemcopad_tree_->Branch("layer", &gemcopad_digi_.layer);
+  gemcopad_tree_->Branch("chamber", &gemcopad_digi_.chamber);
+  gemcopad_tree_->Branch("roll", &gemcopad_digi_.roll);
+  gemcopad_tree_->Branch("pad", &gemcopad_digi_.pad);
+  gemcopad_tree_->Branch("bx", &gemcopad_digi_.bx);
+  gemcopad_tree_->Branch("x", &gemcopad_digi_.x);
+  gemcopad_tree_->Branch("y", &gemcopad_digi_.y);
+  gemcopad_tree_->Branch("g_r", &gemcopad_digi_.g_r);
+  gemcopad_tree_->Branch("g_eta", &gemcopad_digi_.g_eta);
+  gemcopad_tree_->Branch("g_phi", &gemcopad_digi_.g_phi);
+  gemcopad_tree_->Branch("g_x", &gemcopad_digi_.g_x);
+  gemcopad_tree_->Branch("g_y", &gemcopad_digi_.g_y);
+  gemcopad_tree_->Branch("g_z", &gemcopad_digi_.g_z);
 }
 
  void MuonDigiAnalyzer::bookSimTracksTree()
@@ -565,11 +566,11 @@ void MuonDigiAnalyzer::analyzeGEM()
 }
 
 
-// ======= GEMCSCPad ========
-void MuonDigiAnalyzer::analyzeGEMCSCPad()
+// ======= GEMPad ========
+void MuonDigiAnalyzer::analyzeGEMPad()
 {
-  //Loop over GEMCSCPad digi collection
-  for(GEMCSCPadDigiCollection::DigiRangeIterator cItr = gemcscpad_digis->begin(); cItr != gemcscpad_digis->end(); ++cItr)
+  //Loop over GEMPad digi collection
+  for(GEMPadDigiCollection::DigiRangeIterator cItr = gempad_digis->begin(); cItr != gempad_digis->end(); ++cItr)
     {
     GEMDetId id = (*cItr).first; 
 
@@ -577,45 +578,46 @@ void MuonDigiAnalyzer::analyzeGEMCSCPad()
     const BoundPlane & surface = gdet->surface();
     const GEMEtaPartition * roll = gem_geo_->etaPartition(id);
 
-    gemcscpad_digi_.detId = id();
-    gemcscpad_digi_.region = (Short_t) id.region();
-    gemcscpad_digi_.ring = (Short_t) id.ring();
-    gemcscpad_digi_.station = (Short_t) id.station();
-    gemcscpad_digi_.layer = (Short_t) id.layer();
-    gemcscpad_digi_.chamber = (Short_t) id.chamber();
-    gemcscpad_digi_.roll = (Short_t) id.roll();
+    gempad_digi_.detId = id();
+    gempad_digi_.region = (Short_t) id.region();
+    gempad_digi_.ring = (Short_t) id.ring();
+    gempad_digi_.station = (Short_t) id.station();
+    gempad_digi_.layer = (Short_t) id.layer();
+    gempad_digi_.chamber = (Short_t) id.chamber();
+    gempad_digi_.roll = (Short_t) id.roll();
 
-    GEMCSCPadDigiCollection::const_iterator digiItr; 
+    GEMPadDigiCollection::const_iterator digiItr; 
     //loop over digis of given roll
     for (digiItr = (*cItr ).second.first; digiItr != (*cItr ).second.second; ++digiItr)
     {
-      gemcscpad_digi_.pad = (Short_t) digiItr->pad();
-      gemcscpad_digi_.bx = (Short_t) digiItr->bx();
+      gempad_digi_.pad = (Short_t) digiItr->pad();
+      gempad_digi_.bx = (Short_t) digiItr->bx();
 
       LocalPoint lp = roll->centreOfPad(digiItr->pad());
-      gemcscpad_digi_.x = (Float_t) lp.x();
-      gemcscpad_digi_.y = (Float_t) lp.y();
+      gempad_digi_.x = (Float_t) lp.x();
+      gempad_digi_.y = (Float_t) lp.y();
 
       GlobalPoint gp = surface.toGlobal(lp);
-      gemcscpad_digi_.g_r = (Float_t) gp.perp();
-      gemcscpad_digi_.g_eta = (Float_t) gp.eta();
-      gemcscpad_digi_.g_phi = (Float_t) gp.phi();
-      gemcscpad_digi_.g_x = (Float_t) gp.x();
-      gemcscpad_digi_.g_y = (Float_t) gp.y();
-      gemcscpad_digi_.g_z = (Float_t) gp.z();
+      gempad_digi_.g_r = (Float_t) gp.perp();
+      gempad_digi_.g_eta = (Float_t) gp.eta();
+      gempad_digi_.g_phi = (Float_t) gp.phi();
+      gempad_digi_.g_x = (Float_t) gp.x();
+      gempad_digi_.g_y = (Float_t) gp.y();
+      gempad_digi_.g_z = (Float_t) gp.z();
 
       // fill TTree
-      gemcscpad_tree_->Fill();
+      gempad_tree_->Fill();
     }
   }
 }
 
 
-// ======= GEMCSCCoPad ========
-void MuonDigiAnalyzer::analyzeGEMCSCCoPad()
+// ======= GEMCoPad ========
+void MuonDigiAnalyzer::analyzeGEMCoPad()
 {
-  //Loop over GEMCSCPad digi collection
-  for(GEMCSCPadDigiCollection::DigiRangeIterator cItr = gemcsccopad_digis->begin(); cItr != gemcsccopad_digis->end(); ++cItr)
+  /*
+  //Loop over GEMPad digi collection
+  for(GEMPadDigiCollection::DigiRangeIterator cItr = gemcopad_digis->begin(); cItr != gemcopad_digis->end(); ++cItr)
   {
     GEMDetId id = (*cItr).first; 
 
@@ -623,37 +625,38 @@ void MuonDigiAnalyzer::analyzeGEMCSCCoPad()
     const BoundPlane & surface = gdet->surface();
     const GEMEtaPartition * roll = gem_geo_->etaPartition(id);
 
-    gemcsccopad_digi_.detId = id();
-    gemcsccopad_digi_.region = (Short_t) id.region();
-    gemcsccopad_digi_.ring = (Short_t) id.ring();
-    gemcsccopad_digi_.station = (Short_t) id.station();
-    gemcsccopad_digi_.layer = (Short_t) id.layer();
-    gemcsccopad_digi_.chamber = (Short_t) id.chamber();
-    gemcsccopad_digi_.roll = (Short_t) id.roll();
+    gemcopad_digi_.detId = id();
+    gemcopad_digi_.region = (Short_t) id.region();
+    gemcopad_digi_.ring = (Short_t) id.ring();
+    gemcopad_digi_.station = (Short_t) id.station();
+    gemcopad_digi_.layer = (Short_t) id.layer();
+    gemcopad_digi_.chamber = (Short_t) id.chamber();
+    gemcopad_digi_.roll = (Short_t) id.roll();
 
-    GEMCSCPadDigiCollection::const_iterator digiItr; 
+    GEMPadDigiCollection::const_iterator digiItr; 
     //loop over digis of given roll
     for (digiItr = (*cItr ).second.first; digiItr != (*cItr ).second.second; ++digiItr)
     {
-      gemcsccopad_digi_.pad = (Short_t) digiItr->pad();
-      gemcsccopad_digi_.bx = (Short_t) digiItr->bx();
+      gemcopad_digi_.pad = (Short_t) digiItr->pad();
+      gemcopad_digi_.bx = (Short_t) digiItr->bx();
 
       LocalPoint lp = roll->centreOfPad(digiItr->pad());
-      gemcsccopad_digi_.x = (Float_t) lp.x();
-      gemcsccopad_digi_.y = (Float_t) lp.y();
+      gemcopad_digi_.x = (Float_t) lp.x();
+      gemcopad_digi_.y = (Float_t) lp.y();
 
       GlobalPoint gp = surface.toGlobal(lp);
-      gemcsccopad_digi_.g_r = (Float_t) gp.perp();
-      gemcsccopad_digi_.g_eta = (Float_t) gp.eta();
-      gemcsccopad_digi_.g_phi = (Float_t) gp.phi();
-      gemcsccopad_digi_.g_x = (Float_t) gp.x();
-      gemcsccopad_digi_.g_y = (Float_t) gp.y();
-      gemcsccopad_digi_.g_z = (Float_t) gp.z();
+      gemcopad_digi_.g_r = (Float_t) gp.perp();
+      gemcopad_digi_.g_eta = (Float_t) gp.eta();
+      gemcopad_digi_.g_phi = (Float_t) gp.phi();
+      gemcopad_digi_.g_x = (Float_t) gp.x();
+      gemcopad_digi_.g_y = (Float_t) gp.y();
+      gemcopad_digi_.g_z = (Float_t) gp.z();
 
       // fill TTree
-      gemcsccopad_tree_->Fill();
+      gemcopad_tree_->Fill();
     }
   }
+  */
 }
 
 bool MuonDigiAnalyzer::isSimTrackGood(const SimTrack &t)

@@ -55,11 +55,11 @@ GEMDigiMatcher::init()
   event().getByLabel(gemDigiInput_, gem_digis);
   if (runGEMDigi_) matchDigisToSimTrack(*gem_digis.product());
 
-  edm::Handle<GEMCSCPadDigiCollection> gem_pads;
+  edm::Handle<GEMPadDigiCollection> gem_pads;
   event().getByLabel(gemPadDigiInput_, gem_pads);
   if (runGEMPad_) matchPadsToSimTrack(*gem_pads.product());
 
-  edm::Handle<GEMCSCPadDigiCollection> gem_co_pads;
+  edm::Handle<GEMCoPadDigiCollection> gem_co_pads;
   event().getByLabel(gemPadDigiInput_, gem_co_pads);
   if (runGEMCoPad_) matchCoPadsToSimTrack(*gem_co_pads.product());
 }
@@ -106,7 +106,7 @@ GEMDigiMatcher::matchDigisToSimTrack(const GEMDigiCollection& digis)
 
 
 void
-GEMDigiMatcher::matchPadsToSimTrack(const GEMCSCPadDigiCollection& pads)
+GEMDigiMatcher::matchPadsToSimTrack(const GEMPadDigiCollection& pads)
 {
   auto det_ids = simhit_matcher_->detIdsGEM();
   for (auto id: det_ids)
@@ -144,8 +144,9 @@ GEMDigiMatcher::matchPadsToSimTrack(const GEMCSCPadDigiCollection& pads)
 
 
 void
-GEMDigiMatcher::matchCoPadsToSimTrack(const GEMCSCPadDigiCollection& co_pads)
+GEMDigiMatcher::matchCoPadsToSimTrack(const GEMCoPadDigiCollection& co_pads)
 {
+  /*
   auto det_ids = simhit_matcher_->detIdsGEMCoincidences();
   for (auto id: det_ids)
   {
@@ -174,6 +175,7 @@ GEMDigiMatcher::matchCoPadsToSimTrack(const GEMCSCPadDigiCollection& co_pads)
       superchamber_to_copads_[ superch_id() ].push_back(mydigi);
     }
   }
+  */
 }
 
 

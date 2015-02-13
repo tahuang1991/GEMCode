@@ -319,7 +319,7 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
       int hs = lct->getStrip() + 1; // LCT halfstrip and wiregoup numbers start from 0
       int wg = lct->getKeyWG() + 1;
 
-      float dphi = lct->getGEMDPhi();
+      float dphi = 0;//lct->getGEMDPhi();
 
       auto mydigi = make_digi(id, hs, bx, CSC_LCT, lct->getQuality(), lct->getPattern(), wg, dphi);
       lcts_tmp.push_back(mydigi);
@@ -533,7 +533,7 @@ CSCStubMatcher::matchMPLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& mplc
       int hs = lct->getStrip() + 1; // LCT halfstrip and wiregoup numbers start from 0
       int wg = lct->getKeyWG() + 1;
 
-      float dphi = lct->getGEMDPhi();
+      float dphi = 0;//lct->getGEMDPhi();
 
       auto mydigi = make_digi(id, hs, bx, CSC_LCT, lct->getQuality(), lct->getPattern(), wg, dphi);
       mplcts_tmp.push_back(mydigi);
@@ -862,7 +862,7 @@ CSCStubMatcher::checkStubInChamber(CSCDetId id, CSCCorrelatedLCTDigi lct) const
   //    int wg = lct->getKeyWG() + 1;
   //    float dphi = lct->getGEMDPhi();
 
-  auto mydigi = make_digi(id.rawId(), lct.getStrip()+1, lct.getBX(), CSC_LCT, lct.getQuality(), lct.getPattern(),lct.getKeyWG()+1,lct.getGEMDPhi());
+  auto mydigi = make_digi(id.rawId(), lct.getStrip()+1, lct.getBX(), CSC_LCT, lct.getQuality(), lct.getPattern(),lct.getKeyWG()+1, 0);//lct.getGEMDPhi());
   try{
   auto alldigis(chamber_to_lcts_all_.at(id.rawId()));
 //  std::cout << "in checkstub, mydigi  " << mydigi << std::endl;
