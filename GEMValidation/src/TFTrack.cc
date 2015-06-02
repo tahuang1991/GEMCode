@@ -1,4 +1,4 @@
-#include "GEMCode/GEMValidation/src/TFTrack.h"
+#include "GEMCode/GEMValidation/interface/TFTrack.h"
 
 TFTrack::TFTrack(const csc::L1Track* t, const CSCCorrelatedLCTDigiCollection* lcts)
 {

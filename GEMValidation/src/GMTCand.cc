@@ -1,4 +1,4 @@
-#include "GEMCode/GEMValidation/src/GMTCand.h"
+#include "GEMCode/GEMValidation/interface/GMTCand.h"
 
 GMTCand::GMTCand()
 {}

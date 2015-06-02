@@ -1,4 +1,4 @@
-#include "GEMCode/GEMValidation/src/GMTRegCand.h"
+#include "GEMCode/GEMValidation/interface/GMTRegCand.h"
 
 GMTRegCand::GMTRegCand()
 {}
