@@ -1,5 +1,5 @@
-#include "GEMCode/GEMValidation/src/CSCStubMatcher.h"
-#include "GEMCode/GEMValidation/src/SimHitMatcher.h"
+#include "GEMCode/GEMValidation/interface/CSCStubMatcher.h"
+#include "GEMCode/GEMValidation/interface/SimHitMatcher.h"
 
 #include "DataFormats/MuonDetId/interface/CSCDetId.h"
 #include <DataFormats/MuonDetId/interface/CSCTriggerNumbering.h>

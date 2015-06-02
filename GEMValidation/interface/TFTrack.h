@@ -9,8 +9,8 @@
 #include <iostream>
 
 // user include files
-#include "GEMCode/GEMValidation/src/GenericDigi.h"
-#include "GEMCode/GEMValidation/src/BaseMatcher.h"
+#include "GEMCode/GEMValidation/interface/GenericDigi.h"
+#include "GEMCode/GEMValidation/interface/BaseMatcher.h"
 
 #include "DataFormats/MuonDetId/interface/CSCDetId.h"
 

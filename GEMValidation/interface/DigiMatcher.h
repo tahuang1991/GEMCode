@@ -8,8 +8,8 @@
  Original Author:  "Vadim Khotilovich"
 */
 
-#include "GEMCode/GEMValidation/src/BaseMatcher.h"
-#include "GEMCode/GEMValidation/src/GenericDigi.h"
+#include "GEMCode/GEMValidation/interface/BaseMatcher.h"
+#include "GEMCode/GEMValidation/interface/GenericDigi.h"
 
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 

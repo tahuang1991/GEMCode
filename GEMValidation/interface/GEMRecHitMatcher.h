@@ -8,15 +8,15 @@
  Original Author:  "Vadim Khotilovich"
 */
 
-#include "GEMCode/GEMValidation/src/BaseMatcher.h"
+#include "GEMCode/GEMValidation/interface/BaseMatcher.h"
 
 #include "FWCore/Utilities/interface/InputTag.h"
 
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include <DataFormats/GEMRecHit/interface/GEMRecHit.h>
 #include "DataFormats/GEMRecHit/interface/GEMRecHitCollection.h"
-#include "GEMCode/GEMValidation/src/GenericDigi.h"
-#include "GEMCode/GEMValidation/src/DigiMatcher.h"
+#include "GEMCode/GEMValidation/interface/GenericDigi.h"
+#include "GEMCode/GEMValidation/interface/DigiMatcher.h"
 
 #include <vector>
 #include <map>

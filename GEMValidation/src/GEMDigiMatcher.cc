@@ -1,5 +1,5 @@
-#include "GEMDigiMatcher.h"
-#include "SimHitMatcher.h"
+#include "GEMCode/GEMValidation/interface/GEMDigiMatcher.h"
+#include "GEMCode/GEMValidation/interface/SimHitMatcher.h"
 
 using namespace std;
 using namespace matching;

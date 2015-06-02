@@ -2,8 +2,8 @@
 #define SimMuL1_LCT_h
 
 #include "DataFormats/CSCDigi/interface/CSCCorrelatedLCTDigiCollection.h"
-#include "GEMCode/GEMValidation/src/ALCT.h" 
-#include "GEMCode/GEMValidation/src/CLCT.h" 
+#include "GEMCode/GEMValidation/interface/ALCT.h" 
+#include "GEMCode/GEMValidation/interface/CLCT.h" 
 
 class LCT
 {

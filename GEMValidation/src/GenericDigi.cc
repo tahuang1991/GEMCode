@@ -1,4 +1,4 @@
-#include "GEMCode/GEMValidation/src/GenericDigi.h"
+#include "GEMCode/GEMValidation/interface/GenericDigi.h"
 
 using namespace matching;
 
