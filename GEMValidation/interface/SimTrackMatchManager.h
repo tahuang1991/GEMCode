@@ -10,14 +10,14 @@
  Original Author:  "Vadim Khotilovich"
 */
 
-#include "GEMCode/GEMValidation/src/BaseMatcher.h"
-#include "GEMCode/GEMValidation/src/SimHitMatcher.h"
-#include "GEMCode/GEMValidation/src/GEMDigiMatcher.h"
-#include "GEMCode/GEMValidation/src/RPCDigiMatcher.h"
-#include "GEMCode/GEMValidation/src/CSCDigiMatcher.h"
-#include "GEMCode/GEMValidation/src/CSCStubMatcher.h"
-#include "GEMCode/GEMValidation/src/GEMRecHitMatcher.h"
-#include "GEMCode/GEMValidation/src/TrackMatcher.h"
+#include "GEMCode/GEMValidation/interface/BaseMatcher.h"
+#include "GEMCode/GEMValidation/interface/SimHitMatcher.h"
+#include "GEMCode/GEMValidation/interface/GEMDigiMatcher.h"
+#include "GEMCode/GEMValidation/interface/RPCDigiMatcher.h"
+#include "GEMCode/GEMValidation/interface/CSCDigiMatcher.h"
+#include "GEMCode/GEMValidation/interface/CSCStubMatcher.h"
+#include "GEMCode/GEMValidation/interface/GEMRecHitMatcher.h"
+#include "GEMCode/GEMValidation/interface/TrackMatcher.h"
 
 class SimTrackMatchManager
 {

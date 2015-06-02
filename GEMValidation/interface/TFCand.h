@@ -1,7 +1,7 @@
 #ifndef GEMValidation_TFCand_h
 #define GEMValidation_TFCand_h
 
-#include "GEMCode/GEMValidation/src/TFTrack.h"
+#include "GEMCode/GEMValidation/interface/TFTrack.h"
 
 class TFCand
 {

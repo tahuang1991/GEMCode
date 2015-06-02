@@ -37,8 +37,8 @@
 
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 #include "DataFormats/Math/interface/deltaR.h"
-#include "GEMCode/GEMValidation/src/SimTrackMatchManager.h"
-#include "GEMCode/GEMValidation/src/DigiMatcher.h"
+#include "GEMCode/GEMValidation/interface/SimTrackMatchManager.h"
+#include "GEMCode/GEMValidation/interface/DigiMatcher.h"
 
 using namespace matching;
 

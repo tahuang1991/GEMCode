@@ -8,7 +8,7 @@
  Original Author:  "Vadim Khotilovich"
 */
 
-#include "GEMCode/GEMValidation/src/BaseMatcher.h"
+#include "GEMCode/GEMValidation/interface/BaseMatcher.h"
 
 #include "SimDataFormats/TrackingHit/interface/PSimHitContainer.h"
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"

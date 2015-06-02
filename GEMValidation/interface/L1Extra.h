@@ -1,7 +1,7 @@
 #ifndef GEMValidation_L1Extra_h
 #define GEMValidation_L1Extra_h
 
-#include "GEMCode/GEMValidation/src/GMTCand.h"
+#include "GEMCode/GEMValidation/interface/GMTCand.h"
 
 class L1Extra : public GMTCand
 {

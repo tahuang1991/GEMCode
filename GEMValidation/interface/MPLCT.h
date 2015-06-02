@@ -2,7 +2,7 @@
 #define SimMuL1_MPLCT_h
 
 #include "DataFormats/CSCDigi/interface/CSCCorrelatedLCTDigiCollection.h"
-#include "GEMCode/GEMValidation/src/LCT.h" 
+#include "GEMCode/GEMValidation/interface/LCT.h" 
 
 class MPLCT
 {

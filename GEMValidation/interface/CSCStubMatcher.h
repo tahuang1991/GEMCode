@@ -9,9 +9,9 @@
  $Id: $
 */
 
-#include "GEMCode/GEMValidation/src/CSCDigiMatcher.h"
-#include "GEMCode/GEMValidation/src/GEMDigiMatcher.h"
-#include "GEMCode/GEMValidation/src/RPCDigiMatcher.h"
+#include "GEMCode/GEMValidation/interface/CSCDigiMatcher.h"
+#include "GEMCode/GEMValidation/interface/GEMDigiMatcher.h"
+#include "GEMCode/GEMValidation/interface/RPCDigiMatcher.h"
 
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/CSCDigi/interface/CSCALCTDigiCollection.h"

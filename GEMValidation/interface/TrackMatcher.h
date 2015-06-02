@@ -8,17 +8,17 @@
  Original Author:  "Sven Dildick"
 */
 
-#include "GEMCode/GEMValidation/src/SimHitMatcher.h"
-#include "GEMCode/GEMValidation/src/GEMDigiMatcher.h"
-#include "GEMCode/GEMValidation/src/CSCDigiMatcher.h"
-#include "GEMCode/GEMValidation/src/RPCDigiMatcher.h"
-#include "GEMCode/GEMValidation/src/CSCStubMatcher.h"
+#include "GEMCode/GEMValidation/interface/SimHitMatcher.h"
+#include "GEMCode/GEMValidation/interface/GEMDigiMatcher.h"
+#include "GEMCode/GEMValidation/interface/CSCDigiMatcher.h"
+#include "GEMCode/GEMValidation/interface/RPCDigiMatcher.h"
+#include "GEMCode/GEMValidation/interface/CSCStubMatcher.h"
 
-#include "GEMCode/GEMValidation/src/TFTrack.h" 
-#include "GEMCode/GEMValidation/src/TFCand.h" 
-#include "GEMCode/GEMValidation/src/GMTRegCand.h" 
-#include "GEMCode/GEMValidation/src/GMTCand.h" 
-#include "GEMCode/GEMValidation/src/L1Extra.h" 
+#include "GEMCode/GEMValidation/interface/TFTrack.h" 
+#include "GEMCode/GEMValidation/interface/TFCand.h" 
+#include "GEMCode/GEMValidation/interface/GMTRegCand.h" 
+#include "GEMCode/GEMValidation/interface/GMTCand.h" 
+#include "GEMCode/GEMValidation/interface/L1Extra.h" 
 
 #include "L1Trigger/CSCCommonTrigger/interface/CSCConstants.h"
 #include "L1Trigger/CSCCommonTrigger/interface/CSCTriggerGeometry.h"

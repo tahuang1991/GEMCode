@@ -8,7 +8,7 @@
  Original Author:  "Vadim Khotilovich"
 */
 
-#include "GEMCode/GEMValidation/src/DigiMatcher.h"
+#include "GEMCode/GEMValidation/interface/DigiMatcher.h"
 
 #include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/CSCDigi/interface/CSCComparatorDigiCollection.h"

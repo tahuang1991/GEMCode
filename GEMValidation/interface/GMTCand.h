@@ -1,7 +1,7 @@
 #ifndef GEMValidation_GMTCand_h
 #define GEMValidation_GMTCand_h
 
-#include "GEMCode/GEMValidation/src/GMTRegCand.h"
+#include "GEMCode/GEMValidation/interface/GMTRegCand.h"
 
 class GMTCand //: public GMTRegCand
 {
