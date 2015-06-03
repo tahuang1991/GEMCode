@@ -34,7 +34,7 @@
 
 #include "L1Trigger/CSCCommonTrigger/interface/CSCConstants.h"
 
-#include "GEMCode/GEMValidation/src/SimTrackMatchManager.h"
+#include "GEMCode/GEMValidation/interface/SimTrackMatchManager.h"
 #include "GEMCode/SimMuL1/interface/FastGEMCSCBuilder.h"
 
 #include "CLHEP/Random/RandomEngine.h"

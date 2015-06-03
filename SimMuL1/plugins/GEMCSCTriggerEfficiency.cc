@@ -35,7 +35,7 @@
 #include <Geometry/CSCGeometry/interface/CSCChamberSpecs.h>
 #include "Geometry/GEMGeometry/interface/GEMGeometry.h"
 
-#include "GEMCode/GEMValidation/src/SimTrackMatchManager.h"
+#include "GEMCode/GEMValidation/interface/SimTrackMatchManager.h"
 
 using namespace mugeo;
 

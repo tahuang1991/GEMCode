@@ -19,7 +19,7 @@
 #include "CLHEP/Random/RandomEngine.h"
 #include "CLHEP/Random/RandFlat.h"
 
-#include "GEMCode/GEMValidation/src/SimHitMatcher.h"
+#include "GEMCode/GEMValidation/interface/SimHitMatcher.h"
 
 #include "TLinearFitter.h"
 
