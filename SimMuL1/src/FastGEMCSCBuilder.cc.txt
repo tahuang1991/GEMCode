@@ -9,7 +9,7 @@
 
 #include "L1Trigger/CSCCommonTrigger/interface/CSCConstants.h"
 
-#include "GEMCode/GEMValidation/src/SimTrackMatchManager.h"
+#include "GEMCode/GEMValidation/interface/SimTrackMatchManager.h"
 
 using namespace std;
 using namespace matching;
