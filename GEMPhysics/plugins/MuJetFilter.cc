@@ -12,19 +12,12 @@
 // user include files
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDFilter.h"
-
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
-
-
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
-
 using namespace edm;
-//
-// class declaration
-//
 
 class MuJetFilter : public edm::EDFilter {
    public:
@@ -45,13 +38,12 @@ MuJetFilter::~MuJetFilter()
 {
 }
 
-bool
-MuJetFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
+bool MuJetFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   using namespace edm;
   
-  Handle<reco::GenParticleCollection> genParticleColl;
-  iEvent.getByLabel("genParticles", genParticleColl);
+  Handle<reco::GenParticleCollection> genParticles;
+  iEvent.getByLabel("genParticles", genParticles);
   
   std::vector<const reco::GenParticle*> genMuons;
   std::vector<const reco::Candidate*>   genMuonMothers;
@@ -89,25 +81,22 @@ MuJetFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
       }
     }
   }
-
+  
   // 2 muons in barrel, 2 muons in endcap
   int nMuBarrel = 0;
   int nMuEndcap = 0;
   int nMuPTok = 0;
   for (auto muon: genMuons) {
-    if (abs(muon.eta()) < 1.1) nMuBarrel++;
-    if (abs(muon.eta()) > 1.1 and abs(muon.eta()) < 2.4) nMuEndcap++;
-    if (muon.pt() > 10) nMuPTok++;
+    if (abs(muon->eta()) < 1.1) nMuBarrel++;
+    if (abs(muon->eta()) > 1.1 and abs(muon->eta()) < 2.4) nMuEndcap++;
+    if (muon->pt() > 10) nMuPTok++;
   }
   
-  return nMuBarrel==2 and nMuBarrel==2 and nMuPTok==4
+  return nMuBarrel==2 and nMuBarrel==2 and nMuPTok==4;
 }
 
-// ------------ method called once each job just before starting event loop  ------------
-
-// ------------ method called once each job just after ending the event loop  ------------
-void 
-MuJetFilter::endJob() {
+void MuJetFilter::endJob() 
+{
 }
 
 //define this as a plug-in
