@@ -3,7 +3,7 @@
 
 /**\class SimTrackMatchManager
 
- Description: Matching of SIM and Trigger info for a SimTrack in CSC & GEM
+ Description: Matching of SIM and Trigger info for a SimTrack in Muon subsystems
 
  It's a manager-matcher class, as it uses specialized matching classes to match SimHits, various digis and stubs.
 
@@ -17,6 +17,8 @@
 #include "GEMCode/GEMValidation/interface/CSCDigiMatcher.h"
 #include "GEMCode/GEMValidation/interface/CSCStubMatcher.h"
 #include "GEMCode/GEMValidation/interface/GEMRecHitMatcher.h"
+//#include "GEMCode/GEMValidation/interface/DTDigiMatcher.h"
+//#include "GEMCode/GEMValidation/interface/DTRecHitMatcher.h"
 #include "GEMCode/GEMValidation/interface/TrackMatcher.h"
 
 class SimTrackMatchManager
@@ -33,8 +35,10 @@ public:
   const RPCDigiMatcher& rpcDigis() const {return rpc_digis_;}
   const CSCDigiMatcher& cscDigis() const {return csc_digis_;}
   const CSCStubMatcher& cscStubs() const {return stubs_;}
-  // Add matcher for DT digis & 4D segments
   const GEMRecHitMatcher& gemRecHits() const {return gem_rechits_;}
+  // Add matcher for DT digis & 4D segments
+  /* const DTDigiMatcher& dtDigis() const {return dt_digis_;} */
+  /* const DTRecHitMatcher& dtRecHits() const {return dt_rechits_;} */
   const TrackMatcher& tracks() const {return tracks_;}
   
 private:
@@ -45,6 +49,8 @@ private:
   CSCDigiMatcher csc_digis_;
   CSCStubMatcher stubs_;
   GEMRecHitMatcher gem_rechits_;
+  /* DTDigiMatcher dt_digis_; */
+  /* DTRecHitMatcher dt_rechits_; */
   TrackMatcher tracks_;
 };
 

@@ -8,6 +8,8 @@ SimTrackMatchManager::SimTrackMatchManager(const SimTrack& t, const SimVertex& v
 , csc_digis_(simhits_)
 , stubs_(simhits_, csc_digis_, gem_digis_, rpc_digis_)
 , gem_rechits_(simhits_)
+// , dt_digis_(simhits_)
+// , dt_rechits_(simhits_)
 , tracks_(simhits_, csc_digis_, gem_digis_, rpc_digis_, stubs_)
 {
   //std::cout <<" simTrackMatcherManager constructor " << std::endl;
