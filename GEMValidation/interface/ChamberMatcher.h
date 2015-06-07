@@ -1,5 +1,5 @@
-#ifndef GEMValidation_ChamberMatcher_h
-#define GEMValidation_ChamberMatcher_h
+#ifndef GEMCode_GEMValidation_ChamberMatcher_h
+#define GEMCode_GEMValidation_ChamberMatcher_h
 
 /**\class ChamberMatcher
 

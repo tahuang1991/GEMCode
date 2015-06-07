@@ -1,5 +1,5 @@
-#ifndef GEMValidation_TFCand_h
-#define GEMValidation_TFCand_h
+#ifndef GEMCode_GEMValidation_TFCand_h
+#define GEMCode_GEMValidation_TFCand_h
 
 #include "GEMCode/GEMValidation/interface/TFTrack.h"
 

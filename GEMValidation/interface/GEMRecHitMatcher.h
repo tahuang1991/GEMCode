@@ -1,5 +1,5 @@
-#ifndef GEMValidation_GEMRecHitMatcher_h
-#define GEMValidation_GEMRecHitMatcher_h
+#ifndef GEMCode_GEMValidation_GEMRecHitMatcher_h
+#define GEMCode_GEMValidation_GEMRecHitMatcher_h
 
 /**\class RecHitMatcher
 
