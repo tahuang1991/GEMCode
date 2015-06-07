@@ -33,15 +33,12 @@ public:
 
   // partition GEM detIds with digis
   std::set<unsigned int> detIds() const;
-
-  // chamber detIds with digis
-  std::set<unsigned int> chamberIds() const;
-
   // chamber detIds with digis
   std::set<unsigned int> layerIds() const;
-
   // superchamber detIds with digis
   std::set<unsigned int> superLayerIds() const;
+  // chamber detIds with digis
+  std::set<unsigned int> chamberIds() const;
 
   //DT digis from a particular partition, chamber or superchamber
   const DTDigiContainer& digisInDetId(unsigned int) const;
