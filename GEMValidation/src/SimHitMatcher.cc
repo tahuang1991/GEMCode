@@ -422,6 +422,13 @@ SimHitMatcher::chamberIdsCSC(int csc_type) const
   return result;
 }
 
+std::set<unsigned int>
+SimHitMatcher::chamberIdsDT() const
+{
+  std::set<unsigned int> result;
+  for (auto& p: dt_chamber_to_hits_) result.insert(p.first);
+  return result;
+}
 
 std::set<unsigned int>
 SimHitMatcher::superChamberIdsGEM() const
@@ -453,6 +460,13 @@ SimHitMatcher::superChamberIdsGEMCoincidences() const
   return result;
 }
 
+std::set<unsigned int>
+SimHitMatcher::layerIdsDT() const
+{
+  std::set<unsigned int> result;
+  for (auto& p: dt_layer_to_hits_) result.insert(p.first);
+  return result;
+}
 
 const edm::PSimHitContainer&
 SimHitMatcher::hitsInDetId(unsigned int detid) const
@@ -477,6 +491,11 @@ SimHitMatcher::hitsInDetId(unsigned int detid) const
     if (rpc_detid_to_hits_.find(detid) == rpc_detid_to_hits_.end()) return no_hits_;
     return rpc_detid_to_hits_.at(detid);
   }
+  if(is_dt(detid))
+  {
+    if (dt_detid_to_hits_.find(detid) == dt_detid_to_hits_.end()) return no_hits_;
+    return dt_detid_to_hits_.at(detid);
+  }
   return no_hits_;
 }
 
@@ -486,27 +505,33 @@ SimHitMatcher::hitsInChamber(unsigned int detid) const
 {
   if (is_gem(detid)) // make sure we use chamber id
   {
-    GEMDetId id(detid);
+    const GEMDetId id(detid);
     if (gem_chamber_to_hits_.find(id.chamberId().rawId()) == gem_chamber_to_hits_.end()) return no_hits_;
     return gem_chamber_to_hits_.at(id.chamberId().rawId());
   }
   if (is_me0(detid)) // make sure we use chamber id
   {
-    ME0DetId id(detid);
+    const ME0DetId id(detid);
     if (me0_chamber_to_hits_.find(id.chamberId().rawId()) == me0_chamber_to_hits_.end()) return no_hits_;
     return me0_chamber_to_hits_.at(id.chamberId().rawId());
   }
   if (is_csc(detid))
   {
-    CSCDetId id(detid);
+    const CSCDetId id(detid);
     if (csc_chamber_to_hits_.find(id.chamberId().rawId()) == csc_chamber_to_hits_.end()) return no_hits_;
     return csc_chamber_to_hits_.at(id.chamberId().rawId());
   }
   if (is_rpc(detid))
   {
-    RPCDetId id(detid);
+    const RPCDetId id(detid);
     if (rpc_chamber_to_hits_.find(id.chamberId().rawId()) == rpc_chamber_to_hits_.end()) return no_hits_;
     return rpc_chamber_to_hits_.at(id.chamberId().rawId());
+  }
+  if(is_dt(detid)) 
+  {
+    const DTWireId id(detid);
+    if(dt_chamber_to_hits_.find(id.chamberId().rawId()) == dt_chamber_to_hits_.end()) return no_hits_;
+    return dt_chamber_to_hits_.at(id.chamberId().rawId());
   }
   return no_hits_;
 }
@@ -517,7 +542,7 @@ SimHitMatcher::hitsInSuperChamber(unsigned int detid) const
 {
   if (is_gem(detid))
   {
-    GEMDetId id(detid);
+    const GEMDetId id(detid);
     if (gem_superchamber_to_hits_.find(id.chamberId().rawId()) == gem_superchamber_to_hits_.end()) return no_hits_;
     return gem_superchamber_to_hits_.at(id.chamberId().rawId());
   }
@@ -527,78 +552,40 @@ SimHitMatcher::hitsInSuperChamber(unsigned int detid) const
 }
 
 const edm::PSimHitContainer&
-SimHitMatcher::hitsInDetIdDT(unsigned int detid) const
-{
-
-  if(is_dt(detid)) {
-
-    DTWireId id(detid);
-    if (dt_detid_to_hits_.find(detid) == dt_detid_to_hits_.end())
-      {
-	return no_hits_;
-      }
-    return dt_detid_to_hits_.at(detid);
-
-  }
-
-  return no_hits_;
-}
-
-const edm::PSimHitContainer&
 SimHitMatcher::hitsInLayerDT(unsigned int detid) const
 {
-  if (is_dt(detid))
-    {
-      DTWireId id(detid);
+  if (!is_dt(detid)) return no_hits_;
 
-      if (dt_layer_to_hits_.find(id.layerId().rawId()) == dt_layer_to_hits_.end()) return no_hits_;
-      return dt_layer_to_hits_.at(id.layerId().rawId());
-    }
-
-  return no_hits_;
-}
-
-const edm::PSimHitContainer&
-SimHitMatcher::hitsInChamberDT(unsigned int detid) const
-{
-
-  if(is_dt(detid)) {
-
-    DTWireId id(detid);
-    if(dt_chamber_to_hits_.find(id.chamberId().rawId()) == dt_chamber_to_hits_.end()) {
-      std::cout<<"There are no hits in chamber: "<<id<<std::endl;
-      return no_hits_;}
-    return dt_chamber_to_hits_.at(id.chamberId().rawId());
-  }
-
-  return no_hits_;
+  const DTWireId id(detid);
+  if (dt_layer_to_hits_.find(id.layerId().rawId()) == dt_layer_to_hits_.end()) return no_hits_;
+  return dt_layer_to_hits_.at(id.layerId().rawId());
 }
 
 int
 SimHitMatcher::nLayersWithHitsInSuperChamber(unsigned int detid) const
 {
   set<int> layers_with_hits;
-  auto hits = hitsInSuperChamber(detid);
+  const auto hits = hitsInSuperChamber(detid);
   for (auto& h: hits)
   {
     if (is_gem(detid))
     {
-      GEMDetId idd(h.detUnitId());
+      const GEMDetId idd(h.detUnitId());
       layers_with_hits.insert(idd.layer());
     }
     if (is_me0(detid))
     {
-      ME0DetId idd(h.detUnitId());
+      const ME0DetId idd(h.detUnitId());
       layers_with_hits.insert(idd.layer());
     }
     if (is_csc(detid))
     {
-      CSCDetId idd(h.detUnitId());
+      const CSCDetId idd(h.detUnitId());
       layers_with_hits.insert(idd.layer());
     }
     if (is_rpc(detid))
     {
-      RPCDetId idd(h.detUnitId());
+      const RPCDetId idd(h.detUnitId());
       layers_with_hits.insert(idd.layer());
     }
   }
@@ -606,35 +593,35 @@ SimHitMatcher::nLayersWithHitsInSuperChamber(unsigned int detid) const
 }
 
 int
-SimHitMatcher::nLayerWithHitsInLayerDT(unsigned int detid) const
+SimHitMatcher::nLayersWithHitsInLayerDT(unsigned int detid) const
 {
-  set<int> DT_layers_with_hits;
-  auto hits=hitsInLayerDT(detid);
+  set<int> layers_with_hits;
+  const auto hits = hitsInLayerDT(detid);
   for (auto& h: hits)
+  {
+    if (is_dt(detid))
     {
-      if (is_dt(detid))
-        {
-	  DTWireId idd(h.detUnitId());
-	  DT_layers_with_hits.insert(idd.layerId());
-        }
+      const DTWireId idd(h.detUnitId());
+      layers_with_hits.insert(idd.layerId());
     }
-  return DT_layers_with_hits.size();
+  }
+  return layers_with_hits.size();
 }
 
 int
-SimHitMatcher::nLayerWithHitsInChamberDT(unsigned int detid) const
+SimHitMatcher::nLayersWithHitsInChamberDT(unsigned int detid) const
 {
-  set<int> DT_Layer_with_hits;
-  auto hits=hitsInChamberDT(detid);
-  for (auto& h: hits)
+  set<int> layers_with_hits;
+  const auto hits = hitsInChamber(detid);
+  for (auto& h: hits) 
+  {
+    if (is_dt(detid))
     {
-      if (is_dt(detid))
-        {
-	  DTWireId idd(h.detUnitId());
-	  DT_Layer_with_hits.insert(idd.chamberId());
-        }
+      const DTWireId idd(h.detUnitId());
+      layers_with_hits.insert(idd.chamberId());
     }
-  return DT_Layer_with_hits.size();
+  }
+  return layers_with_hits.size();
 }
 
 GlobalPoint

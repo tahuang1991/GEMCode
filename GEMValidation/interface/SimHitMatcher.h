@@ -70,6 +70,8 @@ public:
   std::set<unsigned int> chamberIdsRPC() const;
   /// CSC chamber detIds with SimHits
   std::set<unsigned int> chamberIdsCSC(int csc_type = CSC_ME1b) const;
+  /// DT chamber detIds with SimHits
+  std::set<unsigned int> chamberIdsDT() const;
 
   /// GEM superchamber detIds with SimHits
   std::set<unsigned int> superChamberIdsGEM() const;
@@ -81,20 +83,19 @@ public:
   /// ME0 superchamber detIds with SimHits >=2 layers of coincidence pads
   std::set<unsigned int> superChamberIdsME0Coincidences(int min_n_layers = 2) const;
 
+  /// DT layer detIds with SimHits
+  std::set<unsigned int> layerIdsDT() const;
+  /// DT super layer detIds with SimHits
+  std::set<unsigned int> superlayerIdsDT() const;
+
   /// simhits from a particular partition (GEM)/layer (CSC), chamber or superchamber
   const edm::PSimHitContainer& hitsInDetId(unsigned int) const;
   const edm::PSimHitContainer& hitsInChamber(unsigned int) const;
   const edm::PSimHitContainer& hitsInSuperChamber(unsigned int) const;
 
-  std::set<unsigned int> superlayerIdsDT() const;
-  std::set<unsigned int> chamberIdsDT() const;
-
-  int nLayerWithHitsInLayerDT(unsigned int) const;
-  int nLayerWithHitsInChamberDT(unsigned int) const;
-  int nLayerWithHitsInSuperlayerDT(unsigned int) const;
-  const edm::PSimHitContainer& hitsInDetIdDT(unsigned int) const;
-  const edm::PSimHitContainer& hitsInSuperlayerDT(unsigned int) const;
-  const edm::PSimHitContainer& hitsInChamberDT(unsigned int) const;
+  int nLayersWithHitsInLayerDT(unsigned int) const;
+  int nLayersWithHitsInChamberDT(unsigned int) const;
+  int nLayersWithHitsInSuperlayerDT(unsigned int) const;
   const edm::PSimHitContainer& hitsInLayerDT(unsigned int) const;
 
   /// #layers with hits
