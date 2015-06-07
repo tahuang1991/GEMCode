@@ -33,6 +33,7 @@ public:
   const RPCDigiMatcher& rpcDigis() const {return rpc_digis_;}
   const CSCDigiMatcher& cscDigis() const {return csc_digis_;}
   const CSCStubMatcher& cscStubs() const {return stubs_;}
+  // Add matcher for DT digis & 4D segments
   const GEMRecHitMatcher& gemRecHits() const {return gem_rechits_;}
   const TrackMatcher& tracks() const {return tracks_;}
   

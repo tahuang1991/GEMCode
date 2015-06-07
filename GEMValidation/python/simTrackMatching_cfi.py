@@ -335,7 +335,7 @@ SimTrackMatching = cms.PSet(
     ),
     l1Extra = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("l1extraParticles"),
+        input = cms.InputTag("hltL1extraParticles"),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),

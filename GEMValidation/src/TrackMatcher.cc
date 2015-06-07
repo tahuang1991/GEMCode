@@ -95,12 +95,12 @@ TrackMatcher::~TrackMatcher()
 
 
   for (auto trk:tfTracks_)  delete trk;
-
- // if(dtrc_) 
-      delete dtrc_;
+  
+  if(dtrc_) 
+    delete dtrc_;
   dtrc_ = nullptr;
   clear();
-
+  
 //  delete sh_matcher_;
 //  delete gem_digi_matcher_;
 //  delete csc_digi_matcher_;
@@ -170,17 +170,23 @@ TrackMatcher::init()
   propagationInterStation();
   
   // L1 muon candidates after CSC sorter
-  edm::Handle<std::vector<L1MuRegionalCand> > hl1TfCands;
+  edm::Handle<L1MuRegionalCandCollection> hl1TfCands;
   event().getByLabel(cscTfCandInputLabel_, hl1TfCands);
-  const std::vector<L1MuRegionalCand>* l1TfCands = hl1TfCands.product();
+  const L1MuRegionalCandCollection* l1TfCands = hl1TfCands.product();
   matchTfCandToSimTrack(l1TfCands);
+
+  // L1 muon candidates
+  edm::Handle<l1extra::L1MuonParticleCollection> l1_particles;
+  event().getByLabel(l1ExtraInputLabel_, l1_particles);
+  const l1extra::L1MuonParticleCollection* l1_part = l1_particles.product();
+  matchL1MuonParticleToSimTrack(l1_part);
 }
 
 void 
 TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
 {
 
-  for (L1CSCTrackCollection::const_iterator trk = tracks.begin(); trk != tracks.end(); trk++) {
+  for (auto trk = tracks.begin(); trk != tracks.end(); trk++) {
      verboseTFTrack_ = 0;
     TFTrack *track = new TFTrack(&trk->first,&trk->second);
     track->init(ptLUT_, muScalesHd_, muPtScaleHd_);
@@ -264,14 +270,14 @@ TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
     if (verboseTFTrack_ > 1){
       std::cout << " \t\tStubs:" << std::endl;
     }
-    for (CSCCorrelatedLCTDigiCollection::DigiRangeIterator detUnitIt = trk->second.begin(); 
+    for (auto  detUnitIt = trk->second.begin(); 
          detUnitIt != trk->second.end(); detUnitIt++) {
       const CSCDetId& id = (*detUnitIt).first;
       if (verboseTFTrack_ > 1){
         std::cout << "\t\tDetId: " << id << std::endl;
       }
       const CSCCorrelatedLCTDigiCollection::Range& range = (*detUnitIt).second;
-      for (CSCCorrelatedLCTDigiCollection::const_iterator digiIt = range.first; digiIt != range.second; digiIt++) {
+      for (auto digiIt = range.first; digiIt != range.second; digiIt++) {
         auto lct(*digiIt);
         // check for valid stubs
         if (!(lct.isValid())) continue;
@@ -306,9 +312,9 @@ TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
 }
 
 void 
-TrackMatcher::matchTfCandToSimTrack(const std::vector<L1MuRegionalCand>* tracks)
+TrackMatcher::matchTfCandToSimTrack(const L1MuRegionalCandCollection& tracks)
 {
-  for (std::vector<L1MuRegionalCand>::const_iterator trk = tracks->begin(); trk != tracks->end(); trk++) {
+  for (auto trk = tracks.begin(); trk != tracks.end(); trk++) {
     TFCand track(&*trk);
     track.init(ptLUT_, muScalesHd_, muPtScaleHd_);
     // calculate the DR
@@ -316,7 +322,7 @@ TrackMatcher::matchTfCandToSimTrack(const std::vector<L1MuRegionalCand>* tracks)
 
     // debugging
     if (verboseTFCand_){
-      std::cout << "\tL1CSC TFCand "<< trk-tracks->begin() << " information:" << std::endl;
+      std::cout << "\tL1CSC TFCand "<< trk-tracks.begin() << " information:" << std::endl;
       std::cout << "\tpt (GeV/c) = " << track.pt() << ", eta = " << track.eta() 
                 << "\t, phi = " << track.phi() << ", dR(sim,L1) = " << track.dr() << std::endl;      
     }
@@ -325,7 +331,6 @@ TrackMatcher::matchTfCandToSimTrack(const std::vector<L1MuRegionalCand>* tracks)
 //       tfCands_.push_back(track);
 //     }
   }
-
 }
 
 void 
@@ -335,6 +340,11 @@ TrackMatcher::matchGmtRegCandToSimTrack(const L1MuRegionalCand& tracks)
 
 void 
 TrackMatcher::matchGmtCandToSimTrack(const L1MuGMTExtendedCand& tracks)
+{
+}
+
+void 
+TrackMatcher::matchL1MuonParticleToSimTrack(const l1extra::L1MuonParticleCollection& tracks)
 {
 }
 
