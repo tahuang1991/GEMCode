@@ -1,5 +1,5 @@
-#ifndef GEMValidation_TrackMatcher_h
-#define GEMValidation_TrackMatcher_h
+#ifndef GEMCode_GEMValidation_TrackMatcher_h
+#define GEMCode_GEMValidation_TrackMatcher_h
 
 /**\class TrackMatcher
 

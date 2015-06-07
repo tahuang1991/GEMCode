@@ -1,5 +1,5 @@
-#ifndef GEMValidation_L1Extra_h
-#define GEMValidation_L1Extra_h
+#ifndef GEMCode_GEMValidation_L1Extra_h
+#define GEMCode_GEMValidation_L1Extra_h
 
 #include "GEMCode/GEMValidation/interface/GMTCand.h"
 

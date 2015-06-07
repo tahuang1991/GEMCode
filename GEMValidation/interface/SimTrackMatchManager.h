@@ -1,5 +1,5 @@
-#ifndef GEMValidation_SimTrackMatchManager_h
-#define GEMValidation_SimTrackMatchManager_h
+#ifndef GEMCode_GEMValidation_SimTrackMatchManager_h
+#define GEMCode_GEMValidation_SimTrackMatchManager_h
 
 /**\class SimTrackMatchManager
 

@@ -1,5 +1,5 @@
-#ifndef GEMValidation_DigiMatcher_h
-#define GEMValidation_DigiMatcher_h
+#ifndef GEMCode_GEMValidation_DigiMatcher_h
+#define GEMCode_GEMValidation_DigiMatcher_h
 
 /**\class DigiMatcher
 
