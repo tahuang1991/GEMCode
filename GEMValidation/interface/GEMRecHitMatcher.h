@@ -66,8 +66,6 @@ public:
 
 private:
 
-  void init();
-
   void matchRecHitsToSimTrack(const GEMRecHitCollection& recHits);
 
   edm::InputTag gemRecHitInput_;
