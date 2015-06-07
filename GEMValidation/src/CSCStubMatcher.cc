@@ -55,39 +55,33 @@ CSCStubMatcher::CSCStubMatcher(SimHitMatcher& sh, CSCDigiMatcher& dg, GEMDigiMat
 
   minNHitsChamber_ = conf().getUntrackedParameter<int>("minNHitsChamber", 4);
 
-  setVerbose(conf().getUntrackedParameter<int>("verboseCSCStub", 0));
+  if (!clctInput_.label().empty()) {
+    edm::Handle<CSCCLCTDigiCollection> clcts;
+    event().getByLabel(clctInput_, clcts);
+    if (runCLCT_) matchCLCTsToSimTrack(*clcts.product());    
+  }
 
-  if (! ( clctInput_.label().empty() || alctInput_.label().empty() ||
-          lctInput_.label().empty() || mplctInput_.label().empty() )
-      )
-  {
-   init();
+  if (!alctInput_.label().empty()) {
+    edm::Handle<CSCALCTDigiCollection> alcts;
+    event().getByLabel(alctInput_, alcts);
+    if (runALCT_) matchALCTsToSimTrack(*alcts.product());
+  }
+
+  if (!lctInput_.label().empty()) {
+    edm::Handle<CSCCorrelatedLCTDigiCollection> lcts;
+    event().getByLabel(lctInput_, lcts);
+    if (runLCT_) matchLCTsToSimTrack(*lcts.product());
+  }    
+  
+  if (!mplctInput_.label().empty()) {
+    edm::Handle<CSCCorrelatedLCTDigiCollection> mplcts;
+    event().getByLabel(mplctInput_, mplcts);
+    if (runMPLCT_) matchMPLCTsToSimTrack(*mplcts.product());
   }
 }
 
 
 CSCStubMatcher::~CSCStubMatcher() {}
-
-
-void CSCStubMatcher::init()
-{
-  edm::Handle<CSCCLCTDigiCollection> clcts;
-  event().getByLabel(clctInput_, clcts);
-
-  edm::Handle<CSCALCTDigiCollection> alcts;
-  event().getByLabel(alctInput_, alcts);
-
-  edm::Handle<CSCCorrelatedLCTDigiCollection> lcts;
-  event().getByLabel(lctInput_, lcts);
-
-  edm::Handle<CSCCorrelatedLCTDigiCollection> mplcts;
-  event().getByLabel(mplctInput_, mplcts);
-
-  if (runCLCT_) matchCLCTsToSimTrack(*clcts.product());
-  if (runALCT_) matchALCTsToSimTrack(*alcts.product());
-  if (runLCT_) matchLCTsToSimTrack(*lcts.product());
-  if (runMPLCT_) matchMPLCTsToSimTrack(*mplcts.product());
-}
 
 
 void

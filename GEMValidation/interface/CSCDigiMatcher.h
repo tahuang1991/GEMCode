@@ -67,8 +67,6 @@ public:
 
 private:
 
-  void init();
-
   void matchTriggerDigisToSimTrack(const CSCComparatorDigiCollection& comparators, const CSCWireDigiCollection& wires);
 
   edm::InputTag cscComparatorDigiInput_;

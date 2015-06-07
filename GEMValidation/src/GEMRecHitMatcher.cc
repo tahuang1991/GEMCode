@@ -18,20 +18,13 @@ GEMRecHitMatcher::GEMRecHitMatcher(SimHitMatcher& sh)
 
   if (!(gemRecHitInput_.label().empty()))
   {
-    init();
+    edm::Handle<GEMRecHitCollection> gem_rechits;
+    event().getByLabel(gemRecHitInput_, gem_rechits);
+    if (runGEMRecHit_) matchRecHitsToSimTrack(*gem_rechits.product());
   }
 }
 
 GEMRecHitMatcher::~GEMRecHitMatcher() {}
-
-
-void
-GEMRecHitMatcher::init()
-{
-  edm::Handle<GEMRecHitCollection> gem_rechits;
-  event().getByLabel(gemRecHitInput_, gem_rechits);
-  if (runGEMRecHit_) matchRecHitsToSimTrack(*gem_rechits.product());
-}
 
 
 void

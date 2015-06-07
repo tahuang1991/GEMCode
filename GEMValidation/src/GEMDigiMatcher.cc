@@ -211,8 +211,6 @@ GEMDigiMatcher::superChamberIdsWithCoPads() const
 }
 
 
-
-
 const matching::DigiContainer&
 GEMDigiMatcher::digisInDetId(unsigned int detid) const
 {
@@ -401,9 +399,6 @@ GEMDigiMatcher::extrapolateHsfromGEMPad(unsigned int id, int gempad) const
   else if (gem_id.station() == 2) return result;
   else station = gem_id.station();
   CSCDetId csc_id(endcap, station, gem_id.ring(), gem_id.chamber(), 0);
-
-//  const CSCGeometry* cscGeometry_(DigiMatcher::getCSCGeometry());
-//  const GEMGeometry* gemGeometry_(DigiMatcher::getGEMGeometry());
 
   const CSCChamber* cscChamber(cscGeometry_->chamber(csc_id));
   const CSCLayer* cscKeyLayer(cscChamber->layer(3));
