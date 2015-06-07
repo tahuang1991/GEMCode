@@ -20,6 +20,10 @@
 #include <map>
 #include <set>
 
+typedef std::vector<GEMDigi> GEMDigiContainer;
+typedef std::vector<GEMPadDigi> GEMPadDigiContainer;
+typedef std::vector<GEMCoPadDigi> GEMCoPadDigiContainer;
+
 class SimHitMatcher;
 
 class GEMDigiMatcher : public DigiMatcher

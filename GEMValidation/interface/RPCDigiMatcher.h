@@ -19,6 +19,8 @@
 #include <map>
 #include <set>
 
+typedef std::vector<RPCDigi> RPCDigiContainer;
+
 class SimHitMatcher;
 
 class RPCDigiMatcher : public DigiMatcher
