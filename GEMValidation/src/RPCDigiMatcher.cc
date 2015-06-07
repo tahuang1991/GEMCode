@@ -1,9 +1,6 @@
 #include "GEMCode/GEMValidation/interface/RPCDigiMatcher.h"
 #include "GEMCode/GEMValidation/interface/SimHitMatcher.h"
 
-#include "DataFormats/MuonDetId/interface/CSCDetId.h"
-#include "DataFormats/MuonDetId/interface/CSCTriggerNumbering.h"
-
 using namespace std;
 using namespace matching;
 
@@ -25,20 +22,13 @@ RPCDigiMatcher::RPCDigiMatcher(SimHitMatcher& sh)
 
   if (!rpcDigiInput_.label().empty())
   {
-    init();
+    edm::Handle<RPCDigiCollection> rpc_digis;
+    event().getByLabel(rpcDigiInput_, rpc_digis);
+    if (runRPCDigi_) matchDigisToSimTrack(*rpc_digis.product());
   }
 }
 
 RPCDigiMatcher::~RPCDigiMatcher() {}
-
-
-void
-RPCDigiMatcher::init()
-{
-  edm::Handle<RPCDigiCollection> rpc_digis;
-  event().getByLabel(rpcDigiInput_, rpc_digis);
-  if (runRPCDigi_) matchDigisToSimTrack(*rpc_digis.product());
-}
 
 
 void
@@ -100,16 +90,16 @@ RPCDigiMatcher::digisInDetId(unsigned int detid) const
 std::set<unsigned int>
 RPCDigiMatcher::chamberIds() const
 {
-   std::set<unsigned int> result;
-   for (auto& p: chamber_to_digis_) result.insert(p.first);
-   return result;
+  std::set<unsigned int> result;
+  for (auto& p: chamber_to_digis_) result.insert(p.first);
+  return result;
 }
 
 const matching::DigiContainer&
 RPCDigiMatcher::digisInChamber(unsigned int detid) const  //use chamber raw id here
 {
-   if (chamber_to_digis_.find(detid) == chamber_to_digis_.end()) return no_digis_;
-   return chamber_to_digis_.at(detid);
+  if (chamber_to_digis_.find(detid) == chamber_to_digis_.end()) return no_digis_;
+  return chamber_to_digis_.at(detid);
 }
 
 int

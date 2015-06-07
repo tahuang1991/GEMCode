@@ -7,8 +7,7 @@
 
  Original Author:  "Vadim Khotilovich"
 */
-
-#include "DigiMatcher.h"
+#include "GEMCode/GEMValidation/interface/DigiMatcher.h"
 
 #include "FWCore/Utilities/interface/InputTag.h"
 
@@ -86,8 +85,6 @@ public:
 
 private:
 
-  void init();
-
   void matchDigisToSimTrack(const GEMDigiCollection& digis);
   void matchPadsToSimTrack(const GEMCSCPadDigiCollection& pads);
   void matchCoPadsToSimTrack(const GEMCSCPadDigiCollection& co_pads);
@@ -96,7 +93,9 @@ private:
   edm::InputTag gemPadDigiInput_;
   edm::InputTag gemCoPadDigiInput_;
 
-  int minBXGEM_, maxBXGEM_;
+  int minBXGEMDigi_, maxBXGEMDigi_;
+  int minBXGEMPad_, maxBXGEMPad_;
+  int minBXGEMCoPad_, maxBXGEMCoPad_;
 
   int matchDeltaStrip_;
 

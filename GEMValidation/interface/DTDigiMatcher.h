@@ -8,7 +8,7 @@
  Original Author:  "Vadim Khotilovich"
 */
 
-#include "DigiMatcher.h"
+#include "GEMCode/GEMValidation/interface/DigiMatcher.h"
 
 #include "FWCore/Utilities/interface/InputTag.h"
 
@@ -46,22 +46,25 @@ public:
   const DTDigiContainer& digisInSuperLayer(unsigned int) const;
   const DTDigiContainer& digisInChamber(unsigned int) const;
 
+  // #tubes with digis in layer from this simtrack
+  int nTubesWithDigisInLayer(unsigned int) const;
   // #layers with digis from this simtrack
-  int nLayersWithDigisInSuperChamber(unsigned int) const;
+  int nLayersWithDigisInSuperLayer(unsigned int) const;
+  // #layers with digis from this simtrack
+  int nSuperLayersWithDigisInChamber(unsigned int) const;
 
-  // what unique partitions numbers with digis from this simtrack?
-  std::set<int> partitionNumbers() const;
+  // wire numbers from this simtrack in a detId
+  std::set<int> wireNumbersInDetId(unsigned int detid) const;
 
 private:
 
-  void init();
-
-  void matchWireDigisToSimTrack(const DTDigiCollection& digis);
+  void matchDigisToSimTrack(const DTDigiCollection& digis);
 
   edm::InputTag dtDigiInput_;
 
+  bool verboseDigi_;
+  bool runDTDigi_;
   int minBXDT_, maxBXDT_;
-
   int matchDeltaWire_;
 
   std::map<unsigned int, DTDigiContainer> detid_to_digis_;
@@ -69,9 +72,7 @@ private:
   std::map<unsigned int, DTDigiContainer> superLayer_to_digis_;
   std::map<unsigned int, DTDigiContainer> chamber_to_digis_;
 
-  bool verboseDigi_;
-
-  bool runDTDigi_;
+  DTDigiContainer no_dt_digis_;
 };
 
 #endif

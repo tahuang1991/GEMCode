@@ -8,7 +8,7 @@
  Original Author:  "Vadim Khotilovich"
 */
 
-#include "DigiMatcher.h"
+#include "GEMCode/GEMValidation/interface/DigiMatcher.h"
 
 #include "FWCore/Utilities/interface/InputTag.h"
 
@@ -54,8 +54,6 @@ public:
   std::set<int> partitionNumbers() const;
 
 private:
-
-  void init();
 
   void matchDigisToSimTrack(const RPCDigiCollection& digis);
 

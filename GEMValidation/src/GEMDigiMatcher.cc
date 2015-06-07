@@ -4,65 +4,54 @@
 using namespace std;
 using namespace matching;
 
-#include "DataFormats/MuonDetId/interface/CSCDetId.h"
-#include "DataFormats/MuonDetId/interface/GEMDetId.h"
-
 GEMDigiMatcher::GEMDigiMatcher(SimHitMatcher& sh)
 : DigiMatcher(sh)
 {
   auto gemDigi_= conf().getParameter<edm::ParameterSet>("gemStripDigi");
   gemDigiInput_ = gemDigi_.getParameter<edm::InputTag>("input");
-  minBXGEM_ = gemDigi_.getParameter<int>("minBX");
-  maxBXGEM_ = gemDigi_.getParameter<int>("maxBX");
+  minBXGEMDigi_ = gemDigi_.getParameter<int>("minBX");
+  maxBXGEMDigi_ = gemDigi_.getParameter<int>("maxBX");
   matchDeltaStrip_ = gemDigi_.getParameter<int>("matchDeltaStrip");
   verboseDigi_ = gemDigi_.getParameter<int>("verbose");
   runGEMDigi_ = gemDigi_.getParameter<bool>("run");
 
   auto gemPad_= conf().getParameter<edm::ParameterSet>("gemPadDigi");
   gemPadDigiInput_ = gemPad_.getParameter<edm::InputTag>("input");
-  minBXGEM_ = gemPad_.getParameter<int>("minBX");
-  maxBXGEM_ = gemPad_.getParameter<int>("maxBX");
+  minBXGEMPad_ = gemPad_.getParameter<int>("minBX");
+  maxBXGEMPad_ = gemPad_.getParameter<int>("maxBX");
   verbosePad_ = gemPad_.getParameter<int>("verbose");
   runGEMPad_ = gemPad_.getParameter<bool>("run");
 
   auto gemCoPad_= conf().getParameter<edm::ParameterSet>("gemCoPadDigi");
   gemCoPadDigiInput_ = gemCoPad_.getParameter<edm::InputTag>("input");
-  minBXGEM_ = gemCoPad_.getParameter<int>("minBX");
-  maxBXGEM_ = gemCoPad_.getParameter<int>("maxBX");
+  minBXGEMCoPad_ = gemCoPad_.getParameter<int>("minBX");
+  maxBXGEMCoPad_ = gemCoPad_.getParameter<int>("maxBX");
   verboseCoPad_ = gemCoPad_.getParameter<int>("verbose");
   runGEMCoPad_ = gemCoPad_.getParameter<bool>("run");
 
-  matchDeltaStrip_ = conf().getUntrackedParameter<int>("matchDeltaStripGEM", 1);
-
-  setVerbose(conf().getUntrackedParameter<int>("verboseGEMDigi", 0));
-
-  if (! (gemDigiInput_.label().empty() ||
-         gemPadDigiInput_.label().empty() ||
-         gemCoPadDigiInput_.label().empty())
-     )
+  if (!gemDigiInput_.label().empty())
   {
-    init();
+    edm::Handle<GEMDigiCollection> gem_digis;
+    event().getByLabel(gemDigiInput_, gem_digis);
+    if (runGEMDigi_) matchDigisToSimTrack(*gem_digis.product());
+  }
+
+  if (!gemPadDigiInput_.label().empty())
+  {
+    edm::Handle<GEMPadDigiCollection> gem_pads;
+    event().getByLabel(gemPadDigiInput_, gem_pads);
+    if (runGEMPad_) matchPadsToSimTrack(*gem_pads.product());
+  }
+
+  if (!gemCoPadDigiInput_.label().empty())
+  {
+    edm::Handle<GEMCoPadDigiCollection> gem_co_pads;
+    event().getByLabel(gemPadDigiInput_, gem_co_pads);
+    if (runGEMCoPad_) matchCoPadsToSimTrack(*gem_co_pads.product());
   }
 }
 
 GEMDigiMatcher::~GEMDigiMatcher() {}
-
-
-void
-GEMDigiMatcher::init()
-{
-  edm::Handle<GEMDigiCollection> gem_digis;
-  event().getByLabel(gemDigiInput_, gem_digis);
-  if (runGEMDigi_) matchDigisToSimTrack(*gem_digis.product());
-
-  edm::Handle<GEMCSCPadDigiCollection> gem_pads;
-  event().getByLabel(gemPadDigiInput_, gem_pads);
-  if (runGEMPad_) matchPadsToSimTrack(*gem_pads.product());
-
-  edm::Handle<GEMCSCPadDigiCollection> gem_co_pads;
-  event().getByLabel(gemPadDigiInput_, gem_co_pads);
-  if (runGEMCoPad_) matchCoPadsToSimTrack(*gem_co_pads.product());
-}
 
 
 void
@@ -88,7 +77,7 @@ GEMDigiMatcher::matchDigisToSimTrack(const GEMDigiCollection& digis)
     {
       if (verboseDigi_) cout<<"gdigi "<<p_id<<" "<<*d<<endl;
       // check that the digi is within BX range
-      if (d->bx() < minBXGEM_ || d->bx() > maxBXGEM_) continue;
+      if (d->bx() < minBXGEMDigi_ || d->bx() > maxBXGEMDigi_) continue;
       // check that it matches a strip that was hit by SimHits from our track
       if (hit_strips.find(d->strip()) == hit_strips.end()) continue;
       if (verboseDigi_) cout<<"oki"<<endl;
@@ -128,7 +117,7 @@ GEMDigiMatcher::matchPadsToSimTrack(const GEMCSCPadDigiCollection& pads)
     {
       if (verbosePad_) cout<<"chp "<<*pad<<endl;
       // check that the pad BX is within the range
-      if (pad->bx() < minBXGEM_ || pad->bx() > maxBXGEM_) continue;
+      if (pad->bx() < minBXGEMPad_ || pad->bx() > maxBXGEMPad_) continue;
       if (verbosePad_) cout<<"chp1"<<endl;
       // check that it matches a pad that was hit by SimHits from our track
       if (hit_pads.find(pad->pad()) == hit_pads.end()) continue;
