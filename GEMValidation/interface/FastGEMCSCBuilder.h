@@ -1,5 +1,5 @@
-#ifndef SimMuL1_FastGEMCSCBuilder_h
-#define SimMuL1_FastGEMCSCBuilder_h
+#ifndef GEMValidation_FastGEMCSCBuilder_h
+#define GEMValidation_FastGEMCSCBuilder_h
 
 /**\class FastGEMCSCBuilder
 
