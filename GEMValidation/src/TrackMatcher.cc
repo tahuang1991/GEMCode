@@ -162,24 +162,23 @@ TrackMatcher::init()
 
   dtrc_ = new CSCTFDTReceiver();
   
+  propagateSimTrack();
+  propagationInterStation();
+
   // tracks produced by TF
   edm::Handle<L1CSCTrackCollection> hl1Tracks;
   event().getByLabel(cscTfTrackInputLabel_,hl1Tracks);
   matchTfTrackToSimTrack(*hl1Tracks.product());
-  propagateSimTrack();
-  propagationInterStation();
   
   // L1 muon candidates after CSC sorter
   edm::Handle<L1MuRegionalCandCollection> hl1TfCands;
   event().getByLabel(cscTfCandInputLabel_, hl1TfCands);
-  const L1MuRegionalCandCollection* l1TfCands = hl1TfCands.product();
-  matchTfCandToSimTrack(l1TfCands);
+  matchTfCandToSimTrack(*hl1TfCands.product());
 
   // L1 muon candidates
   edm::Handle<l1extra::L1MuonParticleCollection> l1_particles;
   event().getByLabel(l1ExtraInputLabel_, l1_particles);
-  const l1extra::L1MuonParticleCollection* l1_part = l1_particles.product();
-  matchL1MuonParticleToSimTrack(l1_part);
+  matchL1MuonParticleToSimTrack(*l1_particles.product());
 }
 
 void 

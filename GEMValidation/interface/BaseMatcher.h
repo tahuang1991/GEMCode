@@ -77,6 +77,9 @@ static const float AVERAGE_ME0_Z(568.6); // [cm]
 class BaseMatcher
 {
 public:
+
+  /// Muon Subsystem
+  enum MuonType {DT= 1, CSC=2, RPC=3, GEM=4, ME0=5};
   
   /// CSC chamber types, according to CSCDetId::iChamberType()
   enum CSCType {CSC_ALL = 0, CSC_ME1a, CSC_ME1b, CSC_ME12, CSC_ME13,

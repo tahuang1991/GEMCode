@@ -306,6 +306,25 @@ SimHitMatcher::matchSimHitsToSimTrack(std::vector<unsigned int> track_ids,
 }
 
 
+const edm::PSimHitContainer& 
+SimHitMatcher::simHits(enum MuonType sub) const
+{
+  switch(sub) {
+  case MuonSubdetId::GEM: 
+    return gem_hits_;
+  case MuonSubdetId::CSC: 
+    return csc_hits_;
+  case MuonSubdetId::ME0: 
+    return me0_hits_;
+  case MuonSubdetId::RPC: 
+    return rpc_hits_;
+  case MuonSubdetId::DT: 
+    return dt_hits_;
+  }
+  return no_hits_;
+}
+
+
 std::set<unsigned int> 
 SimHitMatcher::detIdsGEM() const
 {

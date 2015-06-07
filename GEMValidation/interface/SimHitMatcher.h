@@ -32,6 +32,8 @@ public:
   
   ~SimHitMatcher();
 
+  /// access to all the Muon SimHits (use MuonSubdetId::SubSystem)
+  const edm::PSimHitContainer& simHits(enum MuonType) const;
   /// access to all the GEM SimHits
   const edm::PSimHitContainer& simHitsGEM() const {return gem_hits_;}
   /// access to all the CSC SimHits
