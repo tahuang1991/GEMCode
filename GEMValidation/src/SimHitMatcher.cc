@@ -371,6 +371,15 @@ SimHitMatcher::detIdsCSC(int csc_type) const
 
 
 std::set<unsigned int> 
+SimHitMatcher::detIdsDT() const
+{
+  std::set<unsigned int> result;
+  for (auto& p: dt_detid_to_hits_) result.insert(p.first);
+  return result;
+}
+
+
+std::set<unsigned int> 
 SimHitMatcher::detIdsGEMCoincidences() const
 {
   std::set<unsigned int> result;
@@ -816,7 +825,6 @@ SimHitMatcher::hitStripsInDetId(unsigned int detid, int margin_n_strips) const
       smax = (smax <= max_nstrips) ? smax : max_nstrips;
       for (int ss = smin; ss <= smax; ++ss) result.insert(ss);
     }
-  
   }
   return result;
 }
@@ -864,6 +872,28 @@ SimHitMatcher::hitCoPadsInDetId(unsigned int detid) const
   return gem_detids_to_copads_.at(detid);
 }
 
+
+std::set<int> 
+SimHitMatcher::hitWiresInDTLayerId(unsigned int detid, int margin_n_wires) const
+{
+  set<int> result;
+  if ( is_dt(detid) )
+  {
+    DTLayerId id(detid);
+    int max_nwires = dtGeometry_->layer(id)->specificTopology().channels();
+    for (auto& h: hitsInDetId(detid))
+    {
+      LocalPoint lp = h.entryPoint();
+      int central_wire = static_cast<int>(dtGeometry_->layer(id)->specificTopology().channel(lp));
+      int smin = central_wire - margin_n_wires;
+      smin = (smin > 0) ? smin : 1;
+      int smax = central_wire + margin_n_wires;
+      smax = (smax <= max_nwires) ? smax : max_nwires;
+      for (int ss = smin; ss <= smax; ++ss) result.insert(ss);
+    }
+  }
+  return result;
+}
 
 std::set<int> 
 SimHitMatcher::hitPartitions() const

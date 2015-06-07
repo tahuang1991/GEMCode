@@ -55,25 +55,20 @@ public:
 
 private:
 
-  void init();
-
   void matchPreRecoDigisToSimTrack(const ME0DigiPreRecoCollection& digis);
 
-  edm::InputTag gemDigiInput_;
-  edm::InputTag gemPadDigiInput_;
-  edm::InputTag gemCoPadDigiInput_;
+  edm::InputTag me0DigiInput_;
 
+  bool verboseDigi_;
+  bool runME0Digi_;
   int minBXME0_, maxBXME0_;
-
   int matchDeltaStrip_;
 
   std::map<unsigned int, ME0DigiPreRecoContainer> detid_to_digis_;
   std::map<unsigned int, ME0DigiPreRecoContainer> chamber_to_digis_;
   std::map<unsigned int, ME0DigiPreRecoContainer> superchamber_to_digis_;
 
-  bool verboseDigi_;
-
-  bool runME0Digi_;
+  ME0DigiPreRecoContainer no_me0_digis_;
 };
 
 #endif
