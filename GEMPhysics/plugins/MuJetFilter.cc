@@ -87,12 +87,13 @@ bool MuJetFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
   int nMuEndcap = 0;
   int nMuPTok = 0;
   for (auto muon: genMuons) {
-    if (abs(muon->eta()) < 1.1) nMuBarrel++;
-    if (abs(muon->eta()) > 1.1 and abs(muon->eta()) < 2.4) nMuEndcap++;
+    const float eta(fabs(muon->eta()));
+    if (eta < 1.1) nMuBarrel++;
+    if (eta > 1.1 and eta < 2.4) nMuEndcap++;
     if (muon->pt() > 10) nMuPTok++;
   }
-  
-  return nMuBarrel==2 and nMuBarrel==2 and nMuPTok==4;
+
+  return nMuBarrel>=2 and nMuEndcap>=2 and nMuPTok>=1;
 }
 
 void MuJetFilter::endJob() 

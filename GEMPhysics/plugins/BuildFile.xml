@@ -1,4 +1,4 @@
-<library name="GEMCodeGEMGEMPhysis_plugins" file="*.cc">
+<library name="GEMCodeGEMPhysis_plugins" file="*.cc">
   <use name="root"/>
   <use name="boost"/>
   <use name="FWCore/Framework"/>
