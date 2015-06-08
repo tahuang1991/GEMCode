@@ -55,28 +55,30 @@ CSCStubMatcher::CSCStubMatcher(SimHitMatcher& sh, CSCDigiMatcher& dg, GEMDigiMat
 
   minNHitsChamber_ = conf().getUntrackedParameter<int>("minNHitsChamber", 4);
 
-  if (!clctInput_.label().empty()) {
-    edm::Handle<CSCCLCTDigiCollection> clcts;
-    event().getByLabel(clctInput_, clcts);
-    if (runCLCT_) matchCLCTsToSimTrack(*clcts.product());    
-  }
-
-  if (!alctInput_.label().empty()) {
-    edm::Handle<CSCALCTDigiCollection> alcts;
-    event().getByLabel(alctInput_, alcts);
-    if (runALCT_) matchALCTsToSimTrack(*alcts.product());
-  }
-
-  if (!lctInput_.label().empty()) {
-    edm::Handle<CSCCorrelatedLCTDigiCollection> lcts;
-    event().getByLabel(lctInput_, lcts);
-    if (runLCT_) matchLCTsToSimTrack(*lcts.product());
-  }    
-  
-  if (!mplctInput_.label().empty()) {
-    edm::Handle<CSCCorrelatedLCTDigiCollection> mplcts;
-    event().getByLabel(mplctInput_, mplcts);
-    if (runMPLCT_) matchMPLCTsToSimTrack(*mplcts.product());
+  if (hasCSCGeometry_) {
+    if (!clctInput_.label().empty()) {
+      edm::Handle<CSCCLCTDigiCollection> clcts;
+      event().getByLabel(clctInput_, clcts);
+      if (runCLCT_) matchCLCTsToSimTrack(*clcts.product());    
+    }
+    
+    if (!alctInput_.label().empty()) {
+      edm::Handle<CSCALCTDigiCollection> alcts;
+      event().getByLabel(alctInput_, alcts);
+      if (runALCT_) matchALCTsToSimTrack(*alcts.product());
+    }
+    
+    if (!lctInput_.label().empty()) {
+      edm::Handle<CSCCorrelatedLCTDigiCollection> lcts;
+      event().getByLabel(lctInput_, lcts);
+      if (runLCT_) matchLCTsToSimTrack(*lcts.product());
+    }    
+    
+    if (!mplctInput_.label().empty()) {
+      edm::Handle<CSCCorrelatedLCTDigiCollection> mplcts;
+      event().getByLabel(mplctInput_, mplcts);
+      if (runMPLCT_) matchMPLCTsToSimTrack(*mplcts.product());
+    }
   }
 }
 
@@ -393,7 +395,7 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
            const bool caseAlctRpc(is_valid(alct[j]) and hasDigis and i==clct.size() and (ch_id.station() == 3 or ch_id.station() == 4));
            //const bool caseClctRpc(is_valid(clct[i]) and hasDigis and !is_valid(alct[j]) and (ch_id.station() == 3 or ch_id.station() == 4));
 
-          const CSCChamber* cscChamber(cscGeometry_->chamber(CSCDetId(id)));
+          const CSCChamber* cscChamber(getCSCGeometry()->chamber(CSCDetId(id)));
           const CSCLayer* cscKeyLayer(cscChamber->layer(3));
           const CSCLayerGeometry* cscKeyLayerGeometry(cscKeyLayer->geometry());
           const int nStrips(cscKeyLayerGeometry->numberOfStrips());

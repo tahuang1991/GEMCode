@@ -16,11 +16,12 @@ GEMRecHitMatcher::GEMRecHitMatcher(SimHitMatcher& sh)
   verboseGEMRecHit_ = gemRecHit_.getParameter<int>("verbose");
   runGEMRecHit_ = gemRecHit_.getParameter<bool>("run");
 
-  if (!(gemRecHitInput_.label().empty()))
-  {
-    edm::Handle<GEMRecHitCollection> gem_rechits;
-    event().getByLabel(gemRecHitInput_, gem_rechits);
-    if (runGEMRecHit_) matchRecHitsToSimTrack(*gem_rechits.product());
+  if (hasGEMGeometry_) {
+    if (!(gemRecHitInput_.label().empty())) {
+      edm::Handle<GEMRecHitCollection> gem_rechits;
+      event().getByLabel(gemRecHitInput_, gem_rechits);
+      if (runGEMRecHit_) matchRecHitsToSimTrack(*gem_rechits.product());
+    }
   }
 }
 
@@ -181,8 +182,8 @@ GEMRecHitMatcher::recHitPosition(const RecHit& rechit) const
   if ( t == GEM_STRIP )
   {
     GEMDetId idd(id);
-    LocalPoint lp = gemGeometry_->etaPartition(idd)->centreOfStrip(strip);
-    gp = gemGeometry_->idToDet(id)->surface().toGlobal(lp);
+    LocalPoint lp = getGEMGeometry()->etaPartition(idd)->centreOfStrip(strip);
+    gp = getGEMGeometry()->idToDet(id)->surface().toGlobal(lp);
   }
 
   return gp;

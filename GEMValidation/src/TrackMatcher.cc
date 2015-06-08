@@ -530,7 +530,7 @@ std::pair<float, float>
 TrackMatcher::intersectionEtaPhi(CSCDetId id, int wg, int hs)
 {
   const CSCDetId layerId(id.endcap(), id.station(), id.ring(), id.chamber(), CSCConstants::KEY_CLCT_LAYER);
-  const CSCLayer* csclayer(cscGeometry_->layer(layerId));
+  const CSCLayer* csclayer(getCSCGeometry()->layer(layerId));
   const CSCLayerGeometry* layer_geo(csclayer->geometry());
 
   // LCT::getKeyWG() starts from 0
@@ -540,7 +540,7 @@ TrackMatcher::intersectionEtaPhi(CSCDetId id, int wg, int hs)
   // note that LCT's HS starts from 0, but in geometry strips start from 1
   const float fractional_strip(0.5 * (hs + 1) - 0.25);
   const LocalPoint csc_intersect(layer_geo->intersectionOfStripAndWire(fractional_strip, wire));
-  const GlobalPoint csc_gp(cscGeometry_->idToDet(layerId)->surface().toGlobal(csc_intersect));
+  const GlobalPoint csc_gp(getCSCGeometry()->idToDet(layerId)->surface().toGlobal(csc_intersect));
   //std::cout << " simcharge " << simCharge << "  CSCDet Id  " << id << "   csc_gp.phi" << csc_gp.phi() << std::endl;
   return std::make_pair(csc_gp.eta(), csc_gp.phi());
 }
@@ -557,7 +557,7 @@ void TrackMatcher::propagateSimTrack()
   {
      int chamber = 1;
      const CSCDetId layerId(endcap, st, ring, chamber, CSCConstants::KEY_CLCT_LAYER);
-     const CSCLayer* csclayer(cscGeometry_->layer(layerId));
+     const CSCLayer* csclayer(getCSCGeometry()->layer(layerId));
      const GlobalPoint gp = csclayer->centerOfWireGroup(10);
    //  std::cout <<" layerId " << layerId << "z position: " << gp.z() << std::endl;
      GlobalPoint gp_propagate(propagateToZ(gp.z()));
@@ -571,7 +571,7 @@ void TrackMatcher::propagateSimTrack()
   {
      int chamber = 2;
      const CSCDetId layerId(endcap, st, ring, chamber, CSCConstants::KEY_CLCT_LAYER);
-     const CSCLayer* csclayer(cscGeometry_->layer(layerId));
+     const CSCLayer* csclayer(getCSCGeometry()->layer(layerId));
      GlobalPoint gp = csclayer->centerOfWireGroup(10);
      //std::cout <<" layerId " << layerId << "z position: " << gp.z() << std::endl;
      GlobalPoint gp_propagate(propagateToZ(gp.z()));
@@ -592,7 +592,7 @@ GlobalPoint TrackMatcher::propagationInterStation(int firstSt, int SecondSt, boo
     CSCDetId id(d);
     int chamber(odd ? 1:2);
     const CSCDetId layerId(id.endcap(), SecondSt, 1, chamber, CSCConstants::KEY_CLCT_LAYER);
-    const CSCLayer* csclayer(cscGeometry_->layer(layerId));
+    const CSCLayer* csclayer(getCSCGeometry()->layer(layerId));
     const GlobalPoint gpAtSecondSt = csclayer->centerOfWireGroup(10);
     if (id.station()==firstSt)
     {
@@ -602,9 +602,9 @@ GlobalPoint TrackMatcher::propagationInterStation(int firstSt, int SecondSt, boo
 	auto onehit(hits.at(0));
 	//std::cout <<" detId " << onehit.detUnitId() << "  momentu "<< onehit.momentumAtEntry() <<" entry point " << onehit.entryPoint() << std::endl;
         LocalPoint lp(onehit.entryPoint());
-	GlobalPoint gp(cscGeometry_->idToDet(onehit.detUnitId())->surface().toGlobal(lp));
+	GlobalPoint gp(getCSCGeometry()->idToDet(onehit.detUnitId())->surface().toGlobal(lp));
         LocalVector lv(onehit.momentumAtEntry());
-        GlobalVector gv(cscGeometry_->idToDet(onehit.detUnitId())->surface().toGlobal(lv));
+        GlobalVector gv(getCSCGeometry()->idToDet(onehit.detUnitId())->surface().toGlobal(lv));
 
         GlobalPoint gp_propagate(propagateToZ(gp, gv, gpAtSecondSt.z()));
 	return gp_propagate;

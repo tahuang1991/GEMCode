@@ -175,12 +175,6 @@ public:
 
  protected:
   
-  const CSCGeometry* cscGeometry_;
-  const RPCGeometry* rpcGeometry_;
-  const GEMGeometry* gemGeometry_;
-  const ME0Geometry* me0Geometry_;
-  const DTGeometry* dtGeometry_;
-
   bool hasGEMGeometry_;
   bool hasRPCGeometry_;
   bool hasME0Geometry_;
@@ -188,6 +182,12 @@ public:
   bool hasDTGeometry_; 
   
  private:
+
+  const CSCGeometry* cscGeometry_;
+  const RPCGeometry* rpcGeometry_;
+  const GEMGeometry* gemGeometry_;
+  const ME0Geometry* me0Geometry_;
+  const DTGeometry* dtGeometry_;
 
   const SimTrack& trk_;
   const SimVertex& vtx_;
@@ -205,11 +205,11 @@ public:
   edm::ESHandle<MagneticField> magfield_;
   edm::ESHandle<Propagator> propagator_;
   edm::ESHandle<Propagator> propagatorOpposite_;
-  edm::ESHandle<CSCGeometry> csc_geom;
-  edm::ESHandle<RPCGeometry> rpc_geom;
-  edm::ESHandle<GEMGeometry> gem_geom;
-  edm::ESHandle<ME0Geometry> me0_geom;
-  edm::ESHandle<DTGeometry> dt_geom;
+  edm::ESHandle<CSCGeometry> csc_geom_;
+  edm::ESHandle<RPCGeometry> rpc_geom_;
+  edm::ESHandle<GEMGeometry> gem_geom_;
+  edm::ESHandle<ME0Geometry> me0_geom_;
+  edm::ESHandle<DTGeometry> dt_geom_;
 };
 
 #endif

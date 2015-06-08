@@ -15,11 +15,12 @@ ME0DigiMatcher::ME0DigiMatcher(SimHitMatcher& sh)
   verboseDigi_ = me0Digi_.getParameter<int>("verbose");
   runME0Digi_ = me0Digi_.getParameter<bool>("run");
 
-  if (!me0DigiInput_.label().empty())
-  {
-    edm::Handle<ME0DigiPreRecoCollection> me0_digis;
-    event().getByLabel(me0DigiInput_, me0_digis);
-    if (runME0Digi_) matchPreRecoDigisToSimTrack(*me0_digis.product());    
+  if (hasME0Geometry_) {
+    if (!me0DigiInput_.label().empty()) {
+      edm::Handle<ME0DigiPreRecoCollection> me0_digis;
+      event().getByLabel(me0DigiInput_, me0_digis);
+      if (runME0Digi_) matchPreRecoDigisToSimTrack(*me0_digis.product());    
+    }
   }
 }
 

@@ -29,25 +29,24 @@ GEMDigiMatcher::GEMDigiMatcher(SimHitMatcher& sh)
   verboseCoPad_ = gemCoPad_.getParameter<int>("verbose");
   runGEMCoPad_ = gemCoPad_.getParameter<bool>("run");
 
-  if (!gemDigiInput_.label().empty())
-  {
-    edm::Handle<GEMDigiCollection> gem_digis;
-    event().getByLabel(gemDigiInput_, gem_digis);
-    if (runGEMDigi_) matchDigisToSimTrack(*gem_digis.product());
-  }
-
-  if (!gemPadDigiInput_.label().empty())
-  {
-    edm::Handle<GEMPadDigiCollection> gem_pads;
-    event().getByLabel(gemPadDigiInput_, gem_pads);
-    if (runGEMPad_) matchPadsToSimTrack(*gem_pads.product());
-  }
-
-  if (!gemCoPadDigiInput_.label().empty())
-  {
-    edm::Handle<GEMCoPadDigiCollection> gem_co_pads;
-    event().getByLabel(gemPadDigiInput_, gem_co_pads);
-    if (runGEMCoPad_) matchCoPadsToSimTrack(*gem_co_pads.product());
+  if (hasGEMGeometry_) {
+    if (!gemDigiInput_.label().empty()) {
+      edm::Handle<GEMDigiCollection> gem_digis;
+      event().getByLabel(gemDigiInput_, gem_digis);
+      if (runGEMDigi_) matchDigisToSimTrack(*gem_digis.product());
+    }
+    
+    if (!gemPadDigiInput_.label().empty()) {
+      edm::Handle<GEMPadDigiCollection> gem_pads;
+      event().getByLabel(gemPadDigiInput_, gem_pads);
+      if (runGEMPad_) matchPadsToSimTrack(*gem_pads.product());
+    }
+    
+    if (!gemCoPadDigiInput_.label().empty()) {
+      edm::Handle<GEMCoPadDigiCollection> gem_co_pads;
+      event().getByLabel(gemPadDigiInput_, gem_co_pads);
+      if (runGEMCoPad_) matchCoPadsToSimTrack(*gem_co_pads.product());
+    }
   }
 }
 
@@ -398,11 +397,11 @@ GEMDigiMatcher::extrapolateHsfromGEMPad(unsigned int id, int gempad) const
   else station = gem_id.station();
   CSCDetId csc_id(endcap, station, gem_id.ring(), gem_id.chamber(), 0);
 
-  const CSCChamber* cscChamber(cscGeometry_->chamber(csc_id));
+  const CSCChamber* cscChamber(getCSCGeometry()->chamber(csc_id));
   const CSCLayer* cscKeyLayer(cscChamber->layer(3));
   const CSCLayerGeometry* cscKeyLayerGeometry(cscKeyLayer->geometry());
 
-  const GEMChamber* gemChamber(gemGeometry_->chamber(id));
+  const GEMChamber* gemChamber(getGEMGeometry()->chamber(id));
   auto gemRoll(gemChamber->etaPartition(2));//any roll
   const int nGEMPads(gemRoll->npads());
   if (gempad > nGEMPads or gempad < 0) result = -1;
@@ -430,14 +429,11 @@ GEMDigiMatcher::extrapolateHsfromGEMStrip(unsigned int id, int gemstrip) const
   else station = gem_id.station();
   CSCDetId csc_id(endcap, station, gem_id.ring(), gem_id.chamber(), 0);
 
-//  const CSCGeometry* cscGeometry_(DigiMatcher::getCSCGeometry());
-//  const GEMGeometry* gemGeometry_(DigiMatcher::getGEMGeometry());
-
-  const CSCChamber* cscChamber(cscGeometry_->chamber(csc_id));
+  const CSCChamber* cscChamber(getCSCGeometry()->chamber(csc_id));
   const CSCLayer* cscKeyLayer(cscChamber->layer(3));
   const CSCLayerGeometry* cscKeyLayerGeometry(cscKeyLayer->geometry());
 
-  const GEMChamber* gemChamber(gemGeometry_->chamber(id));
+  const GEMChamber* gemChamber(getGEMGeometry()->chamber(id));
   auto gemRoll(gemChamber->etaPartition(2));//any roll
   const int nGEMStrips(gemRoll->nstrips());
   if (gemstrip > nGEMStrips or gemstrip < 0) result = -1;

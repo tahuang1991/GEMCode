@@ -17,9 +17,13 @@ DTDigiMatcher::DTDigiMatcher(SimHitMatcher& sh)
   verboseDigi_ = dtDigi_.getParameter<int>("verbose");
   runDTDigi_ = dtDigi_.getParameter<bool>("run");
 
-  edm::Handle<DTDigiCollection> dt_digis;
-  event().getByLabel(dtDigiInput_, dt_digis);
-  if (runDTDigi_) matchDigisToSimTrack(*dt_digis.product());
+  if (hasDTGeometry_) {
+    if (!dtDigiInput_.label().empty()) {
+      edm::Handle<DTDigiCollection> dt_digis;
+      event().getByLabel(dtDigiInput_, dt_digis);
+      if (runDTDigi_) matchDigisToSimTrack(*dt_digis.product());
+    }
+  }
 }
 
 DTDigiMatcher::~DTDigiMatcher() {}
@@ -130,7 +134,7 @@ int
 DTDigiMatcher::nLayersWithDigisInSuperLayer(unsigned int detId) const
 {
   set<int> layers;
-  for (auto& l: dtGeometry_->superLayer(DTSuperLayerId(detId))->layers())
+  for (auto& l: getDTGeometry()->superLayer(DTSuperLayerId(detId))->layers())
   {
     DTLayerId lid(l->id());
     if (digisInLayer(lid.rawId()).size()!=0)
@@ -144,7 +148,7 @@ int
 DTDigiMatcher::nSuperLayersWithDigisInChamber(unsigned int detId) const
 {
   set<int> superLayers;
-  for (auto& sl: dtGeometry_->chamber(DTChamberId(detId))->superLayers())
+  for (auto& sl: getDTGeometry()->chamber(DTChamberId(detId))->superLayers())
   {
     DTSuperLayerId slid(sl->id());
     if (digisInSuperLayer(slid.rawId()).size()!=0)

@@ -24,15 +24,15 @@ CSCDigiMatcher::CSCDigiMatcher(SimHitMatcher& sh)
   matchDeltaStrip_ = cscComparatorDigi_.getParameter<int>("matchDeltaStrip");
   runStrip_ = cscComparatorDigi_.getParameter<bool>("run");
 
-  if (! (cscComparatorDigiInput_.label().empty() || cscWireDigiInput_.label().empty()))
-  {
-    edm::Handle<CSCComparatorDigiCollection> comp_digis;
-    event().getByLabel(cscComparatorDigiInput_, comp_digis);
-    
-    edm::Handle<CSCWireDigiCollection> wire_digis;
-    event().getByLabel(cscWireDigiInput_, wire_digis);
-    
-    if (runWG_ and runStrip_) matchTriggerDigisToSimTrack(*comp_digis.product(), *wire_digis.product());
+  if (hasCSCGeometry_) {
+    if (! (cscComparatorDigiInput_.label().empty() || cscWireDigiInput_.label().empty())) {
+      edm::Handle<CSCComparatorDigiCollection> comp_digis;
+      event().getByLabel(cscComparatorDigiInput_, comp_digis);
+      
+      edm::Handle<CSCWireDigiCollection> wire_digis;
+      event().getByLabel(cscWireDigiInput_, wire_digis);      
+      if (runWG_ and runStrip_) matchTriggerDigisToSimTrack(*comp_digis.product(), *wire_digis.product());
+    }
   }
 }
 
