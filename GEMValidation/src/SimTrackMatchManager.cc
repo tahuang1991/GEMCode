@@ -2,7 +2,9 @@
 
 SimTrackMatchManager::SimTrackMatchManager(const SimTrack& t, const SimVertex& v,
       const edm::ParameterSet& ps, const edm::Event& ev, const edm::EventSetup& es)
-: simhits_(t, v, ps, ev, es)
+: 
+  // need additional protection
+  simhits_(t, v, ps, ev, es)
 , gem_digis_(simhits_)
 , me0_digis_(simhits_)
 , rpc_digis_(simhits_)

@@ -146,6 +146,11 @@ private:
                               const edm::PSimHitContainer& rpc_hits,
                               const edm::PSimHitContainer& me0_hits,
 			      const edm::PSimHitContainer& dt_hits);
+  void matchCSCSimHitsToSimTrack(std::vector<unsigned int> track_ids, const edm::PSimHitContainer& csc_hits);
+  void matchRPCSimHitsToSimTrack(std::vector<unsigned int> track_ids, const edm::PSimHitContainer& rpc_hits);
+  void matchGEMSimHitsToSimTrack(std::vector<unsigned int> track_ids, const edm::PSimHitContainer& gem_hits);
+  void matchME0SimHitsToSimTrack(std::vector<unsigned int> track_ids, const edm::PSimHitContainer& me0_hits);
+  void matchDTSimHitsToSimTrack(std::vector<unsigned int> track_ids, const edm::PSimHitContainer& dt_hits);
 
   bool simMuOnlyCSC_;
   bool simMuOnlyGEM_;
@@ -212,11 +217,6 @@ private:
   edm::InputTag me0SimHitInput_;
   edm::InputTag dtSimHitInput_;
 
-  edm::Handle<edm::PSimHitContainer> csc_hits;
-  edm::Handle<edm::PSimHitContainer> gem_hits;
-  edm::Handle<edm::PSimHitContainer> rpc_hits;
-  edm::Handle<edm::PSimHitContainer> me0_hits;
-  edm::Handle<edm::PSimHitContainer> dt_hits;
   edm::Handle<edm::SimTrackContainer> sim_tracks;
   edm::Handle<edm::SimVertexContainer> sim_vertices;
 };
