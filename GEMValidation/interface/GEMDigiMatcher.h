@@ -1,5 +1,5 @@
-#ifndef GEMValidation_GEMDigiMatcher_h
-#define GEMValidation_GEMDigiMatcher_h
+#ifndef GEMCode_GEMValidation_GEMDigiMatcher_h
+#define GEMCode_GEMValidation_GEMDigiMatcher_h
 
 /**\class DigiMatcher
 
@@ -7,8 +7,7 @@
 
  Original Author:  "Vadim Khotilovich"
 */
-
-#include "DigiMatcher.h"
+#include "GEMCode/GEMValidation/interface/DigiMatcher.h"
 
 #include "FWCore/Utilities/interface/InputTag.h"
 
@@ -19,6 +18,10 @@
 #include <vector>
 #include <map>
 #include <set>
+
+typedef std::vector<GEMDigi> GEMDigiContainer;
+typedef std::vector<GEMPadDigi> GEMPadDigiContainer;
+typedef std::vector<GEMCoPadDigi> GEMCoPadDigiContainer;
 
 class SimHitMatcher;
 
@@ -82,8 +85,6 @@ public:
 
 private:
 
-  void init();
-
   void matchDigisToSimTrack(const GEMDigiCollection& digis);
   void matchPadsToSimTrack(const GEMCSCPadDigiCollection& pads);
   void matchCoPadsToSimTrack(const GEMCSCPadDigiCollection& co_pads);
@@ -92,7 +93,9 @@ private:
   edm::InputTag gemPadDigiInput_;
   edm::InputTag gemCoPadDigiInput_;
 
-  int minBXGEM_, maxBXGEM_;
+  int minBXGEMDigi_, maxBXGEMDigi_;
+  int minBXGEMPad_, maxBXGEMPad_;
+  int minBXGEMCoPad_, maxBXGEMCoPad_;
 
   int matchDeltaStrip_;
 

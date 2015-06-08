@@ -1,9 +1,6 @@
 #include "GEMCode/GEMValidation/interface/RPCDigiMatcher.h"
 #include "GEMCode/GEMValidation/interface/SimHitMatcher.h"
 
-#include "DataFormats/MuonDetId/interface/CSCDetId.h"
-#include "DataFormats/MuonDetId/interface/CSCTriggerNumbering.h"
-
 using namespace std;
 using namespace matching;
 
@@ -19,26 +16,18 @@ RPCDigiMatcher::RPCDigiMatcher(SimHitMatcher& sh)
   verboseDigi_ = rpcDigi_.getParameter<int>("verbose");
   runRPCDigi_ = rpcDigi_.getParameter<bool>("run");
 
-  matchDeltaStrip_ = conf().getUntrackedParameter<int>("matchDeltaStripRPC", 1);
-
   setVerbose(conf().getUntrackedParameter<int>("verboseRPCDigi", 0));
 
-  if (!rpcDigiInput_.label().empty())
-  {
-    init();
+  if (hasRPCGeometry_) {
+    if (!rpcDigiInput_.label().empty()) {
+      edm::Handle<RPCDigiCollection> rpc_digis;
+      event().getByLabel(rpcDigiInput_, rpc_digis);
+      if (runRPCDigi_) matchDigisToSimTrack(*rpc_digis.product());
+    }
   }
 }
 
 RPCDigiMatcher::~RPCDigiMatcher() {}
-
-
-void
-RPCDigiMatcher::init()
-{
-  edm::Handle<RPCDigiCollection> rpc_digis;
-  event().getByLabel(rpcDigiInput_, rpc_digis);
-  if (runRPCDigi_) matchDigisToSimTrack(*rpc_digis.product());
-}
 
 
 void
@@ -100,16 +89,16 @@ RPCDigiMatcher::digisInDetId(unsigned int detid) const
 std::set<unsigned int>
 RPCDigiMatcher::chamberIds() const
 {
-   std::set<unsigned int> result;
-   for (auto& p: chamber_to_digis_) result.insert(p.first);
-   return result;
+  std::set<unsigned int> result;
+  for (auto& p: chamber_to_digis_) result.insert(p.first);
+  return result;
 }
 
 const matching::DigiContainer&
 RPCDigiMatcher::digisInChamber(unsigned int detid) const  //use chamber raw id here
 {
-   if (chamber_to_digis_.find(detid) == chamber_to_digis_.end()) return no_digis_;
-   return chamber_to_digis_.at(detid);
+  if (chamber_to_digis_.find(detid) == chamber_to_digis_.end()) return no_digis_;
+  return chamber_to_digis_.at(detid);
 }
 
 int
@@ -164,11 +153,11 @@ RPCDigiMatcher::extrapolateHsfromRPC(unsigned int id, int rpcstrip) const
   CSCDetId csc_id(endcap, rpc_id.station(), rpc_id.ring(), cscchamber, 0);
   
   //std::cout <<"RPC det " << rpc_id <<"  CSC det " << csc_id << std::endl;
-  const CSCChamber* cscChamber(cscGeometry_->chamber(csc_id));
+  const CSCChamber* cscChamber(getCSCGeometry()->chamber(csc_id));
   const CSCLayer* cscKeyLayer(cscChamber->layer(3));
   const CSCLayerGeometry* cscKeyLayerGeometry(cscKeyLayer->geometry());
 
-  const RPCChamber* rpcChamber(rpcGeometry_->chamber(rpc_id));
+  const RPCChamber* rpcChamber(getRPCGeometry()->chamber(rpc_id));
   auto rpcRoll(rpcChamber->roll(2));//any roll
   const int nStrips(rpcRoll->nstrips());
   if (rpcstrip > nStrips or rpcstrip < 0) return result;

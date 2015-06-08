@@ -35,40 +35,40 @@ BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
   hasDTGeometry_ = true;
 
   try {
-    es.get<MuonGeometryRecord>().get(gem_geom);
-    gemGeometry_ = &*gem_geom;
+    es.get<MuonGeometryRecord>().get(gem_geom_);
+    gemGeometry_ = &*gem_geom_;
   } catch (edm::eventsetup::NoProxyException<GEMGeometry>& e) {
     hasGEMGeometry_ = false;
     LogDebug("BaseMatcher") << "+++ Info: GEM geometry is unavailable. +++\n";
   }
 
   try {
-    es.get<MuonGeometryRecord>().get(me0_geom);
-    me0Geometry_ = &*me0_geom;
+    es.get<MuonGeometryRecord>().get(me0_geom_);
+    me0Geometry_ = &*me0_geom_;
   } catch (edm::eventsetup::NoProxyException<ME0Geometry>& e) {
     hasME0Geometry_ = false;
     LogDebug("BaseMatcher") << "+++ Info: ME0 geometry is unavailable. +++\n";
   }
 
   try {
-    es.get<MuonGeometryRecord>().get(csc_geom);
-    cscGeometry_ = &*csc_geom;
+    es.get<MuonGeometryRecord>().get(csc_geom_);
+    cscGeometry_ = &*csc_geom_;
   } catch (edm::eventsetup::NoProxyException<CSCGeometry>& e) {
     hasCSCGeometry_ = false;
     LogDebug("BaseMatcher") << "+++ Info: CSC geometry is unavailable. +++\n";
   }
 
   try {
-    es.get<MuonGeometryRecord>().get(rpc_geom);
-    rpcGeometry_ = &*rpc_geom;
+    es.get<MuonGeometryRecord>().get(rpc_geom_);
+    rpcGeometry_ = &*rpc_geom_;
   } catch (edm::eventsetup::NoProxyException<RPCGeometry>& e) {
     hasRPCGeometry_ = false;
     LogDebug("BaseMatcher") << "+++ Info: RPC geometry is unavailable. +++\n";
   }
 
   try {
-    es.get<MuonGeometryRecord>().get(dt_geom);
-    dtGeometry_ = &*dt_geom;
+    es.get<MuonGeometryRecord>().get(dt_geom_);
+    dtGeometry_ = &*dt_geom_;
   } catch (edm::eventsetup::NoProxyException<DTGeometry>& e) {
     hasDTGeometry_ = false;
     LogDebug("BaseMatcher") << "+++ Info: DT geometry is unavailable. +++\n";

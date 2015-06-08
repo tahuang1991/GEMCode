@@ -1,5 +1,5 @@
-#ifndef GEMValidation_GMTRegCand_h
-#define GEMValidation_GMTRegCand_h
+#ifndef GEMCode_GEMValidation_GMTRegCand_h
+#define GEMCode_GEMValidation_GMTRegCand_h
 
 #include "GEMCode/GEMValidation/interface/TFCand.h"
 

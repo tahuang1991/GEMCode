@@ -1,5 +1,5 @@
-#ifndef GEMValidation_CSCStubMatcher_h
-#define GEMValidation_CSCStubMatcher_h
+#ifndef GEMCode_GEMValidation_CSCStubMatcher_h
+#define GEMCode_GEMValidation_CSCStubMatcher_h
 
 /**\class CSCStubMatcher
 
@@ -26,7 +26,6 @@
 #include <set>
 
 class SimHitMatcher;
-//class CSCDigiMatcher;
 
 class CSCStubMatcher : public DigiMatcher
 {
@@ -80,8 +79,6 @@ public:
 
   bool checkStubInChamber(CSCDetId id, CSCCorrelatedLCTDigi lct) const;
 private:
-
-  void init();
 
   void matchCLCTsToSimTrack(const CSCCLCTDigiCollection& clcts);
   void matchALCTsToSimTrack(const CSCALCTDigiCollection& alcts);

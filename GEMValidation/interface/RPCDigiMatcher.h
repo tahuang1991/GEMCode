@@ -1,5 +1,5 @@
-#ifndef GEMValidation_RPCDigiMatcher_h
-#define GEMValidation_RPCDigiMatcher_h
+#ifndef GEMCode_GEMValidation_RPCDigiMatcher_h
+#define GEMCode_GEMValidation_RPCDigiMatcher_h
 
 /**\class DigiMatcher
 
@@ -8,7 +8,7 @@
  Original Author:  "Vadim Khotilovich"
 */
 
-#include "DigiMatcher.h"
+#include "GEMCode/GEMValidation/interface/DigiMatcher.h"
 
 #include "FWCore/Utilities/interface/InputTag.h"
 
@@ -18,6 +18,8 @@
 #include <vector>
 #include <map>
 #include <set>
+
+typedef std::vector<RPCDigi> RPCDigiContainer;
 
 class SimHitMatcher;
 
@@ -52,8 +54,6 @@ public:
   std::set<int> partitionNumbers() const;
 
 private:
-
-  void init();
 
   void matchDigisToSimTrack(const RPCDigiCollection& digis);
 

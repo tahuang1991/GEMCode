@@ -1,5 +1,5 @@
-#ifndef GEMValidation_BaseMatcher_h
-#define GEMValidation_BaseMatcher_h
+#ifndef GEMCode_GEMValidation_BaseMatcher_h
+#define GEMCode_GEMValidation_BaseMatcher_h
 
 /**\class BaseMatcher
 
@@ -31,6 +31,7 @@
 #include "Geometry/DTGeometry/interface/DTGeometry.h"
 
 #include "DataFormats/MuonDetId/interface/CSCDetId.h"
+#include <DataFormats/MuonDetId/interface/CSCTriggerNumbering.h>
 #include "DataFormats/MuonDetId/interface/GEMDetId.h"
 #include "DataFormats/MuonDetId/interface/RPCDetId.h"
 #include "DataFormats/MuonDetId/interface/ME0DetId.h"
@@ -77,6 +78,9 @@ static const float AVERAGE_ME0_Z(568.6); // [cm]
 class BaseMatcher
 {
 public:
+
+  /// Muon Subsystem
+  enum MuonType {DT= 1, CSC=2, RPC=3, GEM=4, ME0=5};
   
   /// CSC chamber types, according to CSCDetId::iChamberType()
   enum CSCType {CSC_ALL = 0, CSC_ME1a, CSC_ME1b, CSC_ME12, CSC_ME13,
@@ -85,11 +89,13 @@ public:
   /// GEM chamber types
   enum GEMType {GEM_ALL = 0, GEM_ME11, GEM_ME21};
   
-  /// RPC endcap chamber types
+  /// RPC endcap chamber types -- FIXME
   enum RPCType {RPC_ALL = 0, RPC_ME12, RPC_ME13, RPC_ME22, RPC_ME23, 
-                RPC_ME31, RPC_ME32, RPC_ME33, RPC_ME41, RPC_ME42, RPC_ME43};
+                RPC_ME31, RPC_ME32, RPC_ME33, RPC_ME41, RPC_ME42, RPC_ME43,
+		RPC_MB10, RPC_MB11, RPC_MB12, RPC_MB20, RPC_MB21, 
+		RPC_MB22, RPC_MB30, RPC_MB31, RPC_MB32, RPC_MB40, RPC_MB41, RPC_MB42};
 
-  /// DT chamber types
+  /// DT chamber types -- FIXME
   enum DTType { DT_ALL = 0, DT_MB10, DT_MB11, DT_MB12, DT_MB20, DT_MB21, 
 		DT_MB22, DT_MB30, DT_MB31, DT_MB32, DT_MB40, DT_MB41, DT_MB42};
 
@@ -169,12 +175,6 @@ public:
 
  protected:
   
-  const CSCGeometry* cscGeometry_;
-  const RPCGeometry* rpcGeometry_;
-  const GEMGeometry* gemGeometry_;
-  const ME0Geometry* me0Geometry_;
-  const DTGeometry* dtGeometry_;
-
   bool hasGEMGeometry_;
   bool hasRPCGeometry_;
   bool hasME0Geometry_;
@@ -182,6 +182,12 @@ public:
   bool hasDTGeometry_; 
   
  private:
+
+  const CSCGeometry* cscGeometry_;
+  const RPCGeometry* rpcGeometry_;
+  const GEMGeometry* gemGeometry_;
+  const ME0Geometry* me0Geometry_;
+  const DTGeometry* dtGeometry_;
 
   const SimTrack& trk_;
   const SimVertex& vtx_;
@@ -199,11 +205,11 @@ public:
   edm::ESHandle<MagneticField> magfield_;
   edm::ESHandle<Propagator> propagator_;
   edm::ESHandle<Propagator> propagatorOpposite_;
-  edm::ESHandle<CSCGeometry> csc_geom;
-  edm::ESHandle<RPCGeometry> rpc_geom;
-  edm::ESHandle<GEMGeometry> gem_geom;
-  edm::ESHandle<ME0Geometry> me0_geom;
-  edm::ESHandle<DTGeometry> dt_geom;
+  edm::ESHandle<CSCGeometry> csc_geom_;
+  edm::ESHandle<RPCGeometry> rpc_geom_;
+  edm::ESHandle<GEMGeometry> gem_geom_;
+  edm::ESHandle<ME0Geometry> me0_geom_;
+  edm::ESHandle<DTGeometry> dt_geom_;
 };
 
 #endif

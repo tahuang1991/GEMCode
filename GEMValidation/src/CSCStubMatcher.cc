@@ -1,9 +1,6 @@
 #include "GEMCode/GEMValidation/interface/CSCStubMatcher.h"
 #include "GEMCode/GEMValidation/interface/SimHitMatcher.h"
 
-#include "DataFormats/MuonDetId/interface/CSCDetId.h"
-#include <DataFormats/MuonDetId/interface/CSCTriggerNumbering.h>
-
 #include <algorithm>
 
 using namespace std;
@@ -58,39 +55,35 @@ CSCStubMatcher::CSCStubMatcher(SimHitMatcher& sh, CSCDigiMatcher& dg, GEMDigiMat
 
   minNHitsChamber_ = conf().getUntrackedParameter<int>("minNHitsChamber", 4);
 
-  setVerbose(conf().getUntrackedParameter<int>("verboseCSCStub", 0));
-
-  if (! ( clctInput_.label().empty() || alctInput_.label().empty() ||
-          lctInput_.label().empty() || mplctInput_.label().empty() )
-      )
-  {
-   init();
+  if (hasCSCGeometry_) {
+    if (!clctInput_.label().empty()) {
+      edm::Handle<CSCCLCTDigiCollection> clcts;
+      event().getByLabel(clctInput_, clcts);
+      if (runCLCT_) matchCLCTsToSimTrack(*clcts.product());    
+    }
+    
+    if (!alctInput_.label().empty()) {
+      edm::Handle<CSCALCTDigiCollection> alcts;
+      event().getByLabel(alctInput_, alcts);
+      if (runALCT_) matchALCTsToSimTrack(*alcts.product());
+    }
+    
+    if (!lctInput_.label().empty()) {
+      edm::Handle<CSCCorrelatedLCTDigiCollection> lcts;
+      event().getByLabel(lctInput_, lcts);
+      if (runLCT_) matchLCTsToSimTrack(*lcts.product());
+    }    
+    
+    if (!mplctInput_.label().empty()) {
+      edm::Handle<CSCCorrelatedLCTDigiCollection> mplcts;
+      event().getByLabel(mplctInput_, mplcts);
+      if (runMPLCT_) matchMPLCTsToSimTrack(*mplcts.product());
+    }
   }
 }
 
 
 CSCStubMatcher::~CSCStubMatcher() {}
-
-
-void CSCStubMatcher::init()
-{
-  edm::Handle<CSCCLCTDigiCollection> clcts;
-  event().getByLabel(clctInput_, clcts);
-
-  edm::Handle<CSCALCTDigiCollection> alcts;
-  event().getByLabel(alctInput_, alcts);
-
-  edm::Handle<CSCCorrelatedLCTDigiCollection> lcts;
-  event().getByLabel(lctInput_, lcts);
-
-  edm::Handle<CSCCorrelatedLCTDigiCollection> mplcts;
-  event().getByLabel(mplctInput_, mplcts);
-
-  if (runCLCT_) matchCLCTsToSimTrack(*clcts.product());
-  if (runALCT_) matchALCTsToSimTrack(*alcts.product());
-  if (runLCT_) matchLCTsToSimTrack(*lcts.product());
-  if (runMPLCT_) matchMPLCTsToSimTrack(*mplcts.product());
-}
 
 
 void
@@ -402,7 +395,7 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
            const bool caseAlctRpc(is_valid(alct[j]) and hasDigis and i==clct.size() and (ch_id.station() == 3 or ch_id.station() == 4));
            //const bool caseClctRpc(is_valid(clct[i]) and hasDigis and !is_valid(alct[j]) and (ch_id.station() == 3 or ch_id.station() == 4));
 
-          const CSCChamber* cscChamber(cscGeometry_->chamber(CSCDetId(id)));
+          const CSCChamber* cscChamber(getCSCGeometry()->chamber(CSCDetId(id)));
           const CSCLayer* cscKeyLayer(cscChamber->layer(3));
           const CSCLayerGeometry* cscKeyLayerGeometry(cscKeyLayer->geometry());
           const int nStrips(cscKeyLayerGeometry->numberOfStrips());

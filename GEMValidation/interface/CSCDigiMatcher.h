@@ -1,5 +1,5 @@
-#ifndef GEMValidation_CSCDigiMatcher_h
-#define GEMValidation_CSCDigiMatcher_h
+#ifndef GEMCode_GEMValidation_CSCDigiMatcher_h
+#define GEMCode_GEMValidation_CSCDigiMatcher_h
 
 /**\class CSCDigiMatcher
 
@@ -66,8 +66,6 @@ public:
   std::set<int> wiregroupsInChamber(unsigned int, int max_gap_to_fill = 0) const;
 
 private:
-
-  void init();
 
   void matchTriggerDigisToSimTrack(const CSCComparatorDigiCollection& comparators, const CSCWireDigiCollection& wires);
 
