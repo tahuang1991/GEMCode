@@ -9,7 +9,7 @@ GEMRecHitMatcher::GEMRecHitMatcher(SimHitMatcher& sh)
   , simhit_matcher_(&sh)
 {
   auto gemRecHit_= conf().getParameter<edm::ParameterSet>("gemRecHit");
-  gemRecHitInput_ = gemRecHit_.getParameter<edm::InputTag>("validInputTags");
+  gemRecHitInput_ = gemRecHit_.getParameter<std::vector<edm::InputTag>>("validInputTags");
   minBXGEM_ = gemRecHit_.getParameter<int>("minBX");
   maxBXGEM_ = gemRecHit_.getParameter<int>("maxBX");
   matchDeltaStrip_ = gemRecHit_.getParameter<int>("matchDeltaStrip");
@@ -17,11 +17,8 @@ GEMRecHitMatcher::GEMRecHitMatcher(SimHitMatcher& sh)
   runGEMRecHit_ = gemRecHit_.getParameter<bool>("run");
 
   if (hasGEMGeometry_) {
-    if (!(gemRecHitInput_.label().empty())) {
-      edm::Handle<GEMRecHitCollection> gem_rechits;
-      event().getByLabel(gemRecHitInput_, gem_rechits);
-      if (runGEMRecHit_) matchRecHitsToSimTrack(*gem_rechits.product());
-    }
+    edm::Handle<GEMRecHitCollection> gem_rechits;
+    if (gemvalidation::getByLabel(gemRecHitInput_, gem_rechits, event())) if (runGEMRecHit_) matchRecHitsToSimTrack(*gem_rechits.product());
   }
 }
 

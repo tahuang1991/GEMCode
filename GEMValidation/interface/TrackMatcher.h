@@ -104,11 +104,11 @@ class TrackMatcher : public CSCStubMatcher
   const RPCDigiMatcher* rpc_digi_matcher_;
   const CSCStubMatcher* csc_stub_matcher_;
 
-  edm::InputTag cscTfTrackInputLabel_;
-  edm::InputTag cscTfCandInputLabel_;
-  edm::InputTag gmtRegCandInputLabel_;
-  edm::InputTag gmtCandInputLabel_;
-  edm::InputTag l1ExtraInputLabel_;
+  std::vector<edm::InputTag> cscTfTrackInputLabel_;
+  std::vector<edm::InputTag> cscTfCandInputLabel_;
+  std::vector<edm::InputTag> gmtRegCandInputLabel_;
+  std::vector<edm::InputTag> gmtCandInputLabel_;
+  std::vector<edm::InputTag> l1ExtraInputLabel_;
 
   int minBXTFTrack_, maxBXTFTrack_;
   int minBXTFCand_, maxBXTFCand_;

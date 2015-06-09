@@ -156,9 +156,9 @@ private:
 
   edm::ParameterSet cfg_;
 
-  edm::InputTag simTrackInput_;
-  edm::InputTag gemSimHitInput_;
-  edm::InputTag gemRecHitInput_;
+  std::vector<edm::InputTag> simTrackInput_;
+  std::vector<edm::InputTag> gemSimHitInput_;
+  std::vector<edm::InputTag> gemRecHitInput_;
 
   double simTrackMinPt_;
   double simTrackMaxPt_;
@@ -182,7 +182,7 @@ GEMRecHitAnalyzer::GEMRecHitAnalyzer(const edm::ParameterSet& iConfig)
 {
   cfg_ = iConfig.getParameter<edm::ParameterSet>("simTrackMatching");
   auto simTrack = cfg_.getParameter<edm::ParameterSet>("simTrack");
-  simTrackInput_ = simTrack.getParameter<edm::InputTag>("validInputTags");
+  simTrackInput_ = simTrack.getParameter<std::vector<edm::InputTag>>("validInputTags");
   simTrackMinPt_ = simTrack.getParameter<double>("minPt");
   simTrackMaxPt_ = simTrack.getParameter<double>("maxPt");
   simTrackMinEta_ = simTrack.getParameter<double>("minEta");
@@ -190,10 +190,10 @@ GEMRecHitAnalyzer::GEMRecHitAnalyzer(const edm::ParameterSet& iConfig)
   simTrackOnlyMuon_ = simTrack.getParameter<bool>("onlyMuon");
 
   auto gemSimHit = cfg_.getParameter<edm::ParameterSet>("gemSimHit");
-  gemSimHitInput_ = gemSimHit.getParameter<edm::InputTag>("validInputTags");
+  gemSimHitInput_ = gemSimHit.getParameter<std::vector<edm::InputTag>>("validInputTags");
 
   auto gemRecHit = cfg_.getParameter<edm::ParameterSet>("gemRecHit");
-  gemRecHitInput_ = gemRecHit.getParameter<edm::InputTag>("validInputTags");
+  gemRecHitInput_ = gemRecHit.getParameter<std::vector<edm::InputTag>>("validInputTags");
 
   bookGEMEventsTree();
   bookGEMRecHitTree();
@@ -250,12 +250,12 @@ void GEMRecHitAnalyzer::beginJob()
 
 void GEMRecHitAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-  iEvent.getByLabel(gemRecHitInput_, gemRecHits_);
-  iEvent.getByLabel(gemSimHitInput_, GEMHits);
-  iEvent.getByLabel(simTrackInput_, sim_tracks);
-  iEvent.getByLabel(simTrackInput_, sim_vertices);
-  if(hasGEMGeometry_) analyzeGEM(iEvent);
-  if(hasGEMGeometry_) analyzeTracks(cfg_,iEvent,iSetup); 
+  if (gemvalidation::getByLabel(gemRecHitInput_, gemRecHits_, iEvent) and gemvalidation::getByLabel(gemSimHitInput_, GEMHits, iEvent)) {
+    if(hasGEMGeometry_) analyzeGEM(iEvent);
+    if (gemvalidation::getByLabel(simTrackInput_, sim_tracks, iEvent) and gemvalidation::getByLabel(simTrackInput_, sim_vertices, iEvent)) {
+      if(hasGEMGeometry_) analyzeTracks(cfg_,iEvent,iSetup); 
+    }
+  }
 }
 
 void GEMRecHitAnalyzer::bookGEMEventsTree()

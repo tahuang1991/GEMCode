@@ -10,7 +10,7 @@ DTDigiMatcher::DTDigiMatcher(SimHitMatcher& sh)
 : DigiMatcher(sh)
 {
   auto dtDigi_= conf().getParameter<edm::ParameterSet>("dtDigi");
-  dtDigiInput_ = dtDigi_.getParameter<edm::InputTag>("validInputTags");
+  dtDigiInput_ = dtDigi_.getParameter<std::vector<edm::InputTag>>("validInputTags");
   minBXDT_ = dtDigi_.getParameter<int>("minBX");
   maxBXDT_ = dtDigi_.getParameter<int>("maxBX");
   matchDeltaWire_ = dtDigi_.getParameter<int>("matchDeltaWire");
@@ -18,11 +18,8 @@ DTDigiMatcher::DTDigiMatcher(SimHitMatcher& sh)
   runDTDigi_ = dtDigi_.getParameter<bool>("run");
 
   if (hasDTGeometry_) {
-    if (!dtDigiInput_.label().empty()) {
-      edm::Handle<DTDigiCollection> dt_digis;
-      event().getByLabel(dtDigiInput_, dt_digis);
-      if (runDTDigi_) matchDigisToSimTrack(*dt_digis.product());
-    }
+    edm::Handle<DTDigiCollection> dt_digis;
+    if(gemvalidation::getByLabel(dtDigiInput_, dt_digis, event())) if (runDTDigi_) matchDigisToSimTrack(*dt_digis.product());
   }
 }
 

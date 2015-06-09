@@ -154,11 +154,11 @@ private:
   edm::ParameterSet cfg_;
   bool verbose_;
 
-  edm::InputTag simTrackInput_;
-  edm::InputTag gemSimHitInput_;
-  edm::InputTag rpcSimHitInput_;
-  edm::InputTag cscSimHitInput_;
-  edm::InputTag me0SimHitInput_;
+  std::vector<edm::InputTag> simTrackInput_;
+  std::vector<edm::InputTag> gemSimHitInput_;
+  std::vector<edm::InputTag> rpcSimHitInput_;
+  std::vector<edm::InputTag> cscSimHitInput_;
+  std::vector<edm::InputTag> me0SimHitInput_;
 
   double simTrackMinPt_;
   double simTrackMaxPt_;
@@ -188,7 +188,7 @@ MuonSimHitAnalyzer::MuonSimHitAnalyzer(const edm::ParameterSet& ps)
   verbose_ = cfg_.getParameter<bool>("verbose");
 
   auto simTrack = cfg_.getParameter<edm::ParameterSet>("simTrack");
-  simTrackInput_ = simTrack.getParameter<edm::InputTag>("validInputTags");
+  simTrackInput_ = simTrack.getParameter<std::vector<edm::InputTag>>("validInputTags");
   simTrackMinPt_ = simTrack.getParameter<double>("minPt");
   simTrackMaxPt_ = simTrack.getParameter<double>("maxPt");
   simTrackMinEta_ = simTrack.getParameter<double>("minEta");
@@ -196,16 +196,16 @@ MuonSimHitAnalyzer::MuonSimHitAnalyzer(const edm::ParameterSet& ps)
   simTrackOnlyMuon_ = simTrack.getParameter<bool>("onlyMuon");
 
   auto gemSimHit = cfg_.getParameter<edm::ParameterSet>("gemSimHit");
-  gemSimHitInput_ = gemSimHit.getParameter<edm::InputTag>("validInputTags");
+  gemSimHitInput_ = gemSimHit.getParameter<std::vector<edm::InputTag>>("validInputTags");
   
   auto cscSimHit = cfg_.getParameter<edm::ParameterSet>("cscSimHit");
-  cscSimHitInput_ = cscSimHit.getParameter<edm::InputTag>("validInputTags");
+  cscSimHitInput_ = cscSimHit.getParameter<std::vector<edm::InputTag>>("validInputTags");
   
   auto me0SimHit = cfg_.getParameter<edm::ParameterSet>("me0SimHit");
-  me0SimHitInput_ = me0SimHit.getParameter<edm::InputTag>("validInputTags");
+  me0SimHitInput_ = me0SimHit.getParameter<std::vector<edm::InputTag>>("validInputTags");
   
   auto rpcSimHit = cfg_.getParameter<edm::ParameterSet>("rpcSimHit");
-  rpcSimHitInput_ = rpcSimHit.getParameter<edm::InputTag>("validInputTags");
+  rpcSimHitInput_ = rpcSimHit.getParameter<std::vector<edm::InputTag>>("validInputTags");
 
   bookCSCSimHitsTree();
   bookRPCSimHitsTree();
@@ -284,21 +284,16 @@ void MuonSimHitAnalyzer::beginRun(const edm::Run &iRun, const edm::EventSetup &i
 
 void MuonSimHitAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-  iEvent.getByLabel(gemSimHitInput_, GEMHits);
-  if(hasGEMGeometry_ and GEMHits->size()) analyzeGEM(iEvent);
-
-  iEvent.getByLabel(me0SimHitInput_, ME0Hits);
-  if(hasME0Geometry_ and ME0Hits->size()) analyzeME0(iEvent);
-
-  iEvent.getByLabel(cscSimHitInput_, CSCHits);
-  if(hasCSCGeometry_ and CSCHits->size()) analyzeCSC(iEvent);
-  
-  iEvent.getByLabel(rpcSimHitInput_, RPCHits);
-  if(hasRPCGeometry_ and RPCHits->size()) analyzeRPC(iEvent);
-  
-  iEvent.getByLabel(simTrackInput_, simVertices);
-  iEvent.getByLabel(simTrackInput_, simTracks);
-  if(hasGEMGeometry_ and GEMHits->size()) analyzeTracks(iEvent,iSetup);
+  if (gemvalidation::getByLabel(gemSimHitInput_, GEMHits, iEvent)) if(hasGEMGeometry_) analyzeGEM(iEvent);
+  if (gemvalidation::getByLabel(me0SimHitInput_, ME0Hits, iEvent)) if(hasME0Geometry_) analyzeME0(iEvent);
+  if (gemvalidation::getByLabel(cscSimHitInput_, CSCHits, iEvent)) if(hasCSCGeometry_) analyzeCSC(iEvent);
+  if (gemvalidation::getByLabel(rpcSimHitInput_, RPCHits, iEvent)) if(hasRPCGeometry_) analyzeRPC(iEvent);
+  if (gemvalidation::getByLabel(simTrackInput_, simVertices, iEvent) and 
+      gemvalidation::getByLabel(simTrackInput_, simTracks, iEvent)) {
+    if(hasGEMGeometry_) {
+      analyzeTracks(iEvent,iSetup);
+    }
+  }
 }
 
 void MuonSimHitAnalyzer::bookCSCSimHitsTree()

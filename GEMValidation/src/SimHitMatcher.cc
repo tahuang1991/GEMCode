@@ -12,35 +12,35 @@ SimHitMatcher::SimHitMatcher(const SimTrack& t, const SimVertex& v,
 {
   auto gemSimHit_ = conf().getParameter<edm::ParameterSet>("gemSimHit");
   verboseGEM_ = gemSimHit_.getParameter<int>("verbose");
-  gemSimHitInput_ = gemSimHit_.getParameter<edm::InputTag>("validInputTags");
+  gemSimHitInput_ = gemSimHit_.getParameter<std::vector<edm::InputTag>>("validInputTags");
   simMuOnlyGEM_ = gemSimHit_.getParameter<bool>("simMuOnly");
   discardEleHitsGEM_ = gemSimHit_.getParameter<bool>("discardEleHits");
   runGEMSimHit_ = gemSimHit_.getParameter<bool>("run");
 
   auto cscSimHit_= conf().getParameter<edm::ParameterSet>("cscSimHit");
   verboseCSC_ = cscSimHit_.getParameter<int>("verbose");
-  cscSimHitInput_ = cscSimHit_.getParameter<edm::InputTag>("validInputTags");
+  cscSimHitInput_ = cscSimHit_.getParameter<std::vector<edm::InputTag>>("validInputTags");
   simMuOnlyCSC_ = cscSimHit_.getParameter<bool>("simMuOnly");
   discardEleHitsCSC_ = cscSimHit_.getParameter<bool>("discardEleHits");
   runCSCSimHit_ = cscSimHit_.getParameter<bool>("run");
 
   auto me0SimHit_ = conf().getParameter<edm::ParameterSet>("me0SimHit");
   verboseME0_ = me0SimHit_.getParameter<int>("verbose");
-  me0SimHitInput_ = me0SimHit_.getParameter<edm::InputTag>("validInputTags");
+  me0SimHitInput_ = me0SimHit_.getParameter<std::vector<edm::InputTag>>("validInputTags");
   simMuOnlyME0_ = me0SimHit_.getParameter<bool>("simMuOnly");
   discardEleHitsME0_ = me0SimHit_.getParameter<bool>("discardEleHits");
   runME0SimHit_ = me0SimHit_.getParameter<bool>("run");
 
   auto rpcSimHit_ = conf().getParameter<edm::ParameterSet>("rpcSimHit");
   verboseRPC_ = rpcSimHit_.getParameter<int>("verbose");
-  rpcSimHitInput_ = rpcSimHit_.getParameter<edm::InputTag>("validInputTags");
+  rpcSimHitInput_ = rpcSimHit_.getParameter<std::vector<edm::InputTag>>("validInputTags");
   simMuOnlyRPC_ = rpcSimHit_.getParameter<bool>("simMuOnly");
   discardEleHitsRPC_ = rpcSimHit_.getParameter<bool>("discardEleHits");
   runRPCSimHit_ = rpcSimHit_.getParameter<bool>("run");
 
   auto dtSimHit_ = conf().getParameter<edm::ParameterSet>("dtSimHit");
   verboseDT_ = dtSimHit_.getParameter<int>("verbose");
-  dtSimHitInput_ = dtSimHit_.getParameter<edm::InputTag>("validInputTags");
+  dtSimHitInput_ = dtSimHit_.getParameter<std::vector<edm::InputTag>>("validInputTags");
   simMuOnlyDT_ = dtSimHit_.getParameter<bool>("simMuOnly");
   discardEleHitsDT_ = dtSimHit_.getParameter<bool>("discardEleHits");
   runDTSimHit_ = dtSimHit_.getParameter<bool>("run");
@@ -77,84 +77,82 @@ SimHitMatcher::init()
   // matchSimHitsToSimTrack(track_ids, csc_hits_select, *gem_hits.product(),
   //                        *rpc_hits.product(),*me0_hits.product(),*dt_hits.product());
 
-  if (hasCSCGeometry_ and !cscSimHitInput_.label().empty()) {
+  if (hasCSCGeometry_) {
     edm::Handle<edm::PSimHitContainer> csc_hits;  
-    event().getByLabel(cscSimHitInput_, csc_hits);
+    if (gemvalidation::getByLabel(cscSimHitInput_, csc_hits, event())) {
 
-    // select CSC simhits
-    edm::PSimHitContainer csc_hits_select;
-    for (auto& h: *csc_hits.product())
-    {
-      CSCDetId id(h.detUnitId());
-      if ( useCSCChamberType(id.iChamberType()) )  csc_hits_select.push_back(h);
-    }    
-    
-    if(runCSCSimHit_) {
-      matchCSCSimHitsToSimTrack(track_ids, csc_hits_select);
+      // select CSC simhits
+      edm::PSimHitContainer csc_hits_select;
+      for (auto& h: *csc_hits.product()) {
+        CSCDetId id(h.detUnitId());
+        if ( useCSCChamberType(id.iChamberType()) )  csc_hits_select.push_back(h);
+      }    
+      
+      if(runCSCSimHit_) {
+        matchCSCSimHitsToSimTrack(track_ids, csc_hits_select);
+      }
       
       if (verboseCSC_) {
-	cout<<"sh tn ntids "<<no<<" "<<track_ids.size()<<" "<<csc_hits_select.size()<<endl;
-	cout<<"detids CSC " << detIdsCSC().size()<<endl;
-	
-	auto csc_det_ids = detIdsCSC();
-	for (auto id: csc_det_ids) {
-	  //auto& csc_simhits = hitsInDetId(id);
-	  auto csc_simhits = hitsInDetId(id);
-	  auto csc_simhits_gp = simHitsMeanPosition(csc_simhits);
-	  auto strips = hitStripsInDetId(id);
-	  cout<<"detid "<<CSCDetId(id)<<": "<<csc_simhits.size()<<" "<<csc_simhits_gp.phi()<<" "<< csc_detid_to_hits_[id].size()<<endl;
-	  cout<<"nstrp "<<strips.size()<<endl;
-	  cout<<"strps : "; std::copy(strips.begin(), strips.end(), ostream_iterator<int>(cout, " ")); cout<<endl;
-	}
+        cout<<"sh tn ntids "<<no<<" "<<track_ids.size()<<" "<<csc_hits_select.size()<<endl;
+        cout<<"detids CSC " << detIdsCSC().size()<<endl;
+        
+        auto csc_det_ids = detIdsCSC();
+        for (auto id: csc_det_ids) {
+          //auto& csc_simhits = hitsInDetId(id);
+          auto csc_simhits = hitsInDetId(id);
+          auto csc_simhits_gp = simHitsMeanPosition(csc_simhits);
+          auto strips = hitStripsInDetId(id);
+          cout<<"detid "<<CSCDetId(id)<<": "<<csc_simhits.size()<<" "<<csc_simhits_gp.phi()<<" "<< csc_detid_to_hits_[id].size()<<endl;
+          cout<<"nstrp "<<strips.size()<<endl;
+          cout<<"strps : "; std::copy(strips.begin(), strips.end(), ostream_iterator<int>(cout, " ")); cout<<endl;
+        }
       }
     }
   }
-
-  if (hasGEMGeometry_ and !gemSimHitInput_.label().empty()) {
+  
+  if (hasGEMGeometry_) {
     edm::Handle<edm::PSimHitContainer> gem_hits;
-    event().getByLabel(gemSimHitInput_, gem_hits);
-
-    if(runGEMSimHit_) {
-      matchGEMSimHitsToSimTrack(track_ids, *gem_hits.product());
+    if (gemvalidation::getByLabel(gemSimHitInput_, gem_hits, event())) {
       
-      if (verboseGEM_) {
-	cout << "detids GEM " << detIdsGEM().size() << endl;
-	
-	auto gem_ch_ids = chamberIdsGEM();
-	for (auto id: gem_ch_ids) {
-	  auto& gem_simhits = hitsInChamber(id);
-	  auto gem_simhits_gp = simHitsMeanPosition(gem_simhits);
-	  cout<<"cchid "<<GEMDetId(id)<<": nHits "<<gem_simhits.size()<<" phi "<<gem_simhits_gp.phi()<<" nCh "<< gem_chamber_to_hits_[id].size()<<endl;
-	  //       auto strips = hitStripsInDetId(id);
-	  //       cout<<"nstrp "<<strips.size()<<endl;
-	  //       cout<<"strps : "; std::copy(strips.begin(), strips.end(), ostream_iterator<int>(cout, " ")); cout<<endl;
-	}
-	auto gem_sch_ids = superChamberIdsGEM();
-	for (auto id: gem_sch_ids) {
-	  auto& gem_simhits = hitsInSuperChamber(id);
-	  auto gem_simhits_gp = simHitsMeanPosition(gem_simhits);
-	  cout<<"schid "<<GEMDetId(id)<<": "<<nCoincidencePadsWithHits() <<" | "<<gem_simhits.size()<<" "<<gem_simhits_gp.phi()<<" "<< gem_superchamber_to_hits_[id].size()<<endl;
-	}
-      }    
+      if(runGEMSimHit_) {
+        matchGEMSimHitsToSimTrack(track_ids, *gem_hits.product());
+        
+        if (verboseGEM_) {
+          cout << "detids GEM " << detIdsGEM().size() << endl;
+          
+          auto gem_ch_ids = chamberIdsGEM();
+          for (auto id: gem_ch_ids) {
+            auto& gem_simhits = hitsInChamber(id);
+            auto gem_simhits_gp = simHitsMeanPosition(gem_simhits);
+            cout<<"cchid "<<GEMDetId(id)<<": nHits "<<gem_simhits.size()<<" phi "<<gem_simhits_gp.phi()<<" nCh "<< gem_chamber_to_hits_[id].size()<<endl;
+            //       auto strips = hitStripsInDetId(id);
+            //       cout<<"nstrp "<<strips.size()<<endl;
+            //       cout<<"strps : "; std::copy(strips.begin(), strips.end(), ostream_iterator<int>(cout, " ")); cout<<endl;
+          }
+          auto gem_sch_ids = superChamberIdsGEM();
+          for (auto id: gem_sch_ids) {
+            auto& gem_simhits = hitsInSuperChamber(id);
+            auto gem_simhits_gp = simHitsMeanPosition(gem_simhits);
+            cout<<"schid "<<GEMDetId(id)<<": "<<nCoincidencePadsWithHits() <<" | "<<gem_simhits.size()<<" "<<gem_simhits_gp.phi()<<" "<< gem_superchamber_to_hits_[id].size()<<endl;
+          }
+        }    
+      }
     }
   }
   
-  if (hasME0Geometry_ and !me0SimHitInput_.label().empty()) {
+  if (hasME0Geometry_) {
     edm::Handle<edm::PSimHitContainer> me0_hits;
-    event().getByLabel(me0SimHitInput_, me0_hits);
-    if (runME0SimHit_) matchME0SimHitsToSimTrack(track_ids, *me0_hits.product());
+    if (gemvalidation::getByLabel(me0SimHitInput_, me0_hits, event())) if (runME0SimHit_) matchME0SimHitsToSimTrack(track_ids, *me0_hits.product());
   }
 
-  if (hasRPCGeometry_ and !rpcSimHitInput_.label().empty()) {
+  if (hasRPCGeometry_) {
     edm::Handle<edm::PSimHitContainer> rpc_hits;
-    event().getByLabel(rpcSimHitInput_, rpc_hits);
-    if (runRPCSimHit_) matchRPCSimHitsToSimTrack(track_ids, *rpc_hits.product());
+    if (gemvalidation::getByLabel(rpcSimHitInput_, rpc_hits, event())) if (runRPCSimHit_) matchRPCSimHitsToSimTrack(track_ids, *rpc_hits.product());
   }
   
-  if (hasDTGeometry_ and !dtSimHitInput_.label().empty()) {
+  if (hasDTGeometry_) {
     edm::Handle<edm::PSimHitContainer> dt_hits;
-    event().getByLabel(dtSimHitInput_, dt_hits);
-    if (runDTSimHit_) matchDTSimHitsToSimTrack(track_ids, *dt_hits.product());    
+    if (gemvalidation::getByLabel(dtSimHitInput_, dt_hits, event())) if (runDTSimHit_) matchDTSimHitsToSimTrack(track_ids, *dt_hits.product());    
   }
 }
 

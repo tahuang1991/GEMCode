@@ -68,7 +68,7 @@ private:
 
   void matchRecHitsToSimTrack(const GEMRecHitCollection& recHits);
 
-  edm::InputTag gemRecHitInput_;
+  std::vector<edm::InputTag> gemRecHitInput_;
 
   const SimHitMatcher* simhit_matcher_;
 

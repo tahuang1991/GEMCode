@@ -90,9 +90,9 @@ private:
   void matchPadsToSimTrack(const GEMPadDigiCollection& pads);
   void matchCoPadsToSimTrack(const GEMCoPadDigiCollection& co_pads);
 
-  edm::InputTag gemDigiInput_;
-  edm::InputTag gemPadDigiInput_;
-  edm::InputTag gemCoPadDigiInput_;
+  std::vector<edm::InputTag> gemDigiInput_;
+  std::vector<edm::InputTag> gemPadDigiInput_;
+  std::vector<edm::InputTag> gemCoPadDigiInput_;
 
   int minBXGEMDigi_, maxBXGEMDigi_;
   int minBXGEMPad_, maxBXGEMPad_;

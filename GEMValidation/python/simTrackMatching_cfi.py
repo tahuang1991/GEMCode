@@ -19,7 +19,7 @@ SimTrackMatching = cms.PSet(
     ## per collection params
     simTrack = cms.PSet(
         verbose = cms.int32(0),
-        validInputTags = cms.VInputTag(cms.InputTag('g4SimHits')),
+        validInputTags = cms.InputTag('g4SimHits'),
         minPt = cms.double(1.5),
         maxPt = cms.double(999.),
         minEta = cms.double(1.45),
@@ -31,7 +31,7 @@ SimTrackMatching = cms.PSet(
     ## GEM
     gemSimHit = cms.PSet(
         verbose = cms.int32(0),
-        validInputTags = cms.VInputTag(cms.InputTag('g4SimHits','MuonGEMHits')),
+        validInputTags = cms.InputTag('g4SimHits','MuonGEMHits'),
         run = cms.bool(True),
         simMuOnly = cms.bool(True),
         discardEleHits = cms.bool(True),
@@ -69,7 +69,7 @@ SimTrackMatching = cms.PSet(
     ## ME0
     me0SimHit = cms.PSet(
         verbose = cms.int32(0),
-        validInputTags = cms.VInputTag(cms.InputTag('g4SimHits','MuonME0Hits')),
+        validInputTags = cms.InputTag('g4SimHits','MuonME0Hits'),
         run = cms.bool(False),
         simMuOnly = cms.bool(True),
         discardEleHits = cms.bool(True),
@@ -106,7 +106,7 @@ SimTrackMatching = cms.PSet(
     ## RPC
     rpcSimHit = cms.PSet(
         verbose = cms.int32(0),
-        validInputTags = cms.VInputTag(cms.InputTag('g4SimHits','MuonRPCHits')),
+        validInputTags = cms.InputTag('g4SimHits','MuonRPCHits'),
         run = cms.bool(True),
         simMuOnly = cms.bool(True),
         discardEleHits = cms.bool(True),
@@ -130,7 +130,7 @@ SimTrackMatching = cms.PSet(
     ## CSC
     cscSimHit = cms.PSet(
         verbose = cms.int32(0),
-        validInputTags = cms.VInputTag(cms.InputTag('g4SimHits','MuonCSCHits')),
+        validInputTags = cms.InputTag('g4SimHits','MuonCSCHits'),
         run = cms.bool(True),
         simMuOnly = cms.bool(True),
         discardEleHits = cms.bool(True),
@@ -214,7 +214,7 @@ SimTrackMatching = cms.PSet(
     ## DT
     dtSimHit = cms.PSet(
         verbose = cms.int32(0),
-        validInputTags = cms.VInputTag(cms.InputTag('g4SimHits','MuonDTHits')),
+        validInputTags = cms.InputTag('g4SimHits','MuonDTHits'),
         run = cms.bool(True),
         simMuOnly = cms.bool(True),
         discardEleHits = cms.bool(True),

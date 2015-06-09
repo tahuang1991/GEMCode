@@ -60,7 +60,7 @@ private:
 
   void matchDigisToSimTrack(const DTDigiCollection& digis);
 
-  edm::InputTag dtDigiInput_;
+  std::vector<edm::InputTag> dtDigiInput_;
 
   bool verboseDigi_;
   bool runDTDigi_;

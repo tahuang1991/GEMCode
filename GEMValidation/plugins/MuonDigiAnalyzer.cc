@@ -188,11 +188,11 @@ private:
 
   edm::ParameterSet cfg_;
 
-  edm::InputTag simTrackInput_;
-  edm::InputTag gemDigiInput_;
-  edm::InputTag rpcDigiInput_;
-  edm::InputTag gemPadDigiInput_;
-  edm::InputTag gemCoPadDigiInput_;
+  std::vector<edm::InputTag> simTrackInput_;
+  std::vector<edm::InputTag> gemDigiInput_;
+  std::vector<edm::InputTag> rpcDigiInput_;
+  std::vector<edm::InputTag> gemPadDigiInput_;
+  std::vector<edm::InputTag> gemCoPadDigiInput_;
 
   double simTrackMinPt_;
   double simTrackMaxPt_;
@@ -232,7 +232,7 @@ MuonDigiAnalyzer::MuonDigiAnalyzer(const edm::ParameterSet& ps)
 {
   cfg_ = ps.getParameter<edm::ParameterSet>("simTrackMatching");
   auto simTrack = cfg_.getParameter<edm::ParameterSet>("simTrack");
-  simTrackInput_ = simTrack.getParameter<edm::InputTag>("validInputTags");
+  simTrackInput_ = simTrack.getParameter<std::vector<edm::InputTag>>("validInputTags");
   simTrackMinPt_ = simTrack.getParameter<double>("minPt");
   simTrackMaxPt_ = simTrack.getParameter<double>("maxPt");
   simTrackMinEta_ = simTrack.getParameter<double>("minEta");
@@ -240,16 +240,16 @@ MuonDigiAnalyzer::MuonDigiAnalyzer(const edm::ParameterSet& ps)
   simTrackOnlyMuon_ = simTrack.getParameter<bool>("onlyMuon");
 
   auto gemDigi = cfg_.getParameter<edm::ParameterSet>("gemStripDigi");
-  gemDigiInput_ = gemDigi.getParameter<edm::InputTag>("validInputTags");
+  gemDigiInput_ = gemDigi.getParameter<std::vector<edm::InputTag>>("validInputTags");
   
   auto rpcDigi = cfg_.getParameter<edm::ParameterSet>("rpcStripDigi");
-  rpcDigiInput_ = rpcDigi.getParameter<edm::InputTag>("validInputTags");
+  rpcDigiInput_ = rpcDigi.getParameter<std::vector<edm::InputTag>>("validInputTags");
 
   auto gemPadDigi= cfg_.getParameter<edm::ParameterSet>("gemPadDigi");
-  gemPadDigiInput_ = gemPadDigi.getParameter<edm::InputTag>("validInputTags");
+  gemPadDigiInput_ = gemPadDigi.getParameter<std::vector<edm::InputTag>>("validInputTags");
   
   auto gemCoPadDigi= cfg_.getParameter<edm::ParameterSet>("gemCoPadDigi");
-  gemCoPadDigiInput_ = gemCoPadDigi.getParameter<edm::InputTag>("validInputTags");
+  gemCoPadDigiInput_ = gemCoPadDigi.getParameter<std::vector<edm::InputTag>>("validInputTags");
 
   bookRPCDigiTree();
   bookGEMDigiTree();
@@ -313,22 +313,14 @@ void MuonDigiAnalyzer::beginRun(edm::Run const&, edm::EventSetup const& iSetup)
 
 void MuonDigiAnalyzer::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
-  iEvent.getByLabel(rpcDigiInput_, rpc_digis);
-  if (hasRPCGeometry_) analyzeRPC();
-
-  iEvent.getByLabel(gemDigiInput_, gem_digis);
-  if(hasGEMGeometry_) analyzeGEM();
+  if (gemvalidation::getByLabel(rpcDigiInput_, rpc_digis, iEvent)) if (hasRPCGeometry_) analyzeRPC();
   
-  iEvent.getByLabel(gemPadDigiInput_, gempad_digis);
-  if(hasGEMGeometry_) analyzeGEMPad();  
-  
-  iEvent.getByLabel(gemCoPadDigiInput_, gemcopad_digis);
-  if(hasGEMGeometry_) analyzeGEMCoPad();  
-
-  iEvent.getByLabel(simTrackInput_, sim_tracks);
-  iEvent.getByLabel(simTrackInput_, sim_vertices);
-
-  if(hasGEMGeometry_) analyzeTracks(cfg_,iEvent,iSetup);  
+  if (hasGEMGeometry_) {
+    if (gemvalidation::getByLabel(gemDigiInput_, gem_digis, iEvent)) analyzeGEM();  
+    if (gemvalidation::getByLabel(gemPadDigiInput_, gempad_digis, iEvent)) analyzeGEMPad();    
+    if (gemvalidation::getByLabel(gemCoPadDigiInput_, gemcopad_digis, iEvent)) analyzeGEMCoPad();  
+    if (gemvalidation::getByLabel(simTrackInput_, sim_tracks, iEvent) and gemvalidation::getByLabel(simTrackInput_, sim_vertices, iEvent)) analyzeTracks(cfg_,iEvent,iSetup);  
+  }
 }
 
 void MuonDigiAnalyzer::bookRPCDigiTree()

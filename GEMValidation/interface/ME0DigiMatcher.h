@@ -57,7 +57,7 @@ private:
 
   void matchPreRecoDigisToSimTrack(const ME0DigiPreRecoCollection& digis);
 
-  edm::InputTag me0DigiInput_;
+  std::vector<edm::InputTag> me0DigiInput_;
 
   bool verboseDigi_;
   bool runME0Digi_;

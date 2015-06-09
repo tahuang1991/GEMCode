@@ -9,7 +9,7 @@ CSCDigiMatcher::CSCDigiMatcher(SimHitMatcher& sh)
 : DigiMatcher(sh)
 {
   auto cscWireDigi_ = conf().getParameter<edm::ParameterSet>("cscWireDigi");
-  cscWireDigiInput_ = cscWireDigi_.getParameter<edm::InputTag>("validInputTags");
+  cscWireDigiInput_ = cscWireDigi_.getParameter<std::vector<edm::InputTag>>("validInputTags");
   verboseWG_ = cscWireDigi_.getParameter<int>("verbose");
   minBXCSCWire_ = cscWireDigi_.getParameter<int>("minBX");
   maxBXCSCWire_ = cscWireDigi_.getParameter<int>("maxBX");
@@ -17,7 +17,7 @@ CSCDigiMatcher::CSCDigiMatcher(SimHitMatcher& sh)
   runWG_ = cscWireDigi_.getParameter<bool>("run");
 
   auto cscComparatorDigi_ = conf().getParameter<edm::ParameterSet>("cscStripDigi");
-  cscComparatorDigiInput_ = cscComparatorDigi_.getParameter<edm::InputTag>("validInputTags");
+  cscComparatorDigiInput_ = cscComparatorDigi_.getParameter<std::vector<edm::InputTag>>("validInputTags");
   verboseStrip_ = cscComparatorDigi_.getParameter<int>("verbose");
   minBXCSCComp_ = cscComparatorDigi_.getParameter<int>("minBX");
   maxBXCSCComp_ = cscComparatorDigi_.getParameter<int>("maxBX");
@@ -25,14 +25,11 @@ CSCDigiMatcher::CSCDigiMatcher(SimHitMatcher& sh)
   runStrip_ = cscComparatorDigi_.getParameter<bool>("run");
 
   if (hasCSCGeometry_) {
-    if (! (cscComparatorDigiInput_.label().empty() || cscWireDigiInput_.label().empty())) {
-      edm::Handle<CSCComparatorDigiCollection> comp_digis;
-      event().getByLabel(cscComparatorDigiInput_, comp_digis);
-      
-      edm::Handle<CSCWireDigiCollection> wire_digis;
-      event().getByLabel(cscWireDigiInput_, wire_digis);      
+    edm::Handle<CSCComparatorDigiCollection> comp_digis;
+    edm::Handle<CSCWireDigiCollection> wire_digis;
+    if(gemvalidation::getByLabel(cscComparatorDigiInput_, comp_digis, event()) and 
+       gemvalidation::getByLabel(cscWireDigiInput_, wire_digis, event()))
       if (runWG_ and runStrip_) matchTriggerDigisToSimTrack(*comp_digis.product(), *wire_digis.product());
-    }
   }
 }
 

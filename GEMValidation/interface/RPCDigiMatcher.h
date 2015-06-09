@@ -57,7 +57,7 @@ private:
 
   void matchDigisToSimTrack(const RPCDigiCollection& digis);
 
-  edm::InputTag rpcDigiInput_;
+  std::vector<edm::InputTag> rpcDigiInput_;
 
   int minBXRPC_, maxBXRPC_;
 

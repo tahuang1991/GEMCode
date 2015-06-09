@@ -69,8 +69,8 @@ private:
 
   void matchTriggerDigisToSimTrack(const CSCComparatorDigiCollection& comparators, const CSCWireDigiCollection& wires);
 
-  edm::InputTag cscComparatorDigiInput_;
-  edm::InputTag cscWireDigiInput_;
+  std::vector<edm::InputTag> cscComparatorDigiInput_;
+  std::vector<edm::InputTag> cscWireDigiInput_;
 
   int minBXCSCComp_, maxBXCSCComp_;
   int minBXCSCWire_, maxBXCSCWire_;

@@ -57,16 +57,16 @@ CSCStubMatcher::CSCStubMatcher(SimHitMatcher& sh, CSCDigiMatcher& dg, GEMDigiMat
 
   if (hasCSCGeometry_) {
     edm::Handle<CSCCLCTDigiCollection> clcts;
-    if (getByLabel(clctInputs_, clcts)) if (runCLCT_) matchCLCTsToSimTrack(*clcts.product());    
+    if (gemvalidation::getByLabel(clctInputs_, clcts, event())) if (runCLCT_) matchCLCTsToSimTrack(*clcts.product());    
     
     edm::Handle<CSCALCTDigiCollection> alcts;
-    if (getByLabel(alctInputs_, alcts)) if (runALCT_) matchALCTsToSimTrack(*alcts.product());    
+    if (gemvalidation::getByLabel(alctInputs_, alcts, event())) if (runALCT_) matchALCTsToSimTrack(*alcts.product());    
     
     edm::Handle<CSCCorrelatedLCTDigiCollection> lcts;
-    if (getByLabel(lctInputs_, lcts)) if (runLCT_) matchLCTsToSimTrack(*lcts.product());    
+    if (gemvalidation::getByLabel(lctInputs_, lcts, event())) if (runLCT_) matchLCTsToSimTrack(*lcts.product());    
     
     edm::Handle<CSCCorrelatedLCTDigiCollection> mplcts;
-    if (getByLabel(mplctInputs_, mplcts)) if (runMPLCT_) matchMPLCTsToSimTrack(*mplcts.product());    
+    if (gemvalidation::getByLabel(mplctInputs_, mplcts, event())) if (runMPLCT_) matchMPLCTsToSimTrack(*mplcts.product());    
   }
 }
 

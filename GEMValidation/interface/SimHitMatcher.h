@@ -211,11 +211,11 @@ private:
   bool verboseME0_;
   bool verboseDT_;
 
-  edm::InputTag gemSimHitInput_;
-  edm::InputTag cscSimHitInput_;
-  edm::InputTag rpcSimHitInput_;
-  edm::InputTag me0SimHitInput_;
-  edm::InputTag dtSimHitInput_;
+  std::vector<edm::InputTag> gemSimHitInput_;
+  std::vector<edm::InputTag> cscSimHitInput_;
+  std::vector<edm::InputTag> rpcSimHitInput_;
+  std::vector<edm::InputTag> me0SimHitInput_;
+  std::vector<edm::InputTag> dtSimHitInput_;
 
   edm::Handle<edm::SimTrackContainer> sim_tracks;
   edm::Handle<edm::SimVertexContainer> sim_vertices;

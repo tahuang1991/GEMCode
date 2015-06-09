@@ -37,6 +37,8 @@
 #include "DataFormats/MuonDetId/interface/ME0DetId.h"
 #include "DataFormats/MuonDetId/interface/DTWireId.h"
 
+#include "GEMCode/GEMValidation/interface/Helpers.h"
+
 inline bool is_dt(unsigned int detId) {
   return (DetId(detId)).subdetId() == MuonSubdetId::DT;
 }
@@ -139,11 +141,6 @@ public:
   const edm::Event& event() const {return ev_;}
   const edm::EventSetup& eventSetup() const {return es_;}
 
-  // checks if an inputTag is valid
-  template<typename PROD>
-  bool
-  getByLabel(std::vector<edm::InputTag> const&, edm::Handle<PROD>&) const;
-
   /// check if CSC chamber type is in the used list
   bool useCSCChamberType(int csc_type);
   
@@ -216,25 +213,5 @@ public:
   edm::ESHandle<ME0Geometry> me0_geom_;
   edm::ESHandle<DTGeometry> dt_geom_;
 };
-
-template<typename PROD>
-bool
-BaseMatcher::getByLabel(std::vector<edm::InputTag> const& tags, edm::Handle<PROD>& result) const
-{
-  int i=0;
-  bool inputTagIsNotValid(true);
-  while(inputTagIsNotValid) {
-    event().getByLabel(tags.at(i), result);
-    if (result.isValid()) {
-      if (verbose_) std::cout << tags.at(i) << " is a valid inputTag" << std::endl;
-      inputTagIsNotValid = false;
-    } else {
-      if (verbose_) std::cout << tags.at(i) << " is an invalid inputTag" << std::endl;
-    }
-    ++i;
-  }
-  return (!inputTagIsNotValid);
-}
-
 
 #endif
