@@ -37,7 +37,7 @@ GEMDigiMatcher::GEMDigiMatcher(SimHitMatcher& sh)
     if (gemvalidation::getByLabel(gemPadDigiInput_, gem_pads, event())) if (runGEMPad_) matchPadsToSimTrack(*gem_pads.product());
     
     edm::Handle<GEMCoPadDigiCollection> gem_co_pads;
-    if (gemvalidation::getByLabel(gemPadDigiInput_, gem_co_pads, event())) if (runGEMCoPad_) matchCoPadsToSimTrack(*gem_co_pads.product());
+    if (gemvalidation::getByLabel(gemCoPadDigiInput_, gem_co_pads, event())) if (runGEMCoPad_) matchCoPadsToSimTrack(*gem_co_pads.product());
   }
 }
 

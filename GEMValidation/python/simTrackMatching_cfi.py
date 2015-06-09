@@ -18,7 +18,7 @@ SimTrackMatching = cms.PSet(
     verbose = cms.bool(True),
     ## per collection params
     simTrack = cms.PSet(
-        verbose = cms.int32(0),
+        verbose = cms.int32(1),
         validInputTags = cms.VInputTag(cms.InputTag('g4SimHits')),
         minPt = cms.double(1.5),
         maxPt = cms.double(999.),
@@ -30,7 +30,7 @@ SimTrackMatching = cms.PSet(
     ),
     ## GEM
     gemSimHit = cms.PSet(
-        verbose = cms.int32(0),
+        verbose = cms.int32(1),
         validInputTags = cms.VInputTag(cms.InputTag('g4SimHits','MuonGEMHits')),
         run = cms.bool(True),
         simMuOnly = cms.bool(True),
@@ -46,14 +46,14 @@ SimTrackMatching = cms.PSet(
     ),
     gemPadDigi = cms.PSet(
         verbose = cms.int32(0),
-        validInputTags = cms.VInputTag(cms.InputTag("simMuonGEMCSCPadDigis")),
+        validInputTags = cms.VInputTag(cms.InputTag("simMuonGEMPadDigis")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
      ),
     gemCoPadDigi = cms.PSet(
         verbose = cms.int32(0),
-        validInputTags = cms.VInputTag(cms.InputTag("simMuonGEMCSCPadDigis", "Coincidence")),
+        validInputTags = cms.VInputTag(cms.InputTag("simCscTriggerPrimitiveDigis")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
@@ -68,9 +68,9 @@ SimTrackMatching = cms.PSet(
     ),
     ## ME0
     me0SimHit = cms.PSet(
-        verbose = cms.int32(0),
+        verbose = cms.int32(1),
         validInputTags = cms.VInputTag(cms.InputTag('g4SimHits','MuonME0Hits')),
-        run = cms.bool(False),
+        run = cms.bool(True),
         simMuOnly = cms.bool(True),
         discardEleHits = cms.bool(True),
     ),
@@ -105,7 +105,7 @@ SimTrackMatching = cms.PSet(
     ),
     ## RPC
     rpcSimHit = cms.PSet(
-        verbose = cms.int32(0),
+        verbose = cms.int32(1),
         validInputTags = cms.VInputTag(cms.InputTag('g4SimHits','MuonRPCHits')),
         run = cms.bool(True),
         simMuOnly = cms.bool(True),
@@ -129,7 +129,7 @@ SimTrackMatching = cms.PSet(
     ),
     ## CSC
     cscSimHit = cms.PSet(
-        verbose = cms.int32(0),
+        verbose = cms.int32(1),
         validInputTags = cms.VInputTag(cms.InputTag('g4SimHits','MuonCSCHits')),
         run = cms.bool(True),
         simMuOnly = cms.bool(True),
@@ -180,7 +180,7 @@ SimTrackMatching = cms.PSet(
         minBX = cms.int32(5),
         maxBX = cms.int32(7),
         minNHitsChamber = cms.int32(4),
-        addGhosts = cms.bool(True),
+        addGhosts = cms.bool(False),
         matchAlctGem = cms.bool(True),
         matchAlctRpc = cms.bool(True),
         matchClctGem = cms.bool(False),
@@ -212,7 +212,7 @@ SimTrackMatching = cms.PSet(
     ),
     ## DT
     dtSimHit = cms.PSet(
-        verbose = cms.int32(0),
+        verbose = cms.int32(1),
         validInputTags = cms.VInputTag(cms.InputTag('g4SimHits','MuonDTHits')),
         run = cms.bool(True),
         simMuOnly = cms.bool(True),
@@ -324,7 +324,7 @@ SimTrackMatching = cms.PSet(
     gmtRegCand = cms.PSet(
         verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag("simGmtDigis")),
-        run = cms.bool(False),
+        run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
         deltaR = cms.double(0.05),
@@ -332,7 +332,7 @@ SimTrackMatching = cms.PSet(
     gmtCand = cms.PSet(
         verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag("simGmtDigis")),
-        run = cms.bool(False),
+        run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
         deltaR = cms.double(0.05),

@@ -11,18 +11,17 @@ namespace gemvalidation
   bool
   getByLabel(std::vector<edm::InputTag> const& tags, edm::Handle<PROD>& result, const edm::Event& iEvent)
   {
-    int i=0;
     const bool verbose(false);
     bool inputTagIsNotValid(true);
-    while(inputTagIsNotValid) {
-      iEvent.getByLabel(tags.at(i), result);
+    for (unsigned i=0; i<tags.size(); ++i){
+      iEvent.getByLabel(tags[i], result);
       if (result.isValid()) {
-        if (verbose) std::cout << tags.at(i) << " is a valid inputTag" << std::endl;
+        if (verbose) std::cout << tags[i] << " is a valid inputTag " << i << std::endl;
         inputTagIsNotValid = false;
+        break;
       } else {
-      if (verbose) std::cout << tags.at(i) << " is an invalid inputTag" << std::endl;
+        if (verbose) std::cout << tags[i] << " is an invalid inputTag " << i << std::endl;
       }
-      ++i;
     }
     return (!inputTagIsNotValid);
   }
