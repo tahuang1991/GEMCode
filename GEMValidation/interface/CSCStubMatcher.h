@@ -91,10 +91,10 @@ private:
   const RPCDigiMatcher* rpc_digi_matcher_;
   const SimHitMatcher* sh_matcher_;
 
-  edm::InputTag clctInput_;
-  edm::InputTag alctInput_;
-  edm::InputTag lctInput_;
-  edm::InputTag mplctInput_;
+  std::vector<edm::InputTag> clctInputs_;
+  std::vector<edm::InputTag> alctInputs_;
+  std::vector<edm::InputTag> lctInputs_;
+  std::vector<edm::InputTag> mplctInputs_;
 
   int minBXCLCT_, maxBXCLCT_;
   int minBXALCT_, maxBXALCT_;
