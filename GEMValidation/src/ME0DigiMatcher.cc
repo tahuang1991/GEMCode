@@ -7,7 +7,7 @@ using namespace matching;
 ME0DigiMatcher::ME0DigiMatcher(SimHitMatcher& sh)
 : DigiMatcher(sh)
 {
-  auto me0Digi_= conf().getParameter<edm::ParameterSet>("me0StripDigi");
+  auto me0Digi_= conf().getParameter<edm::ParameterSet>("me0DigiPreReco");
   me0DigiInput_ = me0Digi_.getParameter<edm::InputTag>("input");
   minBXME0_ = me0Digi_.getParameter<int>("minBX");
   maxBXME0_ = me0Digi_.getParameter<int>("maxBX");
