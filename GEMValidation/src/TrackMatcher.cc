@@ -343,8 +343,16 @@ TrackMatcher::matchGmtCandToSimTrack(const L1MuGMTExtendedCand& tracks)
 }
 
 void 
-TrackMatcher::matchL1MuonParticleToSimTrack(const l1extra::L1MuonParticleCollection& tracks)
+TrackMatcher::matchL1MuonParticleToSimTrack(const l1extra::L1MuonParticleCollection& muons)
 {
+  // implement this function Jose!
+
+  for(auto& muon: muons) {
+    std::cout<<" L1 Muon Particle PT: "<<muon.pt()
+             <<", eta: "<<muon.eta()
+             <<", charge: "<<muon.charge()
+             <<", phi: "<<muon.phi()<<std::endl;  
+  }
 }
 
 TFTrack* 
