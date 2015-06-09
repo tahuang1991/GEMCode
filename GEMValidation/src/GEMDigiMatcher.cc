@@ -8,7 +8,7 @@ GEMDigiMatcher::GEMDigiMatcher(SimHitMatcher& sh)
 : DigiMatcher(sh)
 {
   auto gemDigi_= conf().getParameter<edm::ParameterSet>("gemStripDigi");
-  gemDigiInput_ = gemDigi_.getParameter<edm::InputTag>("input");
+  gemDigiInput_ = gemDigi_.getParameter<edm::InputTag>("validInputTags");
   minBXGEMDigi_ = gemDigi_.getParameter<int>("minBX");
   maxBXGEMDigi_ = gemDigi_.getParameter<int>("maxBX");
   matchDeltaStrip_ = gemDigi_.getParameter<int>("matchDeltaStrip");
@@ -16,14 +16,14 @@ GEMDigiMatcher::GEMDigiMatcher(SimHitMatcher& sh)
   runGEMDigi_ = gemDigi_.getParameter<bool>("run");
 
   auto gemPad_= conf().getParameter<edm::ParameterSet>("gemPadDigi");
-  gemPadDigiInput_ = gemPad_.getParameter<edm::InputTag>("input");
+  gemPadDigiInput_ = gemPad_.getParameter<edm::InputTag>("validInputTags");
   minBXGEMPad_ = gemPad_.getParameter<int>("minBX");
   maxBXGEMPad_ = gemPad_.getParameter<int>("maxBX");
   verbosePad_ = gemPad_.getParameter<int>("verbose");
   runGEMPad_ = gemPad_.getParameter<bool>("run");
 
   auto gemCoPad_= conf().getParameter<edm::ParameterSet>("gemCoPadDigi");
-  gemCoPadDigiInput_ = gemCoPad_.getParameter<edm::InputTag>("input");
+  gemCoPadDigiInput_ = gemCoPad_.getParameter<edm::InputTag>("validInputTags");
   minBXGEMCoPad_ = gemCoPad_.getParameter<int>("minBX");
   maxBXGEMCoPad_ = gemCoPad_.getParameter<int>("maxBX");
   verboseCoPad_ = gemCoPad_.getParameter<int>("verbose");

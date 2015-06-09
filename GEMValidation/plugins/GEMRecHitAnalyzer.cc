@@ -182,7 +182,7 @@ GEMRecHitAnalyzer::GEMRecHitAnalyzer(const edm::ParameterSet& iConfig)
 {
   cfg_ = iConfig.getParameter<edm::ParameterSet>("simTrackMatching");
   auto simTrack = cfg_.getParameter<edm::ParameterSet>("simTrack");
-  simTrackInput_ = simTrack.getParameter<edm::InputTag>("input");
+  simTrackInput_ = simTrack.getParameter<edm::InputTag>("validInputTags");
   simTrackMinPt_ = simTrack.getParameter<double>("minPt");
   simTrackMaxPt_ = simTrack.getParameter<double>("maxPt");
   simTrackMinEta_ = simTrack.getParameter<double>("minEta");
@@ -190,10 +190,10 @@ GEMRecHitAnalyzer::GEMRecHitAnalyzer(const edm::ParameterSet& iConfig)
   simTrackOnlyMuon_ = simTrack.getParameter<bool>("onlyMuon");
 
   auto gemSimHit = cfg_.getParameter<edm::ParameterSet>("gemSimHit");
-  gemSimHitInput_ = gemSimHit.getParameter<edm::InputTag>("input");
+  gemSimHitInput_ = gemSimHit.getParameter<edm::InputTag>("validInputTags");
 
   auto gemRecHit = cfg_.getParameter<edm::ParameterSet>("gemRecHit");
-  gemRecHitInput_ = gemRecHit.getParameter<edm::InputTag>("input");
+  gemRecHitInput_ = gemRecHit.getParameter<edm::InputTag>("validInputTags");
 
   bookGEMEventsTree();
   bookGEMRecHitTree();

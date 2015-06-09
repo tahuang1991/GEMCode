@@ -232,7 +232,7 @@ MuonDigiAnalyzer::MuonDigiAnalyzer(const edm::ParameterSet& ps)
 {
   cfg_ = ps.getParameter<edm::ParameterSet>("simTrackMatching");
   auto simTrack = cfg_.getParameter<edm::ParameterSet>("simTrack");
-  simTrackInput_ = simTrack.getParameter<edm::InputTag>("input");
+  simTrackInput_ = simTrack.getParameter<edm::InputTag>("validInputTags");
   simTrackMinPt_ = simTrack.getParameter<double>("minPt");
   simTrackMaxPt_ = simTrack.getParameter<double>("maxPt");
   simTrackMinEta_ = simTrack.getParameter<double>("minEta");
@@ -240,16 +240,16 @@ MuonDigiAnalyzer::MuonDigiAnalyzer(const edm::ParameterSet& ps)
   simTrackOnlyMuon_ = simTrack.getParameter<bool>("onlyMuon");
 
   auto gemDigi = cfg_.getParameter<edm::ParameterSet>("gemStripDigi");
-  gemDigiInput_ = gemDigi.getParameter<edm::InputTag>("input");
+  gemDigiInput_ = gemDigi.getParameter<edm::InputTag>("validInputTags");
   
   auto rpcDigi = cfg_.getParameter<edm::ParameterSet>("rpcStripDigi");
-  rpcDigiInput_ = rpcDigi.getParameter<edm::InputTag>("input");
+  rpcDigiInput_ = rpcDigi.getParameter<edm::InputTag>("validInputTags");
 
   auto gemPadDigi= cfg_.getParameter<edm::ParameterSet>("gemPadDigi");
-  gemPadDigiInput_ = gemPadDigi.getParameter<edm::InputTag>("input");
+  gemPadDigiInput_ = gemPadDigi.getParameter<edm::InputTag>("validInputTags");
   
   auto gemCoPadDigi= cfg_.getParameter<edm::ParameterSet>("gemCoPadDigi");
-  gemCoPadDigiInput_ = gemCoPadDigi.getParameter<edm::InputTag>("input");
+  gemCoPadDigiInput_ = gemCoPadDigi.getParameter<edm::InputTag>("validInputTags");
 
   bookRPCDigiTree();
   bookGEMDigiTree();

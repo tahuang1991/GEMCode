@@ -188,7 +188,7 @@ MuonSimHitAnalyzer::MuonSimHitAnalyzer(const edm::ParameterSet& ps)
   verbose_ = cfg_.getParameter<bool>("verbose");
 
   auto simTrack = cfg_.getParameter<edm::ParameterSet>("simTrack");
-  simTrackInput_ = simTrack.getParameter<edm::InputTag>("input");
+  simTrackInput_ = simTrack.getParameter<edm::InputTag>("validInputTags");
   simTrackMinPt_ = simTrack.getParameter<double>("minPt");
   simTrackMaxPt_ = simTrack.getParameter<double>("maxPt");
   simTrackMinEta_ = simTrack.getParameter<double>("minEta");
@@ -196,16 +196,16 @@ MuonSimHitAnalyzer::MuonSimHitAnalyzer(const edm::ParameterSet& ps)
   simTrackOnlyMuon_ = simTrack.getParameter<bool>("onlyMuon");
 
   auto gemSimHit = cfg_.getParameter<edm::ParameterSet>("gemSimHit");
-  gemSimHitInput_ = gemSimHit.getParameter<edm::InputTag>("input");
+  gemSimHitInput_ = gemSimHit.getParameter<edm::InputTag>("validInputTags");
   
   auto cscSimHit = cfg_.getParameter<edm::ParameterSet>("cscSimHit");
-  cscSimHitInput_ = cscSimHit.getParameter<edm::InputTag>("input");
+  cscSimHitInput_ = cscSimHit.getParameter<edm::InputTag>("validInputTags");
   
   auto me0SimHit = cfg_.getParameter<edm::ParameterSet>("me0SimHit");
-  me0SimHitInput_ = me0SimHit.getParameter<edm::InputTag>("input");
+  me0SimHitInput_ = me0SimHit.getParameter<edm::InputTag>("validInputTags");
   
   auto rpcSimHit = cfg_.getParameter<edm::ParameterSet>("rpcSimHit");
-  rpcSimHitInput_ = rpcSimHit.getParameter<edm::InputTag>("input");
+  rpcSimHitInput_ = rpcSimHit.getParameter<edm::InputTag>("validInputTags");
 
   bookCSCSimHitsTree();
   bookRPCSimHitsTree();

@@ -9,7 +9,7 @@ RPCDigiMatcher::RPCDigiMatcher(SimHitMatcher& sh)
 : DigiMatcher(sh)
 {
   auto rpcDigi_= conf().getParameter<edm::ParameterSet>("rpcStripDigi");
-  rpcDigiInput_ = rpcDigi_.getParameter<edm::InputTag>("input");
+  rpcDigiInput_ = rpcDigi_.getParameter<edm::InputTag>("validInputTags");
   minBXRPC_ = rpcDigi_.getParameter<int>("minBX");
   maxBXRPC_ = rpcDigi_.getParameter<int>("maxBX");
   matchDeltaStrip_ = rpcDigi_.getParameter<int>("matchDeltaStrip");

@@ -10,7 +10,7 @@ DTDigiMatcher::DTDigiMatcher(SimHitMatcher& sh)
 : DigiMatcher(sh)
 {
   auto dtDigi_= conf().getParameter<edm::ParameterSet>("dtDigi");
-  dtDigiInput_ = dtDigi_.getParameter<edm::InputTag>("input");
+  dtDigiInput_ = dtDigi_.getParameter<edm::InputTag>("validInputTags");
   minBXDT_ = dtDigi_.getParameter<int>("minBX");
   maxBXDT_ = dtDigi_.getParameter<int>("maxBX");
   matchDeltaWire_ = dtDigi_.getParameter<int>("matchDeltaWire");
