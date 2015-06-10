@@ -73,6 +73,9 @@ BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
     hasDTGeometry_ = false;
     LogDebug("BaseMatcher") << "+++ Info: DT geometry is unavailable. +++\n";
   }
+
+  simTrackPSet_ = conf().getParameter<edm::ParameterSet>("simTrack");
+  verboseSimTrack_ = simTrackPSet_.getParameter<int>("verbose");
 }
 
 

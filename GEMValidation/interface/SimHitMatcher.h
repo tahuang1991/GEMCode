@@ -140,12 +140,6 @@ private:
   std::vector<unsigned int> getIdsOfSimTrackShower(unsigned  trk_id,
       const edm::SimTrackContainer& simTracks, const edm::SimVertexContainer& simVertices);
 
-  void matchSimHitsToSimTrack(std::vector<unsigned int> track_ids,
-                              const edm::PSimHitContainer& csc_hits, 
-                              const edm::PSimHitContainer& gem_hits,
-                              const edm::PSimHitContainer& rpc_hits,
-                              const edm::PSimHitContainer& me0_hits,
-			      const edm::PSimHitContainer& dt_hits);
   void matchCSCSimHitsToSimTrack(std::vector<unsigned int> track_ids, const edm::PSimHitContainer& csc_hits);
   void matchRPCSimHitsToSimTrack(std::vector<unsigned int> track_ids, const edm::PSimHitContainer& rpc_hits);
   void matchGEMSimHitsToSimTrack(std::vector<unsigned int> track_ids, const edm::PSimHitContainer& gem_hits);
@@ -171,7 +165,7 @@ private:
   bool runDTSimHit_;
 
   std::string simInputLabel_;
-
+  
   std::map<unsigned int, unsigned int> trkid_to_index_;
 
   edm::PSimHitContainer no_hits_;

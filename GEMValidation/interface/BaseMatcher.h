@@ -183,6 +183,9 @@ public:
   bool hasCSCGeometry_;
   bool hasDTGeometry_; 
   
+  edm::ParameterSet simTrackPSet_;
+  bool verboseSimTrack_;
+
  private:
 
   const CSCGeometry* cscGeometry_;
