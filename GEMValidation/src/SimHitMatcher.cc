@@ -113,7 +113,7 @@ SimHitMatcher::init()
         matchGEMSimHitsToSimTrack(track_ids, *gem_hits.product());
         
         if (verboseGEM_) {
-          cout<<"sh tn ntids "<<no<<" "<<track_ids.size()<<" "<<(*gem_hits.product()).size()<<endl;
+          cout<<"nSimHits "<<no<<" nTrackIds "<<track_ids.size()<<" nSelectedGEMSimHits "<<(*gem_hits.product()).size()<<endl;
           cout << "detids GEM " << detIdsGEM().size() << endl;
           
           auto gem_ch_ids = chamberIdsGEM();
@@ -143,7 +143,7 @@ SimHitMatcher::init()
         matchME0SimHitsToSimTrack(track_ids, *me0_hits.product());
        
         if (verboseME0_) {
-          cout<<"sh tn ntids "<<no<<" "<<track_ids.size()<<" "<<(*me0_hits.product()).size()<<endl;
+          cout<<"nSimHits "<<no<<" nTrackIds "<<track_ids.size()<<" nSelectedME0SimHits "<<(*me0_hits.product()).size()<<endl;
           cout << "detids ME0 " << detIdsME0().size() << endl;
           
           auto me0_ch_ids = chamberIdsME0();
@@ -173,9 +173,9 @@ SimHitMatcher::init()
             auto& rpc_simhits = hitsInChamber(id);
             auto rpc_simhits_gp = simHitsMeanPosition(rpc_simhits);
             cout<<"RPCDetId "<<RPCDetId(id)<<": nHits "<<rpc_simhits.size()<<" eta "<<rpc_simhits_gp.eta()<<" phi "<<rpc_simhits_gp.phi()<<" nCh "<< rpc_chamber_to_hits_[id].size()<<endl;
-            // auto strips = hitStripsInDetId(id);
-            // cout<<"nStrips "<<strips.size()<<endl;
-            // cout<<"strips : "; std::copy(strips.begin(), strips.end(), ostream_iterator<int>(cout, " ")); cout<<endl;
+            auto strips = hitStripsInDetId(id);
+            cout<<"nStrips "<<strips.size()<<endl;
+            cout<<"strips : "; std::copy(strips.begin(), strips.end(), ostream_iterator<int>(cout, " ")); cout<<endl;
           }
         }
       }
@@ -196,6 +196,7 @@ SimHitMatcher::init()
             auto dt_simhits = hitsInDetId(id);
             auto dt_simhits_gp = simHitsMeanPosition(dt_simhits);
             cout<<"DTWireId "<<DTWireId(id)<<": nHits "<<dt_simhits.size()<<" eta "<<dt_simhits_gp.eta()<<" phi "<<dt_simhits_gp.phi()<<" nCh "<< dt_chamber_to_hits_[id].size()<<endl;
+            // only 1 wire per DT cell
             // auto wires = hitWiresInDTLayerId(id);
             // cout<<"nWires "<<wires.size()<<endl;
             // cout<<"wires : "; std::copy(wires.begin(), wires.end(), ostream_iterator<int>(cout, " ")); cout<<endl;
@@ -926,19 +927,20 @@ SimHitMatcher::hitStripsInDetId(unsigned int detid, int margin_n_strips) const
   else if ( is_rpc(detid) )
   {
     RPCDetId id(detid); 
-    // if (verboseRPC_) std::cout << "SimHitMatcher::hitsInDetId id " << id << std::endl;
-    int max_nstrips = getRPCGeometry()->roll(id)->nstrips();
-    for (auto& h: simhits)
-    {
-      LocalPoint lp = h.entryPoint();
-      int central_strip = 1 + static_cast<int>(getRPCGeometry()->roll(id)->topology().channel(lp));
-      // int central_strip2 = 1 + static_cast<int>(getRPCGeometry()->roll(id)->strip(lp));
-      // std::cout <<"strip from topology"<< central_strip <<" strip from roll" << central_strip2 <<std::endl; 
-      int smin = central_strip - margin_n_strips;
-      smin = (smin > 0) ? smin : 1;
-      int smax = central_strip + margin_n_strips;
-      smax = (smax <= max_nstrips) ? smax : max_nstrips;
-      for (int ss = smin; ss <= smax; ++ss) result.insert(ss);
+    for (auto roll: getRPCGeometry()->chamber(id)->rolls()) {
+      int max_nstrips = roll->nstrips();
+      for (auto& h: hitsInDetId(roll->id().rawId())) {
+        LocalPoint lp = h.entryPoint();
+        // check how the RPC strip numbers start counting - Ask Piet!!!
+        int central_strip = static_cast<int>(roll->topology().channel(lp));
+        // int central_strip2 = 1 + static_cast<int>(getRPCGeometry()->roll(id)->strip(lp));
+        // std::cout <<"strip from topology"<< central_strip <<" strip from roll" << central_strip2 <<std::endl; 
+        int smin = central_strip - margin_n_strips;
+        smin = (smin > 0) ? smin : 1;
+        int smax = central_strip + margin_n_strips;
+        smax = (smax <= max_nstrips) ? smax : max_nstrips;
+        for (int ss = smin; ss <= smax; ++ss) result.insert(ss);
+      }
     }
   }
   return result;
@@ -949,22 +951,20 @@ std::set<int>
 SimHitMatcher::hitWiregroupsInDetId(unsigned int detid, int margin_n_wg) const
 {
   set<int> result;
-  if ( !is_csc(detid) ) return result;
-
-  auto simhits = hitsInDetId(detid);
-  CSCDetId id(detid);
-  int max_n_wg = getCSCGeometry()->layer(id)->geometry()->numberOfWireGroups();
-  for (auto& h: simhits)
-  {
-    LocalPoint lp = h.entryPoint();
-    auto layer_geo = getCSCGeometry()->layer(id)->geometry();
-    int central_wg = layer_geo->wireGroup(layer_geo->nearestWire(lp));
-    int wg_min = central_wg - margin_n_wg;
-    wg_min = (wg_min > 0) ? wg_min : 1;
-    int wg_max = central_wg + margin_n_wg;
-    wg_max = (wg_max <= max_n_wg) ? wg_max : max_n_wg;
-    for (int wg = wg_min; wg <= wg_max; ++wg) result.insert(wg);
-
+  if ( is_csc(detid) ) {
+    auto simhits = hitsInDetId(detid);
+    CSCDetId id(detid);
+    int max_n_wg = getCSCGeometry()->layer(id)->geometry()->numberOfWireGroups();
+    for (auto& h: simhits) {
+      LocalPoint lp = h.entryPoint();
+      auto layer_geo = getCSCGeometry()->layer(id)->geometry();
+      int central_wg = layer_geo->wireGroup(layer_geo->nearestWire(lp));
+      int wg_min = central_wg - margin_n_wg;
+      wg_min = (wg_min > 0) ? wg_min : 1;
+      int wg_max = central_wg + margin_n_wg;
+      wg_max = (wg_max <= max_n_wg) ? wg_max : max_n_wg;
+      for (int wg = wg_min; wg <= wg_max; ++wg) result.insert(wg);
+    }
   }
   return result;
 }
@@ -992,12 +992,10 @@ std::set<int>
 SimHitMatcher::hitWiresInDTLayerId(unsigned int detid, int margin_n_wires) const
 {
   set<int> result;
-  if ( is_dt(detid) )
-  {
+  if ( is_dt(detid) ) {
     DTLayerId id(detid);
     int max_nwires = getDTGeometry()->layer(id)->specificTopology().channels();
-    for (auto& h: hitsInDetId(detid))
-    {
+    for (auto& h: hitsInDetId(detid)) {
       LocalPoint lp = h.entryPoint();
       int central_wire = static_cast<int>(getDTGeometry()->layer(id)->specificTopology().channel(lp));
       int smin = central_wire - margin_n_wires;
