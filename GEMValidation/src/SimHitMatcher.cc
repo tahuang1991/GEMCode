@@ -847,6 +847,49 @@ SimHitMatcher::simHitsMeanPosition(const edm::PSimHitContainer& sim_hits) const
 }
 
 
+GlobalVector
+SimHitMatcher::simHitsMeanMomentum(const edm::PSimHitContainer& sim_hits) const
+{
+  if (sim_hits.empty()) return GlobalVector(); // point "zero"
+
+  float sumx, sumy, sumz;
+  sumx = sumy = sumz = 0.f;
+  size_t n = 0;
+  for (auto& h: sim_hits)
+  {
+    LocalVector lv = h.momentumAtEntry();
+    GlobalVector gv;
+    if ( is_gem(h.detUnitId()) )
+    {
+      gv = getGEMGeometry()->idToDet(h.detUnitId())->surface().toGlobal(lv);
+    }
+    if ( is_me0(h.detUnitId()) )
+    {
+      gv = getME0Geometry()->idToDet(h.detUnitId())->surface().toGlobal(lv);
+    }
+    else if (is_csc(h.detUnitId()))
+    {
+      gv = getCSCGeometry()->idToDet(h.detUnitId())->surface().toGlobal(lv);
+    }
+    else if (is_rpc(h.detUnitId()))
+    {
+      gv = getRPCGeometry()->idToDet(h.detUnitId())->surface().toGlobal(lv);
+    }
+    else if (is_dt(h.detUnitId()))
+    {
+      gv = getDTGeometry()->idToDet(h.detUnitId())->surface().toGlobal(lv);
+    }
+    else continue;
+    sumx += gv.x();
+    sumy += gv.y();
+    sumz += gv.z();
+    ++n;
+  }
+  if (n == 0) return GlobalVector();
+  return GlobalVector(sumx/n, sumy/n, sumz/n);
+}
+
+
 float 
 SimHitMatcher::simHitsMeanStrip(const edm::PSimHitContainer& sim_hits) const
 {
@@ -913,6 +956,31 @@ SimHitMatcher::simHitsMeanWG(const edm::PSimHitContainer& sim_hits) const
   return sums/n;
 }
 
+
+float 
+SimHitMatcher::simHitsMeanWire(const edm::PSimHitContainer& sim_hits) const
+{
+  if (sim_hits.empty()) return -1.f;
+
+  float sums = 0.f;
+  size_t n = 0;
+  for (auto& h: sim_hits)
+  {
+    LocalPoint lp = h.entryPoint();
+    float s;
+    auto d = h.detUnitId();
+    if (is_dt(d))
+    {
+      // find nearest wire
+      s  = getDTGeometry()->layer(DTLayerId(d))->specificTopology().channel(lp);
+    }
+    else continue;
+    sums += s;
+    ++n;
+  }
+  if (n == 0) return -1.f;
+  return sums/n;
+}
 
 
 std::set<int> 
