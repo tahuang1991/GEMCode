@@ -120,11 +120,17 @@ public:
   /// calculate Global average position for a provided collection of simhits
   GlobalPoint simHitsMeanPosition(const edm::PSimHitContainer& sim_hits) const;
 
+  /// calculate Global average momentum for a provided collection of simhits
+  GlobalVector simHitsMeanMomentum(const edm::PSimHitContainer& sim_hits) const;
+
   /// calculate average strip (strip for GEM/ME0, half-strip for CSC) number for a provided collection of simhits
   float simHitsMeanStrip(const edm::PSimHitContainer& sim_hits) const;
 
-  /// calculate average wg number for a provided collection of simhits
+  /// calculate average wg number for a provided collection of simhits (for CSC)
   float simHitsMeanWG(const edm::PSimHitContainer& sim_hits) const;
+
+  /// calculate average wg number for a provided collection of simhits (for DT)
+  float simHitsMeanWire(const edm::PSimHitContainer& sim_hits) const;
 
   std::set<int> hitStripsInDetId(unsigned int, int margin_n_strips = 0) const;  // GEM/ME0 or CSC
   std::set<int> hitWiregroupsInDetId(unsigned int, int margin_n_wg = 0) const; // CSC
