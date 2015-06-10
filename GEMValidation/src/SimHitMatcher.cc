@@ -411,6 +411,7 @@ SimHitMatcher::matchDTSimHitsToSimTrack(std::vector<unsigned int> track_ids, con
       DTWireId layer_id( h.detUnitId() );
       dt_hits_.push_back(h);
       dt_layer_to_hits_ [ layer_id.layerId().rawId() ].push_back(h);
+      dt_superlayer_to_hits_ [ layer_id.superlayerId().rawId() ].push_back(h);
       dt_chamber_to_hits_[ layer_id.chamberId().rawId() ].push_back(h);
     }
   }
@@ -607,6 +608,14 @@ SimHitMatcher::layerIdsDT() const
   return result;
 }
 
+std::set<unsigned int>
+SimHitMatcher::superlayerIdsDT() const
+{
+  std::set<unsigned int> result;
+  for (auto& p: dt_superlayer_to_hits_) result.insert(p.first);
+  return result;
+}
+
 const edm::PSimHitContainer&
 SimHitMatcher::hitsInDetId(unsigned int detid) const
 {
@@ -700,6 +709,26 @@ SimHitMatcher::hitsInLayerDT(unsigned int detid) const
   return dt_layer_to_hits_.at(id.layerId().rawId());
 }
 
+const edm::PSimHitContainer&
+SimHitMatcher::hitsInSuperLayerDT(unsigned int detid) const
+{
+  if (!is_dt(detid)) return no_hits_;
+
+  const DTWireId id(detid);
+  if (dt_superlayer_to_hits_.find(id.superlayerId().rawId()) == dt_superlayer_to_hits_.end()) return no_hits_;
+  return dt_superlayer_to_hits_.at(id.superlayerId().rawId());
+}
+
+const edm::PSimHitContainer&
+SimHitMatcher::hitsInChamberDT(unsigned int detid) const
+{
+  if (!is_dt(detid)) return no_hits_;
+
+  const DTWireId id(detid);
+  if (dt_chamber_to_hits_.find(id.chamberId().rawId()) == dt_chamber_to_hits_.end()) return no_hits_;
+  return dt_chamber_to_hits_.at(id.chamberId().rawId());
+}
+
 int
 SimHitMatcher::nLayersWithHitsInSuperChamber(unsigned int detid) const
 {
@@ -731,36 +760,48 @@ SimHitMatcher::nLayersWithHitsInSuperChamber(unsigned int detid) const
   return layers_with_hits.size();
 }
 
-int
-SimHitMatcher::nLayersWithHitsInLayerDT(unsigned int detid) const
+int 
+SimHitMatcher::nCellsWithHitsInLayerDT(unsigned int detid) const
 {
   set<int> layers_with_hits;
   const auto hits = hitsInLayerDT(detid);
-  for (auto& h: hits)
-  {
-    if (is_dt(detid))
-    {
+  for (auto& h: hits) {
+    if (is_dt(detid)) {
       const DTWireId idd(h.detUnitId());
-      layers_with_hits.insert(idd.layerId());
+      layers_with_hits.insert(idd.wire());
+    }
+  }
+  return layers_with_hits.size();
+}
+
+int 
+SimHitMatcher::nLayersWithHitsInSuperLayerDT(unsigned int detid) const
+{
+  set<int> layers_with_hits;
+  const auto hits = hitsInSuperLayerDT(detid);
+  for (auto& h: hits) {
+    if (is_dt(detid)) {
+      const DTLayerId idd(h.detUnitId());
+      layers_with_hits.insert(idd.layer());
     }
   }
   return layers_with_hits.size();
 }
 
 int
-SimHitMatcher::nLayersWithHitsInChamberDT(unsigned int detid) const
+SimHitMatcher::nSuperLayersWithHitsInChamberDT(unsigned int detid) const
 {
-  set<int> layers_with_hits;
+  set<int> sl_with_hits;
   const auto hits = hitsInChamber(detid);
-  for (auto& h: hits) 
-  {
-    if (is_dt(detid))
-    {
-      const DTWireId idd(h.detUnitId());
-      layers_with_hits.insert(idd.chamberId());
+  std::cout << "nHits in chamber " << hits.size() << std::endl;
+  for (auto& h: hits) {
+    if (is_dt(detid)) {
+      const DTSuperLayerId idd(h.detUnitId());
+      std::cout << "idd " << idd << std::endl;
+      sl_with_hits.insert(idd.superLayer());
     }
   }
-  return layers_with_hits.size();
+  return sl_with_hits.size();
 }
 
 GlobalPoint

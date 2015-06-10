@@ -3,7 +3,7 @@ from L1Trigger.CSCTrackFinder.csctfTrackDigis_cfi import*
 
 SimTrackMatching = cms.PSet(
     # common
-    useCSCChamberTypes = cms.untracked.vint32(0,1,2,3,4,5,6,7,8,9,10),
+    useCSCChamberTypes = cms.untracked.vint32(0),
     ## endcap stations
     cscStations = cms.vstring('ALL','ME11','ME1a','ME1b','ME12','ME13',
                               'ME21','ME22','ME31','ME32','ME41','ME42'),
@@ -18,7 +18,7 @@ SimTrackMatching = cms.PSet(
     verbose = cms.bool(True),
     ## per collection params
     simTrack = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag('g4SimHits')),
         minPt = cms.double(1.5),
         maxPt = cms.double(999.),
@@ -30,7 +30,7 @@ SimTrackMatching = cms.PSet(
     ),
     ## GEM
     gemSimHit = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag('g4SimHits','MuonGEMHits')),
         run = cms.bool(True),
         simMuOnly = cms.bool(True),
@@ -68,7 +68,7 @@ SimTrackMatching = cms.PSet(
     ),
     ## ME0
     me0SimHit = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag('g4SimHits','MuonME0Hits')),
         run = cms.bool(True),
         simMuOnly = cms.bool(True),
@@ -105,7 +105,7 @@ SimTrackMatching = cms.PSet(
     ),
     ## RPC
     rpcSimHit = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag('g4SimHits','MuonRPCHits')),
         run = cms.bool(True),
         simMuOnly = cms.bool(True),
@@ -129,7 +129,7 @@ SimTrackMatching = cms.PSet(
     ),
     ## CSC
     cscSimHit = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag('g4SimHits','MuonCSCHits')),
         run = cms.bool(True),
         simMuOnly = cms.bool(True),
@@ -212,7 +212,7 @@ SimTrackMatching = cms.PSet(
     ),
     ## DT
     dtSimHit = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag('g4SimHits','MuonDTHits')),
         run = cms.bool(True),
         simMuOnly = cms.bool(True),

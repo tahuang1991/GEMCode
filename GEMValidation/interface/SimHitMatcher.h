@@ -95,10 +95,12 @@ public:
   const edm::PSimHitContainer& hitsInChamber(unsigned int) const;
   const edm::PSimHitContainer& hitsInSuperChamber(unsigned int) const;
 
-  int nLayersWithHitsInLayerDT(unsigned int) const;
-  int nLayersWithHitsInChamberDT(unsigned int) const;
-  int nLayersWithHitsInSuperlayerDT(unsigned int) const;
+  int nCellsWithHitsInLayerDT(unsigned int) const;
+  int nLayersWithHitsInSuperLayerDT(unsigned int) const;
+  int nSuperLayersWithHitsInChamberDT(unsigned int) const;
   const edm::PSimHitContainer& hitsInLayerDT(unsigned int) const;
+  const edm::PSimHitContainer& hitsInSuperLayerDT(unsigned int) const;
+  const edm::PSimHitContainer& hitsInChamberDT(unsigned int) const;
 
   /// #layers with hits
   /// for CSC: "super-chamber" means chamber
@@ -190,9 +192,9 @@ private:
 
   edm::PSimHitContainer dt_hits_;
   std::map<unsigned int, edm::PSimHitContainer > dt_detid_to_hits_;
+  std::map<unsigned int, edm::PSimHitContainer > dt_layer_to_hits_;
   std::map<unsigned int, edm::PSimHitContainer > dt_superlayer_to_hits_;
   std::map<unsigned int, edm::PSimHitContainer > dt_chamber_to_hits_;
-  std::map<unsigned int, edm::PSimHitContainer > dt_layer_to_hits_;
 
   // detids with hits in pads
   std::map<unsigned int, std::set<int> > gem_detids_to_pads_;
