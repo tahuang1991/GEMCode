@@ -37,14 +37,14 @@ GEMDigiMatcher::GEMDigiMatcher(SimHitMatcher& sh)
     }
     
     if (!gemPadDigiInput_.label().empty()) {
-      edm::Handle<GEMPadDigiCollection> gem_pads;
+      edm::Handle<GEMCSCPadDigiCollection> gem_pads;
       event().getByLabel(gemPadDigiInput_, gem_pads);
       if (runGEMPad_) matchPadsToSimTrack(*gem_pads.product());
     }
     
     if (!gemCoPadDigiInput_.label().empty()) {
-      edm::Handle<GEMCoPadDigiCollection> gem_co_pads;
-      event().getByLabel(gemPadDigiInput_, gem_co_pads);
+      edm::Handle<GEMCSCPadDigiCollection> gem_co_pads;
+      event().getByLabel(gemCoPadDigiInput_, gem_co_pads);
       if (runGEMCoPad_) matchCoPadsToSimTrack(*gem_co_pads.product());
     }
   }
@@ -153,7 +153,7 @@ GEMDigiMatcher::matchCoPadsToSimTrack(const GEMCSCPadDigiCollection& co_pads)
     for (auto pad = co_pads_in_det.first; pad != co_pads_in_det.second; ++pad)
     {
       // check that the pad BX is within the range
-      if (pad->bx() < minBXGEM_ || pad->bx() > maxBXGEM_) continue;
+      if (pad->bx() < minBXGEMCoPad_ || pad->bx() > maxBXGEMCoPad_) continue;
       // check that it matches a coincidence pad that was hit by SimHits from our track
       if (hit_co_pads.find(pad->pad()) == hit_co_pads.end()) continue;
 

@@ -20,8 +20,7 @@
 #include <set>
 
 typedef std::vector<GEMDigi> GEMDigiContainer;
-typedef std::vector<GEMPadDigi> GEMPadDigiContainer;
-typedef std::vector<GEMCoPadDigi> GEMCoPadDigiContainer;
+typedef std::vector<GEMCSCPadDigi> GEMCSCPadDigiContainer;
 
 class SimHitMatcher;
 
