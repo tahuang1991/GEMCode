@@ -2,7 +2,7 @@
  * Muon-jet filter:
  * - 2 muons in barrel
  * - 2 muons in endcap
- * - all muon pT > 10GeV
+ * - endcap muon pT > 10GeV
  */
 
 // system include files
@@ -85,15 +85,16 @@ bool MuJetFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
   // 2 muons in barrel, 2 muons in endcap
   int nMuBarrel = 0;
   int nMuEndcap = 0;
-  int nMuPTok = 0;
+  int nMuEndcapPTok = 0;
   for (auto muon: genMuons) {
     const float eta(fabs(muon->eta()));
     if (eta < 1.1) nMuBarrel++;
-    if (eta > 1.1 and eta < 2.4) nMuEndcap++;
-    if (muon->pt() > 10) nMuPTok++;
+    if (eta > 1.1 and eta < 2.4){ 
+      nMuEndcap++;
+      if (muon->pt() > 10) nMuEndcapPTok++;
+    }
   }
-
-  return nMuBarrel>=2 and nMuEndcap>=2 and nMuPTok>=1;
+  return nMuBarrel>=2 and nMuEndcap>=2 and nMuEndcapPTok>=2;
 }
 
 void MuJetFilter::endJob() 
