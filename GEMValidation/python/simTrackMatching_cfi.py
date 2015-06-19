@@ -18,7 +18,7 @@ SimTrackMatching = cms.PSet(
     verbose = cms.bool(True),
     ## per collection params
     simTrack = cms.PSet(
-        verbose = cms.int32(0),
+        verbose = cms.int32(1),
         validInputTags = cms.VInputTag(cms.InputTag('g4SimHits')),
         minPt = cms.double(1.5),
         maxPt = cms.double(999.),
@@ -252,8 +252,9 @@ SimTrackMatching = cms.PSet(
         maxBX = cms.int32(1),
     ),
     dtRecSegment4D = cms.PSet(
-        verbose = cms.int32(0),
-        validInputTags = cms.VInputTag(cms.InputTag("dt4DSegments")),
+        verbose = cms.int32(1),
+        validInputTags = cms.VInputTag(cms.InputTag("dt4DSegments"),
+                                       cms.InputTag("hltDt4DSegments")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),

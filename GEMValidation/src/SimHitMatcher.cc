@@ -793,11 +793,9 @@ SimHitMatcher::nSuperLayersWithHitsInChamberDT(unsigned int detid) const
 {
   set<int> sl_with_hits;
   const auto hits = hitsInChamber(detid);
-  std::cout << "nHits in chamber " << hits.size() << std::endl;
   for (auto& h: hits) {
     if (is_dt(detid)) {
       const DTSuperLayerId idd(h.detUnitId());
-      std::cout << "idd " << idd << std::endl;
       sl_with_hits.insert(idd.superLayer());
     }
   }
@@ -1104,16 +1102,21 @@ SimHitMatcher::hitWiresInDTLayerId(unsigned int detid, int margin_n_wires) const
   if ( is_dt(detid) ) {
     DTLayerId id(detid);
     int max_nwires = getDTGeometry()->layer(id)->specificTopology().channels();
-    for (auto& h: hitsInDetId(detid)) {
-      LocalPoint lp = h.entryPoint();
-      int central_wire = static_cast<int>(getDTGeometry()->layer(id)->specificTopology().channel(lp));
-      int smin = central_wire - margin_n_wires;
-      smin = (smin > 0) ? smin : 1;
-      int smax = central_wire + margin_n_wires;
-      smax = (smax <= max_nwires) ? smax : max_nwires;
-      for (int ss = smin; ss <= smax; ++ss) {
-	DTWireId wid(id, ss);
-	result.insert(wid.rawId());
+    for (int wn = 0; wn <= max_nwires; ++wn) {
+      DTWireId wid(id,wn);
+      for (auto& h: hitsInDetId(wid.rawId())) {
+	if (verboseDT_) cout << "central DTWireId "<< wid << " simhit " <<h<< endl;
+	// LocalPoint lp = h.entryPoint();
+	// int central_wire = static_cast<int>(getDTGeometry()->layer(id)->specificTopology().channel(lp));
+	int smin = wn - margin_n_wires;
+	smin = (smin > 0) ? smin : 1;
+	int smax = wn + margin_n_wires;
+	smax = (smax <= max_nwires) ? smax : max_nwires;
+	for (int ss = smin; ss <= smax; ++ss) {
+	  DTWireId widd(id, ss);
+	  if (verboseDT_) cout << "\tadding DTWireId to collection "<< widd << endl;
+	  result.insert(widd.rawId());
+	}
       }
     }
   }
@@ -1127,7 +1130,8 @@ SimHitMatcher::hitWiresInDTSuperLayerId(unsigned int detid, int margin_n_wires) 
   set<unsigned int> result;
   auto layers(getDTGeometry()->superLayer(DTSuperLayerId(detid))->layers());
   for (auto& l: layers) {
-    auto p(hitWiresInDTLayerId(l->id(), margin_n_wires));
+    if (verboseDT_)cout << "hitWiresInDTSuperLayerId::l id "<<l->id() << endl;
+    auto p(hitWiresInDTLayerId(l->id().rawId(), margin_n_wires));
     result.insert(p.begin(),p.end());
   }
   return result;
@@ -1140,7 +1144,8 @@ SimHitMatcher::hitWiresInDTChamberId(unsigned int detid, int margin_n_wires) con
   set<unsigned int> result;
   auto superLayers(getDTGeometry()->chamber(DTChamberId(detid))->superLayers());
   for (auto& sl: superLayers) {
-    auto p(hitWiresInDTSuperLayerId(sl->id(), margin_n_wires));
+    if (verboseDT_)cout << "hitWiresInDTChamberId::sl id "<<sl->id() << endl;
+    auto p(hitWiresInDTSuperLayerId(sl->id().rawId(), margin_n_wires));
     result.insert(p.begin(),p.end());
   }
   return result;

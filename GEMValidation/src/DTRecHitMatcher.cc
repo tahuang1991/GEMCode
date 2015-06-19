@@ -24,10 +24,10 @@ DTRecHitMatcher::DTRecHitMatcher(SimHitMatcher& sh)
 
   if (hasDTGeometry_) {
     edm::Handle<DTRecSegment2DCollection> dt_2DSegments;
-    if (gemvalidation::getByLabel(dtRecSegment2DInput_, dt_2DSegments, event())) if (verboseDTRecSegment2D_) matchDTRecSegment2DsToSimTrack(*dt_2DSegments.product());
+    if (gemvalidation::getByLabel(dtRecSegment2DInput_, dt_2DSegments, event())) if (runDTRecSegment2D_) matchDTRecSegment2DsToSimTrack(*dt_2DSegments.product());
 
     edm::Handle<DTRecSegment4DCollection> dt_4DSegments;
-    if (gemvalidation::getByLabel(dtRecSegment4DInput_, dt_4DSegments, event())) if (verboseDTRecSegment4D_) matchDTRecSegment4DsToSimTrack(*dt_4DSegments.product());
+    if (gemvalidation::getByLabel(dtRecSegment4DInput_, dt_4DSegments, event())) if (runDTRecSegment4D_) matchDTRecSegment4DsToSimTrack(*dt_4DSegments.product());
   }
 }
 
@@ -41,50 +41,58 @@ DTRecHitMatcher::matchDTRecSegment2DsToSimTrack(const DTRecSegment2DCollection& 
 void
 DTRecHitMatcher::matchDTRecSegment4DsToSimTrack(const DTRecSegment4DCollection& dtRecSegment4Ds)
 {
+  cout << "Matching simtrack to segments" << endl;
   // fetch all chamberIds with simhits
   auto chamber_ids = simhit_matcher_->chamberIdsDT();
   
   for (auto id: chamber_ids) {
     DTChamberId p_id(id);
     
-    //    std::set<int> hitWiresInDTLayerId(unsigned int, int margin_n_wires = 0) const;  // DT
-    
-    
-    // auto hit_strips = simhit_matcher_->hitStripsInDetId(id, matchDeltaStrip_);
-    // if (verboseDTRecSegment4D_) {
-    //   cout<<"hit_strips_fat ";
-    //   copy(hit_strips.begin(), hit_strips.end(), ostream_iterator<int>(cout, " "));
-    //   cout<<endl;
-    // 	}
+    // print all the wires in the DTChamber    
+    auto hit_wires(simhit_matcher_->hitWiresInDTChamberId(id));
+    if (verboseDTRecSegment4D_) {
+      cout<<"hit wires dt from simhit"<<endl;
+      for (auto wire: hit_wires) cout << "\t"<<DTWireId(wire) << endl;
+      cout<<endl;
+    }
     
     // get the segments
     auto segments_in_det = dtRecSegment4Ds.get(p_id);
     
     for (auto d = segments_in_det.first; d != segments_in_det.second; ++d) {
       if (verboseDTRecSegment4D_) cout<<"segment "<<p_id<<" "<<*d<<endl;
+      
+      const float time(d->hasPhi()? d->phiSegment()->t0() : d->zSegment()->t0());
+      if (verboseDTRecSegment4D_) cout << "time " << time << endl;
       // check that the rechit is within BX range
-      //	bunch crossing is calculated from the 2D segments
-      //	if (d->BunchX() < minBXGEM_ || d->BunchX() > maxBXGEM_) continue;
+      // bunch crossing is calculated from the 2D segments
+      //      if (d->BunchX() < minBXGEM_ || d->BunchX() > maxBXGEM_) continue;
       // check that it matches a wire that was hit by SimHits from our track
       
-      // int firstStrip = d->firstClusterStrip();
-      // int cls = d->clusterSize();
-      // bool stripFound = false;
-      
-      // for(int i = firstStrip; i < (firstStrip + cls); i++){
-      
-      //   if (hit_strips.find(i) != hit_strips.end()) stripFound = true;
-      //   //std::cout<<i<<" "<<firstStrip<<" "<<cls<<" "<<stripFound<<std::endl;
-      
-      // }
-      
-      // if (!stripFound) continue;
-      // if (verboseGEMRecHit_) cout<<"oki"<<endl;
-      
-      // auto myrechit = make_digi(id, d->firstClusterStrip(), d->BunchX(), GEM_STRIP, d->clusterSize());
-      // detid_to_recHits_[id].push_back(myrechit);
-      // chamber_to_recHits_[ p_id.chamberId().rawId() ].push_back(myrechit);
-      // superchamber_to_recHits_[ superch_id() ].push_back(myrechit);
+      // access the rechits in the 4D segment
+      vector<DTRecHit1D> recHits;
+      if (d->hasPhi()) {
+	vector<DTRecHit1D> phiHits = d->phiSegment()->specificRecHits();
+	recHits.insert(recHits.end(), phiHits.begin(), phiHits.end());
+      }
+      if (d->hasZed()) {
+	vector<DTRecHit1D> zedHits = d->zSegment()->specificRecHits();
+	recHits.insert(recHits.end(), zedHits.begin(), zedHits.end());
+      }
+
+      int wiresFound = 0;
+      if (verboseDTRecSegment4D_)cout<< recHits.size() << " hit wires dt from segment "<<endl;
+      for (auto rh: recHits) {
+	auto rhid(rh.wireId());
+	if (verboseDTRecSegment4D_)cout << "\t"<<rh << " " << rhid << endl;
+	// is this "rechit" wire also a "simhit wire"?
+	if (hit_wires.find(rhid.rawId()) != hit_wires.end()) ++wiresFound;
+
+      }
+      if (verboseDTRecSegment4D_)cout << "Found " << wiresFound << " rechit wires out of " << hit_wires.size() << " simhit wires" << endl;
+      if (wiresFound==0) continue;
+
+      chamber_to_dtRecSegment4D_[ p_id.rawId() ].push_back(*d);
     }
   }
 }
