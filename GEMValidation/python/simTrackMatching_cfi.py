@@ -244,6 +244,20 @@ SimTrackMatching = cms.PSet(
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
     ),
+    dtRecSegment2D = cms.PSet(
+        verbose = cms.int32(0),
+        validInputTags = cms.VInputTag(cms.InputTag("dt2DSegments")),
+        run = cms.bool(False),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+    ),
+    dtRecSegment4D = cms.PSet(
+        verbose = cms.int32(0),
+        validInputTags = cms.VInputTag(cms.InputTag("dt4DSegments")),
+        run = cms.bool(True),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+    ),
     ## TrackFinder tracks
     cscTfTrack = cms.PSet(
         verbose = cms.int32(0),

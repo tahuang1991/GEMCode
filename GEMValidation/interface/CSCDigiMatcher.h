@@ -10,7 +10,6 @@
 
 #include "GEMCode/GEMValidation/interface/DigiMatcher.h"
 
-#include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/CSCDigi/interface/CSCComparatorDigiCollection.h"
 #include "DataFormats/CSCDigi/interface/CSCWireDigiCollection.h"
 

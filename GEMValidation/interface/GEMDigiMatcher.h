@@ -9,8 +9,6 @@
 */
 #include "GEMCode/GEMValidation/interface/DigiMatcher.h"
 
-#include "FWCore/Utilities/interface/InputTag.h"
-
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/GEMDigi/interface/GEMDigiCollection.h"
 #include "DataFormats/GEMDigi/interface/GEMPadDigiCollection.h"

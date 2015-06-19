@@ -13,14 +13,9 @@
 #include "GEMCode/GEMValidation/interface/GEMDigiMatcher.h"
 #include "GEMCode/GEMValidation/interface/RPCDigiMatcher.h"
 
-#include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/CSCDigi/interface/CSCALCTDigiCollection.h"
 #include "DataFormats/CSCDigi/interface/CSCCLCTDigiCollection.h"
 #include "DataFormats/CSCDigi/interface/CSCCorrelatedLCTDigiCollection.h"
-#include "DataFormats/CSCDigi/interface/CSCCorrelatedLCTDigi.h"
-#include "DataFormats/GEMDigi/interface/GEMPadDigiCollection.h"
-#include "DataFormats/GEMDigi/interface/GEMCoPadDigiCollection.h"
-#include "DataFormats/RPCDigi/interface/RPCDigiCollection.h"
 
 #include <vector>
 #include <map>

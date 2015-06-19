@@ -3,14 +3,12 @@
 
 /**\class DigiMatcher
 
- Description: Matching of Digis for SimTrack in GEM
+ Description: Matching of Digis for SimTrack in RPC
 
- Original Author:  "Vadim Khotilovich"
+ Original Author:  Sven Dildick
 */
 
 #include "GEMCode/GEMValidation/interface/DigiMatcher.h"
-
-#include "FWCore/Utilities/interface/InputTag.h"
 
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include <DataFormats/RPCDigi/interface/RPCDigiCollection.h>

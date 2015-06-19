@@ -21,7 +21,7 @@
 #include "GEMCode/GEMValidation/interface/GEMRecHitMatcher.h"
 //#include "GEMCode/GEMValidation/interface/ME0RecHitMatcher.h"
 #include "GEMCode/GEMValidation/interface/DTDigiMatcher.h"
-//#include "GEMCode/GEMValidation/interface/DTRecHitMatcher.h"
+#include "GEMCode/GEMValidation/interface/DTRecHitMatcher.h"
 #include "GEMCode/GEMValidation/interface/TrackMatcher.h"
 
 class SimTrackMatchManager
@@ -42,7 +42,7 @@ public:
   const GEMRecHitMatcher& gemRecHits() const {return gem_rechits_;}
   //  const ME0RecHitMatcher& me0RecHits() const {return me0_rechits_;}
   const DTDigiMatcher& dtDigis() const {return dt_digis_;}
-  /* const DTRecHitMatcher& dtRecHits() const {return dt_rechits_;} */
+  const DTRecHitMatcher& dtRecHits() const {return dt_rechits_;} 
   const TrackMatcher& tracks() const {return tracks_;}
   
 private:
@@ -56,7 +56,7 @@ private:
   GEMRecHitMatcher gem_rechits_;
   //  ME0RecHitMatcher me0_rechits_;
   DTDigiMatcher dt_digis_;
-  //  DTRecHitMatcher dt_rechits_; 
+  DTRecHitMatcher dt_rechits_; 
   TrackMatcher tracks_;
 };
 

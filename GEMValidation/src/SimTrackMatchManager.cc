@@ -13,7 +13,7 @@ SimTrackMatchManager::SimTrackMatchManager(const SimTrack& t, const SimVertex& v
 , gem_rechits_(simhits_)
 // , me0_rechits_(simhits_)
 , dt_digis_(simhits_)
-// , dt_rechits_(simhits_)
+, dt_rechits_(simhits_)
 , tracks_(simhits_, csc_digis_, gem_digis_, rpc_digis_, csc_stubs_)
 {
   //  std::cout <<"Constructing new SimTrackMatchManager" << std::endl;
