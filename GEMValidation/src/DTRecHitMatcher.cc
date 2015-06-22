@@ -8,6 +8,13 @@ DTRecHitMatcher::DTRecHitMatcher(SimHitMatcher& sh)
   : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
   , simhit_matcher_(&sh)
 {
+  auto dtRecHit1DPair = conf().getParameter<edm::ParameterSet>("dtRecHit");
+  dtRecHit1DPairInput_ = dtRecHit1DPair.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  maxBXDTRecHit1DPair_ = dtRecHit1DPair.getParameter<int>("maxBX");
+  minBXDTRecHit1DPair_ = dtRecHit1DPair.getParameter<int>("minBX");
+  verboseDTRecHit1DPair_ = dtRecHit1DPair.getParameter<int>("verbose");
+  runDTRecHit1DPair_ = dtRecHit1DPair.getParameter<bool>("run");
+
   auto dtSegment2D = conf().getParameter<edm::ParameterSet>("dtRecSegment2D");
   dtRecSegment2DInput_ = dtSegment2D.getParameter<std::vector<edm::InputTag>>("validInputTags");
   maxBXDTRecSegment2D_ = dtSegment2D.getParameter<int>("maxBX");
@@ -23,11 +30,63 @@ DTRecHitMatcher::DTRecHitMatcher(SimHitMatcher& sh)
   runDTRecSegment4D_ = dtSegment4D.getParameter<bool>("run");
 
   if (hasDTGeometry_) {
+    edm::Handle<DTRecHitCollection> dt_rechits;
+    if (gemvalidation::getByLabel(dtRecHit1DPairInput_, dt_rechits, event())) if (runDTRecHit1DPair_) matchDTRecHit1DPairsToSimTrack(*dt_rechits.product());
+
     edm::Handle<DTRecSegment2DCollection> dt_2DSegments;
     if (gemvalidation::getByLabel(dtRecSegment2DInput_, dt_2DSegments, event())) if (runDTRecSegment2D_) matchDTRecSegment2DsToSimTrack(*dt_2DSegments.product());
 
     edm::Handle<DTRecSegment4DCollection> dt_4DSegments;
     if (gemvalidation::getByLabel(dtRecSegment4DInput_, dt_4DSegments, event())) if (runDTRecSegment4D_) matchDTRecSegment4DsToSimTrack(*dt_4DSegments.product());
+  }
+}
+
+
+void 
+DTRecHitMatcher::matchDTRecHit1DPairsToSimTrack(const DTRecHitCollection& rechits)
+{
+  cout << "Matching simtrack to DT rechits" << endl;
+  // fetch all chamberIds with simhits
+  auto layer_ids = simhit_matcher_->layerIdsDT();
+  
+  for (auto id: layer_ids) {
+    DTLayerId p_id(id);
+    
+    // print all the wires in the DTChamber    
+    auto hit_wires(simhit_matcher_->hitWiresInDTLayerId(id));
+    if (verboseDTRecHit1DPair_) {
+      cout<<"hit wires dt from simhit"<<endl;
+      for (auto wire: hit_wires) cout << "\t"<<DTWireId(wire) << endl;
+      cout<<endl;
+    }
+    
+    // get the segments
+    auto rechits_in_det = rechits.get(p_id);
+    
+    for (auto d = rechits_in_det.first; d != rechits_in_det.second; ++d) {
+      if (verboseDTRecHit1DPair_) cout<<"rechit "<<p_id<<" "<<*d<<endl;
+      
+      unsigned int rightId(d->componentRecHit(DTEnums::DTCellSide::Right)->wireId());
+      unsigned int leftId(d->componentRecHit(DTEnums::DTCellSide::Left)->wireId());
+      std::set<unsigned int> rechitsIds;
+      rechitsIds.insert(rightId);
+      rechitsIds.insert(leftId);
+
+      int wiresFound = 0;
+      if (verboseDTRecHit1DPair_)cout<< rechitsIds.size() << " hit wires dt from rechit "<<endl;
+      for (auto rh: rechitsIds) {
+	if (verboseDTRecHit1DPair_)cout << "\t"<<rh << " " << DTWireId(rh) << endl;
+	// is this "rechit" wire also a "simhit wire"?
+	if (hit_wires.find(rh) != hit_wires.end()) ++wiresFound;
+
+      }
+      if (verboseDTRecHit1DPair_)cout << "Found " << wiresFound << " rechit wires out of " << hit_wires.size() << " simhit wires" << endl;
+      if (wiresFound==0) continue;
+
+      layer_to_dtRecHit1DPair_[p_id.rawId()].push_back(*d);
+      superLayer_to_dtRecHit1DPair_[p_id.superlayerId().rawId()].push_back(*d);
+      chamber_to_dtRecHit1DPair_[p_id.chamberId().rawId()].push_back(*d);
+    }
   }
 }
 
@@ -98,13 +157,97 @@ DTRecHitMatcher::matchDTRecSegment4DsToSimTrack(const DTRecSegment4DCollection& 
 }
 
 
-// std::set<unsigned int>
-// DTRecHitMatcher::superLayerIdsDTRecSegment2D() const
-// {
-//   std::set<unsigned int> result;
-//   for (auto& p: chamber_to_dtRecSegment4D_) result.insert(p.first);
-//   return result;
-// }
+std::set<unsigned int> 
+DTRecHitMatcher::layerIdsDTRecHit1DPair() const 
+{
+  std::set<unsigned int> result;
+  for (auto& p: layer_to_dtRecHit1DPair_) result.insert(p.first);
+  return result;
+}
+
+
+std::set<unsigned int> 
+DTRecHitMatcher::superLayerIdsDTRecHit1DPair() const
+{
+  std::set<unsigned int> result;
+  for (auto& p: superLayer_to_dtRecHit1DPair_) result.insert(p.first);
+  return result;
+}
+
+
+std::set<unsigned int>
+DTRecHitMatcher::chamberIdsDTRecHit1DPair() const
+{
+  std::set<unsigned int> result;
+  for (auto& p: chamber_to_dtRecHit1DPair_) result.insert(p.first);
+  return result;
+}
+
+
+std::set<unsigned int>
+DTRecHitMatcher::superLayerIdsDTRecSegment2D() const
+{
+  std::set<unsigned int> result;
+  for (auto& p: superLayer_to_dtRecSegment2D_) result.insert(p.first);
+  return result;
+}
+
+
+std::set<unsigned int> 
+DTRecHitMatcher::chamberIdsDTRecSegment2D() const
+{
+  std::set<unsigned int> result;
+  for (auto& p: chamber_to_dtRecSegment2D_) result.insert(p.first);
+  return result;
+}
+
+
+std::set<unsigned int> 
+DTRecHitMatcher::chamberIdsDTRecSegment4D() const
+{
+  std::set<unsigned int> result;
+  for (auto& p: chamber_to_dtRecSegment4D_) result.insert(p.first);
+  return result;
+}
+
+const DTRecHitMatcher::DTRecHit1DPairContainer& 
+DTRecHitMatcher::dtRecHit1DPairInLayer(unsigned int detid) const
+{
+  if (layer_to_dtRecHit1DPair_.find(detid) == layer_to_dtRecHit1DPair_.end()) return no_dtRecHit1DPairs_;
+  return layer_to_dtRecHit1DPair_.at(detid);
+}
+
+
+const DTRecHitMatcher::DTRecHit1DPairContainer& 
+DTRecHitMatcher::dtRecHit1DPairInSuperLayer(unsigned int detid) const
+{
+  if (superLayer_to_dtRecHit1DPair_.find(detid) == superLayer_to_dtRecHit1DPair_.end()) return no_dtRecHit1DPairs_;
+  return superLayer_to_dtRecHit1DPair_.at(detid);
+}
+
+
+const DTRecHitMatcher::DTRecHit1DPairContainer& 
+DTRecHitMatcher::dtRecHit1DPairInChamber(unsigned int detid) const
+{
+  if (chamber_to_dtRecHit1DPair_.find(detid) == chamber_to_dtRecHit1DPair_.end()) return no_dtRecHit1DPairs_;
+  return chamber_to_dtRecHit1DPair_.at(detid);
+}
+
+
+const DTRecHitMatcher::DTRecSegment2DContainer& 
+DTRecHitMatcher::dtRecSegment2DInSuperLayer(unsigned int detid) const
+{
+  if (superLayer_to_dtRecSegment2D_.find(detid) == superLayer_to_dtRecSegment2D_.end()) return no_dtRecSegment2Ds_;
+  return superLayer_to_dtRecSegment2D_.at(detid);
+}
+
+
+const DTRecHitMatcher::DTRecSegment2DContainer& 
+DTRecHitMatcher::dtRecSegment2DInChamber(unsigned int detid) const
+{
+  if (chamber_to_dtRecSegment2D_.find(detid) == chamber_to_dtRecSegment2D_.end()) return no_dtRecSegment2Ds_;
+  return chamber_to_dtRecSegment2D_.at(detid);
+}
 
 
 const DTRecHitMatcher::DTRecSegment4DContainer&

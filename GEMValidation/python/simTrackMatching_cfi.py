@@ -239,8 +239,9 @@ SimTrackMatching = cms.PSet(
     ),
     dtRecHit = cms.PSet(
         verbose = cms.int32(0),
-        validInputTags = cms.VInputTag(cms.InputTag("dt2DRecHits")),
-        run = cms.bool(False),
+        validInputTags = cms.VInputTag(cms.InputTag("dt1DRecHits"),
+                                       cms.InputTag("hltDt1DRecHits")),
+        run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
     ),
@@ -252,7 +253,7 @@ SimTrackMatching = cms.PSet(
         maxBX = cms.int32(1),
     ),
     dtRecSegment4D = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag("dt4DSegments"),
                                        cms.InputTag("hltDt4DSegments")),
         run = cms.bool(True),

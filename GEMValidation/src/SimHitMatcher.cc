@@ -1106,8 +1106,6 @@ SimHitMatcher::hitWiresInDTLayerId(unsigned int detid, int margin_n_wires) const
       DTWireId wid(id,wn);
       for (auto& h: hitsInDetId(wid.rawId())) {
 	if (verboseDT_) cout << "central DTWireId "<< wid << " simhit " <<h<< endl;
-	// LocalPoint lp = h.entryPoint();
-	// int central_wire = static_cast<int>(getDTGeometry()->layer(id)->specificTopology().channel(lp));
 	int smin = wn - margin_n_wires;
 	smin = (smin > 0) ? smin : 1;
 	int smax = wn + margin_n_wires;
