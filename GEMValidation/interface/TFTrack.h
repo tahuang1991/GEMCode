@@ -102,6 +102,7 @@ class TFTrack
   unsigned etaPacked() const {return eta_packed_;}
   unsigned phiPacked() const {return phi_packed_;}
   unsigned qPacked() const {return q_packed_;}
+  unsigned int chargesign() const {return chargesign_;}
   double pt() const {return pt_;}
   double eta() const {return eta_;}
   double phi() const {return phi_;}
@@ -121,6 +122,7 @@ class TFTrack
   unsigned eta_packed_;
   unsigned pt_packed_;
   unsigned q_packed_;
+  unsigned int chargesign_;
   double phi_;
   double eta_;
   double pt_;

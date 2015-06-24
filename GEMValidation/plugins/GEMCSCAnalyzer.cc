@@ -1399,7 +1399,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
    if (lct2 < (besttrack->getTriggerDigis()).size()) 
    {
-       etrk_[0].passGE11 = match_track.passDPhicut_TFTrack(2);
+       etrk_[0].passGE21 = match_track.passDPhicut_TFTrack(2);
        etrk_[0].dphiGE21 = ((besttrack->getTriggerDigis()).at(lct2))->getGEMDPhi();
    }
      auto propagate_odd_gp(match_track.simTrackPropagateGPs_odd());

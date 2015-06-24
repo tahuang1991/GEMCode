@@ -531,15 +531,17 @@ bool TrackMatcher::passDPhicut_TFTrack(int st) const
   
   auto lct((besttrack->getTriggerDigis()).at(lct_n));
   auto id((besttrack->getTriggerDigisIds()).at(lct_n));
+  //std::cout <<" id " << id << " LCT " << (*lct) << std::endl;
   double dphi = lct->getGEMDPhi();
   double pt= besttrack->pt();
   bool is_odd(id.chamber()%2==1);
   bool pass = false;
-  unsigned int LUTsize = sizeof(GEMdPhi)/sizeof(GEMdPhi[0]);
-  unsigned int sign = besttrack->qPacked();
+  unsigned int LUTsize = (st==1)? sizeof(ME11GEMdPhi)/sizeof(ME11GEMdPhi[0]) :sizeof(ME21GEMdPhi)/sizeof(ME21GEMdPhi[0]);
+  unsigned int sign = besttrack->chargesign();
   if (dphi > -99 and ((sign == 1 and dphi < 0) || (sign == 0 and dphi > 0) || fabs(dphi) <  0.5*GEMdPhi[LUTsize-1][2])){
    for (unsigned int b = 0; b < LUTsize; b++)
    {
+       std::cout <<"  b " << " odd " << GEMdPhi[b][1]  <<" even " << GEMdPhi[b][2] << std::endl;
 	if (double(pt) >= GEMdPhi[b][0])
 	{
 		
@@ -550,11 +552,12 @@ bool TrackMatcher::passDPhicut_TFTrack(int st) const
 	}
     }
   }
-   if (dphi <= -99) pass = true;
+  else if (dphi <= -99) pass = true;
+  else pass = false;
 
    if (double(pt) < GEMdPhi[0][0] ) pass = true;
    
-   //std::cout <<"id " << id <<" dphi " << dphi <<" pt "<< pt <<(pass? "  pass dphicut ": "  failed to pass dphicut") <<std::endl;
+   //std::cout <<"id " << id <<" dphi " << dphi <<" Tracksign "<< sign <<" pt "<< pt <<(pass? "  pass dphicut ": "  failed to pass dphicut") <<std::endl;
    return pass;
 
 }

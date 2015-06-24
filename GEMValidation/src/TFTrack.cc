@@ -54,7 +54,7 @@ TFTrack::init(CSCTFPtLUT* ptLUT,
   csc::L1Track::decodeRank(l1track_->rank(), gpt, quality);
   q_packed_ = quality & 0x3;
   pt_packed_ = gpt & 0x1f;
-
+  chargesign_ = l1track_->charge_packed();
   // calculate pt, eta and phi (don't forget to store the sign)                                                                                   
   const int sign(l1track_->endcap()==1 ? 1 : -1);
   pt_ = muPtScale->getPtScale()->getLowEdge(pt_packed_) + 1.e-6;
