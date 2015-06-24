@@ -54,12 +54,28 @@ public:
   const DTRecSegment2DContainer& dtRecSegment2DInChamber(unsigned int) const;
   const DTRecSegment4DContainer& dtRecSegment4DInChamber(unsigned int) const;
 
+  const DTRecHit1DPairContainer dtRecHit1DPairs() const;
+  const DTRecSegment2DContainer dtRecSegment2Ds() const;
+  const DTRecSegment4DContainer dtRecSegment4Ds() const;
+
   int nDTRecHit1DPairInLayer(unsigned int) const;
   int nDTRecHit1DPairInSuperLayer(unsigned int) const;
   int nDTRecHit1DPairInChamber(unsigned int) const;
   int nDTRecSegment2DInSuperLayer(unsigned int) const;
   int nDTRecSegment2DInChamber(unsigned int) const;
   int nDTRecSegment4DInChamber(unsigned int) const;
+
+  int nDTRecHit1DPairs() const;
+  int nDTRecSegment2Ds() const;
+  int nDTRecSegment4Ds() const;
+
+  bool dtRecHit1DPairInContainer(const DTRecHit1DPair&, const DTRecHit1DPairContainer&) const;
+  bool dtRecSegment2DInContainer(const DTRecSegment2D&, const DTRecSegment2DContainer&) const;
+  bool dtRecSegment4DInContainer(const DTRecSegment4D&, const DTRecSegment4DContainer&) const;
+
+  bool isDTRecHit1DPairMatched(const DTRecHit1DPair&) const;
+  bool isDTRecSegment2DMatched(const DTRecSegment2D&) const;
+  bool isDTRecSegment4DMatched(DTRecSegment4D) const;
 
 private:
 

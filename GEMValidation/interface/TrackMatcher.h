@@ -13,6 +13,9 @@
 #include "GEMCode/GEMValidation/interface/CSCDigiMatcher.h"
 #include "GEMCode/GEMValidation/interface/RPCDigiMatcher.h"
 #include "GEMCode/GEMValidation/interface/CSCStubMatcher.h"
+#include "GEMCode/GEMValidation/interface/CSCRecHitMatcher.h"
+#include "GEMCode/GEMValidation/interface/DTRecHitMatcher.h"
+#include "GEMCode/GEMValidation/interface/RPCRecHitMatcher.h"
 
 #include "GEMCode/GEMValidation/interface/TFTrack.h" 
 #include "GEMCode/GEMValidation/interface/TFCand.h" 
@@ -34,8 +37,13 @@
 #include "CondFormats/DataRecord/interface/L1MuTriggerPtScaleRcd.h"
 
 #include "DataFormats/L1CSCTrackFinder/interface/L1CSCTrackCollection.h"
-#include "DataFormats/L1Trigger/interface/L1MuonParticleFwd.h"
 #include "DataFormats/L1Trigger/interface/L1MuonParticle.h"
+#include "DataFormats/L1Trigger/interface/L1MuonParticleFwd.h"
+
+#include "DataFormats/RecoCandidate/interface/RecoChargedCandidate.h"
+#include "DataFormats/RecoCandidate/interface/RecoChargedCandidateFwd.h"
+#include "DataFormats/TrackReco/interface/TrackExtra.h"
+#include "DataFormats/TrackReco/interface/TrackExtraFwd.h"
 
 typedef std::pair<float, float> EtaPhi;
 typedef std::vector<L1MuRegionalCand> L1MuRegionalCandCollection;
@@ -84,11 +92,13 @@ class TrackMatcher : public CSCStubMatcher
   float simE;
   float simCharge;
 
-  void matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks);
-  void matchTfCandToSimTrack(const L1MuRegionalCandCollection& tracks);
-  void matchGmtRegCandToSimTrack(const L1MuRegionalCand& tracks);
-  void matchGmtCandToSimTrack(const L1MuGMTExtendedCand& tracks);
-  void matchL1MuonParticleToSimTrack(const l1extra::L1MuonParticleCollection& tracks);
+  void matchTfTrackToSimTrack(const L1CSCTrackCollection&);
+  void matchTfCandToSimTrack(const L1MuRegionalCandCollection&);
+  void matchGmtRegCandToSimTrack(const L1MuRegionalCand&);
+  void matchGmtCandToSimTrack(const L1MuGMTExtendedCand&);
+  void matchL1MuonParticleToSimTrack(const l1extra::L1MuonParticleCollection&);
+  void matchTrackExtraToSimTrack(const reco::TrackExtraCollection&);
+  void matchRecoChargedCandidateToSimTrack(const reco::RecoChargedCandidateCollection&);
 
   csctf::TrackStub buildTrackStub(const CSCCorrelatedLCTDigi& d, CSCDetId id);
   std::pair<float, float> intersectionEtaPhi(CSCDetId id, int wg, int hs);
@@ -97,6 +107,7 @@ class TrackMatcher : public CSCStubMatcher
   std::map<int, GlobalPoint> interStatPropagation_odd_;
   std::map<int, GlobalPoint> interStatPropagation_even_;
   //std::map<int, int > simTrackDummy_;
+  //  reco::TrackExtra* 
 
   const SimHitMatcher* sh_matcher_;
   const GEMDigiMatcher* gem_digi_matcher_;
@@ -109,31 +120,38 @@ class TrackMatcher : public CSCStubMatcher
   std::vector<edm::InputTag> gmtRegCandInputLabel_;
   std::vector<edm::InputTag> gmtCandInputLabel_;
   std::vector<edm::InputTag> l1ExtraInputLabel_;
+  std::vector<edm::InputTag> trackExtraInputLabel_;
+  std::vector<edm::InputTag> recoChargedCandidateInputLabel_;
 
   int minBXTFTrack_, maxBXTFTrack_;
   int minBXTFCand_, maxBXTFCand_;
   int minBXGMTRegCand_, maxBXGMTRegCand_;
   int minBXGMTCand_, maxBXGMTCand_;
   int minBXL1Extra_, maxBXL1Extra_;
+  int minBXTrackExtra_, maxBXTrackExtra_;
+  int minBXRecoChargedCandidate_, maxBXRecoChargedCandidate_;
 
   int verboseTFTrack_;
   int verboseTFCand_;
   int verboseGMTRegCand_;
   int verboseGMTCand_;
   int verboseL1Extra_;
+  int verboseTrackExtra_;
+  int verboseRecoChargedCandidate_;
 
   double deltaRTFTrack_;
   double deltaRTFCand_;
   double deltaRGMTRegCand_;
   double deltaRGMTCand_;
   double deltaRL1Extra_;
+  double deltaRTrackExtra_;
+  double deltaRRecoChargedCandidate_;
 
   std::vector<TFTrack*> tfTracks_;
   std::vector<TFCand*> tfCands_;
   std::vector<GMTRegCand*> gmtRegCands_;
   std::vector<GMTCand*> gmtCands_;
   std::vector<L1Extra*> l1Extras_;
-
 
   edm::ParameterSet ptLUTset_;
   edm::ParameterSet CSCTFSPset_;

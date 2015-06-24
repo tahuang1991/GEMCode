@@ -258,9 +258,111 @@ DTRecHitMatcher::dtRecSegment4DInChamber(unsigned int detid) const
 }
 
 
+const DTRecHitMatcher::DTRecHit1DPairContainer
+DTRecHitMatcher::dtRecHit1DPairs() const
+{
+  DTRecHit1DPairContainer result;
+  for (auto id: chamberIdsDTRecHit1DPair()){
+    auto rechitsInChamber(dtRecHit1DPairInChamber(id));
+    result.insert(result.end(), rechitsInChamber.begin(), rechitsInChamber.end());
+  }
+  return result;
+}
+
+
+const DTRecHitMatcher::DTRecSegment2DContainer
+DTRecHitMatcher::dtRecSegment2Ds() const
+{
+  DTRecSegment2DContainer result;
+  for (auto id: chamberIdsDTRecSegment2D()){
+    auto segmentsInChamber(dtRecSegment2DInChamber(id));
+    result.insert(result.end(), segmentsInChamber.begin(), segmentsInChamber.end());
+  }
+  return result;
+}
+
+
+const DTRecHitMatcher::DTRecSegment4DContainer
+DTRecHitMatcher::dtRecSegment4Ds() const
+{
+  DTRecSegment4DContainer result;
+  for (auto id: chamberIdsDTRecSegment4D()){
+    auto segmentsInChamber(dtRecSegment4DInChamber(id));
+    result.insert(result.end(), segmentsInChamber.begin(), segmentsInChamber.end());
+  }
+  return result;
+}
+
+
 int 
 DTRecHitMatcher::nDTRecSegment4DInChamber(unsigned int detid) const
 {
   return dtRecSegment4DInChamber(detid).size();
 }
 
+
+int 
+DTRecHitMatcher::nDTRecHit1DPairs() const
+{
+  int n = 0;
+  auto ids = chamberIdsDTRecHit1DPair();
+  for (auto id: ids) n += dtRecHit1DPairInChamber(id).size();
+  return n;  
+}
+
+
+int 
+DTRecHitMatcher::nDTRecSegment2Ds() const
+{
+  int n = 0;
+  auto ids = chamberIdsDTRecSegment2D();
+  for (auto id: ids) n += dtRecSegment2DInChamber(id).size();
+  return n;  
+}
+
+
+int
+DTRecHitMatcher::nDTRecSegment4Ds() const
+{
+  int n = 0;
+  auto ids = chamberIdsDTRecSegment4D();
+  for (auto id: ids) n += dtRecSegment4DInChamber(id).size();
+  return n;  
+}
+
+bool 
+DTRecHitMatcher::dtRecSegment4DInContainer(const DTRecSegment4D& thisSegment, const DTRecSegment4DContainer& c) const
+{
+  if (verboseDTRecSegment4D_) std::cout << "dtRecSegment4DInContainer()" << std::endl;
+  bool isSame = false;
+  for (auto& segment: c){
+    int nRechits1(segment.recHits().size());
+    for (auto& rec1: segment.recHits()) {
+      const DTRecHit1DPair *dtrh1 = dynamic_cast<const DTRecHit1DPair*>(rec1);
+      int nRechits2(thisSegment.recHits().size());
+      int matchingRecHits(0);
+      for (auto& rec2: thisSegment.recHits()) {
+	const DTRecHit1DPair *dtrh2 = dynamic_cast<const DTRecHit1DPair*>(rec2);
+	if ((*dtrh1)==(*dtrh2)) {
+	  ++matchingRecHits;
+	}
+      }
+      if (verboseDTRecSegment4D_) {
+	std::cout << "matchingRecHits: "<<matchingRecHits<<std::endl;
+	std::cout << "nRechits1:       "<<nRechits1<<std::endl;
+	std::cout << "nRechits2:       "<<nRechits2<<std::endl;
+      }
+      if (matchingRecHits==nRechits2 and nRechits2==nRechits1)
+	isSame = true;
+    }
+  }
+  return isSame;
+}
+
+
+bool 
+DTRecHitMatcher::isDTRecSegment4DMatched(DTRecSegment4D thisSegment) const
+{
+  return dtRecSegment4DInContainer(thisSegment, dtRecSegment4Ds());
+}
+ 

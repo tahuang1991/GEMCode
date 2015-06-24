@@ -1,5 +1,4 @@
 #include "GEMCode/GEMValidation/interface/DigiMatcher.h"
-#include "GEMCode/GEMValidation/interface/SimHitMatcher.h"
 
 #include "DataFormats/Math/interface/deltaR.h"
 

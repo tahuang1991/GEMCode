@@ -1,18 +1,15 @@
-#include "GEMCode/GEMValidation/interface/TrackMatcher.h"
+#include "GEMCode/GEMValidation/interface/L1TrackMatcher.h"
 #include "DataFormats/Math/interface/deltaR.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
 
 #include "TLorentzVector.h"
 #include <map>
 
-TrackMatcher::TrackMatcher(SimHitMatcher& sh, CSCDigiMatcher& csc_dg, 
-                           GEMDigiMatcher& gem_dg, RPCDigiMatcher& rpc_dg, 
-                           CSCStubMatcher& csc_st)
-: CSCStubMatcher(sh, csc_dg, gem_dg, rpc_dg)
-, sh_matcher_(&sh)
-, gem_digi_matcher_(&gem_dg)
-, csc_digi_matcher_(&csc_dg)
-, rpc_digi_matcher_(&rpc_dg)                 
+L1TrackMatcher::L1TrackMatcher(CSCStubMatcher& csc, DTDigiMatcher& dt, RPCDigiMatcher& rpc)
+: BaseMatcher(csc.trk(), csc.vtx(), csc.conf(), csc.event(), csc.eventSetup())
+, csc_stub_matcher_(&csc)
+, dt_digi_matcher_(&dt)
+, rpc_digi_matcher_(&rpc)                 
 {
   auto tfTrack = conf().getParameter<edm::ParameterSet>("cscTfTrack");
   cscTfTrackInputLabel_ = tfTrack.getParameter<std::vector<edm::InputTag>>("validInputTags");
@@ -49,29 +46,10 @@ TrackMatcher::TrackMatcher(SimHitMatcher& sh, CSCDigiMatcher& csc_dg,
   verboseL1Extra_ = l1Extra.getParameter<int>("verbose");
   deltaRL1Extra_ = l1Extra.getParameter<double>("deltaR");
 
-  auto trackExtra = conf().getParameter<edm::ParameterSet>("trackExtra");
-  trackExtraInputLabel_ = trackExtra.getParameter<std::vector<edm::InputTag>>("validInputTags");
-  minBXTrackExtra_ = trackExtra.getParameter<int>("minBX");
-  maxBXTrackExtra_ = trackExtra.getParameter<int>("minBX");
-  verboseTrackExtra_ = trackExtra.getParameter<int>("verbose");
-  deltaRTrackExtra_ = l1Extra.getParameter<double>("deltaR");
-
-  auto recoChargedCandidate = conf().getParameter<edm::ParameterSet>("recoChargedCandidate");
-  recoChargedCandidateInputLabel_ = recoChargedCandidate.getParameter<std::vector<edm::InputTag>>("validInputTags");
-  minBXRecoChargedCandidate_ = recoChargedCandidate.getParameter<int>("minBX");
-  maxBXRecoChargedCandidate_ = recoChargedCandidate.getParameter<int>("minBX");
-  verboseRecoChargedCandidate_ = recoChargedCandidate.getParameter<int>("verbose");
-  deltaRRecoChargedCandidate_ = recoChargedCandidate.getParameter<double>("deltaR");
-
   CSCTFSPset_ = conf().getParameter<edm::ParameterSet>("sectorProcessor");
   ptLUTset_ = CSCTFSPset_.getParameter<edm::ParameterSet>("PTLUT");
   srLUTset_ = CSCTFSPset_.getParameter<edm::ParameterSet>("SRLUT");
   
-  simPt = trk().momentum().pt();
-  simEta = trk().momentum().eta();
-  simPhi = trk().momentum().phi();
-  simE = trk().momentum().E();
-  simCharge = trk().charge();
   hasMuScales_ = true;
   hasMuPtScale_ = true;
 
@@ -80,16 +58,16 @@ TrackMatcher::TrackMatcher(SimHitMatcher& sh, CSCDigiMatcher& csc_dg,
   //  CSCSectorReceiverLUT* srLUTs_[5][6][2];
   dtrc_ = nullptr;
 
-  //std::cout<<" TrackMatcher constructor" <<std::endl;
+  //std::cout<<" L1TrackMatcher constructor" <<std::endl;
   clear();
   init();
 }
 
-TrackMatcher::~TrackMatcher() 
+L1TrackMatcher::~L1TrackMatcher() 
 {
  // if(ptLUT_) delete ptLUT_;
  // ptLUT_ = nullptr;
-    //std::cout<<" TrackMatcher destructor" <<std::endl;
+    //std::cout<<" L1TrackMatcher destructor" <<std::endl;
   delete ptLUT_;
   ptLUT_ = nullptr;
 
@@ -126,7 +104,7 @@ TrackMatcher::~TrackMatcher()
 }
 
 void 
-TrackMatcher::clear()
+L1TrackMatcher::clear()
 {
   tfTracks_.clear();
   tfCands_.clear();
@@ -136,14 +114,14 @@ TrackMatcher::clear()
 }
 
 void 
-TrackMatcher::init()
+L1TrackMatcher::init()
 {  
   try {
     eventSetup().get<L1MuTriggerScalesRcd>().get(muScalesHd_);
     muScales_ = &*muScalesHd_;
   } catch (edm::eventsetup::NoProxyException<L1MuTriggerScalesRcd>& e) {
     hasMuScales_ = false;
-    LogDebug("TrackMatcher") << "+++ Info: L1MuTriggerScalesRcd is unavailable. +++\n";
+    LogDebug("L1TrackMatcher") << "+++ Info: L1MuTriggerScalesRcd is unavailable. +++\n";
   }
 
   try {
@@ -151,7 +129,7 @@ TrackMatcher::init()
     muPtScale_ = &*muPtScaleHd_;
   } catch (edm::eventsetup::NoProxyException<L1MuTriggerPtScaleRcd>& e) {
     hasMuPtScale_ = false;
-    LogDebug("TrackMatcher") << "+++ Info: L1MuTriggerPtScaleRcd is unavailable. +++\n";
+    LogDebug("L1TrackMatcher") << "+++ Info: L1MuTriggerPtScaleRcd is unavailable. +++\n";
   }
 
   if (ptLUT_) delete ptLUT_;
@@ -193,21 +171,18 @@ TrackMatcher::init()
   // L1 muon candidates
   edm::Handle<l1extra::L1MuonParticleCollection> l1Particles;
   if (gemvalidation::getByLabel(l1ExtraInputLabel_, l1Particles, event())) matchL1MuonParticleToSimTrack(*l1Particles.product());
-
-  // TrackExtra 
-  edm::Handle<reco::TrackExtraCollection> l2TrackExtras;
-  if (gemvalidation::getByLabel(trackExtraInputLabel_, l2TrackExtras, event())) matchTrackExtraToSimTrack(*l2TrackExtras.product());
-  
-  // RecoChargedCandidate
-  edm::Handle<reco::RecoChargedCandidateCollection> recoChargedCandidates;
-  if (gemvalidation::getByLabel(recoChargedCandidateInputLabel_, recoChargedCandidates, event())) matchRecoChargedCandidateToSimTrack(*recoChargedCandidates.product());
 }
 
 
 void 
-TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
+L1TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
 {
-
+  const float simPt = trk().momentum().pt();
+  const float simEta = trk().momentum().eta();
+  const float simPhi = trk().momentum().phi();
+  const float simE = trk().momentum().E();
+  const float simCharge = trk().charge();
+  
   for (auto trk = tracks.begin(); trk != tracks.end(); trk++) {
      verboseTFTrack_ = 0;
     TFTrack *track = new TFTrack(&trk->first,&trk->second);
@@ -220,8 +195,8 @@ TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
     
     if (simEta*track->eta() < 0) continue;
     // calculate the deltaR using the simhits in the 2nd CSC station -- reference station
-    auto p(sh_matcher_->chamberIdsCSC(CSC_ME21));  
-    auto pp(sh_matcher_->chamberIdsCSC(CSC_ME22));  
+    auto p(rpc_digi_matcher_->simHitMatcher()->chamberIdsCSC(CSC_ME21));  
+    auto pp(rpc_digi_matcher_->simHitMatcher()->chamberIdsCSC(CSC_ME22));  
     p.insert(pp.begin(),pp.end());
 
     TLorentzVector simmuon;
@@ -231,35 +206,35 @@ TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
     
     if (p.size()!=0) {
       if (verboseTFTrack_ > 1) std::cout << CSCDetId(*p.begin()) << std::endl;  
-      auto hits(sh_matcher_->hitsInChamber(*p.begin()));
-      auto gp(sh_matcher_->simHitsMeanPosition(hits));
+      auto hits(rpc_digi_matcher_->simHitMatcher()->hitsInChamber(*p.begin()));
+      auto gp(rpc_digi_matcher_->simHitMatcher()->simHitsMeanPosition(hits));
       if (verboseTFTrack_ > 1) std::cout << gp << std::endl;
       // simmuon.SetPtEtaPhiM(simPt, gp.eta(), gp.phi(), 1.057);
     }
     
-   //propagate simtrack to station2
-   float phi_cor = phiHeavyCorr(simPt, simEta, simPhi, simCharge); 
-   simmuon.SetPtEtaPhiM(simPt, simEta, phi_cor, 0.1057);
-   dR = simmuon.DeltaR(templ1muon);
-   /*  auto lcts2(lctsInStation(2));
-    auto lcts3(lctsInStation(3));
-    lcts2.insert(lcts2.end(),lcts3.begin(),lcts3.end());
+    //propagate simtrack to station2
+    float phi_cor = phiHeavyCorr(simPt, simEta, simPhi, simCharge); 
+    simmuon.SetPtEtaPhiM(simPt, simEta, phi_cor, 0.1057);
+    dR = simmuon.DeltaR(templ1muon);
+    
+   // auto lcts2(lctsInStation(2));
+   //  auto lcts3(lctsInStation(3));
+   //  lcts2.insert(lcts2.end(),lcts3.begin(),lcts3.end());
 
-    if (lcts2.size() != 0) {
+   //  if (lcts2.size() != 0) {
     
-	TLorentzVector simmuon;
-        for (auto stub : lcts2)
-        {
-	    if (verboseTFTrack_ > 1)   std::cout <<"stubs in st2,3 "<< stub << std::endl;
-	    auto EtaPhi(intersectionEtaPhi(digi_id(stub), digi_wg(stub), digi_channel(stub)));
-            //simmuon.SetPtEtaPhiE(simPt, simEta, simPhi, simE);
-            simmuon.SetPtEtaPhiE(simPt, EtaPhi.first, EtaPhi.second, simE);
-	    if (simmuon.DeltaR(templ1muon) < dR)  dR = simmuon.DeltaR(templ1muon);
-	}
+   // 	TLorentzVector simmuon;
+   //      for (auto stub : lcts2)
+   //      {
+   // 	    if (verboseTFTrack_ > 1)   std::cout <<"stubs in st2,3 "<< stub << std::endl;
+   // 	    auto EtaPhi(intersectionEtaPhi(digi_id(stub), digi_wg(stub), digi_channel(stub)));
+   //          //simmuon.SetPtEtaPhiE(simPt, simEta, simPhi, simE);
+   //          simmuon.SetPtEtaPhiE(simPt, EtaPhi.first, EtaPhi.second, simE);
+   // 	    if (simmuon.DeltaR(templ1muon) < dR)  dR = simmuon.DeltaR(templ1muon);
+   // 	}
     
-    }
-    else continue;//if no stubs available in station2,or 3 that can match to simtrack, then continue;???
-     */
+   //  }
+   //  else continue;//if no stubs available in station2,or 3 that can match to simtrack, then continue;???
 
     if (verboseTFTrack_ > 1) std::cout << "----------------------------------------------------------" << std::endl;
     
@@ -267,11 +242,11 @@ TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
     track->setDR(dR);
 
     // debugging
-    /*if (track->nStubs()==0)
+    if (track->nStubs()==0)
     {
         std::cout << "nstubs == 0" << std::endl;
 	verboseTFTrack_ = 2;
-    }*/
+    }
     //debug
     //if (!(track->hasStubEndcap(1) and track->hasStubEndcap(2)) and track->dr()< deltaRTFTrack_)
    // {
@@ -327,14 +302,14 @@ TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
   for (auto tftrk : tfTracks_)
     {
       if (verboseTFTrack_)  std::cout<<" track that can match to simtrack "<< i << " track pt " << tftrk->pt() <<" track eta " << tftrk->eta()
-                                  <<" nstubs:"<< tftrk->nStubs()<<" dr:" << tftrk->dr() <<std::endl;
+				     <<" nstubs:"<< tftrk->nStubs()<<" dr:" << tftrk->dr() <<std::endl;
       i++;
     }  
 }
 
 
 void 
-TrackMatcher::matchTfCandToSimTrack(const L1MuRegionalCandCollection& tracks)
+L1TrackMatcher::matchTfCandToSimTrack(const L1MuRegionalCandCollection& tracks)
 {
   for (auto trk = tracks.begin(); trk != tracks.end(); trk++) {
     TFCand track(&*trk);
@@ -357,19 +332,19 @@ TrackMatcher::matchTfCandToSimTrack(const L1MuRegionalCandCollection& tracks)
 
 
 void 
-TrackMatcher::matchGmtRegCandToSimTrack(const L1MuRegionalCand& tracks)
+L1TrackMatcher::matchGmtRegCandToSimTrack(const L1MuRegionalCandCollection& tracks)
 {
 }
 
 
 void 
-TrackMatcher::matchGmtCandToSimTrack(const L1MuGMTExtendedCand& tracks)
+L1TrackMatcher::matchGmtCandToSimTrack(const L1MuGMTExtendedCandCollection& tracks)
 {
 }
 
 
 void 
-TrackMatcher::matchL1MuonParticleToSimTrack(const l1extra::L1MuonParticleCollection& muons)
+L1TrackMatcher::matchL1MuonParticleToSimTrack(const l1extra::L1MuonParticleCollection& muons)
 {
   // implement this function Jose!
 
@@ -382,72 +357,8 @@ TrackMatcher::matchL1MuonParticleToSimTrack(const l1extra::L1MuonParticleCollect
 }
 
 
-void 
-TrackMatcher::matchTrackExtraToSimTrack(const reco::TrackExtraCollection& tracks)
-{
-  for(auto& track: tracks) {
-    std::cout<<"L2 TrackExtra pT: "<<track.innerMomentum().Rho()
-	     <<", eta: "<<track.innerPosition().eta()
-     	     <<", phi: "<<track.innerPosition().phi()<<std::endl;  
-    std::cout<< "\tDeltaR(SimTrack, L2TrackExtra): " << reco::deltaR(track.innerPosition(), trk().momentum()) << std::endl;
-    std::cout<< "\tDeltaPt(SimTrack, L2TrackExtra): " << std::fabs(track.innerMomentum().Rho()-trk().momentum().pt()) << std::endl;
-
-    std::cout << "Rechits/Segments: " << track.recHitsSize()<< std::endl;
-    int matchingCSCSegments(0);
-    int matchingRPCSegments(0);
-    int matchingDTSegments(0);
-    int matchingSegments(0);
-    int nValidSegments(0);
-    for(auto rh = track.recHitsBegin(); rh != track.recHitsEnd(); rh++) {
-      if (!(**rh).isValid()) continue;
-      ++nValidSegments;
-      auto id((**rh).rawId());
-      if (is_dt(id)) {
-	std::cout << "\tDT :: id :: " << DTChamberId(id) << std::endl;
-	const DTRecSegment4D *seg = dynamic_cast<const DTRecSegment4D*>(*rh);
-	std::cout << "\t   :: segment :: " << *seg << std::endl;
-	//	if (
-	++matchingDTSegments;
-	++matchingSegments;
-      }
-      if (is_rpc(id)) {
-	std::cout << "\tRPC :: id :: " << RPCDetId(id) << std::endl;
-	const RPCRecHit* rpcrh = dynamic_cast<const RPCRecHit*>(*rh);
-	std::cout << "\t    :: rechit :: " << *rpcrh << std::endl;
-	++matchingRPCSegments;
-	++matchingSegments;
-      }
-      if (is_csc(id)) {
-	std::cout << "\tCSC " << CSCDetId(id) << std::endl;
-	const CSCSegment *seg = dynamic_cast<const CSCSegment*>(*rh);
-	std::cout << "\t    :: segment :: " << *seg << std::endl;
-	++matchingCSCSegments;
-	++matchingSegments;
-      }
-    }
-    std::cout << "Valid Segments:    " << nValidSegments << std::endl << std::endl;
-    std::cout << "Matching Segments: " << matchingSegments << std::endl << std::endl;
-    std::cout <<"\tRPC:   " << matchingRPCSegments << std::endl;
-    std::cout <<"\tCSC:   " << matchingCSCSegments << std::endl;
-    std::cout <<"\tDT:    " << matchingDTSegments << std::endl;
-  }
-}
-
-
-void 
-TrackMatcher::matchRecoChargedCandidateToSimTrack(const reco::RecoChargedCandidateCollection& candidates)
-{
-  // for(auto& muon: candidates) {
-  //   std::cout<<" L1 Muon Particle PT: "<<muon.pt()
-  //            <<", eta: "<<muon.eta()
-  //            <<", charge: "<<muon.charge()
-  //            <<", phi: "<<muon.phi()<<std::endl;  
-  // }
-}
-
-
 TFTrack* 
-TrackMatcher::bestTFTrack(bool sortPtFirst) const
+L1TrackMatcher::bestTFTrack(bool sortPtFirst) const
 {
   //return 0;
   
@@ -509,7 +420,7 @@ TrackMatcher::bestTFTrack(bool sortPtFirst) const
 
 
 TFCand* 
-TrackMatcher::bestTFCand(bool sortPtFirst) const
+L1TrackMatcher::bestTFCand(bool sortPtFirst) const
 {
   /*
     if (cands.size()==0) return NULL;
@@ -565,7 +476,7 @@ OB    if (maxI==99) return NULL;
 
 
 GMTRegCand* 
-TrackMatcher::bestGMTRegCand(bool sortPtFirst) const
+L1TrackMatcher::bestGMTRegCand(bool sortPtFirst) const
 {
   // first sort by Pt inside the cone (if sortPtFirst), then sort by DR
   if (gmtRegCands_.size()==0) return nullptr;
@@ -586,7 +497,7 @@ TrackMatcher::bestGMTRegCand(bool sortPtFirst) const
 
 
 GMTCand* 
-TrackMatcher::bestGMTCand(bool sortPtFirst) const
+L1TrackMatcher::bestGMTCand(bool sortPtFirst) const
 {
   // first sort by Pt inside the cone (if sortPtFirst), then sort by DR
   if (gmtCands_.size()==0) return nullptr;
@@ -607,14 +518,14 @@ TrackMatcher::bestGMTCand(bool sortPtFirst) const
 
 
 L1Extra* 
-TrackMatcher::bestL1Extra(bool sortPtFirst) const
+L1TrackMatcher::bestL1Extra(bool sortPtFirst) const
 {
   return 0;
 }
 
 
 csctf::TrackStub 
-TrackMatcher::buildTrackStub(const CSCCorrelatedLCTDigi &d, CSCDetId id)
+L1TrackMatcher::buildTrackStub(const CSCCorrelatedLCTDigi &d, CSCDetId id)
 {
   const unsigned fpga((id.station() == 1) ? CSCTriggerNumbering::triggerSubSectorFromLabels(id) - 1 : id.station());
   CSCSectorReceiverLUT* srLUT = srLUTs_[fpga][id.triggerSector()-1][id.endcap()-1];
@@ -629,7 +540,7 @@ TrackMatcher::buildTrackStub(const CSCCorrelatedLCTDigi &d, CSCDetId id)
 
 
 std::pair<float, float> 
-TrackMatcher::intersectionEtaPhi(CSCDetId id, int wg, int hs)
+L1TrackMatcher::intersectionEtaPhi(CSCDetId id, int wg, int hs)
 {
   const CSCDetId layerId(id.endcap(), id.station(), id.ring(), id.chamber(), CSCConstants::KEY_CLCT_LAYER);
   const CSCLayer* csclayer(getCSCGeometry()->layer(layerId));
@@ -648,9 +559,10 @@ TrackMatcher::intersectionEtaPhi(CSCDetId id, int wg, int hs)
 }
 
 
-void TrackMatcher::propagateSimTrack()
+void 
+L1TrackMatcher::propagateSimTrack()
 {
-   int endcap = (simEta>0? 1 : 2);
+   int endcap = (trk().momentum().eta()>0? 1 : 2);
    int ring = 1;
  //  auto it_odd(simTrackPropagateGPs_odd_.begin());
   for (int st=1; st<5; st++)
@@ -682,10 +594,11 @@ void TrackMatcher::propagateSimTrack()
 } 
 
 
-GlobalPoint TrackMatcher::propagationInterStation(int firstSt, int SecondSt, bool odd)
+GlobalPoint 
+L1TrackMatcher::propagationInterStation(int firstSt, int SecondSt, bool odd)
 {
 
-  for (auto d: sh_matcher_->chamberIdsCSC(0))
+  for (auto d: rpc_digi_matcher_->simHitMatcher()->chamberIdsCSC(0))
   {
     CSCDetId id(d);
     int chamber(odd ? 1:2);
@@ -694,7 +607,7 @@ GlobalPoint TrackMatcher::propagationInterStation(int firstSt, int SecondSt, boo
     const GlobalPoint gpAtSecondSt = csclayer->centerOfWireGroup(10);
     if (id.station()==firstSt)
     {
-        const auto& hits = sh_matcher_->hitsInChamber(d);
+        const auto& hits = rpc_digi_matcher_->simHitMatcher()->hitsInChamber(d);
 	if (hits.size()==0) continue;
 	//pick up one hit to do propagation
 	auto onehit(hits.at(0));
@@ -713,7 +626,8 @@ GlobalPoint TrackMatcher::propagationInterStation(int firstSt, int SecondSt, boo
 }
 
  
-void TrackMatcher::propagationInterStation()
+void 
+L1TrackMatcher::propagationInterStation()
 {
 
   //auto p(propagationInterStation(1,2, true));
@@ -725,5 +639,5 @@ void TrackMatcher::propagationInterStation()
   interStatPropagation_even_[12] = propagationInterStation(1,2,false);
   interStatPropagation_even_[23] = propagationInterStation(2,3,false);
   interStatPropagation_even_[13] = propagationInterStation(1,3,false);
-
 }
+
