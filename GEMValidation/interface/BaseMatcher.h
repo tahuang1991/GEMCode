@@ -92,7 +92,7 @@ public:
   /// DT chamber types
   enum DTType { DT_ALL = 0, DT_MB10, DT_MB11, DT_MB12, DT_MB20, DT_MB21, 
 		DT_MB22, DT_MB30, DT_MB31, DT_MB32, DT_MB40, DT_MB41, DT_MB42};
-
+/*
   const double ME11GEMdPhi[9][3] = {
     {-2 , 1.0, 1.0 },
     {3 , 0.03971647, 0.01710244 },
@@ -115,7 +115,7 @@ public:
     {30, 0.00465160, 0.00335700 },
     {40, 0.00372145, 0.00366262 }
   };
-
+*/
   BaseMatcher(const SimTrack& t, const SimVertex& v,
       const edm::ParameterSet& ps, const edm::Event& ev, const edm::EventSetup& es);
 

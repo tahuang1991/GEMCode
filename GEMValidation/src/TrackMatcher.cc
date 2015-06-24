@@ -1,4 +1,5 @@
 #include "GEMCode/GEMValidation/interface/TrackMatcher.h"
+#include "GEMCode/GEMValidation/interface/GEMCSCdphi_LUT.h"
 #include "TLorentzVector.h"
 #include <map>
 
@@ -515,6 +516,48 @@ TrackMatcher::buildTrackStub(const CSCCorrelatedLCTDigi &d, CSCDetId id)
   return csctf::TrackStub(d, id, gblPhi.global_phi, gblEta.global_eta);
 }
 
+bool TrackMatcher::passDPhicut_TFTrack(int st) const 
+{
+
+  if (tfTracks().size() == 0)  return true;
+
+  std::cout <<"TFTracks size() " << tfTracks().size() << std::endl;
+  auto GEMdPhi( st==1 ? ME11GEMdPhi : ME21GEMdPhi);
+  auto besttrack(bestTFTrack());
+  unsigned int lct_n = besttrack->digiInME(st,1);
+  if (lct_n == 999 and st==1)
+      lct_n = besttrack->digiInME(st, 4);
+  if (lct_n == 999) return true;
+  
+  auto lct((besttrack->getTriggerDigis()).at(lct_n));
+  auto id((besttrack->getTriggerDigisIds()).at(lct_n));
+  double dphi = lct->getGEMDPhi();
+  double pt= besttrack->pt();
+  bool is_odd(id.chamber()%2==1);
+  bool pass = false;
+  unsigned int LUTsize = sizeof(GEMdPhi)/sizeof(GEMdPhi[0]);
+  unsigned int sign = besttrack->qPacked();
+  if (dphi > -99 and ((sign == 1 and dphi < 0) || (sign == 0 and dphi > 0) || fabs(dphi) <  0.5*GEMdPhi[LUTsize-1][2])){
+   for (unsigned int b = 0; b < LUTsize; b++)
+   {
+	if (double(pt) >= GEMdPhi[b][0])
+	{
+		
+	    if ((is_odd && GEMdPhi[b][1] > fabs(dphi)) ||
+		(!is_odd && GEMdPhi[b][2] > fabs(dphi)))
+		    pass = true;
+	    else    pass = false;
+	}
+    }
+  }
+   if (dphi <= -99) pass = true;
+
+   if (double(pt) < GEMdPhi[0][0] ) pass = true;
+   
+   //std::cout <<"id " << id <<" dphi " << dphi <<" pt "<< pt <<(pass? "  pass dphicut ": "  failed to pass dphicut") <<std::endl;
+   return pass;
+
+}
 
 
 std::pair<float, float> 

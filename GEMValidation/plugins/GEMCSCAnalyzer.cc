@@ -24,6 +24,7 @@
 #include "SimDataFormats/Track/interface/SimTrackContainer.h"
 
 #include "GEMCode/GEMValidation/interface/SimTrackMatchManager.h"
+#include "GEMCode/GEMValidation/interface/GEMCSCdphi_LUT.h"
 
 #include "TTree.h"
 
@@ -1390,8 +1391,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
    if (lct1 < (besttrack->getTriggerDigis()).size()) 
    {
-       etrk_[0].passGE11 = match_track.passDPhicut((besttrack->getTriggerDigisIds()).at(lct1), 
-		((besttrack->getTriggerDigis()).at(lct1))->getGEMDPhi(), besttrack->pt()); 
+       etrk_[0].passGE11 = match_track.passDPhicut_TFTrack(1);
        etrk_[0].dphiGE11 = ((besttrack->getTriggerDigis()).at(lct1))->getGEMDPhi();
    }
 
@@ -1399,8 +1399,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
    if (lct2 < (besttrack->getTriggerDigis()).size()) 
    {
-       etrk_[0].passGE21 = match_track.passDPhicut((besttrack->getTriggerDigisIds()).at(lct2), 
-		((besttrack->getTriggerDigis()).at(lct2))->getGEMDPhi(), besttrack->pt()); 
+       etrk_[0].passGE11 = match_track.passDPhicut_TFTrack(2);
        etrk_[0].dphiGE21 = ((besttrack->getTriggerDigis()).at(lct2))->getGEMDPhi();
    }
      auto propagate_odd_gp(match_track.simTrackPropagateGPs_odd());

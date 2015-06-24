@@ -70,6 +70,8 @@ class TrackMatcher : public CSCStubMatcher
   GMTRegCand* bestGMTRegCand(bool sortPtFirst=1) const;
   GMTCand* bestGMTCand(bool sortPtFirst=1) const;
   L1Extra* bestL1Extra(bool sortPtFirst=1) const;
+
+  bool passDPhicut_TFTrack(int st) const;
   
  private:
 
