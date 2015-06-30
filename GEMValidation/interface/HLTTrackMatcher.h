@@ -28,6 +28,8 @@ class HLTTrackMatcher : public BaseMatcher
   /// destructor
   ~HLTTrackMatcher();
 
+  const reco::TrackExtraCollection& getMatchedTrackExtras() const {return matchedTrackExtras_;}
+
  private:
 
   void init();
@@ -52,6 +54,8 @@ class HLTTrackMatcher : public BaseMatcher
 
   double deltaRTrackExtra_;
   double deltaRRecoChargedCandidate_;
+
+  reco::TrackExtraCollection matchedTrackExtras_;
 };
 
 #endif

@@ -75,7 +75,8 @@ public:
 
   bool isDTRecHit1DPairMatched(const DTRecHit1DPair&) const;
   bool isDTRecSegment2DMatched(const DTRecSegment2D&) const;
-  bool isDTRecSegment4DMatched(DTRecSegment4D) const;
+  bool isDTRecSegment4DMatched(const DTRecSegment4D&) const;
+  bool areDTRecSegment4DSame(const DTRecSegment4D&,const DTRecSegment4D&) const;
 
 private:
 

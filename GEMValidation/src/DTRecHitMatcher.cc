@@ -9,21 +9,21 @@ DTRecHitMatcher::DTRecHitMatcher(SimHitMatcher& sh)
   , simhit_matcher_(&sh)
 {
   auto dtRecHit1DPair = conf().getParameter<edm::ParameterSet>("dtRecHit");
-  dtRecHit1DPairInput_ = dtRecHit1DPair.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  dtRecHit1DPairInput_ = dtRecHit1DPair.getParameter<vector<edm::InputTag>>("validInputTags");
   maxBXDTRecHit1DPair_ = dtRecHit1DPair.getParameter<int>("maxBX");
   minBXDTRecHit1DPair_ = dtRecHit1DPair.getParameter<int>("minBX");
   verboseDTRecHit1DPair_ = dtRecHit1DPair.getParameter<int>("verbose");
   runDTRecHit1DPair_ = dtRecHit1DPair.getParameter<bool>("run");
 
   auto dtSegment2D = conf().getParameter<edm::ParameterSet>("dtRecSegment2D");
-  dtRecSegment2DInput_ = dtSegment2D.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  dtRecSegment2DInput_ = dtSegment2D.getParameter<vector<edm::InputTag>>("validInputTags");
   maxBXDTRecSegment2D_ = dtSegment2D.getParameter<int>("maxBX");
   minBXDTRecSegment2D_ = dtSegment2D.getParameter<int>("minBX");
   verboseDTRecSegment2D_ = dtSegment2D.getParameter<int>("verbose");
   runDTRecSegment2D_ = dtSegment2D.getParameter<bool>("run");
 
   auto dtSegment4D = conf().getParameter<edm::ParameterSet>("dtRecSegment4D");
-  dtRecSegment4DInput_ = dtSegment4D.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  dtRecSegment4DInput_ = dtSegment4D.getParameter<vector<edm::InputTag>>("validInputTags");
   maxBXDTRecSegment4D_ = dtSegment4D.getParameter<int>("maxBX");
   minBXDTRecSegment4D_ = dtSegment4D.getParameter<int>("minBX");
   verboseDTRecSegment4D_ = dtSegment4D.getParameter<int>("verbose");
@@ -68,7 +68,7 @@ DTRecHitMatcher::matchDTRecHit1DPairsToSimTrack(const DTRecHitCollection& rechit
       
       unsigned int rightId(d->componentRecHit(DTEnums::DTCellSide::Right)->wireId());
       unsigned int leftId(d->componentRecHit(DTEnums::DTCellSide::Left)->wireId());
-      std::set<unsigned int> rechitsIds;
+      set<unsigned int> rechitsIds;
       rechitsIds.insert(rightId);
       rechitsIds.insert(leftId);
 
@@ -87,6 +87,15 @@ DTRecHitMatcher::matchDTRecHit1DPairsToSimTrack(const DTRecHitCollection& rechit
       superLayer_to_dtRecHit1DPair_[p_id.superlayerId().rawId()].push_back(*d);
       chamber_to_dtRecHit1DPair_[p_id.chamberId().rawId()].push_back(*d);
     }
+  }
+  if (verboseDTRecHit1DPair_) {
+    cout << "Number of matching DTRecHit1DPairs: " << nDTRecHit1DPairs() << endl;    
+    for (auto id: chamberIdsDTRecHit1DPair()) {
+      for (auto rh: dtRecHit1DPairInChamber(id)) {
+	cout << "\t" << id << " " << rh << endl;	
+      }
+    }
+    cout<<endl;
   }
 }
 
@@ -148,64 +157,74 @@ DTRecHitMatcher::matchDTRecSegment4DsToSimTrack(const DTRecSegment4DCollection& 
 	if (hit_wires.find(rhid.rawId()) != hit_wires.end()) ++wiresFound;
 
       }
-      if (verboseDTRecSegment4D_)cout << "Found " << wiresFound << " rechit wires out of " << hit_wires.size() << " simhit wires" << endl;
+      if (verboseDTRecSegment4D_) cout << "Found " << wiresFound << " rechit wires out of " << hit_wires.size() << " simhit wires" << endl;
       if (wiresFound==0) continue;
+      if (verboseDTRecSegment4D_) cout << "Matching DTRecSegment4D " << *d << endl;
 
       chamber_to_dtRecSegment4D_[ p_id.rawId() ].push_back(*d);
     }
   }
+  if (verboseDTRecSegment4D_) {
+    cout << "Number of matching DTRecSegment4D: " << nDTRecSegment4Ds() << endl;
+    for (auto id: chamberIdsDTRecSegment4D()) {
+      for (auto rh: dtRecSegment4DInChamber(id)) {
+	cout << "\t" << id << " " << rh << endl;	
+      }
+    }
+    cout<<endl;
+  }
 }
 
 
-std::set<unsigned int> 
+set<unsigned int> 
 DTRecHitMatcher::layerIdsDTRecHit1DPair() const 
 {
-  std::set<unsigned int> result;
+  set<unsigned int> result;
   for (auto& p: layer_to_dtRecHit1DPair_) result.insert(p.first);
   return result;
 }
 
 
-std::set<unsigned int> 
+set<unsigned int> 
 DTRecHitMatcher::superLayerIdsDTRecHit1DPair() const
 {
-  std::set<unsigned int> result;
+  set<unsigned int> result;
   for (auto& p: superLayer_to_dtRecHit1DPair_) result.insert(p.first);
   return result;
 }
 
 
-std::set<unsigned int>
+set<unsigned int>
 DTRecHitMatcher::chamberIdsDTRecHit1DPair() const
 {
-  std::set<unsigned int> result;
+  set<unsigned int> result;
   for (auto& p: chamber_to_dtRecHit1DPair_) result.insert(p.first);
   return result;
 }
 
 
-std::set<unsigned int>
+set<unsigned int>
 DTRecHitMatcher::superLayerIdsDTRecSegment2D() const
 {
-  std::set<unsigned int> result;
+  set<unsigned int> result;
   for (auto& p: superLayer_to_dtRecSegment2D_) result.insert(p.first);
   return result;
 }
 
 
-std::set<unsigned int> 
+set<unsigned int> 
 DTRecHitMatcher::chamberIdsDTRecSegment2D() const
 {
-  std::set<unsigned int> result;
+  set<unsigned int> result;
   for (auto& p: chamber_to_dtRecSegment2D_) result.insert(p.first);
   return result;
 }
 
 
-std::set<unsigned int> 
+set<unsigned int> 
 DTRecHitMatcher::chamberIdsDTRecSegment4D() const
 {
-  std::set<unsigned int> result;
+  set<unsigned int> result;
   for (auto& p: chamber_to_dtRecSegment4D_) result.insert(p.first);
   return result;
 }
@@ -333,36 +352,28 @@ DTRecHitMatcher::nDTRecSegment4Ds() const
 bool 
 DTRecHitMatcher::dtRecSegment4DInContainer(const DTRecSegment4D& thisSegment, const DTRecSegment4DContainer& c) const
 {
-  if (verboseDTRecSegment4D_) std::cout << "dtRecSegment4DInContainer()" << std::endl;
+  if (verboseDTRecSegment4D_) cout << "dtRecSegment4DInContainer()" << endl;
   bool isSame = false;
-  for (auto& segment: c){
-    int nRechits1(segment.recHits().size());
-    for (auto& rec1: segment.recHits()) {
-      const DTRecHit1DPair *dtrh1 = dynamic_cast<const DTRecHit1DPair*>(rec1);
-      int nRechits2(thisSegment.recHits().size());
-      int matchingRecHits(0);
-      for (auto& rec2: thisSegment.recHits()) {
-	const DTRecHit1DPair *dtrh2 = dynamic_cast<const DTRecHit1DPair*>(rec2);
-	if ((*dtrh1)==(*dtrh2)) {
-	  ++matchingRecHits;
-	}
-      }
-      if (verboseDTRecSegment4D_) {
-	std::cout << "matchingRecHits: "<<matchingRecHits<<std::endl;
-	std::cout << "nRechits1:       "<<nRechits1<<std::endl;
-	std::cout << "nRechits2:       "<<nRechits2<<std::endl;
-      }
-      if (matchingRecHits==nRechits2 and nRechits2==nRechits1)
-	isSame = true;
-    }
-  }
+  for (auto& segment: c) if (areDTRecSegment4DSame(thisSegment,segment)) isSame = true;
   return isSame;
 }
 
 
 bool 
-DTRecHitMatcher::isDTRecSegment4DMatched(DTRecSegment4D thisSegment) const
+DTRecHitMatcher::isDTRecSegment4DMatched(const DTRecSegment4D& thisSegment) const
 {
+  if (verboseDTRecSegment4D_) cout << "isDTRecSegment4DMatched()" << endl;
   return dtRecSegment4DInContainer(thisSegment, dtRecSegment4Ds());
 }
+
+
+bool 
+DTRecHitMatcher::areDTRecSegment4DSame(const DTRecSegment4D& dtrh1,const DTRecSegment4D& dtrh2) const
+{
+  if (verboseDTRecSegment4D_) cout << "areDTRecSegment4DSame()" << endl;
+  cout << "dtrh1 " <<dtrh1 << endl;
+  cout << "dtrh2 " <<dtrh2 << endl;
+  return dtrh1.localDirection()==dtrh2.localDirection() and dtrh1.localPosition()==dtrh2.localPosition();
+}
+
  

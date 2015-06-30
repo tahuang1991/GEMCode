@@ -385,6 +385,7 @@ TrackMatcher::matchL1MuonParticleToSimTrack(const l1extra::L1MuonParticleCollect
 void 
 TrackMatcher::matchTrackExtraToSimTrack(const reco::TrackExtraCollection& tracks)
 {
+  std::cout << "Number of L1ExtraTracks: " <<tracks.size() << std::endl;
   for(auto& track: tracks) {
     std::cout<<"L2 TrackExtra pT: "<<track.innerMomentum().Rho()
 	     <<", eta: "<<track.innerPosition().eta()
@@ -406,7 +407,7 @@ TrackMatcher::matchTrackExtraToSimTrack(const reco::TrackExtraCollection& tracks
 	std::cout << "\tDT :: id :: " << DTChamberId(id) << std::endl;
 	const DTRecSegment4D *seg = dynamic_cast<const DTRecSegment4D*>(*rh);
 	std::cout << "\t   :: segment :: " << *seg << std::endl;
-	//	if (
+	
 	++matchingDTSegments;
 	++matchingSegments;
       }
