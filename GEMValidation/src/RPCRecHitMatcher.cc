@@ -27,8 +27,7 @@ RPCRecHitMatcher::~RPCRecHitMatcher() {}
 
 void
 RPCRecHitMatcher::matchRecHitsToSimTrack(const RPCRecHitCollection& rechits)
-{
-  
+{  
   auto det_ids = simhit_matcher_->detIdsRPC();
   for (auto id: det_ids)
   {
@@ -60,17 +59,16 @@ RPCRecHitMatcher::matchRecHitsToSimTrack(const RPCRecHitCollection& rechits)
         //std::cout<<i<<" "<<firstStrip<<" "<<cls<<" "<<stripFound<<std::endl;
 	
       }
-
       if (!stripFound) continue;
       if (verboseRPCRecHit_) cout<<"oki"<<endl;
 
       auto myrechit = make_digi(id, d->firstClusterStrip(), d->BunchX(), RPC_STRIP, d->clusterSize());
       detid_to_recHits_[id].push_back(myrechit);
       chamber_to_recHits_[ p_id.chamberId().rawId() ].push_back(myrechit);
-
+      detid_to_rpcRecHits_[id].push_back(*d);
+      chamber_to_rpcRecHits_[ p_id.chamberId().rawId() ].push_back(*d);
     }
   }
-  
 }
 
 
@@ -91,6 +89,7 @@ RPCRecHitMatcher::chamberIds() const
   return result;
 }
 
+
 const RPCRecHitMatcher::RecHitContainer&
 RPCRecHitMatcher::recHitsInDetId(unsigned int detid) const
 {
@@ -98,12 +97,42 @@ RPCRecHitMatcher::recHitsInDetId(unsigned int detid) const
   return detid_to_recHits_.at(detid);
 }
 
+
 const RPCRecHitMatcher::RecHitContainer&
 RPCRecHitMatcher::recHitsInChamber(unsigned int detid) const
 {
   if (chamber_to_recHits_.find(detid) == chamber_to_recHits_.end()) return no_recHits_;
   return chamber_to_recHits_.at(detid);
 }
+
+
+const RPCRecHitMatcher::RPCRecHitContainer&
+RPCRecHitMatcher::rpcRecHitsInDetId(unsigned int detid) const
+{
+  if (detid_to_rpcRecHits_.find(detid) == detid_to_rpcRecHits_.end()) return no_rpcRecHits_;
+  return detid_to_rpcRecHits_.at(detid);
+}
+
+
+const RPCRecHitMatcher::RPCRecHitContainer&
+RPCRecHitMatcher::rpcRecHitsInChamber(unsigned int detid) const
+{
+  if (chamber_to_rpcRecHits_.find(detid) == chamber_to_rpcRecHits_.end()) return no_rpcRecHits_;
+  return chamber_to_rpcRecHits_.at(detid);
+}
+
+
+const RPCRecHitMatcher::RPCRecHitContainer
+RPCRecHitMatcher::rpcRecHits() const
+{
+  RPCRecHitContainer result;
+  for (auto id: chamberIds()){
+    auto rechitsInChamber(rpcRecHitsInChamber(id));
+    result.insert(result.end(), rechitsInChamber.begin(), rechitsInChamber.end());
+  }
+  return result;
+}
+
 
 std::set<int>
 RPCRecHitMatcher::stripNumbersInDetId(unsigned int detid) const
@@ -119,6 +148,7 @@ RPCRecHitMatcher::stripNumbersInDetId(unsigned int detid) const
   return result;
 }
 
+
 std::set<int>
 RPCRecHitMatcher::partitionNumbers() const
 {
@@ -132,6 +162,7 @@ RPCRecHitMatcher::partitionNumbers() const
   }
   return result;
 }
+
 
 GlobalPoint
 RPCRecHitMatcher::recHitPosition(const RecHit& rechit) const
@@ -175,3 +206,18 @@ RPCRecHitMatcher::recHitMeanPosition(const RecHitContainer& rechit) const
   return GlobalPoint(sumx/n, sumy/n, sumz/n);
 }
 
+
+bool
+RPCRecHitMatcher::rpcRecHitInContainer(const RPCRecHit& rh, const RPCRecHitContainer& c) const
+{
+  bool isSame = false;
+  for (auto& thisRH: c) if (thisRH==rh) isSame = true;
+  return isSame;
+}
+
+
+bool 
+RPCRecHitMatcher::isRPCRecHitMatched(const RPCRecHit& thisRh) const
+{
+  return rpcRecHitInContainer(thisRh, rpcRecHits());
+}
