@@ -205,3 +205,46 @@ CSCRecHitMatcher::nCSCSegmentsInChamber(unsigned int detid) const
 {
   return cscSegmentsInChamber(detid).size();
 }
+
+
+const CSCRecHitMatcher::CSCSegmentContainer 
+CSCRecHitMatcher::cscSegments() const
+{
+  CSCSegmentContainer result;
+  for (auto id: chamberIdsCSCSegment()){
+    auto segmentsInChamber(cscSegmentsInChamber(id));
+    result.insert(result.end(), segmentsInChamber.begin(), segmentsInChamber.end());
+  }
+  return result;
+}
+
+  
+bool CSCRecHitMatcher::cscSegmentInContainer(const CSCSegment& sg, const CSCSegmentContainer& c) const
+{
+  bool isSame = false;
+  for (auto& segment: c) if (areCSCSegmentsSame(sg,segment)) isSame = true;
+  return isSame;
+}
+
+
+bool CSCRecHitMatcher::isCSCSegmentMatched(const CSCSegment& thisSg) const
+{
+  return cscSegmentInContainer(thisSg, cscSegments());
+}
+
+
+int CSCRecHitMatcher::nCSCSegments() const
+{
+  int n = 0;
+  auto ids = chamberIdsCSCSegment();
+  for (auto id: ids) n += cscSegmentsInChamber(id).size();
+  return n;  
+}
+
+bool CSCRecHitMatcher::areCSCSegmentsSame(const CSCSegment& l,const CSCSegment& r) const
+{
+  if (verboseCSCSegment_) cout << "areCSCSegmentsSame()" << endl;
+  cout << "cscrh1 " <<l<< endl;
+  cout << "cscrh2 " <<r<< endl;
+  return (l.localPosition() == r.localPosition() and l.localDirection() == r.localDirection());
+}

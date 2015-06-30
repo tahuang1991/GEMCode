@@ -43,6 +43,14 @@ public:
   //CSC segments from a particular chamber
   const CSCSegmentContainer& cscSegmentsInChamber(unsigned int) const;
 
+  const CSCSegmentContainer cscSegments() const;
+
+  bool cscSegmentInContainer(const CSCSegment&, const CSCSegmentContainer&) const;
+  bool isCSCSegmentMatched(const CSCSegment&) const;
+
+  int nCSCSegments() const;
+  bool areCSCSegmentsSame(const CSCSegment&,const CSCSegment&) const;
+
   int nCSCRecHit2DsInLayer(unsigned int) const;
   int nCSCRecHit2DsInChamber(unsigned int) const;
   int nCSCSegmentsInChamber(unsigned int) const;
