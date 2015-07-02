@@ -45,7 +45,7 @@ DTRecHitMatcher::DTRecHitMatcher(SimHitMatcher& sh)
 void 
 DTRecHitMatcher::matchDTRecHit1DPairsToSimTrack(const DTRecHitCollection& rechits)
 {
-  cout << "Matching simtrack to DT rechits" << endl;
+  if (verboseDTRecHit1DPair_) cout << "Matching simtrack to DT rechits" << endl;
   // fetch all chamberIds with simhits
   auto layer_ids = simhit_matcher_->layerIdsDT();
   
@@ -109,7 +109,7 @@ DTRecHitMatcher::matchDTRecSegment2DsToSimTrack(const DTRecSegment2DCollection& 
 void
 DTRecHitMatcher::matchDTRecSegment4DsToSimTrack(const DTRecSegment4DCollection& dtRecSegment4Ds)
 {
-  cout << "Matching simtrack to segments" << endl;
+  if (verboseDTRecSegment4D_) cout << "Matching simtrack to segments" << endl;
   // fetch all chamberIds with simhits
   auto chamber_ids = simhit_matcher_->chamberIdsDT();
   
@@ -352,7 +352,7 @@ DTRecHitMatcher::nDTRecSegment4Ds() const
 bool 
 DTRecHitMatcher::dtRecSegment4DInContainer(const DTRecSegment4D& thisSegment, const DTRecSegment4DContainer& c) const
 {
-  if (verboseDTRecSegment4D_) cout << "dtRecSegment4DInContainer()" << endl;
+  // if (verboseDTRecSegment4D_) cout << "dtRecSegment4DInContainer()" << endl;
   bool isSame = false;
   for (auto& segment: c) if (areDTRecSegment4DSame(thisSegment,segment)) isSame = true;
   return isSame;
@@ -362,7 +362,7 @@ DTRecHitMatcher::dtRecSegment4DInContainer(const DTRecSegment4D& thisSegment, co
 bool 
 DTRecHitMatcher::isDTRecSegment4DMatched(const DTRecSegment4D& thisSegment) const
 {
-  if (verboseDTRecSegment4D_) cout << "isDTRecSegment4DMatched()" << endl;
+  // if (verboseDTRecSegment4D_) cout << "isDTRecSegment4DMatched()" << endl;
   return dtRecSegment4DInContainer(thisSegment, dtRecSegment4Ds());
 }
 
@@ -370,9 +370,11 @@ DTRecHitMatcher::isDTRecSegment4DMatched(const DTRecSegment4D& thisSegment) cons
 bool 
 DTRecHitMatcher::areDTRecSegment4DSame(const DTRecSegment4D& dtrh1,const DTRecSegment4D& dtrh2) const
 {
-  if (verboseDTRecSegment4D_) cout << "areDTRecSegment4DSame()" << endl;
-  cout << "dtrh1 " <<dtrh1 << endl;
-  cout << "dtrh2 " <<dtrh2 << endl;
+  // if (verboseDTRecSegment4D_) {
+  //   cout << "areDTRecSegment4DSame()" << endl;
+  //   cout << "dtrh1 " <<dtrh1 << endl;
+  //   cout << "dtrh2 " <<dtrh2 << endl;
+  // }
   return dtrh1.localDirection()==dtrh2.localDirection() and dtrh1.localPosition()==dtrh2.localPosition();
 }
 

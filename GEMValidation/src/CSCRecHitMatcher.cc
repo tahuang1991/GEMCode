@@ -51,10 +51,18 @@ CSCRecHitMatcher::matchCSCRecHit2DsToSimTrack(const CSCRecHit2DCollection& rechi
       cout<<endl;
     }
     
-    // // get the segments
-    // auto rechits_in_det = rechits.get(p_id);    
-    // for (auto d = rechits_in_det.first; d != rechits_in_det.second; ++d) {
-    //   if (verboseCSCRecHit2D_) cout<<"rechit "<<p_id<<" "<<*d<<endl;
+    // print all the strips in the CSCChamber    
+    auto hit_strips(simhit_matcher_->hitStripsInDetId(id));
+    if (verboseCSCRecHit2D_) {
+      cout<<"hit strip csc from simhit"<<endl;
+      copy(hit_strips.begin(), hit_strips.end(), ostream_iterator<int>(cout, " "));
+      cout<<endl;
+    }
+
+    // get the rechits
+    auto rechits_in_det = rechits.get(p_id);    
+    for (auto d = rechits_in_det.first; d != rechits_in_det.second; ++d) {
+      if (verboseCSCRecHit2D_) cout<<"rechit "<<p_id<<" "<<*d<<endl;
       
     //   int wiresFound = 0;
     //   if (verboseCSCRecHit2D_) { 
@@ -68,7 +76,7 @@ CSCRecHitMatcher::matchCSCRecHit2DsToSimTrack(const CSCRecHit2DCollection& rechi
       
     //   layer_to_cscRecHit2D_[id].push_back(*d);
     //   chamber_to_cscRecHit2D_[p_id.chamberId().rawId()].push_back(*d);
-    // }
+    }
   }
 }
 
@@ -243,8 +251,10 @@ int CSCRecHitMatcher::nCSCSegments() const
 
 bool CSCRecHitMatcher::areCSCSegmentsSame(const CSCSegment& l,const CSCSegment& r) const
 {
-  if (verboseCSCSegment_) cout << "areCSCSegmentsSame()" << endl;
-  cout << "cscrh1 " <<l<< endl;
-  cout << "cscrh2 " <<r<< endl;
+  // if (verboseCSCSegment_) {
+  //   cout << "areCSCSegmentsSame()" << endl;
+  //   cout << "cscrh1 " <<l<< endl;
+  //   cout << "cscrh2 " <<r<< endl;
+  // }
   return (l.localPosition() == r.localPosition() and l.localDirection() == r.localDirection());
 }

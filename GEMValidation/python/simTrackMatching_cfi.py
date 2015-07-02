@@ -120,8 +120,9 @@ SimTrackMatching = cms.PSet(
         matchDeltaStrip = cms.int32(1),
     ),
     rpcRecHit = cms.PSet(
-        verbose = cms.int32(0),
-        validInputTags = cms.VInputTag(cms.InputTag("rpcRecHits")),
+        verbose = cms.int32(1),
+        validInputTags = cms.VInputTag(cms.InputTag("rpcRecHits"),
+                                       cms.InputTag("hltRpcRecHits")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
@@ -199,7 +200,7 @@ SimTrackMatching = cms.PSet(
         addGhosts = cms.bool(True),
     ),
     cscRecHit = cms.PSet(
-        verbose = cms.int32(0),
+        verbose = cms.int32(1),
         validInputTags = cms.VInputTag(cms.InputTag("csc2DRecHits")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
@@ -207,7 +208,8 @@ SimTrackMatching = cms.PSet(
     ),
     cscSegment = cms.PSet(
         verbose = cms.int32(0),
-        validInputTags = cms.VInputTag(cms.InputTag("cscSegments")),
+        validInputTags = cms.VInputTag(cms.InputTag("cscSegments"),
+                                       cms.InputTag("hltRpcRecHits")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),

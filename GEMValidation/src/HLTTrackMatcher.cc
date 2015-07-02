@@ -88,22 +88,26 @@ HLTTrackMatcher::matchTrackExtraToSimTrack(const reco::TrackExtraCollection& tra
 	std::cout << "\t\tRPC :: id :: " << RPCDetId(id) << std::endl;
 	const RPCRecHit* rpcrh = dynamic_cast<const RPCRecHit*>(*rh);
 	std::cout << "\t\t    :: rechit :: " << *rpcrh << std::endl;
-	// ++matchingRPCSegments;
-	// ++matchingSegments;
+	if (rpc_rechit_matcher_->isRPCRecHitMatched(*rpcrh)) {
+	  ++matchingRPCSegments;
+	  ++matchingSegments;
+	}
       }
       if (is_csc(id)) {
 	std::cout << "\t\tCSC " << CSCDetId(id) << std::endl;
 	const CSCSegment *seg = dynamic_cast<const CSCSegment*>(*rh);
 	std::cout << "\t\t    :: segment :: " << *seg << std::endl;
-	// ++matchingCSCSegments;
-	// ++matchingSegments;
+	if (csc_rechit_matcher_->isCSCSegmentMatched(*seg)) {
+	  ++matchingCSCSegments;
+	  ++matchingSegments;
+	}
       }
     }
     std::cout << "\tValid Segments:    " << nValidSegments << std::endl << std::endl;
     std::cout << "\tMatching Segments: " << matchingSegments << std::endl << std::endl;
-    std::cout <<"\t\tRPC:   " << matchingRPCSegments << std::endl;
-    std::cout <<"\t\tCSC:   " << matchingCSCSegments << std::endl;
-    std::cout <<"\t\tDT:    " << matchingDTSegments << std::endl;
+    std::cout << "\t              RPC: " << matchingRPCSegments << std::endl;
+    std::cout << "\t              CSC: " << matchingCSCSegments << std::endl;
+    std::cout << "\t               DT: " << matchingDTSegments << std::endl;
     // store matching L1TrackExtra
     if (matchingDTSegments>=2) {
       matchedTrackExtras_.push_back(track);

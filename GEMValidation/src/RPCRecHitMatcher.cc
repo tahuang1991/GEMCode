@@ -17,6 +17,7 @@ RPCRecHitMatcher::RPCRecHitMatcher(SimHitMatcher& sh)
   runRPCRecHit_ = rpcRecHit_.getParameter<bool>("run");
 
   if (hasRPCGeometry_) {
+    
     edm::Handle<RPCRecHitCollection> rpc_rechits;
     if (gemvalidation::getByLabel(rpcRecHitInput_, rpc_rechits, event())) if (runRPCRecHit_) matchRecHitsToSimTrack(*rpc_rechits.product());
   }
@@ -28,40 +29,36 @@ RPCRecHitMatcher::~RPCRecHitMatcher() {}
 void
 RPCRecHitMatcher::matchRecHitsToSimTrack(const RPCRecHitCollection& rechits)
 {  
+  if (verboseRPCRecHit_) cout << "Matching simtrack to RPC rechits" << endl;
   auto det_ids = simhit_matcher_->detIdsRPC();
-  for (auto id: det_ids)
-  {
+  for (auto id: det_ids) {
     RPCDetId p_id(id);
-
+    
     auto hit_strips = simhit_matcher_->hitStripsInDetId(id, matchDeltaStrip_);
-    if (verboseRPCRecHit_)
-    {
+    if (verboseRPCRecHit_) {
       cout<<"hit_strips_fat ";
       copy(hit_strips.begin(), hit_strips.end(), ostream_iterator<int>(cout, " "));
       cout<<endl;
     }
-
+    
     auto rechits_in_det = rechits.get(RPCDetId(id));
-    for (auto d = rechits_in_det.first; d != rechits_in_det.second; ++d)
-    {
-      if (verboseRPCRecHit_) cout<<"recHit "<<p_id<<" "<<*d<<endl;
+    for (auto d = rechits_in_det.first; d != rechits_in_det.second; ++d) {
+      if (verboseRPCRecHit_) cout<<"RPCRecHit "<<p_id<<" "<<*d<<endl;
       // check that the rechit is within BX range
       if (d->BunchX() < minBXRPC_ || d->BunchX() > maxBXRPC_) continue;
       // check that it matches a strip that was hit by SimHits from our track
-
+      
       int firstStrip = d->firstClusterStrip();
       int cls = d->clusterSize();
       bool stripFound = false;
 
       for(int i = firstStrip; i < (firstStrip + cls); i++){
-
 	if (hit_strips.find(i) != hit_strips.end()) stripFound = true;
-        //std::cout<<i<<" "<<firstStrip<<" "<<cls<<" "<<stripFound<<std::endl;
-	
+        if (verboseRPCRecHit_) std::cout<<i<<" "<<firstStrip<<" "<<cls<<" "<<stripFound<<std::endl;
       }
       if (!stripFound) continue;
       if (verboseRPCRecHit_) cout<<"oki"<<endl;
-
+      
       auto myrechit = make_digi(id, d->firstClusterStrip(), d->BunchX(), RPC_STRIP, d->clusterSize());
       detid_to_recHits_[id].push_back(myrechit);
       chamber_to_recHits_[ p_id.chamberId().rawId() ].push_back(myrechit);
