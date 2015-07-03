@@ -48,10 +48,10 @@ class HLTTrackMatcher : public BaseMatcher
 
   int minBXTrackExtra_, maxBXTrackExtra_;
   int minBXRecoChargedCandidate_, maxBXRecoChargedCandidate_;
-
   int verboseTrackExtra_;
   int verboseRecoChargedCandidate_;
-
+  bool runTrackExtra_;
+  bool runRecoChargedCandidate_;
   double deltaRTrackExtra_;
   double deltaRRecoChargedCandidate_;
 

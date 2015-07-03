@@ -56,6 +56,7 @@ public:
 
   bool rpcRecHitInContainer(const RPCRecHit&, const RPCRecHitContainer&) const;
   bool isRPCRecHitMatched(const RPCRecHit&) const;
+  bool areRPCRecHitSame(const RPCRecHit&, const RPCRecHit&) const;
 
   std::set<int> stripNumbersInDetId(unsigned int) const;
 

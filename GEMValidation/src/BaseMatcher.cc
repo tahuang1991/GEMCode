@@ -1,5 +1,4 @@
 #include "GEMCode/GEMValidation/interface/BaseMatcher.h"
-
 #include "TrackingTools/TrajectoryState/interface/TrajectoryStateOnSurface.h"
 #include "TrackingTools/Records/interface/TrackingComponentsRecord.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
@@ -11,14 +10,14 @@ BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
 : trk_(t), vtx_(v), conf_(ps), ev_(ev), es_(es), verbose_(0)
 {
   // list of CSC chamber type numbers to use
-  std::vector<int> csc_types = conf().getUntrackedParameter<std::vector<int> >("useCSCChamberTypes", std::vector<int>() );
+  std::vector<int> csc_types = conf().getParameter<std::vector<int> >("useCSCChamberTypes");
   for (int i=0; i <= CSC_ME42; ++i) useCSCChamberTypes_[i] = false;
   for (auto t: csc_types)
   {
-    if (t >= 0 && t <= CSC_ME42) useCSCChamberTypes_[t] = 1;
+    if (t >= 0 && t <= CSC_ME42) useCSCChamberTypes_[t] = true;
   }
   // empty list means use all the chamber types
-  if (csc_types.empty()) useCSCChamberTypes_[CSC_ALL] = 1;
+  if (csc_types.empty()) useCSCChamberTypes_[CSC_ALL] = true;
 
   // Get the magnetic field
   es.get<IdealMagneticFieldRecord>().get(magfield_);

@@ -18,6 +18,7 @@ HLTTrackMatcher::HLTTrackMatcher(CSCRecHitMatcher& csc, DTRecHitMatcher& dt,
   minBXTrackExtra_ = trackExtra.getParameter<int>("minBX");
   maxBXTrackExtra_ = trackExtra.getParameter<int>("minBX");
   verboseTrackExtra_ = trackExtra.getParameter<int>("verbose");
+  runTrackExtra_ = trackExtra.getParameter<bool>("run");
   deltaRTrackExtra_ = trackExtra.getParameter<double>("deltaR");
 
   auto recoChargedCandidate = conf().getParameter<edm::ParameterSet>("recoChargedCandidate");
@@ -25,6 +26,7 @@ HLTTrackMatcher::HLTTrackMatcher(CSCRecHitMatcher& csc, DTRecHitMatcher& dt,
   minBXRecoChargedCandidate_ = recoChargedCandidate.getParameter<int>("minBX");
   maxBXRecoChargedCandidate_ = recoChargedCandidate.getParameter<int>("minBX");
   verboseRecoChargedCandidate_ = recoChargedCandidate.getParameter<int>("verbose");
+  runRecoChargedCandidate_ = recoChargedCandidate.getParameter<bool>("run");
   deltaRRecoChargedCandidate_ = recoChargedCandidate.getParameter<double>("deltaR");
 
   clear();
@@ -45,26 +47,27 @@ HLTTrackMatcher::init()
 {  
   // TrackExtra 
   edm::Handle<reco::TrackExtraCollection> l2TrackExtras;
-  if (gemvalidation::getByLabel(trackExtraInputLabel_, l2TrackExtras, event())) matchTrackExtraToSimTrack(*l2TrackExtras.product());
+  if (gemvalidation::getByLabel(trackExtraInputLabel_, l2TrackExtras, event())) if (runTrackExtra_) matchTrackExtraToSimTrack(*l2TrackExtras.product());
   
   // RecoChargedCandidate
   edm::Handle<reco::RecoChargedCandidateCollection> recoChargedCandidates;
-  if (gemvalidation::getByLabel(recoChargedCandidateInputLabel_, recoChargedCandidates, event())) matchRecoChargedCandidateToSimTrack(*recoChargedCandidates.product());
+  if (gemvalidation::getByLabel(recoChargedCandidateInputLabel_, recoChargedCandidates, event())) if (runRecoChargedCandidate_) matchRecoChargedCandidateToSimTrack(*recoChargedCandidates.product());
 }
 
 
 void 
 HLTTrackMatcher::matchTrackExtraToSimTrack(const reco::TrackExtraCollection& tracks)
 {
-  std::cout << "Number of L1ExtraTracks: " <<tracks.size() << std::endl;
+  if (verboseTrackExtra_) std::cout << "Number of L1ExtraTracks: " <<tracks.size() << std::endl;
   for(auto& track: tracks) {
-    std::cout<<"L2 TrackExtra pT: "<<track.innerMomentum().Rho()
-	     <<", eta: "<<track.innerPosition().eta()
-     	     <<", phi: "<<track.innerPosition().phi()<<std::endl;  
-    std::cout<< "\tDeltaR(SimTrack, L2TrackExtra): " << reco::deltaR(track.innerPosition(), trk().momentum()) << std::endl;
-    std::cout<< "\tDeltaPt(SimTrack, L2TrackExtra): " << std::fabs(track.innerMomentum().Rho()-trk().momentum().pt()) << std::endl;
-
-    std::cout << "\tRechits/Segments: " << track.recHitsSize()<< std::endl;
+    if (verboseTrackExtra_) {
+      std::cout<<"L2 TrackExtra pT: "<<track.innerMomentum().Rho()
+	       <<", eta: "<<track.innerPosition().eta()
+	       <<", phi: "<<track.innerPosition().phi()<<std::endl;  
+      std::cout<< "\tDeltaR(SimTrack, L2TrackExtra): " << reco::deltaR(track.innerPosition(), trk().momentum()) << std::endl;
+      std::cout<< "\tDeltaPt(SimTrack, L2TrackExtra): " << std::fabs(track.innerMomentum().Rho()-trk().momentum().pt()) << std::endl;     
+      std::cout << "\tRechits/Segments: " << track.recHitsSize()<< std::endl;
+    }
     int matchingCSCSegments(0);
     int matchingRPCSegments(0);
     int matchingDTSegments(0);
@@ -75,41 +78,49 @@ HLTTrackMatcher::matchTrackExtraToSimTrack(const reco::TrackExtraCollection& tra
       ++nValidSegments;
       auto id((**rh).rawId());
       if (is_dt(id)) {
-	std::cout << "\t\tDT :: id :: " << DTChamberId(id) << std::endl;
 	const DTRecSegment4D *seg = dynamic_cast<const DTRecSegment4D*>(*rh);
-	std::cout << "\t\t   :: segment :: " << *seg << std::endl;
-	// if RecoTrack RegSegment was found in matching RecSegments
+	if (verboseTrackExtra_) {
+	  std::cout << "\t\tDT :: id :: " << DTChamberId(id) << std::endl;
+	  std::cout << "\t\t   :: segment :: " << *seg << std::endl;
+	}
 	if (dt_rechit_matcher_->isDTRecSegment4DMatched(*seg)) {
 	  ++matchingDTSegments;
 	  ++matchingSegments;
 	}
       }
       if (is_rpc(id)) {
-	std::cout << "\t\tRPC :: id :: " << RPCDetId(id) << std::endl;
 	const RPCRecHit* rpcrh = dynamic_cast<const RPCRecHit*>(*rh);
-	std::cout << "\t\t    :: rechit :: " << *rpcrh << std::endl;
+	if (verboseTrackExtra_) {
+	  std::cout << "\t\tRPC :: id :: " << RPCDetId(id) << std::endl;
+	  std::cout << "\t\t    :: rechit :: " << *rpcrh << std::endl;
+	}
 	if (rpc_rechit_matcher_->isRPCRecHitMatched(*rpcrh)) {
 	  ++matchingRPCSegments;
 	  ++matchingSegments;
 	}
       }
       if (is_csc(id)) {
-	std::cout << "\t\tCSC " << CSCDetId(id) << std::endl;
 	const CSCSegment *seg = dynamic_cast<const CSCSegment*>(*rh);
-	std::cout << "\t\t    :: segment :: " << *seg << std::endl;
+	if (verboseTrackExtra_) {
+	  std::cout << "\t\tCSC " << CSCDetId(id) << std::endl;
+	  std::cout << "\t\t    :: segment :: " << *seg << std::endl;
+	}
 	if (csc_rechit_matcher_->isCSCSegmentMatched(*seg)) {
 	  ++matchingCSCSegments;
 	  ++matchingSegments;
 	}
       }
     }
-    std::cout << "\tValid Segments:    " << nValidSegments << std::endl << std::endl;
-    std::cout << "\tMatching Segments: " << matchingSegments << std::endl << std::endl;
-    std::cout << "\t              RPC: " << matchingRPCSegments << std::endl;
-    std::cout << "\t              CSC: " << matchingCSCSegments << std::endl;
-    std::cout << "\t               DT: " << matchingDTSegments << std::endl;
+    if (verboseTrackExtra_) {
+      std::cout << "\tValid Segments:    " << nValidSegments << std::endl;
+      std::cout << "\tMatching Segments: " << matchingSegments << std::endl;
+      std::cout << "\t              RPC: " << matchingRPCSegments << std::endl;
+      std::cout << "\t              CSC: " << matchingCSCSegments << std::endl;
+      std::cout << "\t               DT: " << matchingDTSegments << std::endl;
+    }
     // store matching L1TrackExtra
-    if (matchingDTSegments>=2) {
+    if (matchingCSCSegments>=2 or matchingDTSegments>=2) {
+      if (verboseTrackExtra_) std::cout << "\tTrackExtra was matched!" << std::endl;
       matchedTrackExtras_.push_back(track);
     }
   }

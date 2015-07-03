@@ -3,7 +3,7 @@ from L1Trigger.CSCTrackFinder.csctfTrackDigis_cfi import*
 
 SimTrackMatching = cms.PSet(
     # common
-    useCSCChamberTypes = cms.untracked.vint32(0),
+    useCSCChamberTypes = cms.vint32(0,1,2,3,4,5,6,7,8,9,10,11),
     ## endcap stations
     cscStations = cms.vstring('ALL','ME11','ME1a','ME1b','ME12','ME13',
                               'ME21','ME22','ME31','ME32','ME41','ME42'),
@@ -120,7 +120,7 @@ SimTrackMatching = cms.PSet(
         matchDeltaStrip = cms.int32(1),
     ),
     rpcRecHit = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag("rpcRecHits"),
                                        cms.InputTag("hltRpcRecHits")),
         run = cms.bool(True),
@@ -201,15 +201,16 @@ SimTrackMatching = cms.PSet(
     ),
     cscRecHit = cms.PSet(
         verbose = cms.int32(1),
-        validInputTags = cms.VInputTag(cms.InputTag("csc2DRecHits")),
+        validInputTags = cms.VInputTag(cms.InputTag("csc2DRecHits"),
+                                       cms.InputTag("hltCsc2DRecHits")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
     ),
     cscSegment = cms.PSet(
-        verbose = cms.int32(0),
+        verbose = cms.int32(1),
         validInputTags = cms.VInputTag(cms.InputTag("cscSegments"),
-                                       cms.InputTag("hltRpcRecHits")),
+                                       cms.InputTag("hltCscSegments")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
@@ -257,7 +258,7 @@ SimTrackMatching = cms.PSet(
         maxBX = cms.int32(1),
     ),
     dtRecSegment4D = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag("dt4DSegments"),
                                        cms.InputTag("hltDt4DSegments")),
         run = cms.bool(True),
@@ -376,7 +377,7 @@ SimTrackMatching = cms.PSet(
     trackExtra = cms.PSet(
         verbose = cms.int32(1),
         validInputTags = cms.VInputTag(cms.InputTag("hltL2Muons")),
-        run = cms.bool(True),
+        run = cms.bool(False),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
         deltaR = cms.double(0.05),

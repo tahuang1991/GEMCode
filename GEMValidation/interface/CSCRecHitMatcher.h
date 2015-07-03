@@ -44,12 +44,17 @@ public:
   const CSCSegmentContainer& cscSegmentsInChamber(unsigned int) const;
 
   const CSCSegmentContainer cscSegments() const;
+  const CSCRecHit2DContainer cscRecHit2Ds() const;
 
+  bool cscRecHit2DInContainer(const CSCRecHit2D&, const CSCRecHit2DContainer&) const;
   bool cscSegmentInContainer(const CSCSegment&, const CSCSegmentContainer&) const;
+  bool isCSCRecHit2DMatched(const CSCRecHit2D&) const;
   bool isCSCSegmentMatched(const CSCSegment&) const;
 
+  int nCSCRecHits() const;
   int nCSCSegments() const;
   bool areCSCSegmentsSame(const CSCSegment&,const CSCSegment&) const;
+  bool areCSCRecHit2DsSame(const CSCRecHit2D&,const CSCRecHit2D&) const;
 
   int nCSCRecHit2DsInLayer(unsigned int) const;
   int nCSCRecHit2DsInChamber(unsigned int) const;
@@ -65,12 +70,12 @@ private:
   std::vector<edm::InputTag> cscRecHit2DInput_;
   std::vector<edm::InputTag> cscSegmentInput_;
 
-  bool verboseCSCRecHit2D_;
+  int verboseCSCRecHit2D_;
   bool runCSCRecHit2D_;
   int maxBXCSCRecHit2D_;
   int minBXCSCRecHit2D_;
 
-  bool verboseCSCSegment_;
+  int verboseCSCSegment_;
   bool runCSCSegment_;
   int maxBXCSCSegment_;
   int minBXCSCSegment_;

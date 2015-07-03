@@ -53,7 +53,7 @@ public:
   std::set<unsigned int> detIdsRPC() const;
   /// CSC layers' detIds with SimHits
   /// by default, only returns those from ME1b
-  std::set<unsigned int> detIdsCSC(int csc_type = CSC_ME1b) const;
+  std::set<unsigned int> detIdsCSC(int csc_type = CSC_ALL) const;
   /// DT partitions' detIds with SimHits
   std::set<unsigned int> detIdsDT() const;
 
@@ -71,7 +71,7 @@ public:
   /// RPC chamber detIds with SimHits
   std::set<unsigned int> chamberIdsRPC() const;
   /// CSC chamber detIds with SimHits
-  std::set<unsigned int> chamberIdsCSC(int csc_type = CSC_ME1b) const;
+  std::set<unsigned int> chamberIdsCSC(int csc_type = CSC_ALL) const;
   /// DT chamber detIds with SimHits
   std::set<unsigned int> chamberIdsDT() const;
 

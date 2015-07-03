@@ -82,33 +82,32 @@ SimHitMatcher::init()
       edm::PSimHitContainer csc_hits_select;
       for (auto& h: *csc_hits.product()) {
         CSCDetId id(h.detUnitId());
-        if ( useCSCChamberType(id.iChamberType()) )  csc_hits_select.push_back(h);
-      }    
+        if (useCSCChamberType(id.iChamberType()))  csc_hits_select.push_back(h);
+      }
       
       if(runCSCSimHit_) {
         matchCSCSimHitsToSimTrack(track_ids, csc_hits_select);
-      }
       
-      if (verboseCSC_) {
-        cout<<"nSimHits "<<no<<" nTrackIds "<<track_ids.size()<<" nSelectedCSCSimHits "<<csc_hits_select.size()<<endl;
-        cout<<"detids CSC " << detIdsCSC().size()<<endl;
-        
-        for (auto id: detIdsCSC()) {
-          auto csc_simhits = hitsInDetId(id);
-          auto csc_simhits_gp = simHitsMeanPosition(csc_simhits);
-          auto strips = hitStripsInDetId(id);
-          cout<<"detid "<<CSCDetId(id)<<": "<<csc_simhits.size()<<" "<<csc_simhits_gp.phi()<<" "<< csc_detid_to_hits_[id].size()<<endl;
-          cout<<"nStrip "<<strips.size()<<endl;
-          cout<<"strips : "; std::copy(strips.begin(), strips.end(), ostream_iterator<int>(cout, " ")); cout<<endl;
-        }
+	if (verboseCSC_) {
+	  cout<<"nSimHits "<<no<<" nTrackIds "<<track_ids.size()<<" nSelectedCSCSimHits "<<csc_hits_select.size()<<endl;
+	  cout<<"detids CSC " << detIdsCSC(0).size()<<endl;
+	  
+	  for (auto id: detIdsCSC(0)) {
+	    auto csc_simhits = hitsInDetId(id);
+	    auto csc_simhits_gp = simHitsMeanPosition(csc_simhits);
+	    auto strips = hitStripsInDetId(id);
+	    cout<<"detid "<<CSCDetId(id)<<": "<<csc_simhits.size()<<" "<<csc_simhits_gp.phi()<<" "<< csc_detid_to_hits_[id].size()<<endl;
+	    cout<<"nStrip "<<strips.size()<<endl;
+	    cout<<"strips : "; std::copy(strips.begin(), strips.end(), ostream_iterator<int>(cout, " ")); cout<<endl;
+	  }
+	}
       }
     }
   }
   
   if (hasGEMGeometry_) {
     edm::Handle<edm::PSimHitContainer> gem_hits;
-    if (gemvalidation::getByLabel(gemSimHitInput_, gem_hits, event())) {
-      
+    if (gemvalidation::getByLabel(gemSimHitInput_, gem_hits, event())) {      
       if(runGEMSimHit_) {
         matchGEMSimHitsToSimTrack(track_ids, *gem_hits.product());
         
@@ -138,10 +137,10 @@ SimHitMatcher::init()
   
   if (hasME0Geometry_) {
     edm::Handle<edm::PSimHitContainer> me0_hits;
-    if (gemvalidation::getByLabel(me0SimHitInput_, me0_hits, event())) 
+    if (gemvalidation::getByLabel(me0SimHitInput_, me0_hits, event())) {
       if (runME0SimHit_) {
         matchME0SimHitsToSimTrack(track_ids, *me0_hits.product());
-       
+	
         if (verboseME0_) {
           cout<<"nSimHits "<<no<<" nTrackIds "<<track_ids.size()<<" nSelectedME0SimHits "<<(*me0_hits.product()).size()<<endl;
           cout << "detids ME0 " << detIdsME0().size() << endl;
@@ -157,13 +156,15 @@ SimHitMatcher::init()
           }
         }    
       }
+    }
   }
 
   if (hasRPCGeometry_) {
     edm::Handle<edm::PSimHitContainer> rpc_hits;
-    if (gemvalidation::getByLabel(rpcSimHitInput_, rpc_hits, event())) if (runRPCSimHit_) {
+    if (gemvalidation::getByLabel(rpcSimHitInput_, rpc_hits, event())) {
+      if (runRPCSimHit_) {
         matchRPCSimHitsToSimTrack(track_ids, *rpc_hits.product());
-
+	
         if (verboseRPC_) {
           cout<<"nSimHits "<<no<<" nTrackIds "<<track_ids.size()<<" nSelectedRPCSimHits "<<(*rpc_hits.product()).size()<<endl;
           cout << "detids RPC " << detIdsRPC().size() << endl;
@@ -179,11 +180,12 @@ SimHitMatcher::init()
           }
         }
       }
+    }
   }
   
   if (hasDTGeometry_) {
     edm::Handle<edm::PSimHitContainer> dt_hits;
-    if (gemvalidation::getByLabel(dtSimHitInput_, dt_hits, event())) 
+    if (gemvalidation::getByLabel(dtSimHitInput_, dt_hits, event())) {
       if (runDTSimHit_) {
         matchDTSimHitsToSimTrack(track_ids, *dt_hits.product());    
         
@@ -203,6 +205,7 @@ SimHitMatcher::init()
           }
         }
       }
+    }
   }
 }
 
@@ -249,14 +252,10 @@ SimHitMatcher::getIdsOfSimTrackShower(unsigned int initial_trk_id,
 void 
 SimHitMatcher::matchCSCSimHitsToSimTrack(std::vector<unsigned int> track_ids, const edm::PSimHitContainer& csc_hits)
 {
-  // std::cout << "n track_id " << track_ids.size() << std::endl;
-  // std::cout << "n dt hits " << csc_hits.size() << std::endl;    
   for (auto& track_id: track_ids)
   {
-    // std::cout << "\ttrack_id " << track_id << std::endl;
     for (auto& h: csc_hits)
     {
-      // std::cout << "csc h.trackId() " << h.trackId() << std::endl;    
       if (h.trackId() != track_id) continue;
       int pdgid = h.particleType();
       if (simMuOnlyCSC_ && std::abs(pdgid) != 13) continue;
@@ -391,18 +390,12 @@ SimHitMatcher::matchME0SimHitsToSimTrack(std::vector<unsigned int> track_ids, co
 void 
 SimHitMatcher::matchDTSimHitsToSimTrack(std::vector<unsigned int> track_ids, const edm::PSimHitContainer& dt_hits)
 {
-  // std::cout << "n track_id " << track_ids.size() << std::endl;
-  // std::cout << "n dt hits " << dt_hits.size() << std::endl;    
   for (auto& track_id: track_ids)
   {
-    // std::cout << "\ttrack_id " << track_id << std::endl;
     for (auto& h: dt_hits)
     {
-      // std::cout << h << std::endl;
-      // std::cout << "dt h.trackId() " << h.trackId() << std::endl;    
       if (h.trackId() != track_id) continue;
       int pdgid = h.particleType();
-      // std::cout << "pdgid " << pdgid << std::endl;
       if (simMuOnlyDT_ && std::abs(pdgid) != 13) continue; 
       // discard electron hits in the DT chambers
       if (discardEleHitsDT_ && pdgid == 11) continue; 
