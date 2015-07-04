@@ -207,15 +207,8 @@ RPCRecHitMatcher::recHitMeanPosition(const RecHitContainer& rechit) const
 bool
 RPCRecHitMatcher::rpcRecHitInContainer(const RPCRecHit& rh, const RPCRecHitContainer& c) const
 {
-  if (verboseRPCRecHit_) std::cout << "rpcRecHitInContainer()" << std::endl;
   bool isSame = false;
-  for (auto& thisRH: c) {
-    if (verboseRPCRecHit_) std::cout << thisRH << std::endl;
-    if (areRPCRecHitSame(thisRH,rh)) {
-      if (verboseRPCRecHit_) std::cout << "Was matched!" << std::endl;
-      isSame = true;
-    }
-  }
+  for (auto& thisRH: c) if (areRPCRecHitSame(thisRH,rh)) isSame = true;
   return isSame;
 }
 
@@ -223,7 +216,6 @@ RPCRecHitMatcher::rpcRecHitInContainer(const RPCRecHit& rh, const RPCRecHitConta
 bool 
 RPCRecHitMatcher::isRPCRecHitMatched(const RPCRecHit& thisRh) const
 {
-  if (verboseRPCRecHit_) std::cout << "isRPCRecHitMatched()" << std::endl;
   return rpcRecHitInContainer(thisRh, rpcRecHits());
 }
 

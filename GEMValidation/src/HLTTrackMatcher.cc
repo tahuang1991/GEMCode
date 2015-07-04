@@ -60,6 +60,8 @@ HLTTrackMatcher::matchTrackExtraToSimTrack(const reco::TrackExtraCollection& tra
 {
   if (verboseTrackExtra_) std::cout << "Number of L1ExtraTracks: " <<tracks.size() << std::endl;
   for(auto& track: tracks) {
+    // do not anlyze tracsks with large deltaR
+    if (reco::deltaR(track.innerPosition(), trk().momentum()) > 0.5) continue;
     if (verboseTrackExtra_) {
       std::cout<<"L2 TrackExtra pT: "<<track.innerMomentum().Rho()
 	       <<", eta: "<<track.innerPosition().eta()
