@@ -18,6 +18,8 @@
 #include "DataFormats/RecoCandidate/interface/RecoChargedCandidateFwd.h"
 #include "DataFormats/TrackReco/interface/TrackExtra.h"
 #include "DataFormats/TrackReco/interface/TrackExtraFwd.h"
+#include "DataFormats/TrackReco/interface/Track.h"
+#include "DataFormats/TrackReco/interface/TrackFwd.h"
 
 class HLTTrackMatcher : public BaseMatcher
 {
@@ -28,7 +30,8 @@ class HLTTrackMatcher : public BaseMatcher
   /// destructor
   ~HLTTrackMatcher();
 
-  const reco::TrackExtraCollection& getMatchedTrackExtras() const {return matchedTrackExtras_;}
+  const reco::TrackExtraCollection& getMatchedRecoTrackExtras() const {return matchedRecoTrackExtras_;}
+  const reco::TrackCollection& getMatchedRecoTracks() const {return matchedRecoTracks_;}
   const reco::RecoChargedCandidateCollection& getRecoChargedCandidates() const {return matchedRecoChargedCandidates_;}
 
  private:
@@ -36,27 +39,38 @@ class HLTTrackMatcher : public BaseMatcher
   void init();
   void clear();
 
-  void matchTrackExtraToSimTrack(const reco::TrackExtraCollection&);
+  void matchRecoTrackExtraToSimTrack(const reco::TrackExtraCollection&);
+  void matchRecoTrackToSimTrack(const reco::TrackCollection&);
   void matchRecoChargedCandidateToSimTrack(const reco::RecoChargedCandidateCollection&);
+
+  bool areRecoTrackExtraSame(const reco::TrackExtra&, const reco::TrackExtra&) const;
 
   const GEMRecHitMatcher* gem_rechit_matcher_;
   const DTRecHitMatcher* dt_rechit_matcher_;
   const RPCRecHitMatcher* rpc_rechit_matcher_;
   const CSCRecHitMatcher* csc_rechit_matcher_;
 
-  std::vector<edm::InputTag> trackExtraInputLabel_;
+  std::vector<edm::InputTag> recoTrackExtraInputLabel_;
+  std::vector<edm::InputTag> recoTrackInputLabel_;
   std::vector<edm::InputTag> recoChargedCandidateInputLabel_;
 
-  int minBXTrackExtra_, maxBXTrackExtra_;
+  int minBXRecoTrackExtra_, maxBXRecoTrackExtra_;
+  int verboseRecoTrackExtra_;
+  bool runRecoTrackExtra_;
+  double deltaRRecoTrackExtra_;
+
+  int minBXRecoTrack_, maxBXRecoTrack_;
+  int verboseRecoTrack_;
+  bool runRecoTrack_;
+  double deltaRRecoTrack_;
+
   int minBXRecoChargedCandidate_, maxBXRecoChargedCandidate_;
-  int verboseTrackExtra_;
   int verboseRecoChargedCandidate_;
-  bool runTrackExtra_;
   bool runRecoChargedCandidate_;
-  double deltaRTrackExtra_;
   double deltaRRecoChargedCandidate_;
 
-  reco::TrackExtraCollection matchedTrackExtras_;
+  reco::TrackExtraCollection matchedRecoTrackExtras_;
+  reco::TrackCollection matchedRecoTracks_;
   reco::RecoChargedCandidateCollection matchedRecoChargedCandidates_;
 };
 

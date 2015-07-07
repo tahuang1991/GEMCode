@@ -13,13 +13,21 @@ HLTTrackMatcher::HLTTrackMatcher(CSCRecHitMatcher& csc, DTRecHitMatcher& dt,
 , rpc_rechit_matcher_(&rpc)
 , csc_rechit_matcher_(&csc)
 {
-  auto trackExtra = conf().getParameter<edm::ParameterSet>("trackExtra");
-  trackExtraInputLabel_ = trackExtra.getParameter<std::vector<edm::InputTag>>("validInputTags");
-  minBXTrackExtra_ = trackExtra.getParameter<int>("minBX");
-  maxBXTrackExtra_ = trackExtra.getParameter<int>("minBX");
-  verboseTrackExtra_ = trackExtra.getParameter<int>("verbose");
-  runTrackExtra_ = trackExtra.getParameter<bool>("run");
-  deltaRTrackExtra_ = trackExtra.getParameter<double>("deltaR");
+  auto recoTrackExtra = conf().getParameter<edm::ParameterSet>("recoTrackExtra");
+  recoTrackExtraInputLabel_ = recoTrackExtra.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  minBXRecoTrackExtra_ = recoTrackExtra.getParameter<int>("minBX");
+  maxBXRecoTrackExtra_ = recoTrackExtra.getParameter<int>("minBX");
+  verboseRecoTrackExtra_ = recoTrackExtra.getParameter<int>("verbose");
+  runRecoTrackExtra_ = recoTrackExtra.getParameter<bool>("run");
+  deltaRRecoTrackExtra_ = recoTrackExtra.getParameter<double>("deltaR");
+
+  auto recoTrack = conf().getParameter<edm::ParameterSet>("recoTrack");
+  recoTrackInputLabel_ = recoTrack.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  minBXRecoTrack_ = recoTrack.getParameter<int>("minBX");
+  maxBXRecoTrack_ = recoTrack.getParameter<int>("minBX");
+  verboseRecoTrack_ = recoTrack.getParameter<int>("verbose");
+  runRecoTrack_ = recoTrack.getParameter<bool>("run");
+  deltaRRecoTrack_ = recoTrack.getParameter<double>("deltaR");
 
   auto recoChargedCandidate = conf().getParameter<edm::ParameterSet>("recoChargedCandidate");
   recoChargedCandidateInputLabel_ = recoChargedCandidate.getParameter<std::vector<edm::InputTag>>("validInputTags");
@@ -45,10 +53,14 @@ HLTTrackMatcher::clear()
 void 
 HLTTrackMatcher::init()
 {  
-  // TrackExtra 
-  edm::Handle<reco::TrackExtraCollection> l2TrackExtras;
-  if (gemvalidation::getByLabel(trackExtraInputLabel_, l2TrackExtras, event())) if (runTrackExtra_) matchTrackExtraToSimTrack(*l2TrackExtras.product());
+  // RecoTrackExtra 
+  edm::Handle<reco::TrackExtraCollection> recoTrackExtras;
+  if (gemvalidation::getByLabel(recoTrackExtraInputLabel_, recoTrackExtras, event())) if (runRecoTrackExtra_) matchRecoTrackExtraToSimTrack(*recoTrackExtras.product());
   
+  // RecoTrack 
+  edm::Handle<reco::TrackCollection> recoTracks;
+  if (gemvalidation::getByLabel(recoTrackInputLabel_, recoTracks, event())) if (runRecoTrack_) matchRecoTrackToSimTrack(*recoTracks.product());
+
   // RecoChargedCandidate
   edm::Handle<reco::RecoChargedCandidateCollection> recoChargedCandidates;
   if (gemvalidation::getByLabel(recoChargedCandidateInputLabel_, recoChargedCandidates, event())) if (runRecoChargedCandidate_) matchRecoChargedCandidateToSimTrack(*recoChargedCandidates.product());
@@ -56,18 +68,18 @@ HLTTrackMatcher::init()
 
 
 void 
-HLTTrackMatcher::matchTrackExtraToSimTrack(const reco::TrackExtraCollection& tracks)
+HLTTrackMatcher::matchRecoTrackExtraToSimTrack(const reco::TrackExtraCollection& tracks)
 {
-  if (verboseTrackExtra_) std::cout << "Number of L1ExtraTracks: " <<tracks.size() << std::endl;
+  if (verboseRecoTrackExtra_) std::cout << "Number of RecoTrackExtras: " <<tracks.size() << std::endl;
   for(auto& track: tracks) {
     // do not anlyze tracsks with large deltaR
     if (reco::deltaR(track.innerPosition(), trk().momentum()) > 0.5) continue;
-    if (verboseTrackExtra_) {
-      std::cout<<"L2 TrackExtra pT: "<<track.innerMomentum().Rho()
+    if (verboseRecoTrackExtra_) {
+      std::cout<<"RecoTrackExtra pT: "<<track.innerMomentum().Rho()
 	       <<", eta: "<<track.innerPosition().eta()
 	       <<", phi: "<<track.innerPosition().phi()<<std::endl;  
-      std::cout<< "\tDeltaR(SimTrack, L2TrackExtra): " << reco::deltaR(track.innerPosition(), trk().momentum()) << std::endl;
-      std::cout<< "\tDeltaPt(SimTrack, L2TrackExtra): " << std::fabs(track.innerMomentum().Rho()-trk().momentum().pt()) << std::endl;     
+      std::cout<< "\tDeltaR(SimTrack, RecoTrackExtra): " << reco::deltaR(track.innerPosition(), trk().momentum()) << std::endl;
+      std::cout<< "\tDeltaPt(SimTrack, RecoTrackExtra): " << std::fabs(track.innerMomentum().Rho()-trk().momentum().pt()) << std::endl;     
       std::cout << "\tRechits/Segments: " << track.recHitsSize()<< std::endl;
     }
     int matchingCSCSegments(0);
@@ -81,54 +93,75 @@ HLTTrackMatcher::matchTrackExtraToSimTrack(const reco::TrackExtraCollection& tra
       auto id((**rh).rawId());
       if (is_dt(id)) {
 	const DTRecSegment4D *seg = dynamic_cast<const DTRecSegment4D*>(*rh);
-	if (verboseTrackExtra_) {
+	if (verboseRecoTrackExtra_) {
 	  std::cout << "\t\tDT  :: id :: " << DTChamberId(id) << std::endl;
 	  std::cout << "\t\t    :: segment :: " << *seg << std::endl;
 	}
 	if (dt_rechit_matcher_->isDTRecSegment4DMatched(*seg)) {
-	  if (verboseTrackExtra_) std::cout << "\t\t    :: MATCHED!" << std::endl;
+	  if (verboseRecoTrackExtra_) std::cout << "\t\t    :: MATCHED!" << std::endl;
 	  ++matchingDTSegments;
 	  ++matchingSegments;
 	}
       }
       if (is_rpc(id)) {
 	const RPCRecHit* rpcrh = dynamic_cast<const RPCRecHit*>(*rh);
-	if (verboseTrackExtra_) {
+	if (verboseRecoTrackExtra_) {
 	  std::cout << "\t\tRPC :: id :: " << RPCDetId(id) << std::endl;
 	  std::cout << "\t\t    :: rechit :: " << *rpcrh << std::endl;
 	}
 	if (rpc_rechit_matcher_->isRPCRecHitMatched(*rpcrh)) {
-	  if (verboseTrackExtra_) std::cout << "\t\t    :: MATCHED!" << std::endl;
+	  if (verboseRecoTrackExtra_) std::cout << "\t\t    :: MATCHED!" << std::endl;
 	  ++matchingRPCSegments;
 	  ++matchingSegments;
 	}
       }
       if (is_csc(id)) {
 	const CSCSegment *seg = dynamic_cast<const CSCSegment*>(*rh);
-	if (verboseTrackExtra_) {
+	if (verboseRecoTrackExtra_) {
 	  std::cout << "\t\tCSC :: id :: " << CSCDetId(id) << std::endl;
 	  std::cout << "\t\t    :: segment :: " << *seg << std::endl;
 	}
 	if (csc_rechit_matcher_->isCSCSegmentMatched(*seg)) {
-	  if (verboseTrackExtra_) std::cout << "\t\t    :: MATCHED!" << std::endl;
+	  if (verboseRecoTrackExtra_) std::cout << "\t\t    :: MATCHED!" << std::endl;
 	  ++matchingCSCSegments;
 	  ++matchingSegments;
 	}
       }
     }
-    if (verboseTrackExtra_) {
+    if (verboseRecoTrackExtra_) {
       std::cout << "\tValid Segments:    " << nValidSegments << std::endl;
       std::cout << "\tMatching Segments: " << matchingSegments << std::endl;
       std::cout << "\t              RPC: " << matchingRPCSegments << std::endl;
       std::cout << "\t              CSC: " << matchingCSCSegments << std::endl;
       std::cout << "\t               DT: " << matchingDTSegments << std::endl;
     }
-    // store matching L1TrackExtra
+    // store matching L1RecoTrackExtra
     if (matchingSegments>=2) {
-      if (verboseTrackExtra_) {
-	std::cout << "\tTrackExtra was matched! (deltaR = " << reco::deltaR(track.innerPosition(), trk().momentum()) << ") " << std::endl;
+      if (verboseRecoTrackExtra_) {
+	std::cout << "\tRecoTrackExtra was matched! (deltaR = " << reco::deltaR(track.innerPosition(), trk().momentum()) << ") " << std::endl;
       }
-      matchedTrackExtras_.push_back(track);
+      matchedRecoTrackExtras_.push_back(track);
+    }
+  }
+}
+
+
+void 
+HLTTrackMatcher::matchRecoTrackToSimTrack(const reco::TrackCollection& tracks)
+{
+  if (verboseRecoTrack_) std::cout << "Number of RecoTracks: " <<tracks.size() << std::endl;
+  for(auto& track: tracks) {
+    std::cout << "Matching RecoTrack..." << std::endl;
+    // check if the associated RecoTrackExtra was matched!
+    auto trackExtraRef(track.extra());
+    auto trackExtra(*trackExtraRef);
+
+    //    std::cout << "Number of trackextras" << trackExtra.size() << std::endl;
+    for (auto &otherTrackExtra: getMatchedRecoTrackExtras()) {
+      if (areRecoTrackExtraSame(trackExtra,otherTrackExtra)) {
+     	std::cout << "\tRecoTrack was matched!" << std::endl;
+     	matchedRecoTracks_.push_back(track);
+      }
     }
   }
 }
@@ -164,4 +197,17 @@ HLTTrackMatcher::matchRecoChargedCandidateToSimTrack(const reco::RecoChargedCand
   }
 }
 
+
+bool
+HLTTrackMatcher::areRecoTrackExtraSame(const reco::TrackExtra& l, const reco::TrackExtra& r) const
+{
+  return (l.outerPosition()==r.outerPosition() and 
+	  l.outerMomentum()==r.outerMomentum() and
+	  l.outerDetId()==r.outerDetId() and 
+	  l.outerDetId()==r.outerDetId() and
+	  l.innerPosition()==r.innerPosition() and 
+	  l.innerMomentum()==r.innerMomentum() and
+	  l.innerOk()==r.innerOk() and
+	  l.outerDetId()==r.outerDetId());
+}
 

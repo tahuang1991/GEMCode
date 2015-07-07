@@ -374,7 +374,15 @@ SimTrackMatching = cms.PSet(
         maxBX = cms.int32(1),
         deltaR = cms.double(0.05),
     ),
-    trackExtra = cms.PSet(
+    recoTrackExtra = cms.PSet(
+        verbose = cms.int32(1),
+        validInputTags = cms.VInputTag(cms.InputTag("hltL2Muons")),
+        run = cms.bool(True),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+        deltaR = cms.double(0.05),
+    ),
+    recoTrack = cms.PSet(
         verbose = cms.int32(1),
         validInputTags = cms.VInputTag(cms.InputTag("hltL2Muons")),
         run = cms.bool(True),
@@ -385,10 +393,10 @@ SimTrackMatching = cms.PSet(
     recoChargedCandidate = cms.PSet(
         verbose = cms.int32(1),
         validInputTags = cms.VInputTag(cms.InputTag("hltL2MuonCandidatesNoVtx")), 
-        run = cms.bool(False),
+        run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
-        deltaR = cms.double(0.05),
+        deltaR = cms.double(0.1),
     ),
 )
 
