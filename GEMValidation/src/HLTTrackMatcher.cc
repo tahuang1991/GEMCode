@@ -82,10 +82,13 @@ HLTTrackMatcher::matchTrackExtraToSimTrack(const reco::TrackExtraCollection& tra
       if (is_dt(id)) {
 	const DTRecSegment4D *seg = dynamic_cast<const DTRecSegment4D*>(*rh);
 	if (verboseTrackExtra_) {
-	  std::cout << "\t\tDT :: id :: " << DTChamberId(id) << std::endl;
-	  std::cout << "\t\t   :: segment :: " << *seg << std::endl;
+	  std::cout << "\t\tDT  :: id :: " << DTChamberId(id) << std::endl;
+	  std::cout << "\t\t    :: segment :: " << *seg << std::endl;
 	}
 	if (dt_rechit_matcher_->isDTRecSegment4DMatched(*seg)) {
+	  if (verboseTrackExtra_) {
+	    std::cout << "\t\t    :: MATCHED!" << std::endl;
+	  }
 	  ++matchingDTSegments;
 	  ++matchingSegments;
 	}
@@ -97,6 +100,9 @@ HLTTrackMatcher::matchTrackExtraToSimTrack(const reco::TrackExtraCollection& tra
 	  std::cout << "\t\t    :: rechit :: " << *rpcrh << std::endl;
 	}
 	if (rpc_rechit_matcher_->isRPCRecHitMatched(*rpcrh)) {
+	  if (verboseTrackExtra_) {
+	    std::cout << "\t\t    :: MATCHED!" << std::endl;
+	  }
 	  ++matchingRPCSegments;
 	  ++matchingSegments;
 	}
@@ -104,10 +110,13 @@ HLTTrackMatcher::matchTrackExtraToSimTrack(const reco::TrackExtraCollection& tra
       if (is_csc(id)) {
 	const CSCSegment *seg = dynamic_cast<const CSCSegment*>(*rh);
 	if (verboseTrackExtra_) {
-	  std::cout << "\t\tCSC " << CSCDetId(id) << std::endl;
+	  std::cout << "\t\tCSC :: id :: " << CSCDetId(id) << std::endl;
 	  std::cout << "\t\t    :: segment :: " << *seg << std::endl;
 	}
 	if (csc_rechit_matcher_->isCSCSegmentMatched(*seg)) {
+	  if (verboseTrackExtra_) {
+	    std::cout << "\t\t    :: MATCHED!" << std::endl;
+	  }
 	  ++matchingCSCSegments;
 	  ++matchingSegments;
 	}
@@ -121,8 +130,10 @@ HLTTrackMatcher::matchTrackExtraToSimTrack(const reco::TrackExtraCollection& tra
       std::cout << "\t               DT: " << matchingDTSegments << std::endl;
     }
     // store matching L1TrackExtra
-    if (matchingCSCSegments>=2 or matchingDTSegments>=2) {
-      if (verboseTrackExtra_) std::cout << "\tTrackExtra was matched!" << std::endl;
+    if (matchingSegments>=2) {
+      if (verboseTrackExtra_) {
+	std::cout << "\tTrackExtra was matched! (deltaR = " << reco::deltaR(track.innerPosition(), trk().momentum()) << ") " << std::endl;
+      }
       matchedTrackExtras_.push_back(track);
     }
   }
@@ -132,12 +143,31 @@ HLTTrackMatcher::matchTrackExtraToSimTrack(const reco::TrackExtraCollection& tra
 void 
 HLTTrackMatcher::matchRecoChargedCandidateToSimTrack(const reco::RecoChargedCandidateCollection& candidates)
 {
-  // for(auto& muon: candidates) {
-  //   std::cout<<" L1 Muon Particle PT: "<<muon.pt()
-  //            <<", eta: "<<muon.eta()
-  //            <<", charge: "<<muon.charge()
-  //            <<", phi: "<<muon.phi()<<std::endl;  
-  // }
+  // match the simTrack to the RecoChargedCandidate with the smallest deltaR
+  double minDeltaR = 99.;
+  int iFound=0;
+  int i=0;
+  for(auto& muon: candidates) {
+    const double deltaR(reco::deltaR(muon.eta(), muon.phi(), trk().momentum().eta(), trk().momentum().phi()));
+    if (verboseRecoChargedCandidate_) {
+      std::cout<< "RecoChargedCandidate " << i+1 << " - pT: "<<muon.pt()
+	       <<", eta: "<<muon.eta()
+	       <<", charge: "<<muon.charge()
+	       <<", phi: "<<muon.phi()
+	       <<", deltaR: "<< deltaR << std::endl;
+    }
+    if (deltaR < minDeltaR) {
+      minDeltaR = deltaR;
+      iFound = i;
+    }
+    ++i;    
+  }
+  if (verboseRecoChargedCandidate_) {
+    std::cout << "minDeltaR(simTrack,RecoChargedCandidate)" << minDeltaR << ", candidate " << iFound+1 << std::endl;
+  }
+  if (minDeltaR < deltaRRecoChargedCandidate_) {
+    matchedRecoChargedCandidates_.push_back(candidates[iFound]);    
+  }
 }
 
 
