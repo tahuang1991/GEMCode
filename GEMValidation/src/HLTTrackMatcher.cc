@@ -86,9 +86,7 @@ HLTTrackMatcher::matchTrackExtraToSimTrack(const reco::TrackExtraCollection& tra
 	  std::cout << "\t\t    :: segment :: " << *seg << std::endl;
 	}
 	if (dt_rechit_matcher_->isDTRecSegment4DMatched(*seg)) {
-	  if (verboseTrackExtra_) {
-	    std::cout << "\t\t    :: MATCHED!" << std::endl;
-	  }
+	  if (verboseTrackExtra_) std::cout << "\t\t    :: MATCHED!" << std::endl;
 	  ++matchingDTSegments;
 	  ++matchingSegments;
 	}
@@ -100,9 +98,7 @@ HLTTrackMatcher::matchTrackExtraToSimTrack(const reco::TrackExtraCollection& tra
 	  std::cout << "\t\t    :: rechit :: " << *rpcrh << std::endl;
 	}
 	if (rpc_rechit_matcher_->isRPCRecHitMatched(*rpcrh)) {
-	  if (verboseTrackExtra_) {
-	    std::cout << "\t\t    :: MATCHED!" << std::endl;
-	  }
+	  if (verboseTrackExtra_) std::cout << "\t\t    :: MATCHED!" << std::endl;
 	  ++matchingRPCSegments;
 	  ++matchingSegments;
 	}
@@ -114,9 +110,7 @@ HLTTrackMatcher::matchTrackExtraToSimTrack(const reco::TrackExtraCollection& tra
 	  std::cout << "\t\t    :: segment :: " << *seg << std::endl;
 	}
 	if (csc_rechit_matcher_->isCSCSegmentMatched(*seg)) {
-	  if (verboseTrackExtra_) {
-	    std::cout << "\t\t    :: MATCHED!" << std::endl;
-	  }
+	  if (verboseTrackExtra_) std::cout << "\t\t    :: MATCHED!" << std::endl;
 	  ++matchingCSCSegments;
 	  ++matchingSegments;
 	}
