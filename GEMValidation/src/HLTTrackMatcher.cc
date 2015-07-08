@@ -72,9 +72,14 @@ HLTTrackMatcher::matchRecoTrackExtraToSimTrack(const reco::TrackExtraCollection&
     // do not anlyze tracsks with large deltaR
     if (reco::deltaR(track.innerPosition(), trk().momentum()) > 0.5) continue;
     if (verboseRecoTrackExtra_) {
-      std::cout << "RecoTrackExtra pT: "<<track.innerMomentum().Rho()
-	        << ", eta: "<<track.innerPosition().eta()
-	        << ", phi: "<<track.innerPosition().phi()<<std::endl;  
+      std::cout << "RecoTrackExtra " << std::endl
+		<< "\tpT_inner: "<<track.innerMomentum().Rho()
+	        << ", eta_inner: "<<track.innerPosition().eta()
+	        << ", phi_inner: "<<track.innerPosition().phi()
+		<< "\tpT_outer: "<<track.outerMomentum().Rho()
+	        << ", eta_outer: "<<track.outerPosition().eta()
+	        << ", phi_outer: "<<track.outerPosition().phi()
+		<<std::endl;  
       std::cout << "\tDeltaR(SimTrack, RecoTrackExtra): " << reco::deltaR(track.innerPosition(), trk().momentum()) << std::endl;
       std::cout << "\tDeltaPt(SimTrack, RecoTrackExtra): " << std::fabs(track.innerMomentum().Rho()-trk().momentum().pt()) << std::endl;     
       std::cout << "\tRechits/Segments: " << track.recHitsSize()<< std::endl;
@@ -147,7 +152,7 @@ HLTTrackMatcher::matchRecoTrackExtraToSimTrack(const reco::TrackExtraCollection&
       std::cout << "\t               DT: " << matchingDTSegments << std::endl;
     }
     // store matching L1RecoTrackExtra
-    if (matchingSegments>=2) {
+    if (matchingDTSegments + matchingCSCSegments>=2) {
       if (verboseRecoTrackExtra_) {
 	std::cout << "\tRecoTrackExtra was matched! (deltaR = " << reco::deltaR(track.innerPosition(), trk().momentum()) << ") " << std::endl;
       }
