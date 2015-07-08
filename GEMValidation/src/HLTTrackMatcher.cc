@@ -19,7 +19,6 @@ HLTTrackMatcher::HLTTrackMatcher(CSCRecHitMatcher& csc, DTRecHitMatcher& dt,
   maxBXRecoTrackExtra_ = recoTrackExtra.getParameter<int>("minBX");
   verboseRecoTrackExtra_ = recoTrackExtra.getParameter<int>("verbose");
   runRecoTrackExtra_ = recoTrackExtra.getParameter<bool>("run");
-  deltaRRecoTrackExtra_ = recoTrackExtra.getParameter<double>("deltaR");
 
   auto recoTrack = conf().getParameter<edm::ParameterSet>("recoTrack");
   recoTrackInputLabel_ = recoTrack.getParameter<std::vector<edm::InputTag>>("validInputTags");
@@ -27,7 +26,6 @@ HLTTrackMatcher::HLTTrackMatcher(CSCRecHitMatcher& csc, DTRecHitMatcher& dt,
   maxBXRecoTrack_ = recoTrack.getParameter<int>("minBX");
   verboseRecoTrack_ = recoTrack.getParameter<int>("verbose");
   runRecoTrack_ = recoTrack.getParameter<bool>("run");
-  deltaRRecoTrack_ = recoTrack.getParameter<double>("deltaR");
 
   auto recoChargedCandidate = conf().getParameter<edm::ParameterSet>("recoChargedCandidate");
   recoChargedCandidateInputLabel_ = recoChargedCandidate.getParameter<std::vector<edm::InputTag>>("validInputTags");
@@ -35,7 +33,6 @@ HLTTrackMatcher::HLTTrackMatcher(CSCRecHitMatcher& csc, DTRecHitMatcher& dt,
   maxBXRecoChargedCandidate_ = recoChargedCandidate.getParameter<int>("minBX");
   verboseRecoChargedCandidate_ = recoChargedCandidate.getParameter<int>("verbose");
   runRecoChargedCandidate_ = recoChargedCandidate.getParameter<bool>("run");
-  deltaRRecoChargedCandidate_ = recoChargedCandidate.getParameter<double>("deltaR");
 
   clear();
   init();
@@ -175,7 +172,7 @@ HLTTrackMatcher::matchRecoTrackToSimTrack(const reco::TrackCollection& tracks)
     }
     // check if the associated RecoTrackExtra was matched!
     for (auto &otherTrackExtra: getMatchedRecoTrackExtras()) {
-      if (areRecoTrackExtraSame(*(track.extra()),otherTrackExtra)) {
+      if (areRecoTrackSame(*(track.extra()), otherTrackExtra)) {
      	if (verboseRecoTrack_) std::cout << "\tRecoTrack was matched!" << std::endl;
      	matchedRecoTracks_.push_back(track);
       }
@@ -188,36 +185,31 @@ HLTTrackMatcher::matchRecoTrackToSimTrack(const reco::TrackCollection& tracks)
 void 
 HLTTrackMatcher::matchRecoChargedCandidateToSimTrack(const reco::RecoChargedCandidateCollection& candidates)
 {
-  // match the simTrack to the RecoChargedCandidate with the smallest deltaR
-  double minDeltaR = 99.;
-  int iFound=0;
+  if (verboseRecoTrack_) std::cout << "Number of RecoChargedCandidates: " <<candidates.size() << std::endl;
   int i=0;
-  for(auto& muon: candidates) {
-    const double deltaR(reco::deltaR(muon.eta(), muon.phi(), trk().momentum().eta(), trk().momentum().phi()));
+  for(auto& candidate: candidates) {
+    const double deltaR(reco::deltaR(candidate.eta(), candidate.phi(), trk().momentum().eta(), trk().momentum().phi()));
     if (verboseRecoChargedCandidate_) {
-      std::cout<< "RecoChargedCandidate " << i+1 << " - pT: "<<muon.pt()
-	       <<", eta: "<<muon.eta()
-	       <<", charge: "<<muon.charge()
-	       <<", phi: "<<muon.phi()
+      std::cout<< "RecoCandidate " << i+1 << " - pT: "<<candidate.pt()
+	       <<", eta: "<<candidate.eta()
+	       <<", phi: "<<candidate.phi()
 	       <<", deltaR: "<< deltaR << std::endl;
     }
-    if (deltaR < minDeltaR) {
-      minDeltaR = deltaR;
-      iFound = i;
+    // get the RecoTrack
+    for (auto &otherTrack: getMatchedRecoTracks()) {
+      if (areRecoTrackSame(*(candidate.track()), otherTrack)) {
+     	if (verboseRecoTrack_) std::cout << "\tRecoChargedCandidate was matched!" << std::endl;
+	matchedRecoChargedCandidates_.push_back(candidate);
+      }
     }
     ++i;    
-  }
-  if (verboseRecoChargedCandidate_) {
-    std::cout << "minDeltaR(simTrack,RecoChargedCandidate)" << minDeltaR << ", candidate " << iFound+1 << std::endl;
-  }
-  if (minDeltaR < deltaRRecoChargedCandidate_) {
-    matchedRecoChargedCandidates_.push_back(candidates[iFound]);    
   }
 }
 
 
+template<typename T>
 bool
-HLTTrackMatcher::areRecoTrackExtraSame(const reco::TrackExtra& l, const reco::TrackExtra& r) const
+HLTTrackMatcher::areRecoTrackSame(const T& l, const T& r) const
 {
   return (l.outerPosition()==r.outerPosition() and 
 	  l.outerMomentum()==r.outerMomentum() and

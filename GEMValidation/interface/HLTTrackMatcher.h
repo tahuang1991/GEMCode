@@ -32,7 +32,7 @@ class HLTTrackMatcher : public BaseMatcher
 
   const reco::TrackExtraCollection& getMatchedRecoTrackExtras() const {return matchedRecoTrackExtras_;}
   const reco::TrackCollection& getMatchedRecoTracks() const {return matchedRecoTracks_;}
-  const reco::RecoChargedCandidateCollection& getRecoChargedCandidates() const {return matchedRecoChargedCandidates_;}
+  const reco::RecoChargedCandidateCollection& getMatchedRecoChargedCandidates() const {return matchedRecoChargedCandidates_;}
 
  private:
 
@@ -43,7 +43,8 @@ class HLTTrackMatcher : public BaseMatcher
   void matchRecoTrackToSimTrack(const reco::TrackCollection&);
   void matchRecoChargedCandidateToSimTrack(const reco::RecoChargedCandidateCollection&);
 
-  bool areRecoTrackExtraSame(const reco::TrackExtra&, const reco::TrackExtra&) const;
+  template<typename T>
+  bool areRecoTrackSame(const T&, const T&) const;
 
   const GEMRecHitMatcher* gem_rechit_matcher_;
   const DTRecHitMatcher* dt_rechit_matcher_;
@@ -57,17 +58,14 @@ class HLTTrackMatcher : public BaseMatcher
   int minBXRecoTrackExtra_, maxBXRecoTrackExtra_;
   int verboseRecoTrackExtra_;
   bool runRecoTrackExtra_;
-  double deltaRRecoTrackExtra_;
 
   int minBXRecoTrack_, maxBXRecoTrack_;
   int verboseRecoTrack_;
   bool runRecoTrack_;
-  double deltaRRecoTrack_;
 
   int minBXRecoChargedCandidate_, maxBXRecoChargedCandidate_;
   int verboseRecoChargedCandidate_;
   bool runRecoChargedCandidate_;
-  double deltaRRecoChargedCandidate_;
 
   reco::TrackExtraCollection matchedRecoTrackExtras_;
   reco::TrackCollection matchedRecoTracks_;
