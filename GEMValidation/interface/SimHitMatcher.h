@@ -98,6 +98,7 @@ public:
   int nCellsWithHitsInLayerDT(unsigned int) const;
   int nLayersWithHitsInSuperLayerDT(unsigned int) const;
   int nSuperLayersWithHitsInChamberDT(unsigned int) const;
+  int nLayersWithHitsInChamberDT(unsigned int) const;
   const edm::PSimHitContainer& hitsInLayerDT(unsigned int) const;
   const edm::PSimHitContainer& hitsInSuperLayerDT(unsigned int) const;
   const edm::PSimHitContainer& hitsInChamberDT(unsigned int) const;

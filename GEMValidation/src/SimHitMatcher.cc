@@ -795,6 +795,17 @@ SimHitMatcher::nSuperLayersWithHitsInChamberDT(unsigned int detid) const
   return sl_with_hits.size();
 }
 
+int 
+SimHitMatcher::nLayersWithHitsInChamberDT(unsigned int detid) const
+{
+  int nLayers = 0;
+  auto superLayers(getDTGeometry()->chamber(DTChamberId(detid))->superLayers());
+  for (auto& sl: superLayers) {
+    nLayers += nLayersWithHitsInSuperLayerDT(sl->id().rawId());
+  }
+  return nLayers;
+}
+
 GlobalPoint
 SimHitMatcher::simHitsMeanPosition(const edm::PSimHitContainer& sim_hits) const
 {
