@@ -241,7 +241,8 @@ SimTrackMatching = cms.PSet(
     ),
     dtDigi = cms.PSet(
         verbose = cms.int32(0),
-        validInputTags = cms.VInputTag(cms.InputTag("simMuonDTDigis")),
+        validInputTags = cms.VInputTag(cms.InputTag("simMuonDTDigis")
+									   cms.InputTag("hltMuonDTDigis")),
         run = cms.bool(False),
         ## not sure which BX is the central one
         minBX = cms.int32(-1),
@@ -250,9 +251,10 @@ SimTrackMatching = cms.PSet(
         minNHitsChamber = cms.int32(4),
     ),
     dtLocalTrigger = cms.PSet(
-        verbose = cms.int32(0),
-        validInputTags = cms.VInputTag(cms.InputTag("simDtTriggerPrimitiveDigis")),
-        run = cms.bool(False),
+        verbose = cms.int32(1),
+        validInputTags = cms.VInputTag(cms.InputTag("simDtTriggerPrimitiveDigis")
+									   cms.InputTag("hltMuonDTDigis")),
+        run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
     ),
@@ -356,9 +358,37 @@ SimTrackMatching = cms.PSet(
 #	initializeFromPSet = cms.bool(True),
 #    ),
     ## GMT and L1Extra
-    gmtRegCand = cms.PSet(
+    gmtRegCandCSC = cms.PSet(
         verbose = cms.int32(0),
-        validInputTags = cms.VInputTag(cms.InputTag("simGmtDigis")),
+        validInputTags = cms.VInputTag(cms.InputTag("simGmtDigis"),
+									   cms.InputTag("hltGtDigis", "CSC")),
+        run = cms.bool(False),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+        deltaR = cms.double(0.05),
+    ),
+    gmtRegCandDT = cms.PSet(
+        verbose = cms.int32(0),
+        validInputTags = cms.VInputTag(cms.InputTag("simGmtDigis"),
+									   cms.InputTag("hltGtDigis", "DT")),
+        run = cms.bool(False),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+        deltaR = cms.double(0.05),
+    ),
+    gmtRegCandRPCb = cms.PSet(
+        verbose = cms.int32(0),
+        validInputTags = cms.VInputTag(cms.InputTag("simGmtDigis"),
+									   cms.InputTag("hltGtDigis", "RPCb")),
+        run = cms.bool(False),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+        deltaR = cms.double(0.05),
+    ),
+    gmtRegCandRPCf = cms.PSet(
+        verbose = cms.int32(0),
+        validInputTags = cms.VInputTag(cms.InputTag("simGmtDigis"),
+									   cms.InputTag("hltGtDigis", "RPCf")),
         run = cms.bool(False),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
@@ -366,28 +396,22 @@ SimTrackMatching = cms.PSet(
     ),
     gmtCand = cms.PSet(
         verbose = cms.int32(0),
-        validInputTags = cms.VInputTag(cms.InputTag("simGmtDigis")),
+        validInputTags = cms.VInputTag(cms.InputTag("simGmtDigis"),
+									   cms.InputTag("hltGtDigis")),
         run = cms.bool(False),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
         deltaR = cms.double(0.05),
     ),
-    l1Extra = cms.PSet(
-        verbose = cms.int32(0),
-        validInputTags = cms.VInputTag(), #cms.InputTag("hltL1extraParticles")
-        run = cms.bool(False),
-        minBX = cms.int32(-1),
-        maxBX = cms.int32(1),
-        deltaR = cms.double(0.05),
-    ),
-    l1MuonParticle = cms.PSet(
+    l1ExtraMuonParticle = cms.PSet(
         verbose = cms.int32(1),
-        validInputTags = cms.VInputTag(), #cms.InputTag("hltL1extraParticles")
+        validInputTags = cms.VInputTag(cms.InputTag("hltL1extraParticles")),
         run = cms.bool(False),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
         deltaR = cms.double(0.05),
     ),
+    ## HLT Tracks
     recoTrackExtra = cms.PSet(
         verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag("hltL2Muons")),
@@ -405,6 +429,13 @@ SimTrackMatching = cms.PSet(
     recoChargedCandidate = cms.PSet(
         verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag("hltL2MuonCandidatesNoVtx")), 
+        run = cms.bool(True),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+    ),
+    recoMuon = cms.PSet(
+        verbose = cms.int32(0),
+        validInputTags = cms.VInputTag(cms.InputTag("hltGlbTrkMuonsNoVtx")), 
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
