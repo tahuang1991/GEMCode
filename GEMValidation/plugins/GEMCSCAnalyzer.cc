@@ -757,7 +757,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   const RPCDigiMatcher& match_rd = match.rpcDigis();
   const CSCDigiMatcher& match_cd = match.cscDigis();
   const CSCStubMatcher& match_lct = match.cscStubs();
-  const L1TrackMatcher& match_track = match.l1Tracks();
+  //  const L1TrackMatcher& match_track = match.l1Tracks();
   const SimTrack &t = match_sh.trk();
    
   for (auto s: stations_to_use_)
@@ -1105,7 +1105,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   GlobalPoint best_pad_even[12];
 
   // GEM digis and pads in superchambers
-  for(auto d: match_gd.superChamberIds())
+  for(auto d: match_gd.superChamberIdsDigi())
   {
     GEMDetId id(d);
     int MEStation;
@@ -1181,7 +1181,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   }
 
   //ME11Case
-  for(auto d: match_gd.superChamberIds())
+  for(auto d: match_gd.superChamberIdsDigi())
   {
     GEMDetId id(d);
     int MEStation;
@@ -1258,7 +1258,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     }
    }
 
-  for(auto d: match_gd.superChamberIdsWithCoPads())
+  for(auto d: match_gd.superChamberIdsCoPad())
   {
     GEMDetId id(d);
     int MEStation;
@@ -1356,7 +1356,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     }
   }
   
-  
+  /*  
   if (match_track.tfTracks().size()) {
     etrk_[0].has_tfTrack = 1;
     TFTrack* besttrack = match_track.bestTFTrack();
@@ -1384,7 +1384,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
    if (lct1 < (besttrack->getTriggerDigis()).size()) 
    {
        etrk_[0].passGE11 = match_track.passDPhicut((besttrack->getTriggerDigisIds()).at(lct1), 0
-						   /*((besttrack->getTriggerDigis()).at(lct1))->getGEMDPhi()*/, besttrack->pt()); 
+						   ((besttrack->getTriggerDigis()).at(lct1))->getGEMDPhi(), besttrack->pt()); 
        etrk_[0].dphiGE11 = 0;//((besttrack->getTriggerDigis()).at(lct1))->getGEMDPhi();
    }
 
@@ -1393,22 +1393,22 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
    if (lct2 < (besttrack->getTriggerDigis()).size()) 
    {
      etrk_[0].passGE21 = match_track.passDPhicut((besttrack->getTriggerDigisIds()).at(lct2), 0
-						   /*((besttrack->getTriggerDigis()).at(lct2))->getGEMDPhi()*/, besttrack->pt()); 
+						  ((besttrack->getTriggerDigis()).at(lct2))->getGEMDPhi(), besttrack->pt()); 
        etrk_[0].dphiGE21 = 0;//((besttrack->getTriggerDigis()).at(lct2))->getGEMDPhi();
    }
      auto propagate_odd_gp(match_track.simTrackPropagateGPs_odd());
      auto propagate_even_gp(match_track.simTrackPropagateGPs_even());
      auto propagate_interstat_odd(match_track.interStatPropagation_odd());
      auto propagate_interstat_even(match_track.interStatPropagation_even());
-  /* for (int st=1; st<5; st++)
-   {
-     auto even(propagate_even_gp.at(st-1));
-     auto odd(propagate_odd_gp.at(st-1));
+   // for (int st=1; st<5; st++)
+   // {
+   //   auto even(propagate_even_gp.at(st-1));
+   //   auto odd(propagate_odd_gp.at(st-1));
 
-     //std::cout << "propaget in even chamber in st " << st << " eta: " << even.first << std::endl;
-     //std::cout << "propaget in odd chamber in st " << st << " eta: " << odd.first << std::endl;
+   //   //std::cout << "propaget in even chamber in st " << st << " eta: " << even.first << std::endl;
+   //   //std::cout << "propaget in odd chamber in st " << st << " eta: " << odd.first << std::endl;
    
-   }*/
+   // }
     auto triggerDigiIds(besttrack->getTriggerDigisIds()); 
     auto triggerDigis(besttrack->getTriggerDigis()); 
 
@@ -1477,12 +1477,13 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	 etrk_[0].lctdphi12 = etaphi1.second-etaphi2.second;
     
     }
-   /*std::cout<<"check csc detids" << std::endl;
-   for (auto id : besttrack->getTriggerDigisIds()) 
-   {
-      std::cout<<" stub id " << id << std::endl;
-   }   
-   std::cout<< std::endl;*/
+   // std::cout<<"check csc detids" << std::endl;
+   // for (auto id : besttrack->getTriggerDigisIds()) 
+   // {
+   //    std::cout<<" stub id " << id << std::endl;
+   // }   
+   // std::cout<< std::endl;
+
      //    std::cout << "SimTrack has matched CSCTF track" << std::endl;
   }
   
@@ -1500,6 +1501,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     etrk_[0].has_gmtCand = 1;
     std::cout << "SimTrack has GMTCand" << std::endl;
   }
+  */
 
   for (auto s: stations_to_use_)
   {
@@ -1579,11 +1581,11 @@ void GEMCSCAnalyzer::analyzeTrackChamberDeltas(SimTrackMatchManager& match, int 
 
   if (verbose_ > 1) // ---- GEMDigiMatcher debug printouts
   {
-    cout<<"n_gd_ids "<<match_gd.detIds().size()<<endl;
-    cout<<"n_gd_ids_copad "<<match_gd.detIdsWithCoPads().size()<<endl;
-    auto gem_gd_sch_ids = match_gd.superChamberIds();
+    cout<<"n_gd_ids "<<match_gd.detIdsDigi().size()<<endl;
+    cout<<"n_gd_ids_pad "<<match_gd.detIdsPad().size()<<endl;
+    auto gem_gd_sch_ids = match_gd.superChamberIdsDigi();
     cout<<"n_gd_ids_sch "<<gem_gd_sch_ids.size()<<endl;
-    cout<<"n_gd_ids_cosch "<<match_gd.superChamberIdsWithCoPads().size()<<endl;
+    cout<<"n_gd_ids_cosch "<<match_gd.superChamberIdsCoPad().size()<<endl;
     cout<<"n_gd_pad "<<match_gd.nPads()<<endl;
     cout<<"n_gd_copad "<<match_gd.nCoPads()<<endl;
     for (auto id: gem_gd_sch_ids)
@@ -1621,7 +1623,7 @@ void GEMCSCAnalyzer::analyzeTrackChamberDeltas(SimTrackMatchManager& match, int 
   if (verbose_ > 0 && match_gd.nPads() != match_sh.nPadsWithHits())
   {
     cout<<"mismatch "<<match_sh.nPadsWithHits()<<" "<<match_gd.nPads()<<endl;
-    auto gdids = match_gd.detIds();
+    auto gdids = match_gd.detIdsDigi();
     for (auto d: gdids)
     {
       auto pad_ns = match_gd.padNumbersInDetId(d);
@@ -1651,7 +1653,7 @@ void GEMCSCAnalyzer::analyzeTrackChamberDeltas(SimTrackMatchManager& match, int 
     dtrk_.charge = t.charge();
 
     auto csc_sd_ch_ids = match_cd.chamberIdsStrip();
-    auto gem_d_sch_ids = match_gd.superChamberIds();
+    auto gem_d_sch_ids = match_gd.superChamberIdsDigi();
     if (verbose_) cout<<"will match csc & gem  "<<csc_sd_ch_ids.size()<<" "<<gem_d_sch_ids.size()<<endl;
     for (auto csc_d: csc_sd_ch_ids)
     {
@@ -1914,7 +1916,7 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
   }
   
   std::cout << "######matching GEM Digi to simtrack " << std::endl;
-  for(auto d: match_gd.superChamberIds())
+  for(auto d: match_gd.superChamberIdsDigi())
   {
     GEMDetId id(d);
     int MEStation;
@@ -1938,7 +1940,7 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
   }
   
   std::cout << "######matching Copad to simtrack " << std::endl;
-  for (auto d: match_gd.superChamberIdsWithCoPads())
+  for (auto d: match_gd.superChamberIdsCoPad())
   {
     GEMDetId id(d);
     int MEStation;

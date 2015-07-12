@@ -59,7 +59,7 @@ DTStubMatcher::selectDetIds(const std::map<unsigned int, DTStubMatcher::DTLocalT
     if (dt_type > 0)
     {
       DTChamberId detId(id);
-      if (toDTType(detId) != dt_type) continue;
+      if (gemvalidation::toDTType(detId) != dt_type) continue;
     }
     result.insert(p.first);
   }

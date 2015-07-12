@@ -25,7 +25,10 @@
 #include "GEMCode/GEMValidation/interface/DTDigiMatcher.h"
 #include "GEMCode/GEMValidation/interface/DTStubMatcher.h"
 #include "GEMCode/GEMValidation/interface/DTRecHitMatcher.h"
-#include "GEMCode/GEMValidation/interface/L1TrackMatcher.h"
+//#include "GEMCode/GEMValidation/interface/L1TrackMatcher.h"
+#include "GEMCode/GEMValidation/interface/L1TrackFinderTrackMatcher.h"
+#include "GEMCode/GEMValidation/interface/L1TrackFinderCandidateMatcher.h"
+#include "GEMCode/GEMValidation/interface/L1GlobalMuonTriggerMatcher.h"
 #include "GEMCode/GEMValidation/interface/HLTTrackMatcher.h"
 
 class SimTrackMatchManager
@@ -50,7 +53,10 @@ public:
   const DTDigiMatcher& dtDigis() const {return dt_digis_;}
   const DTStubMatcher& dtStubs() const {return dt_stubs_;}
   const DTRecHitMatcher& dtRecHits() const {return dt_rechits_;} 
-  const L1TrackMatcher& l1Tracks() const {return l1_tracks_;}
+  //  const L1TrackMatcher& l1Tracks() const {return l1_tracks_;}
+  const L1TrackFinderTrackMatcher& l1TfTracks() const {return l1_tf_tracks_;}
+  const L1TrackFinderCandidateMatcher& l1TfCands() const {return l1_tf_cands_;}
+  const L1GlobalMuonTriggerMatcher& l1GMTCands() const {return l1_gmt_cands_;}
   const HLTTrackMatcher& hltTracks() const {return hlt_tracks_;}
   
 private:
@@ -68,7 +74,10 @@ private:
   DTDigiMatcher dt_digis_;
   DTStubMatcher dt_stubs_;
   DTRecHitMatcher dt_rechits_; 
-  L1TrackMatcher l1_tracks_;
+  //L1TrackMatcher l1_tracks_;
+  L1TrackFinderTrackMatcher l1_tf_tracks_;
+  L1TrackFinderCandidateMatcher l1_tf_cands_;
+  L1GlobalMuonTriggerMatcher l1_gmt_cands_;
   HLTTrackMatcher hlt_tracks_;
 };
 
