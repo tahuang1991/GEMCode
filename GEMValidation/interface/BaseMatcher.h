@@ -86,21 +86,30 @@ public:
   enum MuonType {DT= 1, CSC=2, RPC=3, GEM=4, ME0=5};
   
   /// CSC chamber types, according to CSCDetId::iChamberType()
-  enum CSCType {CSC_ALL = 0, CSC_ME1a, CSC_ME1b, CSC_ME12, CSC_ME13,
-                CSC_ME21, CSC_ME22, CSC_ME31, CSC_ME32, CSC_ME41, CSC_ME42};
+  enum CSCType {CSC_ALL = 0, 
+		CSC_ME1a, CSC_ME1b, CSC_ME12, CSC_ME13, CSC_ME21, 
+		CSC_ME22, CSC_ME31, CSC_ME32, CSC_ME41, CSC_ME42};
 
   /// GEM chamber types
   enum GEMType {GEM_ALL = 0, GEM_ME11, GEM_ME21};
   
   /// RPC endcap chamber types -- FIXME
-  enum RPCType {RPC_ALL = 0, RPC_ME12, RPC_ME13, RPC_ME22, RPC_ME23, 
-                RPC_ME31, RPC_ME32, RPC_ME33, RPC_ME41, RPC_ME42, RPC_ME43,
-		RPC_MB10, RPC_MB11, RPC_MB12, RPC_MB20, RPC_MB21, 
-		RPC_MB22, RPC_MB30, RPC_MB31, RPC_MB32, RPC_MB40, RPC_MB41, RPC_MB42};
+  enum RPCType {RPC_ALL = 0, 
+		RPC_ME12, RPC_ME13, RPC_ME22, RPC_ME23, RPC_ME31, 
+		RPC_ME32, RPC_ME33, RPC_ME41, RPC_ME42, RPC_ME43,
+		RPC_MB01,  RPC_MB02,  RPC_MB03,  RPC_MB04, 
+		RPC_MB11p, RPC_MB12p, RPC_MB13p, RPC_MB14p, 
+		RPC_MB21p, RPC_MB22p, RPC_MB23p, RPC_MB24p, 
+		RPC_MB11n, RPC_MB12n, RPC_MB13n, RPC_MB14n, 
+		RPC_MB21n, RPC_MB22n, RPC_MB23n, RPC_MB24n};
 
   /// DT chamber types -- FIXME
-  enum DTType { DT_ALL = 0, DT_MB10, DT_MB11, DT_MB12, DT_MB20, DT_MB21, 
-		DT_MB22, DT_MB30, DT_MB31, DT_MB32, DT_MB40, DT_MB41, DT_MB42};
+  enum DTType {DT_ALL = 0, 
+	       DT_MB01,  DT_MB02,  DT_MB03,  DT_MB04, 
+	       DT_MB11p, DT_MB12p, DT_MB13p, DT_MB14p, 
+	       DT_MB21p, DT_MB22p, DT_MB23p, DT_MB24p, 
+	       DT_MB11n, DT_MB12n, DT_MB13n, DT_MB14n, 
+	       DT_MB21n, DT_MB22n, DT_MB23n, DT_MB24n};
 
   const double ME11GEMdPhi[9][3] = {
     {-2 , 1.0, 1.0 },
@@ -144,6 +153,9 @@ public:
 
   /// check if CSC chamber type is in the used list
   bool useCSCChamberType(int csc_type);
+  bool useGEMChamberType(int gem_type);
+  bool useDTChamberType(int dt_type);
+  bool useRPCChamberType(int rpc_type);
   
   void setVerbose(int v) { verbose_ = v; }
   int verbose() const { return verbose_; }
@@ -176,6 +188,12 @@ public:
   double phiHeavyCorr(double pt, double eta, double phi, double charge) const;
   bool passDPhicut(CSCDetId id, float dphi, float pt) const;
 
+  // return MuonType for a particular DetId
+  int toGEMType(GEMDetId) const;
+  int toRPCType(RPCDetId) const;
+  int toDTType(DTWireId) const;
+  int toDTType(DTChamberId) const;
+
  protected:
   
   bool hasGEMGeometry_;
@@ -207,6 +225,9 @@ public:
 
   // list of CSC chamber types to use
   bool useCSCChamberTypes_[11];
+  bool useGEMChamberTypes_[3];
+  bool useRPCChamberTypes_[31];
+  bool useDTChamberTypes_[21];
 
   edm::ESHandle<MagneticField> magfield_;
   edm::ESHandle<Propagator> propagator_;

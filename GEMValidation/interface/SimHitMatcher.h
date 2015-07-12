@@ -46,16 +46,16 @@ public:
   const edm::PSimHitContainer& simHitsDT() const {return dt_hits_;}
 
   /// GEM partitions' detIds with SimHits
-  std::set<unsigned int> detIdsGEM() const;
+  std::set<unsigned int> detIdsGEM(int csc_type = GEM_ALL) const;
   /// ME0 partitions' detIds with SimHits
   std::set<unsigned int> detIdsME0() const;
   /// RPC partitions' detIds with SimHits
-  std::set<unsigned int> detIdsRPC() const;
+  std::set<unsigned int> detIdsRPC(int csc_type = RPC_ALL) const;
   /// CSC layers' detIds with SimHits
   /// by default, only returns those from ME1b
   std::set<unsigned int> detIdsCSC(int csc_type = CSC_ALL) const;
   /// DT partitions' detIds with SimHits
-  std::set<unsigned int> detIdsDT() const;
+  std::set<unsigned int> detIdsDT(int csc_type = DT_ALL) const;
 
   /// GEM detid's with hits in 2 layers of coincidence pads
   /// those are layer==1 only detid's
@@ -65,15 +65,15 @@ public:
   std::set<unsigned int> detIdsME0Coincidences(int min_n_layers = 2) const;
 
   /// GEM chamber detIds with SimHits
-  std::set<unsigned int> chamberIdsGEM() const;
+  std::set<unsigned int> chamberIdsGEM(int csc_type = GEM_ALL) const;
   /// ME0 chamber detIds with SimHits
   std::set<unsigned int> chamberIdsME0() const;
   /// RPC chamber detIds with SimHits
-  std::set<unsigned int> chamberIdsRPC() const;
+  std::set<unsigned int> chamberIdsRPC(int csc_type = RPC_ALL) const;
   /// CSC chamber detIds with SimHits
   std::set<unsigned int> chamberIdsCSC(int csc_type = CSC_ALL) const;
   /// DT chamber detIds with SimHits
-  std::set<unsigned int> chamberIdsDT() const;
+  std::set<unsigned int> chamberIdsDT(int csc_type = DT_ALL) const;
 
   /// GEM superchamber detIds with SimHits
   std::set<unsigned int> superChamberIdsGEM() const;

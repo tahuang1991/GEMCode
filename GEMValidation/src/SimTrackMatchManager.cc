@@ -15,6 +15,7 @@ SimTrackMatchManager::SimTrackMatchManager(const SimTrack& t, const SimVertex& v
 , csc_stubs_(simhits_, csc_digis_, gem_digis_, rpc_digis_)
 , csc_rechits_(simhits_)
 , dt_digis_(simhits_)
+, dt_stubs_(simhits_)
 , dt_rechits_(simhits_)
 , l1_tracks_(csc_stubs_, dt_digis_, rpc_digis_)
 , hlt_tracks_(csc_rechits_, dt_rechits_, rpc_rechits_, gem_rechits_)

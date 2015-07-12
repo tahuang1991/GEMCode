@@ -431,7 +431,7 @@ SimHitMatcher::simHits(enum MuonType sub) const
 
 
 std::set<unsigned int> 
-SimHitMatcher::detIdsGEM() const
+SimHitMatcher::detIdsGEM(int gem_type) const
 {
   std::set<unsigned int> result;
   for (auto& p: gem_detid_to_hits_) result.insert(p.first);
@@ -440,7 +440,7 @@ SimHitMatcher::detIdsGEM() const
 
 
 std::set<unsigned int> 
-SimHitMatcher::detIdsRPC() const
+SimHitMatcher::detIdsRPC(int rpc_type) const
 {
   std::set<unsigned int> result;
   for (auto& p: rpc_detid_to_hits_) result.insert(p.first);
@@ -476,7 +476,7 @@ SimHitMatcher::detIdsCSC(int csc_type) const
 
 
 std::set<unsigned int> 
-SimHitMatcher::detIdsDT() const
+SimHitMatcher::detIdsDT(int dt_type) const
 {
   std::set<unsigned int> result;
   for (auto& p: dt_detid_to_hits_) result.insert(p.first);
@@ -512,7 +512,7 @@ SimHitMatcher::detIdsME0Coincidences(int min_n_layers) const
 
 
 std::set<unsigned int> 
-SimHitMatcher::chamberIdsGEM() const
+SimHitMatcher::chamberIdsGEM(int gem_type) const
 {
   std::set<unsigned int> result;
   for (auto& p: gem_chamber_to_hits_) result.insert(p.first);
@@ -521,7 +521,7 @@ SimHitMatcher::chamberIdsGEM() const
 
 
 std::set<unsigned int> 
-SimHitMatcher::chamberIdsRPC() const
+SimHitMatcher::chamberIdsRPC(int rpc_type) const
 {
   std::set<unsigned int> result;
   for (auto& p: rpc_chamber_to_hits_) result.insert(p.first);
@@ -556,7 +556,7 @@ SimHitMatcher::chamberIdsCSC(int csc_type) const
 }
 
 std::set<unsigned int>
-SimHitMatcher::chamberIdsDT() const
+SimHitMatcher::chamberIdsDT(int dt_type) const
 {
   std::set<unsigned int> result;
   for (auto& p: dt_chamber_to_hits_) result.insert(p.first);

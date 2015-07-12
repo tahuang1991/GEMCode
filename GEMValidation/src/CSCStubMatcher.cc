@@ -733,6 +733,34 @@ CSCStubMatcher::allMPLCTsInChamber(unsigned int detid) const
   return chamber_to_mplcts_all_.at(detid);
 }
 
+const CSCCLCTDigiContainer&
+CSCStubMatcher::allCscCLCTsInChamber(unsigned int detid) const
+{
+  if (chamber_to_cscClcts_all_.find(detid) == chamber_to_cscClcts_all_.end()) return no_csc_clcts_;
+  return chamber_to_cscClcts_all_.at(detid);
+}
+
+const CSCALCTDigiContainer&
+CSCStubMatcher::allCscALCTsInChamber(unsigned int detid) const
+{
+  if (chamber_to_cscAlcts_all_.find(detid) == chamber_to_cscAlcts_all_.end()) return no_csc_alcts_;
+  return chamber_to_cscAlcts_all_.at(detid);
+}
+
+const CSCCorrelatedLCTDigiContainer&
+CSCStubMatcher::allCscLCTsInChamber(unsigned int detid) const
+{
+  if (chamber_to_cscLcts_all_.find(detid) == chamber_to_cscLcts_all_.end()) return no_csc_lcts_;
+  return chamber_to_cscLcts_all_.at(detid);
+}
+
+const CSCCorrelatedLCTDigiContainer&
+CSCStubMatcher::allCscMPLCTsInChamber(unsigned int detid) const
+{
+  if (chamber_to_cscMplcts_all_.find(detid) == chamber_to_cscMplcts_all_.end()) return no_csc_lcts_;
+  return chamber_to_cscMplcts_all_.at(detid);
+}
+
 const matching::DigiContainer&
 CSCStubMatcher::clctsInChamber(unsigned int detid) const
 {
@@ -754,6 +782,12 @@ CSCStubMatcher::lctsInChamber(unsigned int detid) const
   return chamber_to_lcts_.at(detid);
 }
 
+const matching::DigiContainer&
+CSCStubMatcher::mplctsInChamber(unsigned int detid) const
+{
+  if (chamber_to_mplcts_.find(detid) == chamber_to_mplcts_.end()) return no_digis_;
+  return chamber_to_mplcts_.at(detid);
+}
 
 const matching::DigiContainer
 CSCStubMatcher::lctsInStation(int st) const
@@ -767,14 +801,6 @@ CSCStubMatcher::lctsInStation(int st) const
     }
 
     return lcts;
-}
-
-
-const matching::DigiContainer&
-CSCStubMatcher::mplctsInChamber(unsigned int detid) const
-{
-  if (chamber_to_mplcts_.find(detid) == chamber_to_mplcts_.end()) return no_digis_;
-  return chamber_to_mplcts_.at(detid);
 }
 
 int

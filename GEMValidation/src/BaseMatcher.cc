@@ -19,6 +19,36 @@ BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
   // empty list means use all the chamber types
   if (csc_types.empty()) useCSCChamberTypes_[CSC_ALL] = true;
 
+  // list of RPC chamber type numbers to use
+  std::vector<int> rpc_types = conf().getParameter<std::vector<int> >("useRPCChamberTypes");
+  for (int i=0; i <= RPC_MB24n; ++i) useRPCChamberTypes_[i] = false;
+  for (auto t: rpc_types)
+  {
+    if (t >= 0 && t <= RPC_MB24n) useRPCChamberTypes_[t] = true;
+  }
+  // empty list means use all the chamber types
+  if (rpc_types.empty()) useRPCChamberTypes_[RPC_ALL] = true;
+
+  // list of DT chamber type numbers to use
+  std::vector<int> dt_types = conf().getParameter<std::vector<int> >("useDTChamberTypes");
+  for (int i=0; i <= DT_MB24n; ++i) useDTChamberTypes_[i] = false;
+  for (auto t: dt_types)
+  {
+    if (t >= 0 && t <= DT_MB24n) useDTChamberTypes_[t] = true;
+  }
+  // empty list means use all the chamber types
+  if (dt_types.empty()) useDTChamberTypes_[DT_ALL] = true;
+
+  // list of GEM chamber type numbers to use
+  std::vector<int> gem_types = conf().getParameter<std::vector<int> >("useGEMChamberTypes");
+  for (int i=0; i <= GEM_ME21; ++i) useGEMChamberTypes_[i] = false;
+  for (auto t: gem_types)
+  {
+    if (t >= 0 && t <= GEM_ME21) useGEMChamberTypes_[t] = true;
+  }
+  // empty list means use all the chamber types
+  if (gem_types.empty()) useGEMChamberTypes_[GEM_ALL] = true;
+
   // Get the magnetic field
   es.get<IdealMagneticFieldRecord>().get(magfield_);
 
@@ -82,6 +112,24 @@ BaseMatcher::~BaseMatcher()
 {
 }
 
+
+bool BaseMatcher::useGEMChamberType(int gem_type)
+{
+  if (gem_type < 0 || gem_type > GEM_ME21) return false;
+  return useGEMChamberTypes_[gem_type];
+}
+
+bool BaseMatcher::useRPCChamberType(int rpc_type)
+{
+  if (rpc_type < 0 || rpc_type > RPC_MB24n) return false;
+  return useRPCChamberTypes_[rpc_type];
+}
+
+bool BaseMatcher::useDTChamberType(int dt_type)
+{
+  if (dt_type < 0 || dt_type > DT_MB24n) return false;
+  return useDTChamberTypes_[dt_type];
+}
 
 bool BaseMatcher::useCSCChamberType(int csc_type)
 {
@@ -208,4 +256,133 @@ bool BaseMatcher::passDPhicut(CSCDetId id, float dPhi, float pt) const
 
    return pass;
 
+}
+
+
+int 
+BaseMatcher::toGEMType(GEMDetId detId) const
+{
+  const int re(detId.region());
+  const int st(detId.station());
+  const int ri(detId.ring());
+  // endcap
+  if (abs(re)==1) {
+    if (st ==1) {
+      if (ri==1) return GEM_ME11;
+    }
+    else if (st ==2) {
+      if (ri==1) return GEM_ME21;
+    }
+  }
+  return GEM_ALL;
+}
+
+
+int 
+BaseMatcher::toRPCType(RPCDetId detId) const
+{
+  const int re(detId.region());
+  const int st(detId.station());
+  const int ri(detId.ring());
+  // endcap
+  if (abs(re)==1) {
+    if (ri ==1) {
+      if (st==2) return RPC_ME12;
+      if (st==3) return RPC_ME13;
+    }
+    else if (ri ==2) {
+      if (st==2) return RPC_ME22;
+      if (st==3) return RPC_ME23;
+    }
+    else if (ri ==3) {
+      if (st==1) return RPC_ME31;
+      if (st==2) return RPC_ME32;
+      if (st==3) return RPC_ME33;
+    }
+    else if (ri ==4) {
+      if (st==1) return RPC_ME41;
+      if (st==2) return RPC_ME42;
+      if (st==3) return RPC_ME43;
+    }
+  }
+  // Barrel
+  else {
+    if (ri==-2) {
+      if (st==1) return RPC_MB21n;
+      if (st==2) return RPC_MB22n;
+      if (st==3) return RPC_MB23n;
+      if (st==4) return RPC_MB24n;
+    }
+    else if (ri==-1) {
+      if (st==1) return RPC_MB11n;
+      if (st==2) return RPC_MB12n;
+      if (st==3) return RPC_MB13n;
+      if (st==4) return RPC_MB14n;
+    }
+    else if (ri==0) {
+      if (st==1) return RPC_MB01;
+      if (st==2) return RPC_MB02;
+      if (st==3) return RPC_MB03;
+      if (st==4) return RPC_MB04;
+    }
+    else if (ri==1) {
+      if (st==1) return RPC_MB11p;
+      if (st==2) return RPC_MB12p;
+      if (st==3) return RPC_MB13p;
+      if (st==4) return RPC_MB14p;
+    }
+    else if (ri==2) {
+      if (st==1) return RPC_MB21p;
+      if (st==2) return RPC_MB22p;
+      if (st==3) return RPC_MB23p;
+      if (st==4) return RPC_MB24p;
+    }
+  }
+  return RPC_ALL;
+}
+
+
+int 
+BaseMatcher::toDTType(DTWireId detId) const
+{
+  return toDTType(DTChamberId(detId.rawId()));
+}
+
+
+int 
+BaseMatcher::toDTType(DTChamberId detId) const
+{
+  const int wh(detId.wheel());
+  const int st(detId.station());
+  if (wh==-2) {
+    if (st==1) return DT_MB21n;
+    if (st==2) return DT_MB22n;
+    if (st==3) return DT_MB23n;
+    if (st==4) return DT_MB24n;
+  }
+  if (wh==-1) {
+    if (st==1) return DT_MB11n;
+    if (st==2) return DT_MB12n;
+    if (st==3) return DT_MB13n;
+    if (st==4) return DT_MB14n;
+  }
+  if (wh==0) {
+    if (st==1) return DT_MB01;
+    if (st==2) return DT_MB02;
+    if (st==3) return DT_MB03;
+    if (st==4) return DT_MB04;
+  }
+  if (wh==1) {
+    if (st==1) return DT_MB11p;
+    if (st==2) return DT_MB12p;
+    if (st==3) return DT_MB13p;
+    if (st==4) return DT_MB14p;
+  }
+  if (wh==2) {
+    if (st==1) return DT_MB21p;
+    if (st==2) return DT_MB22p;
+    if (st==3) return DT_MB23p;
+    if (st==4) return DT_MB24p;
+  }
+  return DT_ALL;
 }

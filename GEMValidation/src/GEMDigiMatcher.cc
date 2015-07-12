@@ -77,6 +77,10 @@ GEMDigiMatcher::matchDigisToSimTrack(const GEMDigiCollection& digis)
       chamber_to_digis_[ p_id.chamberId().rawId() ].push_back(mydigi);
       superchamber_to_digis_[ superch_id() ].push_back(mydigi);
 
+      detid_to_gemdigis_[id].push_back(*d);
+      chamber_to_gemdigis_[ p_id.chamberId().rawId() ].push_back(*d);
+      superchamber_to_gemdigis_[ superch_id() ].push_back(*d);
+
       //int pad_num = 1 + static_cast<int>( roll->padOfStrip(d->strip()) ); // d->strip() is int
       //digi_map[ make_pair(pad_num, d->bx()) ].push_back( d->strip() );
     }
@@ -117,6 +121,10 @@ GEMDigiMatcher::matchPadsToSimTrack(const GEMPadDigiCollection& pads)
       detid_to_pads_[id].push_back(mydigi);
       chamber_to_pads_[ p_id.chamberId().rawId() ].push_back(mydigi);
       superchamber_to_pads_[ superch_id() ].push_back(mydigi);
+
+      detid_to_gempads_[id].push_back(*pad);
+      chamber_to_gempads_[ p_id.chamberId().rawId() ].push_back(*pad);
+      superchamber_to_gempads_[ superch_id() ].push_back(*pad);
     }
   }
 }
@@ -159,45 +167,69 @@ GEMDigiMatcher::matchCoPadsToSimTrack(const GEMCoPadDigiCollection& co_pads)
 
 
 std::set<unsigned int>
-GEMDigiMatcher::detIds() const
+GEMDigiMatcher::selectDetIds(const Id2DigiContainer &digis, int gem_type) const
 {
   std::set<unsigned int> result;
-  for (auto& p: detid_to_digis_) result.insert(p.first);
+  for (auto& p: digis)
+  {
+    auto id = p.first;
+    if (gem_type > 0)
+    {
+      GEMDetId detId(id);
+      if (toGEMType(detId) != gem_type) continue;
+    }
+    result.insert(p.first);
+  }
   return result;
 }
 
 
 std::set<unsigned int>
-GEMDigiMatcher::chamberIds() const
+GEMDigiMatcher::detIdsDigi(int gem_type) const
 {
-  std::set<unsigned int> result;
-  for (auto& p: chamber_to_digis_) result.insert(p.first);
-  return result;
-}
-
-std::set<unsigned int>
-GEMDigiMatcher::superChamberIds() const
-{
-  std::set<unsigned int> result;
-  for (auto& p: superchamber_to_digis_) result.insert(p.first);
-  return result;
+  return selectDetIds(detid_to_digis_, gem_type);
 }
 
 
 std::set<unsigned int>
-GEMDigiMatcher::detIdsWithCoPads() const
+GEMDigiMatcher::detIdsPad(int gem_type) const
 {
-  std::set<unsigned int> result;
-  for (auto& p: detid_to_copads_) result.insert(p.first);
-  return result;
+  return selectDetIds(detid_to_pads_, gem_type);
 }
 
+
 std::set<unsigned int>
-GEMDigiMatcher::superChamberIdsWithCoPads() const
+GEMDigiMatcher::chamberIdsDigi(int gem_type) const
 {
-  std::set<unsigned int> result;
-  for (auto& p: superchamber_to_copads_) result.insert(p.first);
-  return result;
+  return selectDetIds(chamber_to_digis_, gem_type);
+}
+
+
+std::set<unsigned int>
+GEMDigiMatcher::chamberIdsPad(int gem_type) const
+{
+  return selectDetIds(chamber_to_pads_, gem_type);
+}
+
+
+std::set<unsigned int>
+GEMDigiMatcher::superChamberIdsDigi(int gem_type) const
+{
+  return selectDetIds(superchamber_to_digis_, gem_type);
+}
+
+
+std::set<unsigned int>
+GEMDigiMatcher::superChamberIdsPad(int gem_type) const
+{
+  return selectDetIds(superchamber_to_pads_, gem_type);
+}
+
+
+std::set<unsigned int>
+GEMDigiMatcher::superChamberIdsCoPad(int gem_type) const
+{
+  return selectDetIds(superchamber_to_copads_, gem_type);
 }
 
 
@@ -208,12 +240,14 @@ GEMDigiMatcher::digisInDetId(unsigned int detid) const
   return detid_to_digis_.at(detid);
 }
 
+
 const matching::DigiContainer&
 GEMDigiMatcher::digisInChamber(unsigned int detid) const
 {
   if (chamber_to_digis_.find(detid) == chamber_to_digis_.end()) return no_digis_;
   return chamber_to_digis_.at(detid);
 }
+
 
 const matching::DigiContainer&
 GEMDigiMatcher::digisInSuperChamber(unsigned int detid) const
@@ -222,6 +256,7 @@ GEMDigiMatcher::digisInSuperChamber(unsigned int detid) const
   return superchamber_to_digis_.at(detid);
 }
 
+
 const matching::DigiContainer&
 GEMDigiMatcher::padsInDetId(unsigned int detid) const
 {
@@ -229,12 +264,14 @@ GEMDigiMatcher::padsInDetId(unsigned int detid) const
   return detid_to_pads_.at(detid);
 }
 
+
 const matching::DigiContainer&
 GEMDigiMatcher::padsInChamber(unsigned int detid) const
 {
   if (chamber_to_pads_.find(detid) == chamber_to_pads_.end()) return no_digis_;
   return chamber_to_pads_.at(detid);
 }
+
 
 const matching::DigiContainer&
 GEMDigiMatcher::padsInSuperChamber(unsigned int detid) const
@@ -245,17 +282,66 @@ GEMDigiMatcher::padsInSuperChamber(unsigned int detid) const
 
 
 const matching::DigiContainer&
-GEMDigiMatcher::coPadsInDetId(unsigned int detid) const
-{
-  if (detid_to_copads_.find(detid) == detid_to_copads_.end()) return no_digis_;
-  return detid_to_copads_.at(detid);
-}
-
-const matching::DigiContainer&
 GEMDigiMatcher::coPadsInSuperChamber(unsigned int detid) const
 {
   if (superchamber_to_copads_.find(detid) == superchamber_to_copads_.end()) return no_digis_;
   return superchamber_to_copads_.at(detid);
+}
+
+
+const GEMDigiContainer&
+GEMDigiMatcher::gemDigisInDetId(unsigned int detid) const
+{
+  if (detid_to_gemdigis_.find(detid) == detid_to_gemdigis_.end()) return no_gem_digis_;
+  return detid_to_gemdigis_.at(detid);
+}
+
+
+const GEMDigiContainer&
+GEMDigiMatcher::gemDigisInChamber(unsigned int detid) const
+{
+  if (chamber_to_gemdigis_.find(detid) == chamber_to_gemdigis_.end()) return no_gem_digis_;
+  return chamber_to_gemdigis_.at(detid);
+}
+
+
+const GEMDigiContainer&
+GEMDigiMatcher::gemDigisInSuperChamber(unsigned int detid) const
+{
+  if (superchamber_to_gemdigis_.find(detid) == superchamber_to_gemdigis_.end()) return no_gem_digis_;
+  return superchamber_to_gemdigis_.at(detid);
+}
+
+
+const GEMPadDigiContainer&
+GEMDigiMatcher::gemPadsInDetId(unsigned int detid) const
+{
+  if (detid_to_gempads_.find(detid) == detid_to_gempads_.end()) return no_gem_pads_;
+  return detid_to_gempads_.at(detid);
+}
+
+
+const GEMPadDigiContainer&
+GEMDigiMatcher::gemPadsInChamber(unsigned int detid) const
+{
+  if (chamber_to_gempads_.find(detid) == chamber_to_gempads_.end()) return no_gem_pads_;
+  return chamber_to_gempads_.at(detid);
+}
+
+
+const GEMPadDigiContainer&
+GEMDigiMatcher::gemPadsInSuperChamber(unsigned int detid) const
+{
+  if (superchamber_to_gempads_.find(detid) == superchamber_to_gempads_.end()) return no_gem_pads_;
+  return superchamber_to_gempads_.at(detid);
+}
+
+
+const GEMCoPadDigiContainer&
+GEMDigiMatcher::gemCoPadsInSuperChamber(unsigned int detid) const
+{
+  if (superchamber_to_gemcopads_.find(detid) == superchamber_to_gemcopads_.end()) return no_gem_copads_;
+  return superchamber_to_gemcopads_.at(detid);
 }
 
 
@@ -288,26 +374,26 @@ GEMDigiMatcher::nLayersWithPadsInSuperChamber(unsigned int detid) const
 
 
 int
-GEMDigiMatcher::nCoPads() const
+GEMDigiMatcher::nPads() const
 {
   int n = 0;
-  auto ids = superChamberIdsWithCoPads();
+  auto ids = superChamberIdsPad();
   for (auto id: ids)
   {
-    n += coPadsInSuperChamber(id).size();
+    n += padsInSuperChamber(id).size();
   }
   return n;
 }
 
 
 int
-GEMDigiMatcher::nPads() const
+GEMDigiMatcher::nCoPads() const
 {
   int n = 0;
-  auto ids = superChamberIds();
+  auto ids = superChamberIdsCoPad();
   for (auto id: ids)
   {
-    n += padsInSuperChamber(id).size();
+    n += coPadsInSuperChamber(id).size();
   }
   return n;
 }
@@ -325,6 +411,7 @@ GEMDigiMatcher::stripNumbersInDetId(unsigned int detid) const
   return result;
 }
 
+
 std::set<int>
 GEMDigiMatcher::padNumbersInDetId(unsigned int detid) const
 {
@@ -337,24 +424,13 @@ GEMDigiMatcher::padNumbersInDetId(unsigned int detid) const
   return result;
 }
 
-std::set<int>
-GEMDigiMatcher::coPadNumbersInDetId(unsigned int detid) const
-{
-  set<int> result;
-  auto digis = coPadsInDetId(detid);
-  for (auto& d: digis)
-  {
-    result.insert( digi_channel(d) );
-  }
-  return result;
-}
 
 std::set<int>
 GEMDigiMatcher::partitionNumbers() const
 {
   std::set<int> result;
 
-  auto detids = detIds();
+  auto detids = detIdsDigi();
   for (auto id: detids)
   {
     GEMDetId idd(id);
@@ -362,13 +438,14 @@ GEMDigiMatcher::partitionNumbers() const
   }
   return result;
 }
+
 
 std::set<int>
 GEMDigiMatcher::partitionNumbersWithCoPads() const
 {
   std::set<int> result;
 
-  auto detids = detIdsWithCoPads();
+  auto detids = superChamberIdsCoPad();
   for (auto id: detids)
   {
     GEMDetId idd(id);
@@ -376,6 +453,7 @@ GEMDigiMatcher::partitionNumbersWithCoPads() const
   }
   return result;
 }
+
 
 int 
 GEMDigiMatcher::extrapolateHsfromGEMPad(unsigned int id, int gempad) const

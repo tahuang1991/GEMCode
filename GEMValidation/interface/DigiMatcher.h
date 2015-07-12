@@ -20,6 +20,9 @@ public:
 
   typedef matching::Digi Digi;
   typedef matching::DigiContainer DigiContainer;
+  typedef std::map<unsigned int, Digi> Id2Digi;
+
+  typedef std::map<unsigned int, DigiContainer> Id2DigiContainer;
 
   DigiMatcher(SimHitMatcher& sh);
   

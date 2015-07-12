@@ -23,6 +23,7 @@
 #include "GEMCode/GEMValidation/interface/CSCStubMatcher.h"
 #include "GEMCode/GEMValidation/interface/CSCRecHitMatcher.h"
 #include "GEMCode/GEMValidation/interface/DTDigiMatcher.h"
+#include "GEMCode/GEMValidation/interface/DTStubMatcher.h"
 #include "GEMCode/GEMValidation/interface/DTRecHitMatcher.h"
 #include "GEMCode/GEMValidation/interface/L1TrackMatcher.h"
 #include "GEMCode/GEMValidation/interface/HLTTrackMatcher.h"
@@ -47,6 +48,7 @@ public:
   const CSCStubMatcher& cscStubs() const {return csc_stubs_;}
   const CSCRecHitMatcher& cscRecHits() const {return csc_rechits_;}
   const DTDigiMatcher& dtDigis() const {return dt_digis_;}
+  const DTStubMatcher& dtStubs() const {return dt_stubs_;}
   const DTRecHitMatcher& dtRecHits() const {return dt_rechits_;} 
   const L1TrackMatcher& l1Tracks() const {return l1_tracks_;}
   const HLTTrackMatcher& hltTracks() const {return hlt_tracks_;}
@@ -64,6 +66,7 @@ private:
   CSCStubMatcher csc_stubs_;
   CSCRecHitMatcher csc_rechits_;
   DTDigiMatcher dt_digis_;
+  DTStubMatcher dt_stubs_;
   DTRecHitMatcher dt_rechits_; 
   L1TrackMatcher l1_tracks_;
   HLTTrackMatcher hlt_tracks_;

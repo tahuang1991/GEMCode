@@ -49,8 +49,6 @@ DTDigiMatcher::matchDigisToSimTrack(const DTDigiCollection& digis)
     for (auto d = digis_in_det.first; d != digis_in_det.second; ++d)
     {
       if (verboseDigi_) cout<<"dt wire digi "<<l_id<<" "<<*d<<endl;
-      // check that the digi is within BX range
-      //      if (d->bx() < minBXDT_ || d->bx() > maxBXDT_) continue;
       // check that it matches a wire that was hit by SimHits from our track
       if (hit_wires.find(d->wire()) == hit_wires.end()) continue;
       if (verboseDigi_) cout<<"oki"<<endl;
@@ -58,36 +56,62 @@ DTDigiMatcher::matchDigisToSimTrack(const DTDigiCollection& digis)
       /// Constructor from a layerId and a wire number
       const DTWireId w_id(l_id, d->wire());
 
-      /*
-      detid_to_digis_[w_id].push_back(d);
-      layer_to_digis_[l_id].push_back(d);
-      superLayer_to_digis_[sl_id].push_back(d);
-      chamber_to_digis_[c_id].push_back(d);
-      */
+      detid_to_digis_[w_id].push_back(*d);
+      layer_to_digis_[l_id].push_back(*d);
+      superLayer_to_digis_[sl_id].push_back(*d);
+      chamber_to_digis_[c_id].push_back(*d);
     }
   }
 }
 
 
 std::set<unsigned int>
-DTDigiMatcher::detIds() const
+DTDigiMatcher::selectDetIds(const std::map<unsigned int, DTDigiContainer>& digis, int dt_type) const
 {
   std::set<unsigned int> result;
-  for (auto& p: detid_to_digis_) result.insert(p.first);
+  for (auto& p: digis)
+  {
+    auto id = p.first;
+    if (dt_type > 0)
+    {
+      DTWireId detId(id);
+      if (toDTType(detId) != dt_type) continue;
+    }
+    result.insert(p.first);
+  }
   return result;
 }
 
 
 std::set<unsigned int>
-DTDigiMatcher::chamberIds() const
+DTDigiMatcher::detIds(int dt_type) const
 {
-  std::set<unsigned int> result;
-  for (auto& p: chamber_to_digis_) result.insert(p.first);
-  return result;
+  return selectDetIds(detid_to_digis_, dt_type);
 }
 
 
-const DTDigiContainer&
+std::set<unsigned int>
+DTDigiMatcher::layerIds(int dt_type) const
+{
+  return selectDetIds(layer_to_digis_, dt_type);
+}
+
+
+std::set<unsigned int>
+DTDigiMatcher::superLayerIds(int dt_type) const
+{
+  return selectDetIds(superLayer_to_digis_, dt_type);
+}
+
+
+std::set<unsigned int>
+DTDigiMatcher::chamberIds(int dt_type) const
+{
+  return selectDetIds(chamber_to_digis_, dt_type);
+}
+
+
+const DTDigiMatcher::DTDigiContainer&
 DTDigiMatcher::digisInDetId(unsigned int detid) const
 {
   if (detid_to_digis_.find(detid) == detid_to_digis_.end()) return no_dt_digis_;
@@ -95,7 +119,7 @@ DTDigiMatcher::digisInDetId(unsigned int detid) const
 }
 
 
-const DTDigiContainer&
+const DTDigiMatcher::DTDigiContainer&
 DTDigiMatcher::digisInLayer(unsigned int detid) const
 {
   if (layer_to_digis_.find(detid) == layer_to_digis_.end()) return no_dt_digis_;
@@ -103,7 +127,7 @@ DTDigiMatcher::digisInLayer(unsigned int detid) const
 }
 
 
-const DTDigiContainer&
+const DTDigiMatcher::DTDigiContainer&
 DTDigiMatcher::digisInSuperLayer(unsigned int detid) const
 {
   if (superLayer_to_digis_.find(detid) == superLayer_to_digis_.end()) return no_dt_digis_;
@@ -111,7 +135,7 @@ DTDigiMatcher::digisInSuperLayer(unsigned int detid) const
 }
 
 
-const DTDigiContainer&
+const DTDigiMatcher::DTDigiContainer&
 DTDigiMatcher::digisInChamber(unsigned int detid) const
 {
   if (chamber_to_digis_.find(detid) == chamber_to_digis_.end()) return no_dt_digis_;
