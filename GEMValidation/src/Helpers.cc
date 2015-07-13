@@ -163,6 +163,30 @@ int
 gemvalidation::toDTType(DTWireId id)
 {
   return toDTType(DTChamberId(id.rawId()));
-  //  return toDTType(DTChamberId(id.wheel(),id.station(),id.sector()));
 }
 
+int 
+gemvalidation::toCSCType(CSCDetId id)
+{
+  const int st(id.station());
+  const int ri(id.ring());
+  if (st==1) {
+    if (ri==1) return CSC_ME1b;
+    if (ri==2) return CSC_ME12;
+    if (ri==3) return CSC_ME13;
+    if (ri==4) return CSC_ME1a;
+  }
+  else if (st==2) {
+    if (ri==1) return CSC_ME21;
+    if (ri==2) return CSC_ME22;
+  }
+  else if (st==3) {
+    if (ri==1) return CSC_ME31;
+    if (ri==2) return CSC_ME32;
+  }
+  else if (st==4) {
+    if (ri==1) return CSC_ME41;
+    if (ri==2) return CSC_ME42;
+  }
+  return CSC_ALL;
+}

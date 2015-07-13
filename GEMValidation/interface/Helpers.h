@@ -31,7 +31,7 @@ static const float AVERAGE_ME0_Z(568.6); // [cm]
 enum MuonType {DT= 1, CSC=2, RPC=3, GEM=4, ME0=5};
 
 /// CSC chamber types, according to CSCDetId::iChamberType()
-enum CSCType {CSC_ALL = 0, 
+enum CSCType {CSC_ALL = 0, CSC_ME11,
 	      CSC_ME1a, CSC_ME1b, CSC_ME12, CSC_ME13, CSC_ME21, 
 	      CSC_ME22, CSC_ME31, CSC_ME32, CSC_ME41, CSC_ME42};
 
@@ -126,6 +126,7 @@ int toGEMType(GEMDetId id);
 int toRPCType(RPCDetId id);
 int toDTType(DTChamberId id);
 int toDTType(DTWireId id);
+int toCSCType(CSCDetId id);
 
 template<typename PROD>
 bool
