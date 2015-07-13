@@ -1,16 +1,16 @@
 #ifndef GEMCode_GEMValidation_L1TrackFinderTrackMatcher_h
 #define GEMCode_GEMValidation_L1TrackFinderTrackMatcher_h
 
-#include "GEMCode/GEMValidation/interface/BaseMatcher.h"
+#include "GEMCode/GEMValidation/interface/SimHitMatcher.h"
 
 #include "DataFormats/L1DTTrackFinder/interface/L1MuDTChambPhContainer.h"
 #include "DataFormats/L1CSCTrackFinder/interface/L1CSCTrackCollection.h"
 
-class L1TrackFinderTrackMatcher// : public BaseMatcher
+class L1TrackFinderTrackMatcher : public BaseMatcher
 {
  public:
   /// constructor
-  L1TrackFinderTrackMatcher();
+  L1TrackFinderTrackMatcher(SimHitMatcher& sh);
   /// destructor
   ~L1TrackFinderTrackMatcher();
   
@@ -26,6 +26,22 @@ class L1TrackFinderTrackMatcher// : public BaseMatcher
   std::vector<edm::InputTag> cscTfTrackInputLabel_;
   std::vector<edm::InputTag> dtTfTrackInputLabel_;
   std::vector<edm::InputTag> rpcTfTrackInputLabel_;
+
+  int verboseCscTfTrack_;
+  int verboseDtTfTrack_;
+  int verboseRpcTfTrack_;
+
+  bool runCscTfTrack_;
+  bool runDtTfTrack_;
+  bool runRpcTfTrack_;
+
+  int minBXCscTfTrack_;
+  int minBXDtTfTrack_;
+  int minBXRpcTfTrack_;
+
+  int maxBXCscTfTrack_;
+  int maxBXDtTfTrack_;
+  int maxBXRpcTfTrack_;
 };
 
 #endif

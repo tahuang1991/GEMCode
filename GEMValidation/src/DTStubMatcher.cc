@@ -8,7 +8,7 @@ using namespace std;
 DTStubMatcher::DTStubMatcher(SimHitMatcher& sh)
 : DigiMatcher(sh)
 {
-  auto dtStub_= conf().getParameter<edm::ParameterSet>("dtStub");
+  auto dtStub_= conf().getParameter<edm::ParameterSet>("dtLocalTrigger");
   input_ = dtStub_.getParameter<std::vector<edm::InputTag>>("validInputTags");
   minBX_ = dtStub_.getParameter<int>("minBX");
   maxBX_ = dtStub_.getParameter<int>("maxBX");

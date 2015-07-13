@@ -1,7 +1,6 @@
 #ifndef GEMCode_GEMValidation_L1GlobalMuonTriggerMatcher_h
 #define GEMCode_GEMValidation_L1GlobalMuonTriggerMatcher_h
 
-#include "GEMCode/GEMValidation/interface/BaseMatcher.h"
 #include "GEMCode/GEMValidation/interface/SimHitMatcher.h"
 
 #include "DataFormats/L1GlobalMuonTrigger/interface/L1MuGMTExtendedCand.h"

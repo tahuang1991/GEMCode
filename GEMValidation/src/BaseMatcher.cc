@@ -10,8 +10,8 @@ BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
 : trk_(t), vtx_(v), conf_(ps), ev_(ev), es_(es), verbose_(0)
 {
   // list of CSC chamber type numbers to use
-  std::vector<int> csc_types = conf().getParameter<std::vector<int> >("useCSCChamberTypes");
-  for (int i=0; i <= CSC_ME42; ++i) useCSCChamberTypes_[i] = false;
+  std::vector<int> csc_types = conf().getParameter<std::vector<int> >("cscStationsToUse");
+  for (int i = CSC_ALL; i != CSC_ME42; i++) useCSCChamberTypes_[i] = false;
   for (auto t: csc_types)
   {
     if (t >= 0 && t <= CSC_ME42) useCSCChamberTypes_[t] = true;
@@ -20,8 +20,8 @@ BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
   if (csc_types.empty()) useCSCChamberTypes_[CSC_ALL] = true;
 
   // list of RPC chamber type numbers to use
-  std::vector<int> rpc_types = conf().getParameter<std::vector<int> >("useRPCChamberTypes");
-  for (int i=0; i <= RPC_MB24n; ++i) useRPCChamberTypes_[i] = false;
+  std::vector<int> rpc_types = conf().getParameter<std::vector<int> >("rpcStationsToUse");
+  for (int i = RPC_ALL; i != RPC_MB24n; i++) useRPCChamberTypes_[i] = false;
   for (auto t: rpc_types)
   {
     if (t >= 0 && t <= RPC_MB24n) useRPCChamberTypes_[t] = true;
@@ -30,8 +30,8 @@ BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
   if (rpc_types.empty()) useRPCChamberTypes_[RPC_ALL] = true;
 
   // list of DT chamber type numbers to use
-  std::vector<int> dt_types = conf().getParameter<std::vector<int> >("useDTChamberTypes");
-  for (int i=0; i <= DT_MB24n; ++i) useDTChamberTypes_[i] = false;
+  std::vector<int> dt_types = conf().getParameter<std::vector<int> >("dtStationsToUse");
+  for (int i = DT_ALL; i != DT_MB24n; i++) useDTChamberTypes_[i] = false;
   for (auto t: dt_types)
   {
     if (t >= 0 && t <= DT_MB24n) useDTChamberTypes_[t] = true;
@@ -40,8 +40,8 @@ BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
   if (dt_types.empty()) useDTChamberTypes_[DT_ALL] = true;
 
   // list of GEM chamber type numbers to use
-  std::vector<int> gem_types = conf().getParameter<std::vector<int> >("useGEMChamberTypes");
-  for (int i=0; i <= GEM_ME21; ++i) useGEMChamberTypes_[i] = false;
+  std::vector<int> gem_types = conf().getParameter<std::vector<int> >("gemStationsToUse");
+  for (int i = GEM_ALL; i != GEM_ME21; i++) useGEMChamberTypes_[i] = false;
   for (auto t: gem_types)
   {
     if (t >= 0 && t <= GEM_ME21) useGEMChamberTypes_[t] = true;

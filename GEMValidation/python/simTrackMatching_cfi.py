@@ -286,7 +286,7 @@ SimTrackMatching = cms.PSet(
     ## TrackFinder tracks
     cscTfTrack = cms.PSet(
         verbose = cms.int32(0),
-        run = cms.bool(True),
+        run = cms.bool(False),
         validInputTags = cms.VInputTag(cms.InputTag("simCsctfTrackDigis")),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
@@ -295,15 +295,15 @@ SimTrackMatching = cms.PSet(
     dtTfTrack = cms.PSet(
         verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag("simDttfDigis", "DTTF")),
-        run = cms.bool(True),
+        run = cms.bool(False),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
         deltaR = cms.double(0.05),        
     ),
-    rpcPAC = cms.PSet(
+    rpcTfTrack = cms.PSet(
         verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag("simMuonRPCDigis")),
-        run = cms.bool(True),
+        run = cms.bool(False),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
         deltaR = cms.double(0.05),        
