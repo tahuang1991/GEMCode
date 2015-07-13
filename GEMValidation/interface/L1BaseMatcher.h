@@ -1,7 +1,7 @@
 #ifndef GEMCode_GEMValidation_L1BaseMatcher_h
 #define GEMCode_GEMValidation_L1BaseMatcher_h
 
-#include "GEMCode/GEMValidation/interface/BaseMatcher.h"
+#include "GEMCode/GEMValidation/interface/SimHitMatcher.h"
 
 #include "L1Trigger/CSCCommonTrigger/interface/CSCConstants.h"
 #include "L1Trigger/CSCCommonTrigger/interface/CSCTriggerGeometry.h"
@@ -34,6 +34,10 @@ class L1BaseMatcher : public BaseMatcher
   void clear();
   void init(); 
   
+  edm::ParameterSet ptLUTset_; 
+  edm::ParameterSet CSCTFSPset_; 
+  edm::ParameterSet srLUTset_; 
+
   CSCTFPtLUT* ptLUT_; 
   CSCTFSectorProcessor* my_SPs_[2][6]; 
   CSCSectorReceiverLUT* srLUTs_[5][6][2]; 

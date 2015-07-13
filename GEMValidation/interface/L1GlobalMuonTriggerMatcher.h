@@ -2,14 +2,21 @@
 #define GEMCode_GEMValidation_L1GlobalMuonTriggerMatcher_h
 
 #include "GEMCode/GEMValidation/interface/BaseMatcher.h"
+#include "GEMCode/GEMValidation/interface/SimHitMatcher.h"
 
-class L1CSCTrackCollection;
+#include "DataFormats/L1GlobalMuonTrigger/interface/L1MuGMTExtendedCand.h"
+#include "DataFormats/L1GlobalMuonTrigger/interface/L1MuRegionalCand.h"
+#include "DataFormats/L1Trigger/interface/L1MuonParticle.h"
+#include "DataFormats/L1Trigger/interface/L1MuonParticleFwd.h"
 
-class L1GlobalMuonTriggerMatcher //: public BaseMatcher
+typedef std::vector<L1MuRegionalCand> L1MuRegionalCandCollection;
+typedef std::vector<L1MuGMTExtendedCand> L1MuGMTExtendedCandCollection;
+
+class L1GlobalMuonTriggerMatcher : public BaseMatcher
 {
  public:
   /// constructor
-  L1GlobalMuonTriggerMatcher();
+  L1GlobalMuonTriggerMatcher(SimHitMatcher& sh);
   /// destructor
   ~L1GlobalMuonTriggerMatcher();
   
@@ -18,11 +25,50 @@ class L1GlobalMuonTriggerMatcher //: public BaseMatcher
   void clear();
   void init(); 
   
-  void matchRegionalCandCSCToSimTrack(const L1CSCTrackCollection&); 
-  void matchRegionalCandDTToSimTrack(const L1CSCTrackCollection&); 
-  void matchRegionalCandRPCbToSimTrack(const L1CSCTrackCollection&); 
-  void matchRegionalCandRPCfToSimTrack(const L1CSCTrackCollection&); 
-  void matchGMTCandToSimTrack(const L1CSCTrackCollection&); 
+  void matchRegionalCandCSCToSimTrack(const L1MuRegionalCandCollection&); 
+  void matchRegionalCandDTToSimTrack(const L1MuRegionalCandCollection&); 
+  void matchRegionalCandRPCbToSimTrack(const L1MuRegionalCandCollection&); 
+  void matchRegionalCandRPCfToSimTrack(const L1MuRegionalCandCollection&); 
+  void matchGMTCandToSimTrack(const L1MuGMTExtendedCandCollection&); 
+  void matchL1ExtraMuonParticleToSimTrack(const l1extra::L1MuonParticleCollection&); 
+
+  std::vector<edm::InputTag> gmtRegCandCSCInputLabel_;
+  std::vector<edm::InputTag> gmtRegCandDTInputLabel_;
+  std::vector<edm::InputTag> gmtRegCandRPCfInputLabel_;
+  std::vector<edm::InputTag> gmtRegCandRPCbInputLabel_;
+  std::vector<edm::InputTag> gmtCandInputLabel_;
+  std::vector<edm::InputTag> l1ExtraMuonInputLabel_;
+
+  int verboseGmtRegCandCSC_;
+  int verboseGmtRegCandDT_;
+  int verboseGmtRegCandRPCf_;
+  int verboseGmtRegCandRPCb_;
+  int verboseGmtCand_;
+  int verboseL1ExtraMuon_;
+
+  bool runGmtRegCandCSC_;
+  bool runGmtRegCandDT_;
+  bool runGmtRegCandRPCf_;
+  bool runGmtRegCandRPCb_;
+  bool runGmtCand_;
+  bool runL1ExtraMuon_;
+
+  int minBXGmtRegCandCSC_;
+  int minBXGmtRegCandDT_;
+  int minBXGmtRegCandRPCf_;
+  int minBXGmtRegCandRPCb_;
+  int minBXGmtCand_;
+  int minBXL1ExtraMuon_;
+
+  int maxBXGmtRegCandCSC_;
+  int maxBXGmtRegCandDT_;
+  int maxBXGmtRegCandRPCf_;
+  int maxBXGmtRegCandRPCb_;
+  int maxBXGmtCand_;
+  int maxBXL1ExtraMuon_;
+
+  const SimHitMatcher* simhit_matcher_;
+
 };
 
 #endif

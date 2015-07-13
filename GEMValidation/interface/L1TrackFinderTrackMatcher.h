@@ -16,15 +16,15 @@ class L1TrackFinderTrackMatcher// : public BaseMatcher
  private:
   
   void clear();
-  void init(); 
+  void init();
   
-  void matchCSCTfTrackToSimTrack(const L1CSCTrackCollection&); 
-  void matchDTTfTrackToSimTrack(const L1CSCTrackCollection&); 
-  void matchRPCTfTrackToSimTrack(const L1CSCTrackCollection&); 
+  void matchCSCTfTrackToSimTrack(const L1CSCTrackCollection&);
+  void matchDTTfTrackToSimTrack(const L1CSCTrackCollection&);
+  void matchRPCTfTrackToSimTrack(const L1CSCTrackCollection&);
 
-  std::vector<edm::InputTag> cscTfTrackInputLabel_; 
-  std::vector<edm::InputTag> dtTfTrackInputLabel_; 
-  std::vector<edm::InputTag> rpcTfTrackInputLabel_; 
+  std::vector<edm::InputTag> cscTfTrackInputLabel_;
+  std::vector<edm::InputTag> dtTfTrackInputLabel_;
+  std::vector<edm::InputTag> rpcTfTrackInputLabel_;
 };
 
 #endif

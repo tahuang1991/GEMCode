@@ -1,7 +1,7 @@
-#include "GEMCode/GEMValidation/interface/L1TrackFinderCand.h"
+#include "GEMCode/GEMValidation/interface/L1TrackFinderCandidateMatcher.h"
 
-L1TrackFinderCandMatcher::L1TrackFinderCandMatcher()
+L1TrackFinderCandidateMatcher::L1TrackFinderCandidateMatcher()
 {}
-L1TrackFinderCandMatcher::~L1TrackFinderCandMatcher()
+L1TrackFinderCandidateMatcher::~L1TrackFinderCandidateMatcher()
 {}
 

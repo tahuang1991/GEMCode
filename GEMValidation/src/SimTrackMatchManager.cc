@@ -20,7 +20,7 @@ SimTrackMatchManager::SimTrackMatchManager(const SimTrack& t, const SimVertex& v
   //, l1_tracks_(csc_stubs_, dt_digis_, rpc_digis_)
 , l1_tf_tracks_()
 , l1_tf_cands_()
-, l1_gmt_cands_()
+, l1_gmt_cands_(simhits_)
 , hlt_tracks_(csc_rechits_, dt_rechits_, rpc_rechits_, gem_rechits_)
 {
   //  std::cout <<"Constructing new SimTrackMatchManager" << std::endl;

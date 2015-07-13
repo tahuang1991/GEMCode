@@ -1832,7 +1832,7 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
   const RPCDigiMatcher& match_rd = match.rpcDigis();
   const CSCDigiMatcher& match_cd = match.cscDigis();
   const CSCStubMatcher& match_lct = match.cscStubs();
-  const L1TrackMatcher& match_track = match.l1Tracks();
+  //  const L1TrackMatcher& match_track = match.l1Tracks();
   const SimTrack &t = match_sh.trk();
 
   
@@ -2016,15 +2016,15 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
   }
 
 
-  std::cout << "######  matching Tracks to Simtrack " << std::endl;
-  if (match_track.tfTracks().size()) {
-    TFTrack* besttrack = match_track.bestTFTrack();
-    std::cout << "       Best TFTrack                  " << std::endl;
-    besttrack->print();
+  // std::cout << "######  matching Tracks to Simtrack " << std::endl;
+  // if (match_track.tfTracks().size()) {
+  //   TFTrack* besttrack = match_track.bestTFTrack();
+  //   std::cout << "       Best TFTrack                  " << std::endl;
+  //   besttrack->print();
 
 
-  }
-  else std::cout << "NO matched TFtracks"  << std::endl;
+  // }
+  // else std::cout << "NO matched TFtracks"  << std::endl;
 
 
   std::cout << "==========================  end of printing ========================\n\n" << std::endl;
