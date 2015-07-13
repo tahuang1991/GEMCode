@@ -19,10 +19,6 @@
 
 #include "Geometry/Records/interface/MuonGeometryRecord.h"
 #include "Geometry/GEMGeometry/interface/GEMEtaPartitionSpecs.h"
-#include "Geometry/GEMGeometry/interface/GEMGeometry.h"
-#include "Geometry/GEMGeometry/interface/ME0Geometry.h"
-#include "Geometry/RPCGeometry/interface/RPCGeometry.h"
-#include "Geometry/CSCGeometry/interface/CSCGeometry.h"
 #include "Geometry/CommonTopologies/interface/StripTopology.h"
 
 #include "DataFormats/Math/interface/deltaPhi.h"

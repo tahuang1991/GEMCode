@@ -69,6 +69,13 @@ class L1GlobalMuonTriggerMatcher : public BaseMatcher
 
   const SimHitMatcher* simhit_matcher_;
 
+  L1MuGMTExtendedCandCollection matchedL1GmtCands_;
+  L1MuGMTExtendedCandCollection matchedL1GmtfCands_;
+  L1MuRegionalCandCollection    matchedL1GmtCSCCands_;
+  L1MuRegionalCandCollection    matchedL1GmtRPCfCands_;
+  L1MuRegionalCandCollection    matchedL1GmtRPCbCands_;
+  L1MuRegionalCandCollection    matchedL1GmtDTCands_;
+  l1extra::L1MuonParticleCollection matchedL1MuonParticles_;
 };
 
 #endif

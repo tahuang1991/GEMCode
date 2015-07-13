@@ -11,8 +11,7 @@ SimTrackMatching = cms.PSet(
 							 "MB11p", "MB12p", "MB13p", "MB14p",
 							 "MB21p", "MB22p", "MB23p", "MB24p",
 							 "MB11n", "MB12n", "MB13n", "MB14n",
-							 "MB21n", "MB22n", "MB23n", "MB24n")
-
+							 "MB21n", "MB22n", "MB23n", "MB24n"),
     cscStations = cms.vstring("ALL", "ME11", "ME1a", "ME1b", "ME12", "ME13",
                               "ME21", "ME22", "ME31", "ME32", "ME41", "ME42"),
     gemStations = cms.vstring("ALL", "GE11", "GE21"),
@@ -25,7 +24,6 @@ SimTrackMatching = cms.PSet(
 							  "MB21p", "MB22p", "MB23p", "MB24p",
 							  "MB11n", "MB12n", "MB13n", "MB14n",
 							  "MB21n", "MB22n", "MB23n", "MB24n"),
-	
     ntupleTrackChamberDelta = cms.bool(True),
     ntupleTrackEff = cms.bool(True),
     overrideminNHitsChamber = cms.bool(False),
@@ -241,7 +239,7 @@ SimTrackMatching = cms.PSet(
     ),
     dtDigi = cms.PSet(
         verbose = cms.int32(0),
-        validInputTags = cms.VInputTag(cms.InputTag("simMuonDTDigis")
+        validInputTags = cms.VInputTag(cms.InputTag("simMuonDTDigis"),
 									   cms.InputTag("hltMuonDTDigis")),
         run = cms.bool(False),
         ## not sure which BX is the central one
@@ -252,7 +250,7 @@ SimTrackMatching = cms.PSet(
     ),
     dtLocalTrigger = cms.PSet(
         verbose = cms.int32(1),
-        validInputTags = cms.VInputTag(cms.InputTag("simDtTriggerPrimitiveDigis")
+        validInputTags = cms.VInputTag(cms.InputTag("simDtTriggerPrimitiveDigis"),
 									   cms.InputTag("hltMuonDTDigis")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
