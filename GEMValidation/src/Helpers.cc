@@ -155,7 +155,7 @@ int
 gemvalidation::toCSCType(int st, int ri)
 {
   if (st==1) {
-    if (ri==-99) return CSC_ME11;
+    if (ri==0) return CSC_ME11;
     if (ri==1) return CSC_ME1b;
     if (ri==2) return CSC_ME12;
     if (ri==3) return CSC_ME13;
