@@ -3,7 +3,9 @@
 
 #include "GEMCode/GEMValidation/interface/BaseMatcher.h"
 
-class L1CSCTrackCollection;
+#include "DataFormats/L1GlobalMuonTrigger/interface/L1MuRegionalCand.h"
+
+typedef std::vector<L1MuRegionalCand> L1MuRegionalCandCollection;
 
 class L1TrackFinderCandidateMatcher //: public BaseMatcher
 {
@@ -18,8 +20,8 @@ class L1TrackFinderCandidateMatcher //: public BaseMatcher
   void clear();
   void init(); 
   
-  void matchCSCTfCandToSimTrack(const L1CSCTrackCollection&); 
-  void matchDTTfCandToSimTrack(const L1CSCTrackCollection&); 
+  void matchCSCTfCandToSimTrack(const L1MuRegionalCandCollection&); 
+  void matchDTTfCandToSimTrack(const L1MuRegionalCandCollection&); 
 
   std::vector<edm::InputTag> cscTfCandInputLabel_; 
   std::vector<edm::InputTag> dtTfCandInputLabel_; 

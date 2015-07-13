@@ -3,7 +3,8 @@
 
 #include "GEMCode/GEMValidation/interface/BaseMatcher.h"
 
-class L1CSCTrackCollection;
+#include "DataFormats/L1DTTrackFinder/interface/L1MuDTChambPhContainer.h"
+#include "DataFormats/L1CSCTrackFinder/interface/L1CSCTrackCollection.h"
 
 class L1TrackFinderTrackMatcher// : public BaseMatcher
 {
