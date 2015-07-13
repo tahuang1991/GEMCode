@@ -60,6 +60,7 @@ L1GlobalMuonTriggerMatcher::clear()
 void 
 L1GlobalMuonTriggerMatcher::init()
 {
+  /*
   edm::Handle<L1MuRegionalCandCollection> hGmtRegCandCSC;
   if (gemvalidation::getByLabel(gmtRegCandCSCInputLabel_, hGmtRegCandCSC, event())) if (runGmtRegCandCSC_) matchRegionalCandCSCToSimTrack(*hGmtRegCandCSC.product());
 
@@ -77,6 +78,7 @@ L1GlobalMuonTriggerMatcher::init()
 
   edm::Handle<l1extra::L1MuonParticleCollection> hL1ExtraMuonParticle;
   if (gemvalidation::getByLabel(l1ExtraMuonInputLabel_, hL1ExtraMuonParticle, event())) if (runL1ExtraMuon_) matchL1ExtraMuonParticleToSimTrack(*hL1ExtraMuonParticle.product());
+  */
 }
 
 void L1GlobalMuonTriggerMatcher::matchRegionalCandCSCToSimTrack(const L1MuRegionalCandCollection&)
