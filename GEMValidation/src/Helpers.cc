@@ -19,6 +19,9 @@ gemvalidation::chamber(const DetId& id)
   case MuonSubdetId::ME0:
     chamberN = ME0DetId(id).chamber();
     break;
+  case MuonSubdetId::DT:
+    chamberN = DTChamberId(id).sector();
+    break;
   };
   return chamberN;
 }
@@ -41,48 +44,39 @@ gemvalidation::gemDetsFromCSCDet(unsigned int id)
 
 // return MuonType for a particular DetId
 int 
-gemvalidation::toGEMType(GEMDetId id)
+gemvalidation::toGEMType(int st, int ri)
 {
-  const int re(id.region());
-  const int st(id.station());
-  const int ri(id.ring());
-  // endcap
-  if (abs(re)==1) {
-    if (st ==1) {
-      if (ri==1) return GEM_ME11;
-    }
-    else if (st ==2) {
-      if (ri==1) return GEM_ME21;
-    }
+  if (st ==1) {
+    if (ri==1) return GEM_ME11;
+  }
+  else if (st ==2) {
+    if (ri==1) return GEM_ME21;
   }
   return GEM_ALL;
 }
 
 int 
-gemvalidation::toRPCType(RPCDetId id)
+gemvalidation::toRPCType(int re, int st, int ri)
 {
-  const int re(id.region());
-  const int st(id.station());
-  const int ri(id.ring());
   // endcap
   if (abs(re)==1) {
-    if (ri ==1) {
-      if (st==2) return RPC_ME12;
-      if (st==3) return RPC_ME13;
+    if (st ==1) {
+      if (ri==2) return RPC_ME12;
+      if (ri==3) return RPC_ME13;
     }
-    else if (ri ==2) {
-      if (st==2) return RPC_ME22;
-      if (st==3) return RPC_ME23;
+    else if (st ==2) {
+      if (ri==2) return RPC_ME22;
+      if (ri==3) return RPC_ME23;
     }
-    else if (ri ==3) {
-      if (st==1) return RPC_ME31;
-      if (st==2) return RPC_ME32;
-      if (st==3) return RPC_ME33;
+    else if (st ==3) {
+      if (ri==1) return RPC_ME31;
+      if (ri==2) return RPC_ME32;
+      if (ri==3) return RPC_ME33;
     }
-    else if (ri ==4) {
-      if (st==1) return RPC_ME41;
-      if (st==2) return RPC_ME42;
-      if (st==3) return RPC_ME43;
+    else if (st ==4) {
+      if (ri==1) return RPC_ME41;
+      if (ri==2) return RPC_ME42;
+      if (ri==3) return RPC_ME43;
     }
   }
   // Barrel
@@ -122,10 +116,8 @@ gemvalidation::toRPCType(RPCDetId id)
 }
 
 int 
-gemvalidation::toDTType(DTChamberId id)
+gemvalidation::toDTType(int wh, int st)
 {
-  const int wh(id.wheel());
-  const int st(id.station());
   if (wh==-2) {
     if (st==1) return DT_MB21n;
     if (st==2) return DT_MB22n;
@@ -160,17 +152,10 @@ gemvalidation::toDTType(DTChamberId id)
 }
 
 int 
-gemvalidation::toDTType(DTWireId id)
+gemvalidation::toCSCType(int st, int ri)
 {
-  return toDTType(DTChamberId(id.rawId()));
-}
-
-int 
-gemvalidation::toCSCType(CSCDetId id)
-{
-  const int st(id.station());
-  const int ri(id.ring());
   if (st==1) {
+    if (ri==-99) return CSC_ME11;
     if (ri==1) return CSC_ME1b;
     if (ri==2) return CSC_ME12;
     if (ri==3) return CSC_ME13;

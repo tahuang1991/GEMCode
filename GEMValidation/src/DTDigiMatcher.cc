@@ -75,7 +75,7 @@ DTDigiMatcher::selectDetIds(const std::map<unsigned int, DTDigiContainer>& digis
     if (dt_type > 0)
     {
       DTWireId detId(id);
-      if (gemvalidation::toDTType(detId) != dt_type) continue;
+      if (gemvalidation::toDTType(detId.wheel(), detId.station()) != dt_type) continue;
     }
     result.insert(p.first);
   }

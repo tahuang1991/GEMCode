@@ -74,7 +74,7 @@ RPCDigiMatcher::selectDetIds(const Id2DigiContainer &digis, int rpc_type) const
     if (rpc_type > 0)
     {
       RPCDetId detId(id);
-      if (gemvalidation::toRPCType(detId) != rpc_type) continue;
+      if (gemvalidation::toRPCType(detId.region(), detId.station(), detId.ring()) != rpc_type) continue;
     }
     result.insert(p.first);
   }

@@ -122,11 +122,10 @@ std::pair<unsigned int, unsigned int>
 gemDetsFromCSCDet(unsigned int id);
 
 // return MuonType for a particular DetId
-int toGEMType(GEMDetId id);
-int toRPCType(RPCDetId id);
-int toDTType(DTChamberId id);
-int toDTType(DTWireId id);
-int toCSCType(CSCDetId id);
+int toGEMType(int st, int ri);
+int toRPCType(int re, int st, int ri);
+int toDTType(int wh, int st);
+int toCSCType(int st, int ri);
 
 template<typename PROD>
 bool

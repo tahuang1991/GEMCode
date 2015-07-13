@@ -108,9 +108,9 @@ L1TrackMatcher::clear()
 {
   tfTracks_.clear();
   tfCands_.clear();
-  gmtRegCands_.clear();
-  gmtCands_.clear();
-  l1Extras_.clear();
+  // gmtRegCands_.clear();
+  // gmtCands_.clear();
+  // l1Extras_.clear();
 }
 
 void 
@@ -168,9 +168,9 @@ L1TrackMatcher::init()
   edm::Handle<L1MuRegionalCandCollection> hl1TfCands;
   if (gemvalidation::getByLabel(cscTfCandInputLabel_, hl1TfCands, event())) matchTfCandToSimTrack(*hl1TfCands.product());
   
-  // L1 muon candidates
-  edm::Handle<l1extra::L1MuonParticleCollection> l1Particles;
-  if (gemvalidation::getByLabel(l1ExtraInputLabel_, l1Particles, event())) matchL1MuonParticleToSimTrack(*l1Particles.product());
+  // // L1 muon candidates
+  // edm::Handle<l1extra::L1MuonParticleCollection> l1Particles;
+  // if (gemvalidation::getByLabel(l1ExtraInputLabel_, l1Particles, event())) matchL1MuonParticleToSimTrack(*l1Particles.product());
 }
 
 
@@ -331,30 +331,30 @@ L1TrackMatcher::matchTfCandToSimTrack(const L1MuRegionalCandCollection& tracks)
 }
 
 
-void 
-L1TrackMatcher::matchGmtRegCandToSimTrack(const L1MuRegionalCandCollection& tracks)
-{
-}
+// void 
+// L1TrackMatcher::matchGmtRegCandToSimTrack(const L1MuRegionalCandCollection& tracks)
+// {
+// }
 
 
-void 
-L1TrackMatcher::matchGmtCandToSimTrack(const L1MuGMTExtendedCandCollection& tracks)
-{
-}
+// void 
+// L1TrackMatcher::matchGmtCandToSimTrack(const L1MuGMTExtendedCandCollection& tracks)
+// {
+// }
 
 
-void 
-L1TrackMatcher::matchL1MuonParticleToSimTrack(const l1extra::L1MuonParticleCollection& muons)
-{
-  // implement this function Jose!
+// void 
+// L1TrackMatcher::matchL1MuonParticleToSimTrack(const l1extra::L1MuonParticleCollection& muons)
+// {
+//   // implement this function Jose!
 
-  for(auto& muon: muons) {
-    std::cout<<" L1 Muon Particle pT: "<<muon.pt()
-             <<", eta: "<<muon.eta()
-             <<", charge: "<<muon.charge()
-             <<", phi: "<<muon.phi()<<std::endl;  
-  }
-}
+//   for(auto& muon: muons) {
+//     std::cout<<" L1 Muon Particle pT: "<<muon.pt()
+//              <<", eta: "<<muon.eta()
+//              <<", charge: "<<muon.charge()
+//              <<", phi: "<<muon.phi()<<std::endl;  
+//   }
+// }
 
 
 TFTrack* 
@@ -475,53 +475,53 @@ OB    if (maxI==99) return NULL;
 }
 
 
-GMTRegCand* 
-L1TrackMatcher::bestGMTRegCand(bool sortPtFirst) const
-{
-  // first sort by Pt inside the cone (if sortPtFirst), then sort by DR
-  if (gmtRegCands_.size()==0) return nullptr;
-  const double ptBase(sortPtFirst ? 1000. : 0.);
-  unsigned maxI = 99;
-  double maxRank = -999999.;
-  for (unsigned i=0; i<gmtRegCands_.size(); i++) {
-    // quality criterium to sort the GMT Regional candidates
-    const double rank(ptBase*gmtRegCands_.at(i)->pt() + 1./(0.01 + gmtRegCands_.at(i)->dr()));
-    if (rank > maxRank) { 
-      maxRank = rank; 
-      maxI = i;
-    }
-  }
-  if (maxI==99) return nullptr;
-  return gmtRegCands_.at(maxI);
-}
+// GMTRegCand* 
+// L1TrackMatcher::bestGMTRegCand(bool sortPtFirst) const
+// {
+//   // first sort by Pt inside the cone (if sortPtFirst), then sort by DR
+//   if (gmtRegCands_.size()==0) return nullptr;
+//   const double ptBase(sortPtFirst ? 1000. : 0.);
+//   unsigned maxI = 99;
+//   double maxRank = -999999.;
+//   for (unsigned i=0; i<gmtRegCands_.size(); i++) {
+//     // quality criterium to sort the GMT Regional candidates
+//     const double rank(ptBase*gmtRegCands_.at(i)->pt() + 1./(0.01 + gmtRegCands_.at(i)->dr()));
+//     if (rank > maxRank) { 
+//       maxRank = rank; 
+//       maxI = i;
+//     }
+//   }
+//   if (maxI==99) return nullptr;
+//   return gmtRegCands_.at(maxI);
+// }
 
 
-GMTCand* 
-L1TrackMatcher::bestGMTCand(bool sortPtFirst) const
-{
-  // first sort by Pt inside the cone (if sortPtFirst), then sort by DR
-  if (gmtCands_.size()==0) return nullptr;
-  const double ptBase(sortPtFirst ? 1000. : 0.);
-  unsigned maxI = 99;
-  double maxRank = -999999.;
-  for (unsigned i=0; i<gmtCands_.size(); i++) {
-    // quality criterium to sort the GMT candidates
-    const double rank(ptBase*gmtCands_.at(i)->pt() + 1./(0.01 + gmtCands_.at(i)->dr()));
-    if (rank > maxRank) { 
-      maxRank = rank; 
-      maxI = i;
-    }
-  }
-  if (maxI==99) return nullptr;
-  return gmtCands_.at(maxI);
-}
+// GMTCand* 
+// L1TrackMatcher::bestGMTCand(bool sortPtFirst) const
+// {
+//   // first sort by Pt inside the cone (if sortPtFirst), then sort by DR
+//   if (gmtCands_.size()==0) return nullptr;
+//   const double ptBase(sortPtFirst ? 1000. : 0.);
+//   unsigned maxI = 99;
+//   double maxRank = -999999.;
+//   for (unsigned i=0; i<gmtCands_.size(); i++) {
+//     // quality criterium to sort the GMT candidates
+//     const double rank(ptBase*gmtCands_.at(i)->pt() + 1./(0.01 + gmtCands_.at(i)->dr()));
+//     if (rank > maxRank) { 
+//       maxRank = rank; 
+//       maxI = i;
+//     }
+//   }
+//   if (maxI==99) return nullptr;
+//   return gmtCands_.at(maxI);
+// }
 
 
-L1Extra* 
-L1TrackMatcher::bestL1Extra(bool sortPtFirst) const
-{
-  return 0;
-}
+// L1Extra* 
+// L1TrackMatcher::bestL1Extra(bool sortPtFirst) const
+// {
+//   return 0;
+// }
 
 
 csctf::TrackStub 

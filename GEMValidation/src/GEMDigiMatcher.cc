@@ -176,7 +176,7 @@ GEMDigiMatcher::selectDetIds(const Id2DigiContainer &digis, int gem_type) const
     if (gem_type > 0)
     {
       GEMDetId detId(id);
-      if (gemvalidation::toGEMType(detId) != gem_type) continue;
+      if (gemvalidation::toGEMType(detId.station(),detId.ring()) != gem_type) continue;
     }
     result.insert(p.first);
   }

@@ -15,9 +15,9 @@
 
 #include "GEMCode/GEMValidation/interface/TFTrack.h" 
 #include "GEMCode/GEMValidation/interface/TFCand.h" 
-#include "GEMCode/GEMValidation/interface/GMTRegCand.h" 
-#include "GEMCode/GEMValidation/interface/GMTCand.h" 
-#include "GEMCode/GEMValidation/interface/L1Extra.h" 
+/* #include "GEMCode/GEMValidation/interface/GMTRegCand.h"  */
+/* #include "GEMCode/GEMValidation/interface/GMTCand.h"  */
+/* #include "GEMCode/GEMValidation/interface/L1Extra.h"  */
 
 #include "L1Trigger/CSCCommonTrigger/interface/CSCConstants.h"
 #include "L1Trigger/CSCCommonTrigger/interface/CSCTriggerGeometry.h"
@@ -51,9 +51,9 @@ class L1TrackMatcher : public BaseMatcher
   
   const std::vector<TFTrack*> tfTracks() const {return tfTracks_;}
   const std::vector<TFCand*>& tfCands() const {return tfCands_;}
-  const std::vector<GMTRegCand*>& gmtRegCands() const {return gmtRegCands_;}
-  const std::vector<GMTCand*>& gmtCands() const {return gmtCands_;}
-  const std::vector<L1Extra*>& l1Extras() const {return l1Extras_;}
+  /* const std::vector<GMTRegCand*>& gmtRegCands() const {return gmtRegCands_;} */
+  /* const std::vector<GMTCand*>& gmtCands() const {return gmtCands_;} */
+  /* const std::vector<L1Extra*>& l1Extras() const {return l1Extras_;} */
   
   const std::vector< EtaPhi > simTrackPropagateGPs_odd() const {return simTrackPropagateGPs_odd_;} 
   const std::vector< EtaPhi > simTrackPropagateGPs_even() const {return simTrackPropagateGPs_even_;} 
@@ -65,9 +65,9 @@ class L1TrackMatcher : public BaseMatcher
   
   TFTrack* bestTFTrack(bool sortPtFirst=1) const;
   TFCand* bestTFCand(bool sortPtFirst=1) const;
-  GMTRegCand* bestGMTRegCand(bool sortPtFirst=1) const;
-  GMTCand* bestGMTCand(bool sortPtFirst=1) const;
-  L1Extra* bestL1Extra(bool sortPtFirst=1) const;
+  /* GMTRegCand* bestGMTRegCand(bool sortPtFirst=1) const; */
+  /* GMTCand* bestGMTCand(bool sortPtFirst=1) const; */
+  /* L1Extra* bestL1Extra(bool sortPtFirst=1) const; */
 
  private:
   
@@ -76,9 +76,9 @@ class L1TrackMatcher : public BaseMatcher
   
   void matchTfTrackToSimTrack(const L1CSCTrackCollection&); 
   void matchTfCandToSimTrack(const L1MuRegionalCandCollection&); 
-  void matchGmtRegCandToSimTrack(const L1MuRegionalCandCollection&); 
-  void matchGmtCandToSimTrack(const L1MuGMTExtendedCandCollection&); 
-  void matchL1MuonParticleToSimTrack(const l1extra::L1MuonParticleCollection&); 
+  /* void matchGmtRegCandToSimTrack(const L1MuRegionalCandCollection&);  */
+  /* void matchGmtCandToSimTrack(const L1MuGMTExtendedCandCollection&);  */
+  /* void matchL1MuonParticleToSimTrack(const l1extra::L1MuonParticleCollection&);  */
 
    csctf::TrackStub buildTrackStub(const CSCCorrelatedLCTDigi& d, CSCDetId id); 
    std::pair<float, float> intersectionEtaPhi(CSCDetId id, int wg, int hs); 
@@ -119,9 +119,9 @@ class L1TrackMatcher : public BaseMatcher
 
    std::vector<TFTrack*> tfTracks_;
    std::vector<TFCand*> tfCands_;
-   std::vector<GMTRegCand*> gmtRegCands_;
-   std::vector<GMTCand*> gmtCands_;
-   std::vector<L1Extra*> l1Extras_;
+   /* std::vector<GMTRegCand*> gmtRegCands_; */
+   /* std::vector<GMTCand*> gmtCands_; */
+   /* std::vector<L1Extra*> l1Extras_; */
    
    edm::ParameterSet ptLUTset_; 
    edm::ParameterSet CSCTFSPset_; 
