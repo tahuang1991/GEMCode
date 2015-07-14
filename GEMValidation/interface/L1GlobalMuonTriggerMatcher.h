@@ -3,6 +3,7 @@
 
 #include "GEMCode/GEMValidation/interface/SimHitMatcher.h"
 
+#include "DataFormats/L1GlobalMuonTrigger/interface/L1MuGMTCand.h"
 #include "DataFormats/L1GlobalMuonTrigger/interface/L1MuGMTExtendedCand.h"
 #include "DataFormats/L1GlobalMuonTrigger/interface/L1MuRegionalCand.h"
 #include "DataFormats/L1Trigger/interface/L1MuonParticle.h"
@@ -10,6 +11,7 @@
 
 typedef std::vector<L1MuRegionalCand> L1MuRegionalCandCollection;
 typedef std::vector<L1MuGMTExtendedCand> L1MuGMTExtendedCandCollection;
+typedef std::vector<L1MuGMTCand> L1MuGMTCandCollection;
 
 class L1GlobalMuonTriggerMatcher : public BaseMatcher
 {
@@ -19,6 +21,9 @@ class L1GlobalMuonTriggerMatcher : public BaseMatcher
   /// destructor
   ~L1GlobalMuonTriggerMatcher();
   
+  bool gmtCandInContainer(const L1MuGMTCand&, const L1MuGMTCandCollection&) const;
+  bool isGmtCandMatched(const L1MuGMTCand&) const;
+
  private:
   
   void clear();
@@ -28,7 +33,7 @@ class L1GlobalMuonTriggerMatcher : public BaseMatcher
   void matchRegionalCandDTToSimTrack(const L1MuRegionalCandCollection&); 
   void matchRegionalCandRPCbToSimTrack(const L1MuRegionalCandCollection&); 
   void matchRegionalCandRPCfToSimTrack(const L1MuRegionalCandCollection&); 
-  void matchGMTCandToSimTrack(const L1MuGMTExtendedCandCollection&); 
+  void matchGMTCandToSimTrack(const L1MuGMTCandCollection&); 
   void matchL1ExtraMuonParticleToSimTrack(const l1extra::L1MuonParticleCollection&); 
 
   std::vector<edm::InputTag> gmtRegCandCSCInputLabel_;
@@ -66,14 +71,20 @@ class L1GlobalMuonTriggerMatcher : public BaseMatcher
   int maxBXGmtCand_;
   int maxBXL1ExtraMuon_;
 
+  float deltaRGmtRegCandCSC_;
+  float deltaRGmtRegCandDT_;
+  float deltaRGmtRegCandRPCf_;
+  float deltaRGmtRegCandRPCb_;
+  float deltaRGmtCand_;
+  float deltaRL1ExtraMuon_;
+
   const SimHitMatcher* simhit_matcher_;
 
-  L1MuGMTExtendedCandCollection matchedL1GmtCands_;
-  L1MuGMTExtendedCandCollection matchedL1GmtfCands_;
   L1MuRegionalCandCollection    matchedL1GmtCSCCands_;
   L1MuRegionalCandCollection    matchedL1GmtRPCfCands_;
   L1MuRegionalCandCollection    matchedL1GmtRPCbCands_;
   L1MuRegionalCandCollection    matchedL1GmtDTCands_;
+  L1MuGMTCandCollection matchedL1GmtCands_;
   l1extra::L1MuonParticleCollection matchedL1MuonParticles_;
 };
 

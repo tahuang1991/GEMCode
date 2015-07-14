@@ -42,6 +42,8 @@ class L1TrackFinderTrackMatcher : public BaseMatcher
   int maxBXCscTfTrack_;
   int maxBXDtTfTrack_;
   int maxBXRpcTfTrack_;
+
+  L1CSCTrackCollection matchedTfTracks_;
 };
 
 #endif
