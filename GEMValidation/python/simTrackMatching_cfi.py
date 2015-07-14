@@ -361,7 +361,7 @@ SimTrackMatching = cms.PSet(
 #    ),
     ## GMT and L1Extra
     gmtRegCandCSC = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag("simGmtDigis"),
 									   cms.InputTag("hltGtDigis", "CSC")),
         run = cms.bool(True),
@@ -370,7 +370,7 @@ SimTrackMatching = cms.PSet(
         deltaR = cms.double(0.05),
     ),
     gmtRegCandDT = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag("simGmtDigis"),
 									   cms.InputTag("hltGtDigis", "DT")),
         run = cms.bool(True),
@@ -379,7 +379,7 @@ SimTrackMatching = cms.PSet(
         deltaR = cms.double(0.05),
     ),
     gmtRegCandRPCb = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag("simGmtDigis"),
 									   cms.InputTag("hltGtDigis", "RPCb")),
         run = cms.bool(True),
@@ -388,7 +388,7 @@ SimTrackMatching = cms.PSet(
         deltaR = cms.double(0.05),
     ),
     gmtRegCandRPCf = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag("simGmtDigis"),
 									   cms.InputTag("hltGtDigis", "RPCf")),
         run = cms.bool(True),
@@ -397,7 +397,7 @@ SimTrackMatching = cms.PSet(
         deltaR = cms.double(0.05),
     ),
     gmtCand = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag("simGmtDigis"),
 									   cms.InputTag("hltGtDigis")),
         run = cms.bool(True),
@@ -406,7 +406,7 @@ SimTrackMatching = cms.PSet(
         deltaR = cms.double(0.05),
     ),
     l1ExtraMuonParticle = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag("hltL1extraParticles")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
