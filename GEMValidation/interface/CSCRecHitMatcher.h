@@ -60,6 +60,8 @@ public:
   int nCSCRecHit2DsInChamber(unsigned int) const;
   int nCSCSegmentsInChamber(unsigned int) const;
 
+  CSCSegment bestCSCSegment(unsigned int);
+
 private:
 
   const SimHitMatcher* simhit_matcher_;

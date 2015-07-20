@@ -114,9 +114,10 @@ CSCRecHitMatcher::matchCSCSegmentsToSimTrack(const CSCSegmentCollection& cscSegm
        	  ++rechitsFound;
       }
       if (rechitsFound==0) continue;
-      if (verboseCSCSegment_) cout << "Found " << rechitsFound << " rechits out of " << cscRecHit2DsInChamber(id).size() << endl;
-      if (verboseCSCSegment_) cout << "\t...was matched!" << endl;
-      
+      if (verboseCSCSegment_) {
+	cout << "Found " << rechitsFound << " rechits out of " << cscRecHit2DsInChamber(id).size() << endl;
+	cout << "\t...was matched!" << endl;
+      }
       chamber_to_cscSegment_[ p_id.rawId() ].push_back(*d);
     }
   }
@@ -285,4 +286,23 @@ CSCRecHitMatcher::areCSCSegmentsSame(const CSCSegment& l,const CSCSegment& r) co
 }
 
 
+CSCSegment 
+CSCRecHitMatcher::bestCSCSegment(unsigned int id)
+{
+  CSCSegment emptySegment;
+  double chi2overNdf = 99;
+  int index=0;
+  int foundIndex=-99;
+  
+  for (auto& seg: chamber_to_cscSegment_[id]){
+    double newChi2overNdf(seg.chi2()/seg.degreesOfFreedom());
+    if (newChi2overNdf < chi2overNdf) {
+      chi2overNdf = newChi2overNdf;
+      foundIndex = index;
+    }
+    ++index;
+  }
+  if (foundIndex != -99) return chamber_to_cscSegment_[id][foundIndex];
+  return emptySegment;
+}
 
