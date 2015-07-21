@@ -127,6 +127,11 @@ int toRPCType(int re, int st, int ri);
 int toDTType(int wh, int st);
 int toCSCType(int st, int ri);
 
+std::string toGEMTypeString(int st, int ri);
+std::string toRPCTypeString(int re, int st, int ri);
+std::string toDTTypeString(int wh, int st);
+std::string toCSCTypeString(int st, int ri);
+
 template<typename PROD>
 bool
 getByLabel(std::vector<edm::InputTag> const& tags, edm::Handle<PROD>& result, const edm::Event& iEvent)

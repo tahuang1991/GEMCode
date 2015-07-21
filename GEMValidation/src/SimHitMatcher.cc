@@ -82,7 +82,7 @@ SimHitMatcher::init()
       edm::PSimHitContainer csc_hits_select;
       for (auto& h: *csc_hits.product()) {
         CSCDetId id(h.detUnitId());
-        if (useCSCChamberType(id.iChamberType()))  csc_hits_select.push_back(h);
+        if (useCSCChamberType(gemvalidation::toCSCType(id.station(), id.ring())))  csc_hits_select.push_back(h);
       }
       
       if(runCSCSimHit_) {
