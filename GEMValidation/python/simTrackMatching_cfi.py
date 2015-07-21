@@ -217,7 +217,7 @@ SimTrackMatching = cms.PSet(
         addGhosts = cms.bool(True),
     ),
     cscRecHit = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag("csc2DRecHits"),
                                        cms.InputTag("hltCsc2DRecHits")),
         run = cms.bool(True),
@@ -225,7 +225,7 @@ SimTrackMatching = cms.PSet(
         maxBX = cms.int32(1),
     ),
     cscSegment = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag("cscSegments"),
                                        cms.InputTag("hltCscSegments")),
         run = cms.bool(True),

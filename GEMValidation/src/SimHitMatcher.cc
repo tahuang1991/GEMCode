@@ -108,6 +108,14 @@ SimHitMatcher::init()
   if (hasGEMGeometry_) {
     edm::Handle<edm::PSimHitContainer> gem_hits;
     if (gemvalidation::getByLabel(gemSimHitInput_, gem_hits, event())) {      
+
+      // select GEM simhits
+      edm::PSimHitContainer gem_hits_select;
+      for (auto& h: *gem_hits.product()) {
+        GEMDetId id(h.detUnitId());
+        if (useGEMChamberType(gemvalidation::toGEMType(id.station(), id.ring())))  gem_hits_select.push_back(h);
+      }
+
       if(runGEMSimHit_) {
         matchGEMSimHitsToSimTrack(track_ids, *gem_hits.product());
         
@@ -138,6 +146,7 @@ SimHitMatcher::init()
   if (hasME0Geometry_) {
     edm::Handle<edm::PSimHitContainer> me0_hits;
     if (gemvalidation::getByLabel(me0SimHitInput_, me0_hits, event())) {
+
       if (runME0SimHit_) {
         matchME0SimHitsToSimTrack(track_ids, *me0_hits.product());
 	
@@ -162,6 +171,14 @@ SimHitMatcher::init()
   if (hasRPCGeometry_) {
     edm::Handle<edm::PSimHitContainer> rpc_hits;
     if (gemvalidation::getByLabel(rpcSimHitInput_, rpc_hits, event())) {
+
+      // select RPC simhits
+      edm::PSimHitContainer rpc_hits_select;
+      for (auto& h: *rpc_hits.product()) {
+        RPCDetId id(h.detUnitId());
+        if (useRPCChamberType(gemvalidation::toRPCType(id.region(), id.station(), id.ring())))  rpc_hits_select.push_back(h);
+      }
+
       if (runRPCSimHit_) {
         matchRPCSimHitsToSimTrack(track_ids, *rpc_hits.product());
 	
@@ -186,6 +203,14 @@ SimHitMatcher::init()
   if (hasDTGeometry_) {
     edm::Handle<edm::PSimHitContainer> dt_hits;
     if (gemvalidation::getByLabel(dtSimHitInput_, dt_hits, event())) {
+
+      // select DT simhits
+      edm::PSimHitContainer dt_hits_select;
+      for (auto& h: *dt_hits.product()) {
+        DTWireId id(h.detUnitId());
+        if (useDTChamberType(gemvalidation::toDTType(id.wheel(), id.station())))  dt_hits_select.push_back(h);
+      }
+
       if (runDTSimHit_) {
         matchDTSimHitsToSimTrack(track_ids, *dt_hits.product());    
         
