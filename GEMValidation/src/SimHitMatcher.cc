@@ -82,7 +82,7 @@ SimHitMatcher::init()
       edm::PSimHitContainer csc_hits_select;
       for (auto& h: *csc_hits.product()) {
         CSCDetId id(h.detUnitId());
-        if (useCSCChamberType(gemvalidation::toCSCType(id.station(), id.ring())))  csc_hits_select.push_back(h);
+        if (useCSCChamberType(gemvalidation::toCSCType(id.station(), id.ring()))) csc_hits_select.push_back(h);
       }
       
       if(runCSCSimHit_) {
@@ -113,11 +113,11 @@ SimHitMatcher::init()
       edm::PSimHitContainer gem_hits_select;
       for (auto& h: *gem_hits.product()) {
         GEMDetId id(h.detUnitId());
-        if (useGEMChamberType(gemvalidation::toGEMType(id.station(), id.ring())))  gem_hits_select.push_back(h);
+        if (useGEMChamberType(gemvalidation::toGEMType(id.station(), id.ring()))) gem_hits_select.push_back(h);
       }
 
       if(runGEMSimHit_) {
-        matchGEMSimHitsToSimTrack(track_ids, *gem_hits.product());
+        matchGEMSimHitsToSimTrack(track_ids, gem_hits_select);
         
         if (verboseGEM_) {
           cout<<"nSimHits "<<no<<" nTrackIds "<<track_ids.size()<<" nSelectedGEMSimHits "<<(*gem_hits.product()).size()<<endl;
@@ -176,11 +176,11 @@ SimHitMatcher::init()
       edm::PSimHitContainer rpc_hits_select;
       for (auto& h: *rpc_hits.product()) {
         RPCDetId id(h.detUnitId());
-        if (useRPCChamberType(gemvalidation::toRPCType(id.region(), id.station(), id.ring())))  rpc_hits_select.push_back(h);
+        if (useRPCChamberType(gemvalidation::toRPCType(id.region(), id.station(), id.ring()))) rpc_hits_select.push_back(h);
       }
 
       if (runRPCSimHit_) {
-        matchRPCSimHitsToSimTrack(track_ids, *rpc_hits.product());
+        matchRPCSimHitsToSimTrack(track_ids, rpc_hits_select);
 	
         if (verboseRPC_) {
           cout<<"nSimHits "<<no<<" nTrackIds "<<track_ids.size()<<" nSelectedRPCSimHits "<<(*rpc_hits.product()).size()<<endl;
@@ -208,11 +208,11 @@ SimHitMatcher::init()
       edm::PSimHitContainer dt_hits_select;
       for (auto& h: *dt_hits.product()) {
         DTWireId id(h.detUnitId());
-        if (useDTChamberType(gemvalidation::toDTType(id.wheel(), id.station())))  dt_hits_select.push_back(h);
+        if (useDTChamberType(gemvalidation::toDTType(id.wheel(), id.station()))) dt_hits_select.push_back(h);
       }
 
       if (runDTSimHit_) {
-        matchDTSimHitsToSimTrack(track_ids, *dt_hits.product());    
+        matchDTSimHitsToSimTrack(track_ids, dt_hits_select);    
         
         if (verboseDT_) {
           cout<<"nSimHits "<<no<<" nTrackIds "<<track_ids.size()<<" nSelectedDTSimHits "<<(*dt_hits.product()).size()<<endl;
@@ -286,7 +286,6 @@ SimHitMatcher::matchCSCSimHitsToSimTrack(std::vector<unsigned int> track_ids, co
       if (simMuOnlyCSC_ && std::abs(pdgid) != 13) continue;
       // discard electron hits in the CSC chambers
       if (discardEleHitsCSC_ && pdgid == 11) continue;
-
       csc_detid_to_hits_[ h.detUnitId() ].push_back(h);
       csc_hits_.push_back(h);
       CSCDetId layer_id( h.detUnitId() );
@@ -492,7 +491,7 @@ SimHitMatcher::detIdsCSC(int csc_type) const
     if (csc_type > 0)
     {
       CSCDetId detId(id);
-      if (detId.iChamberType() != csc_type) continue;
+      if (gemvalidation::toCSCType(detId.station(), detId.ring()) != csc_type) continue;
     }
     result.insert(id);
   }
@@ -776,6 +775,77 @@ SimHitMatcher::nLayersWithHitsInSuperChamber(unsigned int detid) const
     }
   }
   return layers_with_hits.size();
+}
+
+bool 
+SimHitMatcher::hitStationCSC(int st, int nlayers) const
+{
+  int nst=0;
+  for(auto ddt: chamberIdsCSC()) {
+
+    const CSCDetId id(ddt);
+    int ri(id.ring());
+    if (id.station()!=st) continue;
+        
+    // ME1/a case - check the ME1/b chamber
+    if (st==1 and ri==4) {
+      CSCDetId idME1b(id.endcap(), id.station(), 1, id.chamber(), 0);
+      const int nl1a(nLayersWithHitsInSuperChamber(id.rawId()));
+      const int nl1b(nLayersWithHitsInSuperChamber(idME1b.rawId()));
+      if (nl1a + nl1b < nlayers) continue; 
+      ++nst;      
+    }
+    // ME1/b case - check the ME1/a chamber
+    else if (st==1 and ri==1) {
+      CSCDetId idME1a(id.endcap(), id.station(), 4, id.chamber(), 0);
+      const int nl1a(nLayersWithHitsInSuperChamber(idME1a.rawId()));
+      const int nl1b(nLayersWithHitsInSuperChamber(id.rawId()));
+      if (nl1a + nl1b < nlayers) continue; 
+      ++nst;
+    }
+    // default case
+    else {
+      const int nl(nLayersWithHitsInSuperChamber(id.rawId()));
+      if (nl < nlayers) continue; 
+      ++nst;    
+    }
+  }
+  return nst;
+}
+
+bool 
+SimHitMatcher::hitStationDT(int st, int nsuperlayers, int nlayers) const
+{
+  int nst=0;
+  for(auto ddt: chamberIdsDT()) {
+
+    const DTChamberId id(ddt);
+    if (id.station()!=st) continue;
+    
+    // require at least 1 superlayer
+    const int nsl(nSuperLayersWithHitsInChamberDT(id.rawId()));
+    if (nsl < nsuperlayers) continue; 
+
+    // require at least 3 layers hit per chamber
+    const int nl(nLayersWithHitsInChamberDT(id.rawId()));
+    if (nl < nlayers) continue;    
+    ++nst;
+  }
+  return nst;
+}
+
+int 
+SimHitMatcher::nStationsCSC(int nlayers) const
+{
+  return (hitStationCSC(1, nlayers) + hitStationCSC(2, nlayers) + 
+	  hitStationCSC(3, nlayers) + hitStationCSC(4, nlayers));
+}
+
+int 
+SimHitMatcher::nStationsDT(int nsuperlayers, int nlayers) const
+{
+  return (hitStationDT(1, nsuperlayers, nlayers) + hitStationDT(2, nsuperlayers, nlayers) + 
+	  hitStationDT(3, nsuperlayers, nlayers) + hitStationDT(4,nsuperlayers, nlayers));
 }
 
 int 

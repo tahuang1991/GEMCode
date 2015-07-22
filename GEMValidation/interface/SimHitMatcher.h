@@ -95,6 +95,14 @@ public:
   const edm::PSimHitContainer& hitsInChamber(unsigned int) const;
   const edm::PSimHitContainer& hitsInSuperChamber(unsigned int) const;
 
+  // was there a hit in a particular DT/CSC station?
+  bool hitStationCSC(int, int) const;
+  bool hitStationDT(int, int, int) const;
+
+  // number of stations with hits in at least X layers
+  int nStationsCSC(int nl=4) const;
+  int nStationsDT(int nsl=1, int nl=3) const;
+
   int nCellsWithHitsInLayerDT(unsigned int) const;
   int nLayersWithHitsInSuperLayerDT(unsigned int) const;
   int nSuperLayersWithHitsInChamberDT(unsigned int) const;
