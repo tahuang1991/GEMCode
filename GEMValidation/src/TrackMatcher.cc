@@ -184,7 +184,7 @@ TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
   for (L1CSCTrackCollection::const_iterator trk = tracks.begin(); trk != tracks.end(); trk++) {
      verboseTFTrack_ = 0;
     TFTrack *track = new TFTrack(&trk->first,&trk->second);
-    track->init(ptLUT_, muScalesHd_, muPtScaleHd_);
+    track->init(muScalesHd_, muPtScaleHd_);
     
     float dR = 10.0;
     TLorentzVector templ1muon;
@@ -515,14 +515,17 @@ TrackMatcher::buildTrackStub(const CSCCorrelatedLCTDigi &d, CSCDetId id)
 
   return csctf::TrackStub(d, id, gblPhi.global_phi, gblEta.global_eta);
 }
-
+/*
 bool TrackMatcher::passDPhicut_TFTrack(int st) const 
 {
 
   if (tfTracks().size() == 0)  return true;
 
-  std::cout <<"TFTracks size() " << tfTracks().size() << std::endl;
+  //std::cout <<"TFTracks size() " << tfTracks().size() << std::endl;
   auto GEMdPhi( st==1 ? ME11GEMdPhi : ME21GEMdPhi);
+  //std::cout <<" sizeof(GEMdPhi) "  << sizeof(GEMdPhi[][]) <<" sizeof(GEMdPhi[0])" << sizeof(GEMdPhi[0]) << std::endl;
+  //std::cout <<" sizeof(ME11GEMdPhi) "  << sizeof(ME11GEMdPhi) <<" sizeof(GEMdPhi[0])" << sizeof(ME11GEMdPhi[0]) << std::endl;
+  //std::cout <<" sizeof(ME21GEMdPhi) "  << sizeof(ME21GEMdPhi) <<" sizeof(GEMdPhi[0])" << sizeof(ME21GEMdPhi[0]) << std::endl;
   auto besttrack(bestTFTrack());
   unsigned int lct_n = besttrack->digiInME(st,1);
   if (lct_n == 999 and st==1)
@@ -538,10 +541,11 @@ bool TrackMatcher::passDPhicut_TFTrack(int st) const
   bool pass = false;
   unsigned int LUTsize = (st==1)? sizeof(ME11GEMdPhi)/sizeof(ME11GEMdPhi[0]) :sizeof(ME21GEMdPhi)/sizeof(ME21GEMdPhi[0]);
   unsigned int sign = besttrack->chargesign();
-  if (dphi > -99 and ((sign == 1 and dphi < 0) || (sign == 0 and dphi > 0) || fabs(dphi) <  0.5*GEMdPhi[LUTsize-1][2])){
+  bool smalldphi = ((is_odd and fabs(dphi)<GEMdPhi[LUTsize-2][1]) || (!is_odd and fabs(dphi)<GEMdPhi[LUTsize-2][2]));
+  if (fabs(dphi) < 99 and ((sign == 1 and dphi < 0) || (sign == 0 and dphi > 0) || smalldphi)){
    for (unsigned int b = 0; b < LUTsize; b++)
    {
-       std::cout <<"  b " << " odd " << GEMdPhi[b][1]  <<" even " << GEMdPhi[b][2] << std::endl;
+       //std::cout <<"  b " << " odd " << GEMdPhi[b][1]  <<" even " << GEMdPhi[b][2] << std::endl;
 	if (double(pt) >= GEMdPhi[b][0])
 	{
 		
@@ -552,16 +556,14 @@ bool TrackMatcher::passDPhicut_TFTrack(int st) const
 	}
     }
   }
-  else if (dphi <= -99) pass = true;
+  //else if (dphi <= -99) pass = false;
   else pass = false;
+  if (st==2 and pt>=15 and ((is_odd and fabs(dphi)<GEMdPhi[4][1]) || (!is_odd and fabs(dphi)<GEMdPhi[4][2]))) pass = true;
 
-   if (double(pt) < GEMdPhi[0][0] ) pass = true;
-   
-   //std::cout <<"id " << id <<" dphi " << dphi <<" Tracksign "<< sign <<" pt "<< pt <<(pass? "  pass dphicut ": "  failed to pass dphicut") <<std::endl;
    return pass;
 
 }
-
+*/
 
 std::pair<float, float> 
 TrackMatcher::intersectionEtaPhi(CSCDetId id, int wg, int hs)

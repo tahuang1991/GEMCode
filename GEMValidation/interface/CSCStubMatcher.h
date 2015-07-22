@@ -128,8 +128,10 @@ private:
 
   bool addGhostLCTs_;
   bool addGhostMPLCTs_;
-  bool matchAlctGem_;
-  bool matchClctGem_;
+  bool matchAlctGemME11_;
+  bool matchAlctGemME21_;
+  bool matchClctGemME11_;
+  bool matchClctGemME21_;
   bool matchAlctRpc_;
   bool matchClctRpc_;
   bool hsFromSimHitMean_;

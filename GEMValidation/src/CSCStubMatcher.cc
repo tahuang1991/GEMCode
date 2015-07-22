@@ -40,8 +40,10 @@ CSCStubMatcher::CSCStubMatcher(SimHitMatcher& sh, CSCDigiMatcher& dg, GEMDigiMat
   verboseLCT_ = cscLCT_.getParameter<int>("verbose");
   minNHitsChamberLCT_ = cscLCT_.getParameter<int>("minNHitsChamber");
   addGhostLCTs_ = cscLCT_.getParameter<bool>("addGhosts");
-  matchAlctGem_ = cscLCT_.getParameter<bool>("matchAlctGem");
-  matchClctGem_ = cscLCT_.getParameter<bool>("matchClctGem");
+  matchAlctGemME11_ = cscLCT_.getParameter<bool>("matchAlctGemME11");
+  matchAlctGemME21_ = cscLCT_.getParameter<bool>("matchAlctGemME21");
+  matchClctGemME11_ = cscLCT_.getParameter<bool>("matchClctGemME11");
+  matchClctGemME21_ = cscLCT_.getParameter<bool>("matchClctGemME21");
   matchAlctRpc_ = cscLCT_.getParameter<bool>("matchAlctRpc");
   matchClctRpc_ = cscLCT_.getParameter<bool>("matchClctRpc");
   hsFromSimHitMean_ = cscLCT_.getParameter<bool>("hsFromSimHitMean");
@@ -401,7 +403,6 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
            //const bool caseClctGem(is_valid(clct[i]) and hasPad and !is_valid(alct[j]) and (ch_id.station() == 1 or ch_id.station() == 2));
            const bool caseAlctRpc(is_valid(alct[j]) and hasDigis and i==clct.size() and (ch_id.station() == 3 or ch_id.station() == 4));
            //const bool caseClctRpc(is_valid(clct[i]) and hasDigis and !is_valid(alct[j]) and (ch_id.station() == 3 or ch_id.station() == 4));
-
           const CSCChamber* cscChamber(cscGeometry_->chamber(CSCDetId(id)));
           const CSCLayer* cscKeyLayer(cscChamber->layer(3));
           const CSCLayerGeometry* cscKeyLayerGeometry(cscKeyLayer->geometry());
@@ -414,7 +415,8 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
           const auto hits = sh_matcher_->hitsInChamber(id);
           const float my_hs_gemrpc_mean(sh_matcher_->simHitsMeanStrip(hits));
           //const float my_wg_gemrpc_mean(sh_matcher_->simHitsMeanStrip(hits));
-
+          bool matchAlctGem_((matchAlctGemME11_ and ch_id.station()==1 )||(matchAlctGemME21_ and ch_id.station()==2));
+          //bool matchClctGem_((matchClctGemME11_ and cscid.station()==1 )||(matchClctGemME21_ and cscid.station()==2));
         /* Printing Stuff
               if (caseAlctClct[i][j]) std::cout << "caseAlctClct" << std::endl;
               else if(matchAlctGem_)std::cout << "caseAlctGem" << std::endl;
@@ -466,7 +468,7 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
                     continue;
               }*/
  
-             
+             if (ch_id.station()==1 && !caseAlctClct && !caseAlctGem) std::cout <<"st1 not caseAlctClct caseAlctGemi, LCT "<< lct << std::endl; 
              if (chamber_to_lct_.find(id) == chamber_to_lct_.end())   chamber_to_lct_[id] = lct;
              else if (chamber_to_lct_.find(id) != chamber_to_lct_.end() && abs(digi_dphi(chamber_to_lct_[id])) > abs(digi_dphi(lct))){
                          cout<<"ALARM!!! here already was matching LCT "<<chamber_to_lct_[id]<<endl;

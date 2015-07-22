@@ -46,8 +46,7 @@ class TFTrack
   /// destructor
   ~TFTrack();  
 
-  void init(CSCTFPtLUT*,
-	    edm::ESHandle< L1MuTriggerScales > &muScales,
+  void init(edm::ESHandle< L1MuTriggerScales > &muScales,
 	    edm::ESHandle< L1MuTriggerPtScale > &muPtScale);
   
   void setDR(double dr);
@@ -62,8 +61,8 @@ class TFTrack
   std::vector<csctf::TrackStub> getTriggerStubs() const {return triggerStubs_;}
   std::vector<matching::Digi*> getTriggerMPLCTs() const {return mplcts_;}
   std::vector<CSCDetId> getChamberIds() const {return ids_;}
-
-  unsigned int digiInME(int st, int ring);
+ 
+  unsigned int digiInME(int st, int ring) const;
 
   void addTriggerDigi(const CSCCorrelatedLCTDigi*);
   void addTriggerDigiId(const CSCDetId&);
@@ -109,7 +108,8 @@ class TFTrack
   double dr() const {return dr_;}
   std::vector<bool> deltaOk();
   bool debug() const {return debug_;}
-
+  bool passDPhicutTFTrack(int st) const;
+   
  private:
   const csc::L1Track* l1track_;
   std::vector<const CSCCorrelatedLCTDigi*> triggerDigis_;

@@ -197,6 +197,7 @@ struct MyTrackEff
   //csctf
   Float_t trackpt, tracketa, trackphi;
   UInt_t quality_packed, pt_packed, eta_packed, phi_packed;
+  UInt_t chargesign;
   UInt_t rank;
   UInt_t nstubs;
   UInt_t deltaphi12, deltaphi23; 
@@ -351,6 +352,7 @@ void MyTrackEff::init()
   pt_packed = 0;
   eta_packed = 0;
   phi_packed = 0;
+  chargesign =99;
   rank = 0;
   deltaphi12 = 0;
   deltaphi23 = 0;; 
@@ -512,6 +514,7 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("pt_packed",&pt_packed);
   t->Branch("eta_packed",&eta_packed);
   t->Branch("phi_packed",&phi_packed);
+  t->Branch("chargesign",&chargesign);
   t->Branch("deltaphi12",&deltaphi12);
   t->Branch("deltaphi23",&deltaphi23);
   t->Branch("hasME1",&hasME1);
@@ -1383,6 +1386,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
    etrk_[0].hasME2 = besttrack->hasStubEndcap(2);
    etrk_[0].nstubs = besttrack->nStubs();
    etrk_[0].deltaR = besttrack->dr();
+   etrk_[0].chargesign = besttrack->chargesign();
    unsigned int lct1 = 999;
    auto me1b(besttrack->digiInME(1,1));
    auto me1a(besttrack->digiInME(1,4));
@@ -1391,16 +1395,18 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
    if (lct1 < (besttrack->getTriggerDigis()).size()) 
    {
-       etrk_[0].passGE11 = match_track.passDPhicut_TFTrack(1);
+       etrk_[0].passGE11 = besttrack->passDPhicutTFTrack(1);
        etrk_[0].dphiGE11 = ((besttrack->getTriggerDigis()).at(lct1))->getGEMDPhi();
+       if (fabs(etrk_[0].dphiGE11)>1 and fabs(etrk_[0].dphiGE11)<99) std::cout <<" dphiGE11 " << etrk_[0].dphiGE11  << std::endl;
    }
 
    unsigned int lct2 = besttrack->digiInME(2,1);
 
    if (lct2 < (besttrack->getTriggerDigis()).size()) 
    {
-       etrk_[0].passGE21 = match_track.passDPhicut_TFTrack(2);
+       etrk_[0].passGE21 = besttrack->passDPhicutTFTrack(2);
        etrk_[0].dphiGE21 = ((besttrack->getTriggerDigis()).at(lct2))->getGEMDPhi();
+       if (fabs(etrk_[0].dphiGE21)>1 and fabs(etrk_[0].dphiGE21)<99) std::cout <<" dphiGE21 " << etrk_[0].dphiGE21  << std::endl;
    }
      auto propagate_odd_gp(match_track.simTrackPropagateGPs_odd());
      auto propagate_even_gp(match_track.simTrackPropagateGPs_even());

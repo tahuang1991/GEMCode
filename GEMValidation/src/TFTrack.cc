@@ -1,4 +1,5 @@
 #include "GEMCode/GEMValidation/interface/TFTrack.h"
+#include "GEMCode/GEMValidation/interface/GEMCSCdphi_LUT.h"
 
 TFTrack::TFTrack(const csc::L1Track* t, const CSCCorrelatedLCTDigiCollection* lcts)
 {
@@ -37,8 +38,7 @@ TFTrack::~TFTrack()
 }
 
 void 
-TFTrack::init(CSCTFPtLUT* ptLUT,
-	      edm::ESHandle< L1MuTriggerScales > &muScales,
+TFTrack::init(edm::ESHandle< L1MuTriggerScales > &muScales,
 	      edm::ESHandle< L1MuTriggerPtScale > &muPtScale)
 {
   // This section is copied from L1Trigger/CSCTrackFinder/interface/CSCTFMuonSorter.h                                                               
@@ -178,7 +178,7 @@ TFTrack::print()
   
 }
 
-unsigned int TFTrack::digiInME(int st, int ring)
+unsigned int TFTrack::digiInME(int st, int ring) const
 {
   if (triggerDigis_.size() != triggerIds_.size()) std::cout<<" BUG " <<std::endl;
   for (unsigned int i=0; i<triggerDigis_.size(); i++)
@@ -190,6 +190,52 @@ unsigned int TFTrack::digiInME(int st, int ring)
   return 999;//invalid return, larger than triggerDigis_.size();
 
 }
+
+bool TFTrack::passDPhicutTFTrack(int st) const
+{
+
+  //std::cout <<"TFTracks size() " << tfTracks().size() << std::endl;
+  auto GEMdPhi( st==1 ? ME11GEMdPhi : ME21GEMdPhi);
+  //std::cout <<" sizeof(GEMdPhi) "  << sizeof(GEMdPhi[][]) <<" sizeof(GEMdPhi[0])" << sizeof(GEMdPhi[0]) << std::endl;
+  //std::cout <<" sizeof(ME11GEMdPhi) "  << sizeof(ME11GEMdPhi) <<" sizeof(GEMdPhi[0])" << sizeof(ME11GEMdPhi[0]) << std::endl;
+  //std::cout <<" sizeof(ME21GEMdPhi) "  << sizeof(ME21GEMdPhi) <<" sizeof(GEMdPhi[0])" << sizeof(ME21GEMdPhi[0]) << std::endl;
+  unsigned int lct_n = digiInME(st,1);
+  if (lct_n == 999 and st==1)
+      lct_n = digiInME(st, 4);
+  if (lct_n == 999) return false;//no stub in Station
+  
+  auto lct(triggerDigis_.at(lct_n));
+  auto id(triggerIds_.at(lct_n));
+  //std::cout <<" id " << id << " LCT " << (*lct) << std::endl;
+  double dphi = lct->getGEMDPhi();
+  bool is_odd(id.chamber()%2==1);
+  bool pass = false;
+  unsigned int LUTsize = (st==1)? sizeof(ME11GEMdPhi)/sizeof(ME11GEMdPhi[0]) :sizeof(ME21GEMdPhi)/sizeof(ME21GEMdPhi[0]);
+  bool smalldphi = ((is_odd and fabs(dphi)<GEMdPhi[LUTsize-2][1]) || (!is_odd and fabs(dphi)<GEMdPhi[LUTsize-2][2]));
+  if (fabs(dphi) < 99 and ((chargesign_ == 1 and dphi < 0) || (chargesign_ == 0 and dphi > 0) || smalldphi)){
+   for (unsigned int b = 0; b < LUTsize; b++)
+   {
+       //std::cout <<"  b " << " odd " << GEMdPhi[b][1]  <<" even " << GEMdPhi[b][2] << std::endl;
+	if (double(pt_) >= GEMdPhi[b][0])
+	{
+		
+	    if ((is_odd && GEMdPhi[b][1] > fabs(dphi)) ||
+		(!is_odd && GEMdPhi[b][2] > fabs(dphi)))
+		    pass = true;
+	    else    pass = false;
+	}
+    }
+  }
+  else pass = false;
+
+  if (st==2 and pt_>=15 and ((is_odd and fabs(dphi)<GEMdPhi[4][1]) || (!is_odd and fabs(dphi)<GEMdPhi[4][2]))) pass = true;
+
+   return pass;
+
+}
+
+
+
 
 void 
 TFTrack::addTriggerDigi(const CSCCorrelatedLCTDigi* digi)

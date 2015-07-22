@@ -64,13 +64,14 @@ if doGem:
   matching.cscCLCT.minNHitsChamber = 3
   matching.cscALCT.minNHitsChamber = 3
   matching.cscLCT.minNHitsChamber = 3
-  matching.cscLCT.matchAlctGem = True
+  matching.cscLCT.matchAlctGemME11 = True
+  matching.cscLCT.matchAlctGemME21 = True
   matching.cscMPLCT.minNHitsChamber = 3
 doRpc = True
 if doRpc:
   matching.cscLCT.matchAlctRpc = True
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
 
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 
