@@ -21,6 +21,8 @@ class L1GlobalMuonTriggerMatcher : public BaseMatcher
   /// destructor
   ~L1GlobalMuonTriggerMatcher();
   
+  const l1extra::L1MuonParticleCollection getMatchedL1ExtraMuonParticles() const {return matchedL1MuonParticles_;}
+
   bool gmtCandInContainer(const L1MuGMTCand&, const L1MuGMTCandCollection&) const;
   bool isGmtCandMatched(const L1MuGMTCand&) const;
 

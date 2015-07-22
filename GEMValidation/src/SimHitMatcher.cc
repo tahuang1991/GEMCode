@@ -458,7 +458,16 @@ std::set<unsigned int>
 SimHitMatcher::detIdsGEM(int gem_type) const
 {
   std::set<unsigned int> result;
-  for (auto& p: gem_detid_to_hits_) result.insert(p.first);
+  for (auto& p: gem_detid_to_hits_)
+  {
+    auto id = p.first;
+    if (gem_type > 0)
+    {
+      GEMDetId detId(id);
+      if (gemvalidation::toGEMType(detId.station(), detId.ring()) != gem_type) continue;
+    }
+    result.insert(id);
+  }
   return result;
 }
 
@@ -467,7 +476,16 @@ std::set<unsigned int>
 SimHitMatcher::detIdsRPC(int rpc_type) const
 {
   std::set<unsigned int> result;
-  for (auto& p: rpc_detid_to_hits_) result.insert(p.first);
+  for (auto& p: rpc_detid_to_hits_)
+  {
+    auto id = p.first;
+    if (rpc_type > 0)
+    {
+      RPCDetId detId(id);
+      if (gemvalidation::toRPCType(detId.region(), detId.station(), detId.ring()) != rpc_type) continue;
+    }
+    result.insert(id);
+  }
   return result;
 }
 
@@ -503,7 +521,16 @@ std::set<unsigned int>
 SimHitMatcher::detIdsDT(int dt_type) const
 {
   std::set<unsigned int> result;
-  for (auto& p: dt_detid_to_hits_) result.insert(p.first);
+  for (auto& p: dt_detid_to_hits_)
+  {
+    auto id = p.first;
+    if (dt_type > 0)
+    {
+      DTWireId detId(id);
+      if (gemvalidation::toDTType(detId.wheel(), detId.station()) != dt_type) continue;
+    }
+    result.insert(id);
+  }
   return result;
 }
 
@@ -539,7 +566,16 @@ std::set<unsigned int>
 SimHitMatcher::chamberIdsGEM(int gem_type) const
 {
   std::set<unsigned int> result;
-  for (auto& p: gem_chamber_to_hits_) result.insert(p.first);
+  for (auto& p: gem_chamber_to_hits_)
+  {
+    auto id = p.first;
+    if (gem_type > 0)
+    {
+      GEMDetId detId(id);
+      if (gemvalidation::toGEMType(detId.station(), detId.ring()) != gem_type) continue;
+    }
+    result.insert(id);
+  }
   return result;
 }
 
@@ -548,7 +584,16 @@ std::set<unsigned int>
 SimHitMatcher::chamberIdsRPC(int rpc_type) const
 {
   std::set<unsigned int> result;
-  for (auto& p: rpc_chamber_to_hits_) result.insert(p.first);
+  for (auto& p: rpc_chamber_to_hits_)
+  {
+    auto id = p.first;
+    if (rpc_type > 0)
+    {
+      RPCDetId detId(id);
+      if (gemvalidation::toRPCType(detId.region(), detId.station(), detId.ring()) != rpc_type) continue;
+    }
+    result.insert(id);
+  }
   return result;
 }
 
@@ -572,7 +617,7 @@ SimHitMatcher::chamberIdsCSC(int csc_type) const
     if (csc_type > 0)
     {
       CSCDetId detId(id);
-      if (detId.iChamberType() != csc_type) continue;
+      if (gemvalidation::toCSCType(detId.station(), detId.ring()) != csc_type) continue;
     }
     result.insert(id);
   }
@@ -583,7 +628,16 @@ std::set<unsigned int>
 SimHitMatcher::chamberIdsDT(int dt_type) const
 {
   std::set<unsigned int> result;
-  for (auto& p: dt_chamber_to_hits_) result.insert(p.first);
+  for (auto& p: dt_chamber_to_hits_)
+  {
+    auto id = p.first;
+    if (dt_type > 0)
+    {
+      DTChamberId detId(id);
+      if (gemvalidation::toDTType(detId.wheel(), detId.station()) != dt_type) continue;
+    }
+    result.insert(id);
+  }
   return result;
 }
 

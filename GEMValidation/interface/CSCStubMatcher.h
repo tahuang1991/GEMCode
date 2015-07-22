@@ -187,7 +187,7 @@ CSCStubMatcher::selectDetIds(D &digis, int csc_type) const
     if (csc_type > 0)
     {
       CSCDetId detId(id);
-      if (detId.iChamberType() != csc_type) continue;
+      if (gemvalidation::toCSCType(detId.station(), detId.ring()) != csc_type) continue;
     }
     result.insert(p.first);
   }

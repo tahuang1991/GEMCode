@@ -59,7 +59,7 @@ int
 gemvalidation::toRPCType(int re, int st, int ri)
 {
   // endcap
-  if (abs(re)==1) {
+  if (std::abs(re)==1) {
     if (st ==1) {
       if (ri==2) return RPC_ME12;
       if (ri==3) return RPC_ME13;
@@ -194,7 +194,7 @@ std::string
 gemvalidation::toRPCTypeString(int re, int st, int ri)
 {
   // endcap
-  if (abs(re)==1) {
+  if (std::abs(re)==1) {
     if (st ==1) {
       if (ri==2) return "RPC_ME12";
       if (ri==3) return "RPC_ME13";
