@@ -75,6 +75,12 @@ public:
   /// DT chamber detIds with SimHits
   std::set<unsigned int> chamberIdsDT(int csc_type = DT_ALL) const;
 
+  /// DT station detIds with SimHits
+  std::set<unsigned int> chamberIdsCSCStation(int station) const;
+  /// DT station detIds with SimHits
+  std::set<unsigned int> chamberIdsDTStation(int station) const;
+
+
   /// GEM superchamber detIds with SimHits
   std::set<unsigned int> superChamberIdsGEM() const;
   /// GEM superchamber detIds with SimHits 2 layers of coincidence pads
@@ -151,6 +157,9 @@ public:
 
   // what unique partitions numbers were hit by this simtrack?
   std::set<int> hitPartitions() const; // GEM
+
+  void cscChamberIdsToString(const std::set<unsigned int>&) const;
+  void dtChamberIdsToString(const std::set<unsigned int>&) const;
 
 private:
 

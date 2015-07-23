@@ -1356,4 +1356,111 @@ SimHitMatcher::nCoincidenceCSCChambers(int min_n_layers) const
   return result;
 }
 
+void
+SimHitMatcher::cscChamberIdsToString(const std::set<unsigned int>& set) const
+{
+  for (auto p: set) {
+    CSCDetId detId(p);
+    std::cout << " " << detId << "\n";
+  }
+}
 
+
+void
+SimHitMatcher::dtChamberIdsToString(const std::set<unsigned int>& set) const
+{
+  for (auto p: set) {
+    DTChamberId detId(p);
+    std::cout << " " << detId << "\n";
+  }
+}
+
+
+std::set<unsigned int> 
+SimHitMatcher::chamberIdsCSCStation(int station) const
+{
+  set<unsigned int> result;
+  switch(station){
+  case 1:
+      auto p1(simhit_matcher_->chamberIdsCSC(CSC_ME1a));  
+      auto p2(simhit_matcher_->chamberIdsCSC(CSC_ME1b));  
+      auto p3(simhit_matcher_->chamberIdsCSC(CSC_ME12));  
+      auto p4(simhit_matcher_->chamberIdsCSC(CSC_ME13));  
+      p1.insert(p2.begin(),p2.end());
+      p1.insert(p3.begin(),p3.end());
+      p1.insert(p4.begin(),p4.end());
+    break;
+  case 2:
+      auto p1(simhit_matcher_->chamberIdsCSC(CSC_ME21));  
+      auto p2(simhit_matcher_->chamberIdsCSC(CSC_ME22));  
+      p1.insert(p2.begin(),p2.end());
+    break;
+  case 3:
+      auto p1(simhit_matcher_->chamberIdsCSC(CSC_ME31));  
+      auto p2(simhit_matcher_->chamberIdsCSC(CSC_ME32));  
+      p1.insert(p2.begin(),p2.end());
+    break;
+  case 4:
+      auto p1(simhit_matcher_->chamberIdsCSC(CSC_ME41));  
+      auto p2(simhit_matcher_->chamberIdsCSC(CSC_ME42));  
+      p1.insert(p2.begin(),p2.end());
+    break;
+  };
+  result = p1;
+  return result;
+}
+
+
+std::set<unsigned int> 
+SimHitMatcher::chamberIdsDTStation(int station) const
+{
+  set<unsigned int> result;
+  switch(station){
+  case 1:
+    auto p1(simhit_matcher_->chamberIdsDT(DT_MB21p));  
+    auto p2(simhit_matcher_->chamberIdsDT(DT_MB11p));  
+    auto p3(simhit_matcher_->chamberIdsDT(DT_MB01));  
+    auto p4(simhit_matcher_->chamberIdsDT(DT_MB11n));  
+    auto p5(simhit_matcher_->chamberIdsDT(DT_MB21n));  
+    p1.insert(p2.begin(),p2.end());
+    p1.insert(p3.begin(),p3.end());
+    p1.insert(p4.begin(),p4.end());
+    p1.insert(p5.begin(),p5.end());
+    break;
+  case 2:
+    auto p1(simhit_matcher_->chamberIdsDT(DT_MB22p));  
+    auto p2(simhit_matcher_->chamberIdsDT(DT_MB12p));  
+    auto p3(simhit_matcher_->chamberIdsDT(DT_MB02));  
+    auto p4(simhit_matcher_->chamberIdsDT(DT_MB12n));  
+    auto p5(simhit_matcher_->chamberIdsDT(DT_MB22n));  
+    p1.insert(p2.begin(),p2.end());
+    p1.insert(p3.begin(),p3.end());
+    p1.insert(p4.begin(),p4.end());
+    p1.insert(p5.begin(),p5.end());
+    break;
+  case 3:
+    auto p1(simhit_matcher_->chamberIdsDT(DT_MB23p));  
+    auto p2(simhit_matcher_->chamberIdsDT(DT_MB13p));  
+    auto p3(simhit_matcher_->chamberIdsDT(DT_MB03));  
+    auto p4(simhit_matcher_->chamberIdsDT(DT_MB13n));  
+    auto p5(simhit_matcher_->chamberIdsDT(DT_MB23n));  
+    p1.insert(p2.begin(),p2.end());
+    p1.insert(p3.begin(),p3.end());
+    p1.insert(p4.begin(),p4.end());
+    p1.insert(p5.begin(),p5.end());
+    break;
+  case 4:
+    auto p1(simhit_matcher_->chamberIdsDT(DT_MB24p));  
+    auto p2(simhit_matcher_->chamberIdsDT(DT_MB14p));  
+    auto p3(simhit_matcher_->chamberIdsDT(DT_MB04));  
+    auto p4(simhit_matcher_->chamberIdsDT(DT_MB14n));  
+    auto p5(simhit_matcher_->chamberIdsDT(DT_MB24n));  
+    p1.insert(p2.begin(),p2.end());
+    p1.insert(p3.begin(),p3.end());
+    p1.insert(p4.begin(),p4.end());
+    p1.insert(p5.begin(),p5.end());
+    break;
+  };
+  result = p1;
+  return result;
+}
