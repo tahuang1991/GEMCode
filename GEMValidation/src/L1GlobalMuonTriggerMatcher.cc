@@ -202,11 +202,10 @@ L1GlobalMuonTriggerMatcher::matchL1ExtraMuonParticleToSimTrack(const l1extra::L1
   float dRhitMin = 99;
   for (auto& muon: muons) {
     auto gmt(muon.gmtMuonCand());    
-    const float dR(deltaR(trk().momentum().eta(), trk().momentum().phi(), muon.eta(), normalizedPhi(muon.phi())));
     if (verboseL1ExtraMuon_) {
       cout << i+1 << ": pT = " << muon.pt() << ", eta = " << muon.eta() <<  ", phi = " << muon.phi()
 	   << ", bx = " << muon.bx() << ", charge = " << muon.charge() << endl;    
-      cout << "\tDeltaR = " << dR << endl;
+      //cout << "\tDeltaR = " << deltaR(trk().momentum().eta(), trk().momentum().phi(), muon.eta(), normalizedPhi(muon.phi())) << endl;
       cout << "\tAssociated GMT " << gmt << endl;
     }
 
@@ -214,43 +213,52 @@ L1GlobalMuonTriggerMatcher::matchL1ExtraMuonParticleToSimTrack(const l1extra::L1
     float dRhit = 99;
     // propagate the simtrack to the second station DT or CSC and match to the L1Extra particle
     if (absSimEta < 1.1) {
-      auto q(simhit_matcher_->chamberIdsDT(DT_MB22p));  
-      auto qq(simhit_matcher_->chamberIdsDT(DT_MB12p));  
-      auto qqq(simhit_matcher_->chamberIdsDT(DT_MB02));  
-      auto qqqq(simhit_matcher_->chamberIdsDT(DT_MB12n));  
-      auto qqqqq(simhit_matcher_->chamberIdsDT(DT_MB22n));  
-      q.insert(qq.begin(),qq.end());
-      q.insert(qqq.begin(),qqq.end());
-      q.insert(qqqq.begin(),qqqq.end());
-      q.insert(qqqqq.begin(),qqqqq.end());
-
+      if (verboseL1ExtraMuon_>2) {
+	std::cout << "all hits dt " << std::endl;
+	simhit_matcher_->dtChamberIdsToString(simhit_matcher_->chamberIdsDT(0));
+      }
+      // check for hits in the second station
+      auto q(simhit_matcher_->chamberIdsDTStation(2));  
+      // check for hits in the third station
+      if (q.size()==0) q = simhit_matcher_->chamberIdsDTStation(3);  
       if (q.size()!=0) {
 	auto hits(simhit_matcher_->hitsInChamber(*q.begin()));
 	auto gp(simhit_matcher_->simHitsMeanPosition(hits));
-	dRhit = deltaR(trk().momentum().eta(), trk().momentum().phi(), gp.eta(), normalizedPhi(gp.phi()));
+	dRhit = deltaR(muon.eta(), muon.phi(), gp.eta(), normalizedPhi(gp.phi()));
 	if (verboseL1ExtraMuon_>1) {
 	  std::cout << "DTChamberId " << DTChamberId(*q.begin()) << std::endl;  
 	  std::cout << "\t" << gp << std::endl;
 	}
-	if (verboseL1ExtraMuon_) std::cout << "\tDeltaR = " << dRhit << endl;
+	if (verboseL1ExtraMuon_) std::cout << "\tdRhit = " << dRhit << endl;
+      }
+      if (q.size()==0) {
+	if (verboseL1ExtraMuon_>2) std::cout << "\tNo hits in second or third station DT" << endl;
       }
     }
     else if (1.1 < absSimEta and absSimEta < 2.4) {
-      auto p(simhit_matcher_->chamberIdsCSC(CSC_ME21));  
-      auto pp(simhit_matcher_->chamberIdsCSC(CSC_ME22));  
-      p.insert(pp.begin(),pp.end());
-
+      if (verboseL1ExtraMuon_>2) {
+	std::cout << "all hits csc " << std::endl;
+	simhit_matcher_->cscChamberIdsToString(simhit_matcher_->chamberIdsCSC(0));
+      }
+      // check for hits in the second station
+      auto p(simhit_matcher_->chamberIdsCSCStation(2));
+      // check for hits in the third station
+      if (p.size()==0) p = simhit_matcher_->chamberIdsCSCStation(3);  
       if (p.size()!=0) {
 	auto hits(simhit_matcher_->hitsInChamber(*p.begin()));
 	auto gp(simhit_matcher_->simHitsMeanPosition(hits));
-	dRhit = deltaR(trk().momentum().eta(), trk().momentum().phi(), gp.eta(), normalizedPhi(gp.phi()));
+	dRhit = deltaR(muon.eta(), muon.phi(), gp.eta(), normalizedPhi(gp.phi()));
 	if (verboseL1ExtraMuon_>1) {
 	  std::cout << "CSCDetId " << CSCDetId(*p.begin()) << std::endl;  
 	  std::cout << "\t" << gp << std::endl;
 	}
-	if (verboseL1ExtraMuon_) std::cout << "\tDeltaR = " << dRhit << endl;
+	if (verboseL1ExtraMuon_) std::cout << "\tdRhit = " << dRhit << endl;
       }
-    }
+      if (p.size()==0) {
+	if (verboseL1ExtraMuon_>2) std::cout << "\tNo hits in second or third station CSC" << endl;
+      }
+    } 
+   // look for the best matching one
     if (dRhit < dRhitMin) {
       dRhitMin = dRhit;
       indexFound = i;
@@ -258,8 +266,8 @@ L1GlobalMuonTriggerMatcher::matchL1ExtraMuonParticleToSimTrack(const l1extra::L1
     ++i;
   }
 
-  if (dRhitMin < deltaRL1ExtraMuon_) matchedL1MuonParticles_.push_back(muons[indexFound]);    
-  if (verboseL1ExtraMuon_) std::cout << "\tdRhitMin = " << dRhitMin << endl;	
+  if (indexFound!=-99) matchedL1MuonParticles_.push_back(std::make_pair(muons[indexFound], dRhitMin));
+  if (verboseL1ExtraMuon_) std::cout << "\tdRhitMin = " << dRhitMin << " indexFound " << indexFound << endl;	
 }
 
 

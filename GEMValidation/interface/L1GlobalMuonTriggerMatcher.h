@@ -9,6 +9,8 @@
 #include "DataFormats/L1Trigger/interface/L1MuonParticle.h"
 #include "DataFormats/L1Trigger/interface/L1MuonParticleFwd.h"
 
+#include <utility>
+
 typedef std::vector<L1MuRegionalCand> L1MuRegionalCandCollection;
 typedef std::vector<L1MuGMTExtendedCand> L1MuGMTExtendedCandCollection;
 typedef std::vector<L1MuGMTCand> L1MuGMTCandCollection;
@@ -21,7 +23,7 @@ class L1GlobalMuonTriggerMatcher : public BaseMatcher
   /// destructor
   ~L1GlobalMuonTriggerMatcher();
   
-  const l1extra::L1MuonParticleCollection getMatchedL1ExtraMuonParticles() const {return matchedL1MuonParticles_;}
+  std::vector<std::pair<l1extra::L1MuonParticle, double>> getMatchedL1ExtraMuonParticles() const {return matchedL1MuonParticles_;}
 
   bool gmtCandInContainer(const L1MuGMTCand&, const L1MuGMTCandCollection&) const;
   bool isGmtCandMatched(const L1MuGMTCand&) const;
@@ -87,7 +89,7 @@ class L1GlobalMuonTriggerMatcher : public BaseMatcher
   L1MuRegionalCandCollection    matchedL1GmtRPCbCands_;
   L1MuRegionalCandCollection    matchedL1GmtDTCands_;
   L1MuGMTCandCollection matchedL1GmtCands_;
-  l1extra::L1MuonParticleCollection matchedL1MuonParticles_;
+  std::vector<std::pair<l1extra::L1MuonParticle, double>> matchedL1MuonParticles_;
 };
 
 #endif

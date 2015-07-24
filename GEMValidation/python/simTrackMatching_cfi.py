@@ -411,7 +411,7 @@ SimTrackMatching = cms.PSet(
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
-        deltaR = cms.double(0.05),
+        deltaR = cms.double(0.2),
     ),
     ## HLT Tracks
     recoTrackExtra = cms.PSet(
