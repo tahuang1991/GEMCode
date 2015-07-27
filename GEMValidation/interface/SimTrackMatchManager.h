@@ -12,6 +12,7 @@
 */
 
 #include "GEMCode/GEMValidation/interface/BaseMatcher.h"
+#include "GEMCode/GEMValidation/interface/DisplacedGENMuonMatcher.h"
 #include "GEMCode/GEMValidation/interface/SimHitMatcher.h"
 #include "GEMCode/GEMValidation/interface/GEMDigiMatcher.h"
 #include "GEMCode/GEMValidation/interface/GEMRecHitMatcher.h"
@@ -40,6 +41,7 @@ public:
   
   ~SimTrackMatchManager();
 
+  const DisplacedGENMuonMatcher& genMuons() const {return genMuons_;}
   const SimHitMatcher& simhits() const {return simhits_;}
   const GEMDigiMatcher& gemDigis() const {return gem_digis_;}
   const GEMRecHitMatcher& gemRecHits() const {return gem_rechits_;}
@@ -61,6 +63,7 @@ public:
   
 private:
 
+  DisplacedGENMuonMatcher genMuons_;
   SimHitMatcher simhits_;
   GEMDigiMatcher gem_digis_;
   GEMRecHitMatcher gem_rechits_;

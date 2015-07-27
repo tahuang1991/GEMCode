@@ -35,7 +35,7 @@ SimTrackMatching = cms.PSet(
     verbose = cms.bool(True),
     ## per collection params
     simTrack = cms.PSet(
-        verbose = cms.int32(0),
+        verbose = cms.int32(1),
         validInputTags = cms.VInputTag(cms.InputTag("g4SimHits")),
         minPt = cms.double(1.5),
         maxPt = cms.double(999.),

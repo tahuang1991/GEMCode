@@ -310,3 +310,10 @@ gemvalidation::toCSCTypeString(int st, int ri)
   }
   return "CSC_ALL";
 }
+
+bool 
+gemvalidation::PtOrder (const reco::GenParticle* p1, const reco::GenParticle* p2) 
+{ 
+  return (p1->pt() > p2->pt() ); 
+}
+

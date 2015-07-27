@@ -10,6 +10,9 @@
 #include "DataFormats/MuonDetId/interface/RPCDetId.h"
 #include "DataFormats/MuonDetId/interface/ME0DetId.h"
 #include "DataFormats/MuonDetId/interface/DTWireId.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+
 
 static const float AVERAGE_GEM_Z(568.6); // [cm]
 
@@ -135,6 +138,8 @@ std::string toGEMTypeString(int st, int ri);
 std::string toRPCTypeString(int re, int st, int ri);
 std::string toDTTypeString(int wh, int st);
 std::string toCSCTypeString(int st, int ri);
+
+bool PtOrder(const reco::GenParticle* p1, const reco::GenParticle* p2);
 
 template<typename PROD>
 bool
