@@ -28,12 +28,15 @@ public:
   
   ~DisplacedGENMuonMatcher();
 
-  const reco::GenParticle* getMatchedGENMuon() {return matchedGENMuon_;} 
-  const std::vector<reco::GenParticle*> getMatchedGENMuons() {return matchedGENMuons_;}
-  const reco::GenParticle* getMatchedDarkBoson() {return matchedDarkBoson_;}
+  const reco::GenParticle* getMatchedGENMuon() const {return matchedGENMuon_;} 
+  std::vector<const reco::GenParticle*> getMatchedGENMuons() const {return matchedGENMuons_;}
+  const reco::GenParticle* getMatchedDarkBoson() const {return matchedDarkBoson_;}
 
-  double darkBosonDeltaR() {return genGd0Gd1_m;}
-  double darkBosonInvM() {return genGd0Gd1_dR;}
+  int darkBosonIndex() const {return darkBosonIndex_;}
+  int genMuonIndex() const {return genMuonIndex_;}
+
+  double darkBosonDeltaR() const {return genGd0Gd1_m;}
+  double darkBosonInvM() const {return genGd0Gd1_dR;}
 
 private:
 
@@ -117,9 +120,12 @@ private:
   Float_t genGd0Gd1_m;
   Float_t genGd0Gd1_dR;
 
-  reco::GenParticle* matchedGENMuon_;
-  std::vector<reco::GenParticle*> matchedGENMuons_;
-  reco::GenParticle* matchedDarkBoson_;
+  const reco::GenParticle* matchedGENMuon_;
+  std::vector<const reco::GenParticle*> matchedGENMuons_;
+  const reco::GenParticle* matchedDarkBoson_;
+
+  int darkBosonIndex_;
+  int genMuonIndex_;
 };
 
 #endif
