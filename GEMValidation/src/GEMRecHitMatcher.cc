@@ -9,7 +9,7 @@ GEMRecHitMatcher::GEMRecHitMatcher(SimHitMatcher& sh)
   , simhit_matcher_(&sh)
 {
   auto gemRecHit_= conf().getParameter<edm::ParameterSet>("gemRecHit");
-  gemRecHitInput_ = gemRecHit_.getParameter<edm::InputTag>("input");
+  gemRecHitInput_ = gemRecHit_.getParameter<std::vector<edm::InputTag>>("validInputTags");
   minBXGEM_ = gemRecHit_.getParameter<int>("minBX");
   maxBXGEM_ = gemRecHit_.getParameter<int>("maxBX");
   matchDeltaStrip_ = gemRecHit_.getParameter<int>("matchDeltaStrip");
@@ -17,11 +17,8 @@ GEMRecHitMatcher::GEMRecHitMatcher(SimHitMatcher& sh)
   runGEMRecHit_ = gemRecHit_.getParameter<bool>("run");
 
   if (hasGEMGeometry_) {
-    if (!(gemRecHitInput_.label().empty())) {
-      edm::Handle<GEMRecHitCollection> gem_rechits;
-      event().getByLabel(gemRecHitInput_, gem_rechits);
-      if (runGEMRecHit_) matchRecHitsToSimTrack(*gem_rechits.product());
-    }
+    edm::Handle<GEMRecHitCollection> gem_rechits;
+    if (gemvalidation::getByLabel(gemRecHitInput_, gem_rechits, event())) if (runGEMRecHit_) matchRecHitsToSimTrack(*gem_rechits.product());
   }
 }
 
@@ -74,6 +71,9 @@ GEMRecHitMatcher::matchRecHitsToSimTrack(const GEMRecHitCollection& rechits)
       chamber_to_recHits_[ p_id.chamberId().rawId() ].push_back(myrechit);
       superchamber_to_recHits_[ superch_id() ].push_back(myrechit);
 
+      detid_to_gemRecHits_[id].push_back(*d);
+      chamber_to_gemRecHits_[ p_id.chamberId().rawId() ].push_back(*d);
+      superchamber_to_gemRecHits_[ superch_id() ].push_back(*d);
     }
   }
   
@@ -113,6 +113,7 @@ GEMRecHitMatcher::recHitsInDetId(unsigned int detid) const
   return detid_to_recHits_.at(detid);
 }
 
+
 const GEMRecHitMatcher::RecHitContainer&
 GEMRecHitMatcher::recHitsInChamber(unsigned int detid) const
 {
@@ -120,12 +121,42 @@ GEMRecHitMatcher::recHitsInChamber(unsigned int detid) const
   return chamber_to_recHits_.at(detid);
 }
 
+
 const GEMRecHitMatcher::RecHitContainer&
 GEMRecHitMatcher::recHitsInSuperChamber(unsigned int detid) const
 {
   if (superchamber_to_recHits_.find(detid) == superchamber_to_recHits_.end()) return no_recHits_;
   return superchamber_to_recHits_.at(detid);
 }
+
+
+const GEMRecHitMatcher::GEMRecHitContainer&
+GEMRecHitMatcher::gemRecHitsInDetId(unsigned int detid) const
+{
+  if (detid_to_gemRecHits_.find(detid) == detid_to_gemRecHits_.end()) return no_gemRecHits_;
+  return detid_to_gemRecHits_.at(detid);
+}
+
+
+const GEMRecHitMatcher::GEMRecHitContainer&
+GEMRecHitMatcher::gemRecHitsInChamber(unsigned int detid) const
+{
+  if (chamber_to_gemRecHits_.find(detid) == chamber_to_gemRecHits_.end()) return no_gemRecHits_;
+  return chamber_to_gemRecHits_.at(detid);
+}
+
+
+const GEMRecHitMatcher::GEMRecHitContainer
+GEMRecHitMatcher::gemRecHits() const
+{
+  GEMRecHitContainer result;
+  for (auto id: chamberIds()){
+    auto rechitsInChamber(gemRecHitsInChamber(id));
+    result.insert(result.end(), rechitsInChamber.begin(), rechitsInChamber.end());
+  }
+  return result;
+}
+
 
 int
 GEMRecHitMatcher::nLayersWithRecHitsInSuperChamber(unsigned int detid) const
@@ -213,3 +244,25 @@ GEMRecHitMatcher::recHitMeanPosition(const RecHitContainer& rechit) const
   return GlobalPoint(sumx/n, sumy/n, sumz/n);
 }
 
+
+bool
+GEMRecHitMatcher::gemRecHitInContainer(const GEMRecHit& rh, const GEMRecHitContainer& c) const
+{
+  bool isSame = false;
+  for (auto& thisRH: c) if (areGEMRecHitSame(thisRH,rh)) isSame = true;
+  return isSame;
+}
+
+
+bool 
+GEMRecHitMatcher::isGEMRecHitMatched(const GEMRecHit& thisRh) const
+{
+  return gemRecHitInContainer(thisRh, gemRecHits());
+}
+
+
+bool 
+GEMRecHitMatcher::areGEMRecHitSame(const GEMRecHit& l, const GEMRecHit& r) const
+{
+  return l.localPosition()==r.localPosition() and l.BunchX()==r.BunchX();
+}

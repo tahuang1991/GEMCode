@@ -10,10 +10,7 @@
 
 #include "GEMCode/GEMValidation/interface/BaseMatcher.h"
 
-#include "FWCore/Utilities/interface/InputTag.h"
-
 #include "DataFormats/Common/interface/DetSetVector.h"
-#include <DataFormats/GEMRecHit/interface/GEMRecHit.h>
 #include "DataFormats/GEMRecHit/interface/GEMRecHitCollection.h"
 #include "GEMCode/GEMValidation/interface/GenericDigi.h"
 #include "GEMCode/GEMValidation/interface/DigiMatcher.h"
@@ -31,6 +28,8 @@ public:
 
   typedef matching::Digi RecHit;
   typedef matching::DigiContainer RecHitContainer;
+
+  typedef std::vector<GEMRecHit> GEMRecHitContainer;
 
   GEMRecHitMatcher(SimHitMatcher& sh);
   
@@ -50,11 +49,21 @@ public:
   const RecHitContainer& recHitsInChamber(unsigned int) const;
   const RecHitContainer& recHitsInSuperChamber(unsigned int) const;
 
+  const GEMRecHitContainer& gemRecHitsInDetId(unsigned int) const;
+  const GEMRecHitContainer& gemRecHitsInChamber(unsigned int) const;
+  const GEMRecHitContainer& gemRecHitsInSuperChamber(unsigned int) const;
+
+  const GEMRecHitContainer gemRecHits() const;
+
   // #layers with recHits from this simtrack
   int nLayersWithRecHitsInSuperChamber(unsigned int) const;
 
   /// How many recHits in GEM did this simtrack get in total?
   int nRecHits() const;
+
+  bool gemRecHitInContainer(const GEMRecHit&, const GEMRecHitContainer&) const;
+  bool isGEMRecHitMatched(const GEMRecHit&) const;
+  bool areGEMRecHitSame(const GEMRecHit&, const GEMRecHit&) const;
 
   std::set<int> stripNumbersInDetId(unsigned int) const;
 
@@ -68,7 +77,7 @@ private:
 
   void matchRecHitsToSimTrack(const GEMRecHitCollection& recHits);
 
-  edm::InputTag gemRecHitInput_;
+  std::vector<edm::InputTag> gemRecHitInput_;
 
   const SimHitMatcher* simhit_matcher_;
 
@@ -80,7 +89,12 @@ private:
   std::map<unsigned int, RecHitContainer> chamber_to_recHits_;
   std::map<unsigned int, RecHitContainer> superchamber_to_recHits_;
 
+  std::map<unsigned int, GEMRecHitContainer> detid_to_gemRecHits_;
+  std::map<unsigned int, GEMRecHitContainer> chamber_to_gemRecHits_;
+  std::map<unsigned int, GEMRecHitContainer> superchamber_to_gemRecHits_;
+
   const RecHitContainer no_recHits_;
+  const GEMRecHitContainer no_gemRecHits_;
 
   bool verboseGEMRecHit_;
   bool runGEMRecHit_;

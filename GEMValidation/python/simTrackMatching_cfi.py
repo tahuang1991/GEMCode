@@ -3,14 +3,31 @@ from L1Trigger.CSCTrackFinder.csctfTrackDigis_cfi import*
 
 SimTrackMatching = cms.PSet(
     # common
-    useCSCChamberTypes = cms.untracked.vint32(0,1,2,3,4,5,6,7,8,9,10),
-    ## endcap stations
-    cscStations = cms.vstring('ALL','ME11','ME1a','ME1b','ME12','ME13',
-                              'ME21','ME22','ME31','ME32','ME41','ME42'),
-    gemStations = cms.vstring('GE11','GE21'),
-    me0Stations = cms.vstring('ME0'),
-    rpcStations = cms.vstring('RE12','RE13','RE22','RE23','RE31',
-                              'RE32','RE33','RE41','RE42','RE43'),
+    cscStations = cms.vstring("CSC_ALL", "CSC_ME11", "CSC_ME1a", "CSC_ME1b", "CSC_ME12", "CSC_ME13",
+                              "CSC_ME21", "CSC_ME22", "CSC_ME31", "CSC_ME32", "CSC_ME41", "CSC_ME42"),
+    dtStations = cms.vstring("DT_ALL", 
+                             "DT_MB01", "DT_MB02", "DT_MB03", "DT_MB04",
+                             "DT_MB11p", "DT_MB12p", "DT_MB13p", "DT_MB14p",
+                             "DT_MB21p", "DT_MB22p", "DT_MB23p", "DT_MB24p",
+                             "DT_MB11n", "DT_MB12n", "DT_MB13n", "DT_MB14n",
+                             "DT_MB21n", "DT_MB22n", "DT_MB23n", "DT_MB24n"),
+    rpcStations = cms.vstring("RPC_ALL",
+                              "RPC_ME12", "RPC_ME13", "RPC_ME22", "RPC_ME23", "RPC_ME31",
+                              "RPC_ME32", "RPC_ME33", "RPC_ME41", "RPC_ME42", "RPC_ME43",
+                              "RPC_MB01", "RPC_MB02", "RPC_MB03", "RPC_MB04",
+                              "RPC_MB11p", "RPC_MB12p", "RPC_MB13p", "RPC_MB14p",
+                              "RPC_MB21p", "RPC_MB22p", "RPC_MB23p", "RPC_MB24p",
+                              "RPC_MB11n", "RPC_MB12n", "RPC_MB13n", "RPC_MB14n",
+                              "RPC_MB21n", "RPC_MB22n", "RPC_MB23n", "RPC_MB24n"),
+    gemStations = cms.vstring("GEM_ALL", "GEM_ME11", "GEM_ME21"),
+    me0Stations = cms.vstring("ME0"),
+    cscStationsToUse = cms.vint32(0,1,2,3,4,5,6,7,8,9,10,11),
+    dtStationsToUse = cms.vint32(0,1,2,3,4,5,6,7,8,9,10,11,
+                                 12,13,14,15,16,17,18,19,20),
+    rpcStationsToUse = cms.vint32(0,1,2,3,4,5,6,7,8,9,10,11,
+                                  12,13,14,15,16,17,18,19,20,
+                                  21,22,23,24,25,26,27,28,29,30),
+    gemStationsToUse = cms.vint32(0,1,2),
     ntupleTrackChamberDelta = cms.bool(True),
     ntupleTrackEff = cms.bool(True),
     overrideminNHitsChamber = cms.bool(False),
@@ -19,11 +36,11 @@ SimTrackMatching = cms.PSet(
     ## per collection params
     simTrack = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag('g4SimHits'),
+        validInputTags = cms.VInputTag(cms.InputTag("g4SimHits")),
         minPt = cms.double(1.5),
         maxPt = cms.double(999.),
-        minEta = cms.double(1.45),
-        maxEta = cms.double(4.0),
+        minEta = cms.double(0.0),
+        maxEta = cms.double(2.4),
         onlyMuon = cms.bool(True),
         requireVertex = cms.bool(True),
         requireGenPart = cms.bool(True),
@@ -31,14 +48,14 @@ SimTrackMatching = cms.PSet(
     ## GEM
     gemSimHit = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag('g4SimHits','MuonGEMHits'),
+        validInputTags = cms.VInputTag(cms.InputTag("g4SimHits", "MuonGEMHits")),
         run = cms.bool(True),
         simMuOnly = cms.bool(True),
         discardEleHits = cms.bool(True),
     ),
     gemStripDigi = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("simMuonGEMDigis"),
+        validInputTags = cms.VInputTag(cms.InputTag("simMuonGEMDigis")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
@@ -46,21 +63,21 @@ SimTrackMatching = cms.PSet(
     ),
     gemPadDigi = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("simMuonGEMCSCPadDigis"),
+        validInputTags = cms.VInputTag(cms.InputTag("simMuonGEMPadDigis")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
      ),
     gemCoPadDigi = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("simMuonGEMCSCPadDigis", "Coincidence"),
+        validInputTags = cms.VInputTag(cms.InputTag("simCscTriggerPrimitiveDigis")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
     ),
     gemRecHit = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("gemRecHits"),
+        validInputTags = cms.VInputTag(cms.InputTag("gemRecHits")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
@@ -69,35 +86,36 @@ SimTrackMatching = cms.PSet(
     ## ME0
     me0SimHit = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag('g4SimHits','MuonME0Hits'),
-        run = cms.bool(False),
+        validInputTags = cms.VInputTag(cms.InputTag("g4SimHits", "MuonME0Hits")),
+        run = cms.bool(True),
         simMuOnly = cms.bool(True),
         discardEleHits = cms.bool(True),
     ),
     me0DigiPreReco = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("simMuonME0Digis"),
+        validInputTags = cms.VInputTag(cms.InputTag("simMuonME0Digis")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
+        matchDeltaStrip = cms.int32(1),
     ),
     me0RecHit = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("me0RecHits"),
+        validInputTags = cms.VInputTag(cms.InputTag("me0RecHits")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
     ),
     me0Segment = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("me0Segments"),
+        validInputTags = cms.VInputTag(cms.InputTag("me0Segments")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
     ),
     me0Muon = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("me0MuonConverter"),
+        validInputTags = cms.VInputTag(cms.InputTag("me0MuonConverter")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
@@ -105,14 +123,14 @@ SimTrackMatching = cms.PSet(
     ## RPC
     rpcSimHit = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag('g4SimHits','MuonRPCHits'),
+        validInputTags = cms.VInputTag(cms.InputTag("g4SimHits", "MuonRPCHits")),
         run = cms.bool(True),
         simMuOnly = cms.bool(True),
         discardEleHits = cms.bool(True),
     ),
     rpcStripDigi = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("simMuonRPCDigis"),
+        validInputTags = cms.VInputTag(cms.InputTag("simMuonRPCDigis")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
@@ -120,7 +138,8 @@ SimTrackMatching = cms.PSet(
     ),
     rpcRecHit = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("rpcRecHits"),
+        validInputTags = cms.VInputTag(cms.InputTag("rpcRecHits"),
+                                       cms.InputTag("hltRpcRecHits")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
@@ -129,7 +148,7 @@ SimTrackMatching = cms.PSet(
     ## CSC
     cscSimHit = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag('g4SimHits','MuonCSCHits'),
+        validInputTags = cms.VInputTag(cms.InputTag("g4SimHits", "MuonCSCHits")),
         run = cms.bool(True),
         simMuOnly = cms.bool(True),
         discardEleHits = cms.bool(True),
@@ -137,7 +156,8 @@ SimTrackMatching = cms.PSet(
     ),
     cscStripDigi = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("simMuonCSCDigis", "MuonCSCComparatorDigi"),
+        validInputTags = cms.VInputTag(cms.InputTag("simMuonCSCDigis", "MuonCSCComparatorDigi"),
+                                       cms.InputTag("hltMuonCSCDigis", "MuonCSCComparatorDigi")),
         run = cms.bool(True),
         minBX = cms.int32(3),
         maxBX = cms.int32(9),
@@ -146,7 +166,8 @@ SimTrackMatching = cms.PSet(
     ),
     cscWireDigi = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("simMuonCSCDigis", "MuonCSCWireDigi"),
+        validInputTags = cms.VInputTag(cms.InputTag("simMuonCSCDigis", "MuonCSCWireDigi"),
+                                       cms.InputTag("hltMuonCSCDigis", "MuonCSCWireDigi")),
         run = cms.bool(True),
         minBX = cms.int32(3),
         maxBX = cms.int32(8),
@@ -155,7 +176,8 @@ SimTrackMatching = cms.PSet(
     ),
     cscCLCT = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("simCscTriggerPrimitiveDigis"),
+        validInputTags = cms.VInputTag(cms.InputTag("simCscTriggerPrimitiveDigis"),
+                                       cms.InputTag("hltMuonCSCDigis", "MuonCSCCLCTDigi")),
         run = cms.bool(True),
         minBX = cms.int32(5),
         maxBX = cms.int32(7),
@@ -163,7 +185,8 @@ SimTrackMatching = cms.PSet(
     ),
     cscALCT = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("simCscTriggerPrimitiveDigis"),
+        validInputTags = cms.VInputTag(cms.InputTag("simCscTriggerPrimitiveDigis"),
+                                       cms.InputTag("hltMuonCSCDigis", "MuonCSCALCTDigi")),
         run = cms.bool(True),
         minBX = cms.int32(5),
         maxBX = cms.int32(7),
@@ -171,12 +194,13 @@ SimTrackMatching = cms.PSet(
     ),
     cscLCT = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("simCscTriggerPrimitiveDigis"),
+        validInputTags = cms.VInputTag(cms.InputTag("simCscTriggerPrimitiveDigis"),
+                                       cms.InputTag("hltMuonCSCDigis", "MuonCSCCorrelatedLCTDigi")),
         run = cms.bool(True),
         minBX = cms.int32(5),
         maxBX = cms.int32(7),
         minNHitsChamber = cms.int32(4),
-        addGhosts = cms.bool(True),
+        addGhosts = cms.bool(False),
         matchAlctGem = cms.bool(False),
         matchAlctRpc = cms.bool(False),
         matchClctGem = cms.bool(False),
@@ -185,7 +209,7 @@ SimTrackMatching = cms.PSet(
     ),
     cscMPLCT = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("simCscTriggerPrimitiveDigis"),
+        validInputTags = cms.VInputTag(cms.InputTag("simCscTriggerPrimitiveDigis")),
         run = cms.bool(True),
         minBX = cms.int32(5),
         maxBX = cms.int32(7),
@@ -194,14 +218,16 @@ SimTrackMatching = cms.PSet(
     ),
     cscRecHit = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("csc2DRecHits"),
+        validInputTags = cms.VInputTag(cms.InputTag("csc2DRecHits"),
+                                       cms.InputTag("hltCsc2DRecHits")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
     ),
     cscSegment = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("cscSegments"),
+        validInputTags = cms.VInputTag(cms.InputTag("cscSegments"),
+                                       cms.InputTag("hltCscSegments")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
@@ -209,7 +235,7 @@ SimTrackMatching = cms.PSet(
     ## DT
     dtSimHit = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag('g4SimHits','MuonDTHits'),
+        validInputTags = cms.VInputTag(cms.InputTag("g4SimHits", "MuonDTHits")),
         run = cms.bool(True),
         simMuOnly = cms.bool(True),
         discardEleHits = cms.bool(True),
@@ -217,25 +243,42 @@ SimTrackMatching = cms.PSet(
     ),
     dtDigi = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("simMuonDTDigis"),
-        run = cms.bool(True),
+        validInputTags = cms.VInputTag(cms.InputTag("simMuonDTDigis"),
+                                       cms.InputTag("hltMuonDTDigis")),
+        run = cms.bool(False),
         ## not sure which BX is the central one
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
         matchDeltaWire = cms.int32(1),
         minNHitsChamber = cms.int32(4),
     ),
-    dtStubs = cms.PSet(
-        verbose = cms.int32(0),
-        input = cms.InputTag("simDtTriggerPrimitiveDigis"),
+    dtLocalTrigger = cms.PSet(
+        verbose = cms.int32(1),
+        validInputTags = cms.VInputTag(cms.InputTag("simDtTriggerPrimitiveDigis"),
+                                       cms.InputTag("hltMuonDTDigis")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
-        minNHitsChamber = cms.int32(4),
     ),
     dtRecHit = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("dt2DRecHits"),
+        validInputTags = cms.VInputTag(cms.InputTag("dt1DRecHits"),
+                                       cms.InputTag("hltDt1DRecHits")),
+        run = cms.bool(True),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+    ),
+    dtRecSegment2D = cms.PSet(
+        verbose = cms.int32(0),
+        validInputTags = cms.VInputTag(cms.InputTag("dt2DSegments")),
+        run = cms.bool(False),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+    ),
+    dtRecSegment4D = cms.PSet(
+        verbose = cms.int32(0),
+        validInputTags = cms.VInputTag(cms.InputTag("dt4DSegments"),
+                                       cms.InputTag("hltDt4DSegments")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
@@ -243,24 +286,24 @@ SimTrackMatching = cms.PSet(
     ## TrackFinder tracks
     cscTfTrack = cms.PSet(
         verbose = cms.int32(0),
-        run = cms.bool(True),
-        input = cms.InputTag("simCsctfTrackDigis"),
+        run = cms.bool(False),
+        validInputTags = cms.VInputTag(cms.InputTag("simCsctfTrackDigis")),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
         deltaR = cms.double(0.5),
     ),
     dtTfTrack = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("simDttfDigis", "DTTF"),
-        run = cms.bool(True),
+        validInputTags = cms.VInputTag(cms.InputTag("simDttfDigis", "DTTF")),
+        run = cms.bool(False),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
         deltaR = cms.double(0.05),        
     ),
-    rpcPAC = cms.PSet(
+    rpcTfTrack = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("simMuonRPCDigis"),
-        run = cms.bool(True),
+        validInputTags = cms.VInputTag(cms.InputTag("simMuonRPCDigis")),
+        run = cms.bool(False),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
         deltaR = cms.double(0.05),        
@@ -268,7 +311,7 @@ SimTrackMatching = cms.PSet(
     ## TrackFinder candidates
     cscTfCand = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("simCsctfDigis", "CSC"),
+        validInputTags = cms.VInputTag(cms.InputTag("simCsctfDigis", "CSC")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
@@ -276,7 +319,7 @@ SimTrackMatching = cms.PSet(
     ),
     dtTfCand = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("simDttfDigis", "DT"),
+        validInputTags = cms.VInputTag(cms.InputTag("simDttfDigis", "DT")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
@@ -284,7 +327,7 @@ SimTrackMatching = cms.PSet(
     ),
     rpcfTfCand = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("simRpcTriggerDigis","RPCf"),
+        validInputTags = cms.VInputTag(cms.InputTag("simRpcTriggerDigis", "RPCf")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
@@ -292,7 +335,7 @@ SimTrackMatching = cms.PSet(
     ),
     rpcbTfCand = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("simRpcTriggerDigis","RPCb"),
+        validInputTags = cms.VInputTag(cms.InputTag("simRpcTriggerDigis", "RPCb")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
@@ -302,7 +345,7 @@ SimTrackMatching = cms.PSet(
 #       SRLUT = cms.PSet(
 #			Binary = cms.untracked.bool(False),
 #			ReadLUTs = cms.untracked.bool(False),
-#			LUTPath = cms.untracked.string('./'),
+#			LUTPath = cms.untracked.string("./"),
 #			UseMiniLUTs = cms.untracked.bool(True),
 #		),
 #        PTLUT = cms.PSet(
@@ -317,107 +360,165 @@ SimTrackMatching = cms.PSet(
 #	initializeFromPSet = cms.bool(True),
 #    ),
     ## GMT and L1Extra
-    gmtRegCand = cms.PSet(
+    gmtRegCandCSC = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("simGmtDigis"),
-        run = cms.bool(False),
+        validInputTags = cms.VInputTag(cms.InputTag("simGmtDigis"),
+                                       cms.InputTag("hltGtDigis", "CSC")),
+        run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
         deltaR = cms.double(0.05),
-    ),
+        ),
+    gmtRegCandDT = cms.PSet(
+        verbose = cms.int32(0),
+        validInputTags = cms.VInputTag(cms.InputTag("simGmtDigis"),
+                                       cms.InputTag("hltGtDigis", "DT")),
+        run = cms.bool(True),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+        deltaR = cms.double(0.05),
+        ),
+    gmtRegCandRPCb = cms.PSet(
+        verbose = cms.int32(0),
+        validInputTags = cms.VInputTag(cms.InputTag("simGmtDigis"),
+                                       cms.InputTag("hltGtDigis", "RPCb")),
+        run = cms.bool(True),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+        deltaR = cms.double(0.05),
+        ),
+    gmtRegCandRPCf = cms.PSet(
+        verbose = cms.int32(0),
+        validInputTags = cms.VInputTag(cms.InputTag("simGmtDigis"),
+                                       cms.InputTag("hltGtDigis", "RPCf")),
+        run = cms.bool(True),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+        deltaR = cms.double(0.05),
+        ),
     gmtCand = cms.PSet(
         verbose = cms.int32(0),
-        input = cms.InputTag("simGmtDigis"),
-        run = cms.bool(False),
-        minBX = cms.int32(-1),
-        maxBX = cms.int32(1),
-        deltaR = cms.double(0.05),
-    ),
-    l1Extra = cms.PSet(
-        verbose = cms.int32(0),
-        input = cms.InputTag("hltL1extraParticles"),
+        validInputTags = cms.VInputTag(cms.InputTag("simGmtDigis"),
+                                       cms.InputTag("hltGtDigis")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
         deltaR = cms.double(0.05),
     ),
+    l1ExtraMuonParticle = cms.PSet(
+        verbose = cms.int32(0),
+        validInputTags = cms.VInputTag(cms.InputTag("hltL1extraParticles")),
+        run = cms.bool(True),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+        deltaR = cms.double(0.2),
+    ),
+    ## HLT Tracks
+    recoTrackExtra = cms.PSet(
+        verbose = cms.int32(0),
+        validInputTags = cms.VInputTag(cms.InputTag("hltL2Muons")),
+        run = cms.bool(True),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+    ),
+    recoTrack = cms.PSet(
+        verbose = cms.int32(0),
+        validInputTags = cms.VInputTag(cms.InputTag("hltL2Muons")),
+        run = cms.bool(True),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+    ),
+    recoChargedCandidate = cms.PSet(
+        verbose = cms.int32(0),
+        validInputTags = cms.VInputTag(cms.InputTag("hltL2MuonCandidatesNoVtx")), 
+        run = cms.bool(True),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+    ),
+    recoMuon = cms.PSet(
+        verbose = cms.int32(0),
+        validInputTags = cms.VInputTag(cms.InputTag("hltGlbTrkMuonsNoVtx")), 
+        run = cms.bool(True),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+    ),
 )
 
 ## additional utilities
 def noRPCCollections(analyzer):
-    analyzer.simTrackMatching.rpcSimHit.input = ""
-    analyzer.simTrackMatching.rpcStripDigi.input = ""
-    analyzer.simTrackMatching.rpcRecHit.input = ""
+    analyzer.simTrackMatching.rpcSimHit.validInputTags = ""
+    analyzer.simTrackMatching.rpcStripDigi.validInputTags = ""
+    analyzer.simTrackMatching.rpcRecHit.validInputTags = ""
     return analyzer
 
 def noGEMCollections(analyzer):
-    analyzer.simTrackMatching.gemSimHit.input = ""
-    analyzer.simTrackMatching.gemStripDigi.input = ""
-    analyzer.simTrackMatching.gemPadDigi.input = ""
-    analyzer.simTrackMatching.gemCoPadDigi.input = ""
-    analyzer.simTrackMatching.gemRecHit.input = ""
+    analyzer.simTrackMatching.gemSimHit.validInputTags = ""
+    analyzer.simTrackMatching.gemStripDigi.validInputTags = ""
+    analyzer.simTrackMatching.gemPadDigi.validInputTags = ""
+    analyzer.simTrackMatching.gemCoPadDigi.validInputTags = ""
+    analyzer.simTrackMatching.gemRecHit.validInputTags = ""
     return analyzer
 
 def noCSCCollections(analyzer):
-    analyzer.simTrackMatching.cscSimHit.input = ""
-    analyzer.simTrackMatching.cscStripDigi.input = ""
-    analyzer.simTrackMatching.cscWireDigi.input = ""
-    analyzer.simTrackMatching.cscCLCT.input = ""
-    analyzer.simTrackMatching.cscALCT.input = ""
-    analyzer.simTrackMatching.cscLCT.input = ""
-    analyzer.simTrackMatching.cscMPLCT.input = ""
-    analyzer.simTrackMatching.cscRecHit.input = ""
-    analyzer.simTrackMatching.cscSegment.input = ""
+    analyzer.simTrackMatching.cscSimHit.validInputTags = ""
+    analyzer.simTrackMatching.cscStripDigi.validInputTags = ""
+    analyzer.simTrackMatching.cscWireDigi.validInputTags = ""
+    analyzer.simTrackMatching.cscCLCT.validInputTags = ""
+    analyzer.simTrackMatching.cscALCT.validInputTags = ""
+    analyzer.simTrackMatching.cscLCT.validInputTags = ""
+    analyzer.simTrackMatching.cscMPLCT.validInputTags = ""
+    analyzer.simTrackMatching.cscRecHit.validInputTags = ""
+    analyzer.simTrackMatching.cscSegment.validInputTags = ""
     return analyzer
 
 def noME0Collections(analyzer):
-    analyzer.simTrackMatching.me0SimHit.input = ""
-    analyzer.simTrackMatching.me0DigiPreReco.input = ""
-    analyzer.simTrackMatching.me0RecHit.input = ""
-    analyzer.simTrackMatching.me0Segment.input = ""
-    analyzer.simTrackMatching.me0Muon.input = ""
+    analyzer.simTrackMatching.me0SimHit.validInputTags = ""
+    analyzer.simTrackMatching.me0DigiPreReco.validInputTags = ""
+    analyzer.simTrackMatching.me0RecHit.validInputTags = ""
+    analyzer.simTrackMatching.me0Segment.validInputTags = ""
+    analyzer.simTrackMatching.me0Muon.validInputTags = ""
     return analyzer
 
 def noTrackCollections(analyzer):
-    analyzer.simTrackMatching.cscTfTrack.input = ""
-    analyzer.simTrackMatching.cscTfCand.input = ""
-    analyzer.simTrackMatching.gmtRegCand.input = ""
-    analyzer.simTrackMatching.gmtCand.input = ""
-    analyzer.simTrackMatching.l1Extra.input = ""
+    analyzer.simTrackMatching.cscTfTrack.validInputTags = ""
+    analyzer.simTrackMatching.cscTfCand.validInputTags = ""
+    analyzer.simTrackMatching.gmtRegCand.validInputTags = ""
+    analyzer.simTrackMatching.gmtCand.validInputTags = ""
+    analyzer.simTrackMatching.l1Extra.validInputTags = ""
     return analyzer
 
 def noSimHitCollections(analyzer):    
-    analyzer.simTrackMatching.rpcSimHit.input = ""
-    analyzer.simTrackMatching.gemSimHit.input = ""
-    analyzer.simTrackMatching.cscSimHit.input = ""
-    analyzer.simTrackMatching.me0SimHit.input = ""
+    analyzer.simTrackMatching.rpcSimHit.validInputTags = ""
+    analyzer.simTrackMatching.gemSimHit.validInputTags = ""
+    analyzer.simTrackMatching.cscSimHit.validInputTags = ""
+    analyzer.simTrackMatching.me0SimHit.validInputTags = ""
     return analyzer
     
 def noDigiCollections(analyzer):    
-    analyzer.simTrackMatching.me0DigiPreReco.input = ""
-    analyzer.simTrackMatching.rpcStripDigi.input = ""
-    analyzer.simTrackMatching.gemStripDigi.input = ""
-    analyzer.simTrackMatching.gemPadDigi.input = ""
-    analyzer.simTrackMatching.gemCoPadDigi.input = ""
-    analyzer.simTrackMatching.cscStripDigi.input = ""
-    analyzer.simTrackMatching.cscWireDigi.input = ""
+    analyzer.simTrackMatching.me0DigiPreReco.validInputTags = ""
+    analyzer.simTrackMatching.rpcStripDigi.validInputTags = ""
+    analyzer.simTrackMatching.gemStripDigi.validInputTags = ""
+    analyzer.simTrackMatching.gemPadDigi.validInputTags = ""
+    analyzer.simTrackMatching.gemCoPadDigi.validInputTags = ""
+    analyzer.simTrackMatching.cscStripDigi.validInputTags = ""
+    analyzer.simTrackMatching.cscWireDigi.validInputTags = ""
     return analyzer
 
 def noL1Collections(analyzer):    
-    analyzer.simTrackMatching.cscCLCT.input = ""
-    analyzer.simTrackMatching.cscALCT.input = ""
-    analyzer.simTrackMatching.cscLCT.input = ""
-    analyzer.simTrackMatching.cscMPLCT.input = ""
+    analyzer.simTrackMatching.cscCLCT.validInputTags = ""
+    analyzer.simTrackMatching.cscALCT.validInputTags = ""
+    analyzer.simTrackMatching.cscLCT.validInputTags = ""
+    analyzer.simTrackMatching.cscMPLCT.validInputTags = ""
     return analyzer
 
 def noRecoCollections(analyzer):    
-    analyzer.simTrackMatching.me0RecHit.input = ""
-    analyzer.simTrackMatching.me0Segment.input = ""
-    analyzer.simTrackMatching.me0Muon.input = ""
-    analyzer.simTrackMatching.gemRecHit.input = ""
-    analyzer.simTrackMatching.rpcRecHit.input = ""
-    analyzer.simTrackMatching.cscRecHit.input = ""
-    analyzer.simTrackMatching.cscSegment.input = ""
+    analyzer.simTrackMatching.me0RecHit.validInputTags = ""
+    analyzer.simTrackMatching.me0Segment.validInputTags = ""
+    analyzer.simTrackMatching.me0Muon.validInputTags = ""
+    analyzer.simTrackMatching.gemRecHit.validInputTags = ""
+    analyzer.simTrackMatching.rpcRecHit.validInputTags = ""
+    analyzer.simTrackMatching.cscRecHit.validInputTags = ""
+    analyzer.simTrackMatching.cscSegment.validInputTags = ""
     return analyzer
 
 def onlySimHitCollections(analyzer):
