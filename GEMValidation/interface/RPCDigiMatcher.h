@@ -3,14 +3,12 @@
 
 /**\class DigiMatcher
 
- Description: Matching of Digis for SimTrack in GEM
+ Description: Matching of Digis for SimTrack in RPC
 
- Original Author:  "Vadim Khotilovich"
+ Original Author:  Sven Dildick
 */
 
 #include "GEMCode/GEMValidation/interface/DigiMatcher.h"
-
-#include "FWCore/Utilities/interface/InputTag.h"
 
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include <DataFormats/RPCDigi/interface/RPCDigiCollection.h>
@@ -19,35 +17,38 @@
 #include <map>
 #include <set>
 
-typedef std::vector<RPCDigi> RPCDigiContainer;
-
 class SimHitMatcher;
 
 class RPCDigiMatcher : public DigiMatcher
 {
 public:
 
+  typedef std::vector<RPCDigi> RPCDigiContainer;
+
   RPCDigiMatcher(SimHitMatcher& sh);
   
   ~RPCDigiMatcher();
 
   // partition RPC detIds with digis
-  std::set<unsigned int> detIds() const;
+  std::set<unsigned int> detIds(int rpc_type = RPC_ALL) const;
 
   // chamber detIds with digis
-  std::set<unsigned int> chamberIds() const;
+  std::set<unsigned int> chamberIds(int rpc_type = RPC_ALL) const;
 
 
   // RPC digis from a particular partition, chamber or superchamber
   const DigiContainer& digisInDetId(unsigned int) const;
   const DigiContainer& digisInChamber(unsigned int) const;
 
+  //RPC digis from a particular partition, chamber or superchamber
+  const RPCDigiContainer& rpcDigisInDetId(unsigned int) const;
+  const RPCDigiContainer& rpcDigisInChamber(unsigned int) const;
+
   /// How many pads in RPC did this simtrack get in total?
   int nStrips() const;
 
   int extrapolateHsfromRPC(unsigned int, int) const; 
 
-  
   std::set<int> stripsInDetId(unsigned int) const;
 
   // what unique partitions numbers with digis from this simtrack?
@@ -55,9 +56,11 @@ public:
 
 private:
 
-  void matchDigisToSimTrack(const RPCDigiCollection& digis);
+  void matchDigisToSimTrack(const RPCDigiCollection&);
 
-  edm::InputTag rpcDigiInput_;
+  std::set<unsigned int> selectDetIds(const Id2DigiContainer &, int) const;
+
+  std::vector<edm::InputTag> rpcDigiInput_;
 
   int minBXRPC_, maxBXRPC_;
 
@@ -66,8 +69,13 @@ private:
   std::map<unsigned int, DigiContainer> detid_to_digis_;
   std::map<unsigned int, DigiContainer> chamber_to_digis_;
 
+  std::map<unsigned int, RPCDigiContainer> detid_to_rpcDigis_;
+  std::map<unsigned int, RPCDigiContainer> chamber_to_rpcDigis_;
+
   bool verboseDigi_;
   bool runRPCDigi_;
+
+  RPCDigiContainer no_rpc_digis_;
 };
 
 #endif

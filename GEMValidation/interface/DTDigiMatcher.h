@@ -3,14 +3,12 @@
 
 /**\class DigiMatcher
 
- Description: Matching of Digis for SimTrack in GEM
+ Description: Matching of Digis for SimTrack in DT
 
- Original Author:  "Vadim Khotilovich"
+ Original Author:  Sven Dildick
 */
 
 #include "GEMCode/GEMValidation/interface/DigiMatcher.h"
-
-#include "FWCore/Utilities/interface/InputTag.h"
 
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/DTDigi/interface/DTDigiCollection.h"
@@ -19,26 +17,26 @@
 #include <map>
 #include <set>
 
-typedef std::vector<DTDigi> DTDigiContainer;
-
 class SimHitMatcher;
 
 class DTDigiMatcher : public DigiMatcher
 {
 public:
 
+  typedef std::vector<DTDigi> DTDigiContainer;
+
   DTDigiMatcher(SimHitMatcher& sh);
   
   ~DTDigiMatcher();
 
   // partition GEM detIds with digis
-  std::set<unsigned int> detIds() const;
+  std::set<unsigned int> detIds(int dt_type = DT_ALL) const;
   // chamber detIds with digis
-  std::set<unsigned int> layerIds() const;
+  std::set<unsigned int> layerIds(int dt_type = DT_ALL) const;
   // superchamber detIds with digis
-  std::set<unsigned int> superLayerIds() const;
+  std::set<unsigned int> superLayerIds(int dt_type = DT_ALL) const;
   // chamber detIds with digis
-  std::set<unsigned int> chamberIds() const;
+  std::set<unsigned int> chamberIds(int dt_type = DT_ALL) const;
 
   //DT digis from a particular partition, chamber or superchamber
   const DTDigiContainer& digisInDetId(unsigned int) const;
@@ -54,13 +52,15 @@ public:
   int nSuperLayersWithDigisInChamber(unsigned int) const;
 
   // wire numbers from this simtrack in a detId
-  std::set<int> wireNumbersInDetId(unsigned int detid) const;
+  std::set<int> wireNumbersInDetId(unsigned int) const;
 
 private:
 
-  void matchDigisToSimTrack(const DTDigiCollection& digis);
+  void matchDigisToSimTrack(const DTDigiCollection&);
 
-  edm::InputTag dtDigiInput_;
+  std::set<unsigned int> selectDetIds(const std::map<unsigned int, DTDigiContainer>&, int) const;
+
+  std::vector<edm::InputTag> dtDigiInput_;
 
   bool verboseDigi_;
   bool runDTDigi_;

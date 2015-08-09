@@ -12,35 +12,35 @@ TrackMatcher::TrackMatcher(SimHitMatcher& sh, CSCDigiMatcher& csc_dg,
 , rpc_digi_matcher_(&rpc_dg)                 
 {
   auto tfTrack = conf().getParameter<edm::ParameterSet>("cscTfTrack");
-  cscTfTrackInputLabel_ = tfTrack.getParameter<edm::InputTag>("input");
+  //  cscTfTrackInputLabel_ = tfTrack.getParameter<edm::InputTag>("input");
   minBXTFTrack_ = tfTrack.getParameter<int>("minBX");
   maxBXTFTrack_ = tfTrack.getParameter<int>("minBX");
   verboseTFTrack_ = tfTrack.getParameter<int>("verbose");
   deltaRTFTrack_ = tfTrack.getParameter<double>("deltaR");
   
   auto tfCand = conf().getParameter<edm::ParameterSet>("cscTfCand");
-  cscTfCandInputLabel_ = tfCand.getParameter<edm::InputTag>("input");
+  // cscTfCandInputLabel_ = tfCand.getParameter<edm::InputTag>("input");
   minBXTFCand_ = tfCand.getParameter<int>("minBX");
   maxBXTFCand_ = tfCand.getParameter<int>("minBX");
   verboseTFCand_ = tfCand.getParameter<int>("verbose");
   deltaRTFCand_ = tfCand.getParameter<double>("deltaR");
   
-  auto gmtRegCand = conf().getParameter<edm::ParameterSet>("gmtRegCand");
-  gmtRegCandInputLabel_ = gmtRegCand.getParameter<edm::InputTag>("input");
+  auto gmtRegCand = conf().getParameter<edm::ParameterSet>("gmtRegCandCSC");
+  // gmtRegCandInputLabel_ = gmtRegCand.getParameter<edm::InputTag>("input");
   minBXGMTRegCand_ = gmtRegCand.getParameter<int>("minBX");
   maxBXGMTRegCand_ = gmtRegCand.getParameter<int>("minBX");
   verboseGMTRegCand_ = gmtRegCand.getParameter<int>("verbose");
   deltaRGMTRegCand_ = gmtRegCand.getParameter<double>("deltaR");
   
   auto gmtCand = conf().getParameter<edm::ParameterSet>("gmtCand");
-  gmtCandInputLabel_ = gmtCand.getParameter<edm::InputTag>("input");
+  //  gmtCandInputLabel_ = gmtCand.getParameter<edm::InputTag>("input");
   minBXGMTCand_ = gmtCand.getParameter<int>("minBX");
   maxBXGMTCand_ = gmtCand.getParameter<int>("minBX");
   verboseGMTCand_ = gmtCand.getParameter<int>("verbose");
   deltaRGMTCand_ = gmtCand.getParameter<double>("deltaR");
   
-  auto l1Extra = conf().getParameter<edm::ParameterSet>("l1Extra");
-  l1ExtraInputLabel_ = l1Extra.getParameter<edm::InputTag>("input");
+  auto l1Extra = conf().getParameter<edm::ParameterSet>("l1ExtraMuonParticle");
+  // l1ExtraInputLabel_ = l1Extra.getParameter<edm::InputTag>("input");
   minBXL1Extra_ = l1Extra.getParameter<int>("minBX");
   maxBXL1Extra_ = l1Extra.getParameter<int>("minBX");
   verboseL1Extra_ = l1Extra.getParameter<int>("verbose");
@@ -165,6 +165,7 @@ TrackMatcher::init()
   propagateSimTrack();
   propagationInterStation();
 
+  /*
   // tracks produced by TF
   edm::Handle<L1CSCTrackCollection> hl1Tracks;
   event().getByLabel(cscTfTrackInputLabel_,hl1Tracks);
@@ -179,6 +180,7 @@ TrackMatcher::init()
   edm::Handle<l1extra::L1MuonParticleCollection> l1_particles;
   event().getByLabel(l1ExtraInputLabel_, l1_particles);
   matchL1MuonParticleToSimTrack(*l1_particles.product());
+  */
 }
 
 void 

@@ -9,7 +9,7 @@ RPCDigiMatcher::RPCDigiMatcher(SimHitMatcher& sh)
 : DigiMatcher(sh)
 {
   auto rpcDigi_= conf().getParameter<edm::ParameterSet>("rpcStripDigi");
-  rpcDigiInput_ = rpcDigi_.getParameter<edm::InputTag>("input");
+  rpcDigiInput_ = rpcDigi_.getParameter<std::vector<edm::InputTag>>("validInputTags");
   minBXRPC_ = rpcDigi_.getParameter<int>("minBX");
   maxBXRPC_ = rpcDigi_.getParameter<int>("maxBX");
   matchDeltaStrip_ = rpcDigi_.getParameter<int>("matchDeltaStrip");
@@ -19,16 +19,12 @@ RPCDigiMatcher::RPCDigiMatcher(SimHitMatcher& sh)
   setVerbose(conf().getUntrackedParameter<int>("verboseRPCDigi", 0));
 
   if (hasRPCGeometry_) {
-    if (!rpcDigiInput_.label().empty()) {
-      edm::Handle<RPCDigiCollection> rpc_digis;
-      event().getByLabel(rpcDigiInput_, rpc_digis);
-      if (runRPCDigi_) matchDigisToSimTrack(*rpc_digis.product());
-    }
+    edm::Handle<RPCDigiCollection> rpc_digis;
+    if (gemvalidation::getByLabel(rpcDigiInput_, rpc_digis, event())) if (runRPCDigi_) matchDigisToSimTrack(*rpc_digis.product());
   }
 }
 
 RPCDigiMatcher::~RPCDigiMatcher() {}
-
 
 void
 RPCDigiMatcher::matchDigisToSimTrack(const RPCDigiCollection& digis)
@@ -60,24 +56,42 @@ RPCDigiMatcher::matchDigisToSimTrack(const RPCDigiCollection& digis)
       auto mydigi = make_digi(id, d->strip(), d->bx(), RPC_STRIP);
       detid_to_digis_[id].push_back(mydigi);
       chamber_to_digis_[p_id.chamberId().rawId()].push_back(mydigi);
-      //std::cout << "RPC det id " << (RPCDetId)id << " "<< p_id << std::endl;
-      //std::cout<<"  chamber raw id "<<  p_id.chamberId().rawId()<<""<< p_id.chamberId() << std::endl;
+
+      detid_to_rpcDigis_[id].push_back(*d);
+      chamber_to_rpcDigis_[p_id.chamberId().rawId()].push_back(*d);
     }
   }
 }
 
 
-
-
 std::set<unsigned int>
-RPCDigiMatcher::detIds() const
+RPCDigiMatcher::selectDetIds(const Id2DigiContainer &digis, int rpc_type) const
 {
   std::set<unsigned int> result;
-  for (auto& p: detid_to_digis_) result.insert(p.first);
+  for (auto& p: digis)
+  {
+    auto id = p.first;
+    if (rpc_type > 0)
+    {
+      RPCDetId detId(id);
+      if (gemvalidation::toRPCType(detId.region(), detId.station(), detId.ring()) != rpc_type) continue;
+    }
+    result.insert(p.first);
+  }
   return result;
 }
 
+std::set<unsigned int>
+RPCDigiMatcher::detIds(int rpc_type) const
+{
+  return selectDetIds(detid_to_digis_, rpc_type);
+}
 
+std::set<unsigned int>
+RPCDigiMatcher::chamberIds(int rpc_type) const
+{
+  return selectDetIds(chamber_to_digis_, rpc_type);
+}
 
 const matching::DigiContainer&
 RPCDigiMatcher::digisInDetId(unsigned int detid) const
@@ -86,19 +100,25 @@ RPCDigiMatcher::digisInDetId(unsigned int detid) const
   return detid_to_digis_.at(detid);
 }
 
-std::set<unsigned int>
-RPCDigiMatcher::chamberIds() const
-{
-  std::set<unsigned int> result;
-  for (auto& p: chamber_to_digis_) result.insert(p.first);
-  return result;
-}
-
 const matching::DigiContainer&
 RPCDigiMatcher::digisInChamber(unsigned int detid) const  //use chamber raw id here
 {
   if (chamber_to_digis_.find(detid) == chamber_to_digis_.end()) return no_digis_;
   return chamber_to_digis_.at(detid);
+}
+
+const RPCDigiMatcher::RPCDigiContainer& 
+RPCDigiMatcher::rpcDigisInDetId(unsigned int detid) const
+{
+  if (detid_to_rpcDigis_.find(detid) == detid_to_rpcDigis_.end()) return no_rpc_digis_;
+  return detid_to_rpcDigis_.at(detid);
+}
+
+const RPCDigiMatcher::RPCDigiContainer& 
+RPCDigiMatcher::rpcDigisInChamber(unsigned int detid) const
+{
+  if (chamber_to_rpcDigis_.find(detid) == chamber_to_rpcDigis_.end()) return no_rpc_digis_;
+  return chamber_to_rpcDigis_.at(detid);
 }
 
 int
@@ -112,7 +132,6 @@ RPCDigiMatcher::nStrips() const
   }
   return n;
 }
-
 
 std::set<int>
 RPCDigiMatcher::stripsInDetId(unsigned int detid) const

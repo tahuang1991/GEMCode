@@ -6,7 +6,7 @@ DisplacedGENMuonMatcher::DisplacedGENMuonMatcher(const SimTrack& t, const SimVer
 {
   edm::Handle<reco::GenParticleCollection> genParticles;
   ev.getByLabel("genParticles", genParticles);
-  matchDisplacedGENMuonMatcherToSimTrack(*genParticles.product());
+  //  matchDisplacedGENMuonMatcherToSimTrack(*genParticles.product());
   //  if(gemvalidation::getByLabel("genParticles", genParticles, event())) return;//
 }
 

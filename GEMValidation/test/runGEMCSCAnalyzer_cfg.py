@@ -17,7 +17,7 @@ process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorOp
 process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAlong_cfi')
 
 process.source = cms.Source("PoolSource",
-	fileNames = cms.untracked.vstring('file:out_L1.root'),
+	fileNames = cms.untracked.vstring('file:/afs/cern.ch/work/d/dildick/public/GEM/MuonPhaseIIScopeDoc/CMSSW_6_2_0_SLHC26_patch3/src/L1Trigger/L1IntegratedMuonTrigger/test/out_hlt_fullScope.root'),
 )
 
 from GEMCode.SimMuL1.GEMCSCTriggerSamplesLib import *
@@ -26,7 +26,7 @@ from GEMCode.GEMValidation.InputFileHelpers import *
 #process = useInputDir(process, files['_gem98_pt2-50_PU0_pt0_new'], False)
 
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string("out_ana.root")
+    fileName = cms.string("out_ana_fullScope.root")
 )
 
 ## global tag for upgrade studies
@@ -42,21 +42,15 @@ Stations = enum('ALL','ME11','ME1a','ME1b','ME12','ME13','ME21','ME22','ME31','M
 from GEMCode.GEMValidation.simTrackMatching_cfi import SimTrackMatching
 process.GEMCSCAnalyzer = cms.EDAnalyzer("GEMCSCAnalyzer",
     verbose = cms.untracked.int32(0),
-    stationsToUse = cms.vint32(Stations.ALL,Stations.ME11,Stations.ME1a,Stations.ME1b,
-                              Stations.ME21,Stations.ME31,Stations.ME41),
+#    stationsToUse = cms.vint32(Stations.ALL,Stations.ME11,Stations.ME1a,Stations.ME1b,
+#                              Stations.ME21,Stations.ME31,Stations.ME41),
     simTrackMatching = SimTrackMatching
 )
 matching = process.GEMCSCAnalyzer.simTrackMatching
 matching.simTrack.minPt = 1.5
 matching.matchprint = cms.bool(False)
-matching.gemRecHit.input = ""
-"""
-matching.cscTfTrack.input = ""
-matching.tfCand.input = ""
-matching.gmtCand.input = ""
-matching.l1Extra.input = ""
-"""
-doGem = True
+
+doGem = False
 if doGem:
   matching.cscSimHit.minNHitsChamber = 3
   matching.cscStripDigi.minNHitsChamber = 3
@@ -66,7 +60,7 @@ if doGem:
   matching.cscLCT.minNHitsChamber = 3
   matching.cscLCT.matchAlctGem = True
   matching.cscMPLCT.minNHitsChamber = 3
-doRpc = True
+doRpc = False
 if doRpc:
   matching.cscLCT.matchAlctRpc = True
 

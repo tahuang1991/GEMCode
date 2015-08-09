@@ -9,8 +9,6 @@
 */
 #include "GEMCode/GEMValidation/interface/DigiMatcher.h"
 
-#include "FWCore/Utilities/interface/InputTag.h"
-
 #include "DataFormats/Common/interface/DetSetVector.h"
 #include "DataFormats/GEMDigi/interface/GEMDigiCollection.h"
 #include "DataFormats/GEMDigi/interface/GEMCSCPadDigiCollection.h"
@@ -33,20 +31,17 @@ public:
   ~GEMDigiMatcher();
 
   // partition GEM detIds with digis
-  std::set<unsigned int> detIds() const;
+  std::set<unsigned int> detIdsDigi(int gem_type = GEM_ALL) const;
+  std::set<unsigned int> detIdsPad(int gem_type = GEM_ALL) const;
 
   // chamber detIds with digis
-  std::set<unsigned int> chamberIds() const;
+  std::set<unsigned int> chamberIdsDigi(int gem_type = GEM_ALL) const;
+  std::set<unsigned int> chamberIdsPad(int gem_type = GEM_ALL) const;
 
   // superchamber detIds with digis
-  std::set<unsigned int> superChamberIds() const;
-
-  // partition detIds with coincidence pads
-  std::set<unsigned int> detIdsWithCoPads() const;
-
-  // superchamber detIds with coincidence pads
-  std::set<unsigned int> superChamberIdsWithCoPads() const;
-
+  std::set<unsigned int> superChamberIdsDigi(int gem_type = GEM_ALL) const;
+  std::set<unsigned int> superChamberIdsPad(int gem_type = GEM_ALL) const;
+  std::set<unsigned int> superChamberIdsCoPad(int gem_type = GEM_ALL) const;
 
   // GEM digis from a particular partition, chamber or superchamber
   const DigiContainer& digisInDetId(unsigned int) const;
@@ -59,8 +54,20 @@ public:
   const DigiContainer& padsInSuperChamber(unsigned int) const;
 
   // GEM co-pads from a particular partition or superchamber
-  const DigiContainer& coPadsInDetId(unsigned int) const;
   const DigiContainer& coPadsInSuperChamber(unsigned int) const;
+
+  // GEM digis from a particular partition, chamber or superchamber
+  const GEMDigiContainer& gemDigisInDetId(unsigned int) const;
+  const GEMDigiContainer& gemDigisInChamber(unsigned int) const;
+  const GEMDigiContainer& gemDigisInSuperChamber(unsigned int) const;
+
+  // GEM pads from a particular partition, chamber or superchamber
+  const GEMCSCPadDigiContainer& gemPadsInDetId(unsigned int) const;
+  const GEMCSCPadDigiContainer& gemPadsInChamber(unsigned int) const;
+  const GEMCSCPadDigiContainer& gemPadsInSuperChamber(unsigned int) const;
+
+  // GEM co-pads from a particular partition or superchamber
+  const GEMCSCPadDigiContainer& gemCoPadsInSuperChamber(unsigned int) const;
 
   // #layers with digis from this simtrack
   int nLayersWithDigisInSuperChamber(unsigned int) const;
@@ -74,23 +81,24 @@ public:
 
   std::set<int> stripNumbersInDetId(unsigned int) const;
   std::set<int> padNumbersInDetId(unsigned int) const;
-  std::set<int> coPadNumbersInDetId(unsigned int) const;
 
-  int extrapolateHsfromGEMPad(unsigned int , int ) const;
-  int extrapolateHsfromGEMStrip(unsigned int , int ) const;
+  int extrapolateHsfromGEMPad(unsigned int , int) const;
+  int extrapolateHsfromGEMStrip(unsigned int , int) const;
   // what unique partitions numbers with digis from this simtrack?
   std::set<int> partitionNumbers() const;
   std::set<int> partitionNumbersWithCoPads() const;
 
 private:
 
-  void matchDigisToSimTrack(const GEMDigiCollection& digis);
-  void matchPadsToSimTrack(const GEMCSCPadDigiCollection& pads);
-  void matchCoPadsToSimTrack(const GEMCSCPadDigiCollection& co_pads);
+  void matchDigisToSimTrack(const GEMDigiCollection&);
+  void matchPadsToSimTrack(const GEMCSCPadDigiCollection&);
+  void matchCoPadsToSimTrack(const GEMCSCPadDigiCollection&);
 
-  edm::InputTag gemDigiInput_;
-  edm::InputTag gemPadDigiInput_;
-  edm::InputTag gemCoPadDigiInput_;
+  std::set<unsigned int> selectDetIds(const Id2DigiContainer &, int) const;
+  
+  std::vector<edm::InputTag> gemDigiInput_;
+  std::vector<edm::InputTag> gemPadDigiInput_;
+  std::vector<edm::InputTag> gemCoPadDigiInput_;
 
   int minBXGEMDigi_, maxBXGEMDigi_;
   int minBXGEMPad_, maxBXGEMPad_;
@@ -106,9 +114,17 @@ private:
   std::map<unsigned int, DigiContainer> chamber_to_pads_;
   std::map<unsigned int, DigiContainer> superchamber_to_pads_;
 
-  std::map<unsigned int, DigiContainer> detid_to_copads_;
-  std::map<unsigned int, DigiContainer> chamber_to_copads_;
   std::map<unsigned int, DigiContainer> superchamber_to_copads_;
+
+  std::map<unsigned int, GEMDigiContainer> detid_to_gemdigis_;
+  std::map<unsigned int, GEMDigiContainer> chamber_to_gemdigis_;
+  std::map<unsigned int, GEMDigiContainer> superchamber_to_gemdigis_;
+
+  std::map<unsigned int, GEMCSCPadDigiContainer> detid_to_gempads_;
+  std::map<unsigned int, GEMCSCPadDigiContainer> chamber_to_gempads_;
+  std::map<unsigned int, GEMCSCPadDigiContainer> superchamber_to_gempads_;
+
+  std::map<unsigned int, GEMCSCPadDigiContainer> superchamber_to_gemcopads_;
 
   bool verboseDigi_;
   bool verbosePad_;
@@ -117,6 +133,11 @@ private:
   bool runGEMDigi_;
   bool runGEMPad_;
   bool runGEMCoPad_;
+
+  GEMDigiContainer no_gem_digis_;
+  GEMCSCPadDigiContainer no_gem_pads_;
+  GEMCSCPadDigiContainer no_gem_copads_;
+
 };
 
 #endif

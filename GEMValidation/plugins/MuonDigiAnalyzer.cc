@@ -799,7 +799,7 @@ void MuonDigiAnalyzer::analyzeTracks(edm::ParameterSet cfg_, const edm::Event& i
     }
 
     // ** GEM Digis, Pads and CoPads ** //    
-    auto gem_dg_ids_sch = match_gd.superChamberIds();
+    auto gem_dg_ids_sch = match_gd.superChamberIdsDigi();
     for(auto d: gem_dg_ids_sch)
     {
       auto gem_digis = match_gd.digisInSuperChamber(d);
@@ -815,7 +815,7 @@ void MuonDigiAnalyzer::analyzeTracks(edm::ParameterSet cfg_, const edm::Event& i
       track_.gem_pad_phi = gem_pad_gp.phi();	      
     }
 
-    auto gem_dg_ids_ch = match_gd.chamberIds();
+    auto gem_dg_ids_ch = match_gd.chamberIdsDigi();
     for(auto d: gem_dg_ids_ch)
     {
       GEMDetId id(d);
