@@ -59,24 +59,24 @@ L1TrackFinderCandidateMatcher::init()
 void 
 L1TrackFinderCandidateMatcher::matchCSCTfCandToSimTrack(const L1MuRegionalCandCollection& cands)
 {
-  std::cout << "Match SimTrack to CSC TFCands" << std::cout;
+  if (verboseCscTfCand_) std::cout << "Match SimTrack to CSC TFCands" << std::endl;
 }
 
 void 
 L1TrackFinderCandidateMatcher::matchDTTfCandToSimTrack(const L1MuRegionalCandCollection& cands)
-{
-  std::cout << "Match SimTrack to DT TFCands" << std::cout;
+{  
+  if (verboseDtTfCand_) std::cout << "Match SimTrack to DT TFCands" << std::endl;
 }
 
 void 
 L1TrackFinderCandidateMatcher::matchRPCfTfCandToSimTrack(const L1MuRegionalCandCollection& cands)
 {
-  std::cout << "Match SimTrack to RPCf TFCands" << std::cout;
+  if (verboseRpcfTfCand_) std::cout << "Match SimTrack to RPCf TFCands" << std::endl;
 }
 
 void 
 L1TrackFinderCandidateMatcher::matchRPCbTfCandToSimTrack(const L1MuRegionalCandCollection& cands)
 {
-  std::cout << "Match SimTrack to RPCb TFCands" << std::cout;
+  if (verboseRpcbTfCand_) std::cout << "Match SimTrack to RPCb TFCands" << std::endl;
 }
 

@@ -1376,7 +1376,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   GlobalPoint best_rpcstrip_odd[12];
   GlobalPoint best_rpcstrip_even[12];
 
-  for (auto d: match_sh.chamberIdsRPC())
+  if (false) for (auto d: match_sh.chamberIdsRPC())
   {
     RPCDetId id(d);
     const int st(detIdToMEStation(id.station(), id.ring()));
@@ -1391,7 +1391,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     }	
   }
 
-  for (auto d: match_rd.detIds())
+  if (false) for (auto d: match_rd.detIds())
   {
     RPCDetId id(d);
     const int st(detIdToMEStation(id.station(), id.ring()));
@@ -1679,14 +1679,20 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     etrk_[0].recoChargedCandidate_nValidDTHits = (recoChargedCandidate.track().get())->hitPattern().numberOfValidMuonDTHits();
     etrk_[0].recoChargedCandidate_nValidCSCHits = (recoChargedCandidate.track().get())->hitPattern().numberOfValidMuonCSCHits();
     etrk_[0].recoChargedCandidate_nValidRPCHits = (recoChargedCandidate.track().get())->hitPattern().numberOfValidMuonRPCHits();
+    if (verbose_) {
+      std::cout << "recoChargedCandidate_pt " << etrk_[0].recoChargedCandidate_pt << std::endl;
+      std::cout << "recoChargedCandidate_eta " << etrk_[0].recoChargedCandidate_eta << std::endl;
+      std::cout << "recoChargedCandidate_phi " << etrk_[0].recoChargedCandidate_phi << std::endl;
+      std::cout << "nValidHits:" 
+		<< " DT " << etrk_[0].recoChargedCandidate_nValidDTHits 
+		<< " CSC " << etrk_[0].recoChargedCandidate_nValidCSCHits
+		<< " RPC " << etrk_[0].recoChargedCandidate_nValidRPCHits << std::endl;
+    }
   }
-
 
   for (auto s: stations_to_use_)
   {
     tree_eff_[s]->Fill();
-
-
   }
 }
 
@@ -2034,7 +2040,7 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
     std::cout << "CSC Chamber: "<<d<<" "<<id<<" layerswithhits:"<<nlayers<<" global eta:"<<gp.eta()<<" mean strip:"<<mean_strip<<endl;
   }     
   
-  for (auto d: match_sh.chamberIdsRPC())
+  if (false) for (auto d: match_sh.chamberIdsRPC())
   {
     RPCDetId id(d);
     const int st(detIdToMEStation(id.station(), id.ring()));
