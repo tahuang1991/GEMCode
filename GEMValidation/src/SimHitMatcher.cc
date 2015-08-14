@@ -832,6 +832,37 @@ SimHitMatcher::nLayersWithHitsInSuperChamber(unsigned int detid) const
 }
 
 bool 
+SimHitMatcher::hitStationGEM(int st, int nlayers) const
+{
+  int nst=0;
+  for(auto ddt: chamberIdsGEM()) {
+
+    const GEMDetId id(ddt);
+    if (id.station()!=st) continue;
+        
+    const int nl(nLayersWithHitsInSuperChamber(id.rawId()));
+    if (nl < nlayers) continue; 
+    ++nst;    
+  }
+  return nst;
+}
+
+
+bool 
+SimHitMatcher::hitStationRPC(int st) const
+{
+  int nst=0;
+  for(auto ddt: chamberIdsRPC()) {
+
+    const RPCDetId id(ddt);
+    if (id.station()!=st) continue;
+    ++nst;    
+  }
+  return nst;
+}
+
+
+bool 
 SimHitMatcher::hitStationCSC(int st, int nlayers) const
 {
   int nst=0;
@@ -900,6 +931,21 @@ SimHitMatcher::nStationsDT(int nsuperlayers, int nlayers) const
 {
   return (hitStationDT(1, nsuperlayers, nlayers) + hitStationDT(2, nsuperlayers, nlayers) + 
 	  hitStationDT(3, nsuperlayers, nlayers) + hitStationDT(4,nsuperlayers, nlayers));
+}
+
+
+int 
+SimHitMatcher::nStationsRPC() const
+{
+  return (hitStationRPC(1) + hitStationRPC(2) + hitStationRPC(3) + hitStationRPC(4));
+}
+
+
+int 
+SimHitMatcher::nStationsGEM(int nlayers) const
+{
+  return (hitStationGEM(1, nlayers) + hitStationGEM(2, nlayers) + 
+	  hitStationGEM(3, nlayers) + hitStationGEM(4, nlayers));
 }
 
 int 

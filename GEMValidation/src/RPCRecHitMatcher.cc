@@ -33,6 +33,7 @@ RPCRecHitMatcher::matchRecHitsToSimTrack(const RPCRecHitCollection& rechits)
   auto det_ids = simhit_matcher_->detIdsRPC();
   for (auto id: det_ids) {
     RPCDetId p_id(id);
+    //std::cout << p_id << std::endl;
     
     auto hit_strips = simhit_matcher_->hitStripsInDetId(id, matchDeltaStrip_);
     if (verboseRPCRecHit_) {
@@ -57,7 +58,7 @@ RPCRecHitMatcher::matchRecHitsToSimTrack(const RPCRecHitCollection& rechits)
         if (verboseRPCRecHit_) std::cout<<i<<" "<<firstStrip<<" "<<cls<<" "<<stripFound<<std::endl;
       }
       if (!stripFound) continue;
-      if (verboseRPCRecHit_) cout<<"oki"<<endl;
+      if (verboseRPCRecHit_) cout<<"...was matched!"<<endl;
       
       auto myrechit = make_digi(id, d->firstClusterStrip(), d->BunchX(), RPC_STRIP, d->clusterSize());
       detid_to_recHits_[id].push_back(myrechit);
@@ -224,4 +225,14 @@ bool
 RPCRecHitMatcher::areRPCRecHitSame(const RPCRecHit& l, const RPCRecHit& r) const
 {
   return l.localPosition()==r.localPosition() and l.BunchX()==r.BunchX();
+}
+
+
+int 
+RPCRecHitMatcher::nRecHits() const
+{
+  int n = 0;
+  auto ids = chamberIds();
+  for (auto id: ids) n += rpcRecHitsInChamber(id).size();
+  return n;  
 }

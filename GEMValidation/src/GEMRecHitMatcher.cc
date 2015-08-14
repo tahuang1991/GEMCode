@@ -266,3 +266,13 @@ GEMRecHitMatcher::areGEMRecHitSame(const GEMRecHit& l, const GEMRecHit& r) const
 {
   return l.localPosition()==r.localPosition() and l.BunchX()==r.BunchX();
 }
+
+
+int 
+GEMRecHitMatcher::nRecHits() const
+{
+  int n = 0;
+  auto ids = chamberIds();
+  for (auto id: ids) n += gemRecHitsInChamber(id).size();
+  return n;  
+}

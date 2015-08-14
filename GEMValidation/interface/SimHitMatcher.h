@@ -104,10 +104,14 @@ public:
   // was there a hit in a particular DT/CSC station?
   bool hitStationCSC(int, int) const;
   bool hitStationDT(int, int, int) const;
+  bool hitStationGEM(int, int) const;
+  bool hitStationRPC(int) const;
 
   // number of stations with hits in at least X layers
   int nStationsCSC(int nl=4) const;
   int nStationsDT(int nsl=1, int nl=3) const;
+  int nStationsRPC() const;
+  int nStationsGEM(int nl=1) const;
 
   int nCellsWithHitsInLayerDT(unsigned int) const;
   int nLayersWithHitsInSuperLayerDT(unsigned int) const;
