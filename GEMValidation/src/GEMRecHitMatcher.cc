@@ -28,7 +28,7 @@ GEMRecHitMatcher::~GEMRecHitMatcher() {}
 void
 GEMRecHitMatcher::matchRecHitsToSimTrack(const GEMRecHitCollection& rechits)
 {
-  
+  if (verboseGEMRecHit_) cout << "Matching simtrack to GEM rechits" << endl;
   auto det_ids = simhit_matcher_->detIdsGEM();
   for (auto id: det_ids)
   {
@@ -47,7 +47,7 @@ GEMRecHitMatcher::matchRecHitsToSimTrack(const GEMRecHitCollection& rechits)
 
     for (auto d = rechits_in_det.first; d != rechits_in_det.second; ++d)
     {
-      if (verboseGEMRecHit_) cout<<"recHit "<<p_id<<" "<<*d<<endl;
+      if (verboseGEMRecHit_) cout<<"GEMRecHit "<<p_id<<" "<<*d<<endl;
       // check that the rechit is within BX range
       if (d->BunchX() < minBXGEM_ || d->BunchX() > maxBXGEM_) continue;
       // check that it matches a strip that was hit by SimHits from our track
@@ -58,13 +58,13 @@ GEMRecHitMatcher::matchRecHitsToSimTrack(const GEMRecHitCollection& rechits)
 
       for(int i = firstStrip; i < (firstStrip + cls); i++){
 
-	if (hit_strips.find(i) != hit_strips.end()) stripFound = true;
+        if (hit_strips.find(i) != hit_strips.end()) stripFound = true;
         //std::cout<<i<<" "<<firstStrip<<" "<<cls<<" "<<stripFound<<std::endl;
 	
       }
 
       if (!stripFound) continue;
-      if (verboseGEMRecHit_) cout<<"oki"<<endl;
+      if (verboseGEMRecHit_) cout<<"...was matched!"<<endl;
 
       auto myrechit = make_digi(id, d->firstClusterStrip(), d->BunchX(), GEM_STRIP, d->clusterSize());
       detid_to_recHits_[id].push_back(myrechit);

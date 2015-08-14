@@ -91,56 +91,56 @@ HLTTrackMatcher::matchRecoTrackExtraToSimTrack(const reco::TrackExtraCollection&
     int matchingSegments(0);
     int nValidSegments(0);
     for(auto rh = track.recHitsBegin(); rh != track.recHitsEnd(); rh++) {
-      if (!(**rh).isValid()) continue;
+      //      if (!(**rh).isValid()) continue;
       ++nValidSegments;
       auto id((**rh).rawId());
       if (gemvalidation::is_dt(id)) {
-	const DTRecSegment4D *seg = dynamic_cast<const DTRecSegment4D*>(rh->get());
-	if (verboseRecoTrackExtra_) {
-	  std::cout << "\t\tDT  :: id :: " << DTChamberId(id) << std::endl;
-	  std::cout << "\t\t    :: segment :: " << *seg << std::endl;
-	}
-	if (dt_rechit_matcher_->isDTRecSegment4DMatched(*seg)) {
-	  if (verboseRecoTrackExtra_) std::cout << "\t\t    :: MATCHED!" << std::endl;
-	  ++matchingDTSegments;
-	  ++matchingSegments;
-	}
+        const DTRecSegment4D *seg = dynamic_cast<const DTRecSegment4D*>(rh->get());
+        if (verboseRecoTrackExtra_) {
+          std::cout << "\t\tDT  :: id :: " << DTChamberId(id) << std::endl;
+          std::cout << "\t\t    :: segment :: " << *seg << std::endl;
+        }
+        if (dt_rechit_matcher_->isDTRecSegment4DMatched(*seg)) {
+          if (verboseRecoTrackExtra_) std::cout << "\t\t    :: MATCHED!" << std::endl;
+          ++matchingDTSegments;
+          ++matchingSegments;
+        }
       }
       if (gemvalidation::is_rpc(id)) {
-	const RPCRecHit* rpcrh = dynamic_cast<const RPCRecHit*>(rh->get());
-	if (verboseRecoTrackExtra_) {
-	  std::cout << "\t\tRPC :: id :: " << RPCDetId(id) << std::endl;
-	  std::cout << "\t\t    :: rechit :: " << *rpcrh << std::endl;
-	}
-	if (rpc_rechit_matcher_->isRPCRecHitMatched(*rpcrh)) {
-	  if (verboseRecoTrackExtra_) std::cout << "\t\t    :: MATCHED!" << std::endl;
-	  ++matchingRPCSegments;
-	  ++matchingSegments;
-	}
+        const RPCRecHit* rpcrh = dynamic_cast<const RPCRecHit*>(rh->get());
+        if (verboseRecoTrackExtra_) {
+          std::cout << "\t\tRPC :: id :: " << RPCDetId(id) << std::endl;
+          std::cout << "\t\t    :: rechit :: " << *rpcrh << std::endl;
+        }
+        if (rpc_rechit_matcher_->isRPCRecHitMatched(*rpcrh)) {
+          if (verboseRecoTrackExtra_) std::cout << "\t\t    :: MATCHED!" << std::endl;
+          ++matchingRPCSegments;
+          ++matchingSegments;
+        }
       }
       if (gemvalidation::is_gem(id)) {
-	const GEMRecHit* gemrh = dynamic_cast<const GEMRecHit*>(rh->get());
-	if (verboseRecoTrackExtra_) {
-	  std::cout << "\t\tGEM :: id :: " << GEMDetId(id) << std::endl;
-	  std::cout << "\t\t    :: rechit :: " << *gemrh << std::endl;
-	}
-	if (gem_rechit_matcher_->isGEMRecHitMatched(*gemrh)) {
-	  if (verboseRecoTrackExtra_) std::cout << "\t\t    :: MATCHED!" << std::endl;
-	  ++matchingGEMSegments;
-	  ++matchingSegments;
-	}
+        const GEMRecHit* gemrh = dynamic_cast<const GEMRecHit*>(rh->get());
+        if (verboseRecoTrackExtra_ and GEMDetId(id).station()!=2) {
+          std::cout << "\t\tGEM :: id :: " << GEMDetId(id) << std::endl;
+          std::cout << "\t\t    :: rechit :: " << *gemrh << std::endl;
+        }
+        if (gem_rechit_matcher_->isGEMRecHitMatched(*gemrh) and GEMDetId(id).station()!=2) {
+          if (verboseRecoTrackExtra_) std::cout << "\t\t    :: MATCHED!" << std::endl;
+          ++matchingGEMSegments;
+          ++matchingSegments;
+        }
       }
       if (gemvalidation::is_csc(id)) {
-	const CSCSegment *seg = dynamic_cast<const CSCSegment*>(rh->get());
-	if (verboseRecoTrackExtra_) {
-	  std::cout << "\t\tCSC :: id :: " << CSCDetId(id) << std::endl;
-	  std::cout << "\t\t    :: segment :: " << *seg << std::endl;
-	}
-	if (csc_rechit_matcher_->isCSCSegmentMatched(*seg)) {
-	  if (verboseRecoTrackExtra_) std::cout << "\t\t    :: MATCHED!" << std::endl;
-	  ++matchingCSCSegments;
-	  ++matchingSegments;
-	}
+        const CSCSegment *seg = dynamic_cast<const CSCSegment*>(rh->get());
+        if (verboseRecoTrackExtra_) {
+          std::cout << "\t\tCSC :: id :: " << CSCDetId(id) << std::endl;
+          std::cout << "\t\t    :: segment :: " << *seg << std::endl;
+        }
+        if (csc_rechit_matcher_->isCSCSegmentMatched(*seg)) {
+          if (verboseRecoTrackExtra_) std::cout << "\t\t    :: MATCHED!" << std::endl;
+          ++matchingCSCSegments;
+          ++matchingSegments;
+        }
       }
     }
     if (verboseRecoTrackExtra_) {

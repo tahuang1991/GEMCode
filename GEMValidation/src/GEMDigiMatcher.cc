@@ -47,6 +47,7 @@ GEMDigiMatcher::~GEMDigiMatcher() {}
 void
 GEMDigiMatcher::matchDigisToSimTrack(const GEMDigiCollection& digis)
 {
+  if (verboseDigi_) cout << "Matching simtrack to GEM digis" << endl;
   auto det_ids = simhit_matcher_->detIdsGEM();
   for (auto id: det_ids)
   {
@@ -65,12 +66,12 @@ GEMDigiMatcher::matchDigisToSimTrack(const GEMDigiCollection& digis)
 
     for (auto d = digis_in_det.first; d != digis_in_det.second; ++d)
     {
-      if (verboseDigi_) cout<<"gdigi "<<p_id<<" "<<*d<<endl;
+      if (verboseDigi_) cout<<"GEMDigi "<<p_id<<" "<<*d<<endl;
       // check that the digi is within BX range
       if (d->bx() < minBXGEMDigi_ || d->bx() > maxBXGEMDigi_) continue;
       // check that it matches a strip that was hit by SimHits from our track
       if (hit_strips.find(d->strip()) == hit_strips.end()) continue;
-      if (verboseDigi_) cout<<"oki"<<endl;
+      if (verboseDigi_) cout<<"...was matched!"<<endl;
 
       auto mydigi = make_digi(id, d->strip(), d->bx(), GEM_STRIP);
       detid_to_digis_[id].push_back(mydigi);

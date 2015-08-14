@@ -29,6 +29,7 @@ RPCDigiMatcher::~RPCDigiMatcher() {}
 void
 RPCDigiMatcher::matchDigisToSimTrack(const RPCDigiCollection& digis)
 {
+  if (verboseDigi_) cout << "Matching simtrack to RPC digis" << endl;
   auto det_ids = simhit_matcher_->detIdsRPC();
   for (auto id: det_ids)
   {
@@ -46,12 +47,12 @@ RPCDigiMatcher::matchDigisToSimTrack(const RPCDigiCollection& digis)
 
     for (auto d = digis_in_det.first; d != digis_in_det.second; ++d)
     {
-      if (verboseDigi_) cout<<"gdigi "<<p_id<<" "<<*d<<endl;
+      if (verboseDigi_) cout<<"RPCDigi "<<p_id<<" "<<*d<<endl;
       // check that the digi is within BX range
       if (d->bx() < minBXRPC_ || d->bx() > maxBXRPC_) continue;
       // check that it matches a strip that was hit by SimHits from our track
       if (hit_strips.find(d->strip()) == hit_strips.end()) continue;
-      if (verboseDigi_) cout<<"oki"<<endl;
+      if (verboseDigi_) cout<<"...was matched!"<<endl;
 
       auto mydigi = make_digi(id, d->strip(), d->bx(), RPC_STRIP);
       detid_to_digis_[id].push_back(mydigi);
