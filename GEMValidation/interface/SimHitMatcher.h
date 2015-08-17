@@ -111,7 +111,7 @@ public:
   int nStationsCSC(int nl=4) const;
   int nStationsDT(int nsl=1, int nl=3) const;
   int nStationsRPC() const;
-  int nStationsGEM(int nl=1) const;
+  int nStationsGEM(int nl=2) const;
 
   int nCellsWithHitsInLayerDT(unsigned int) const;
   int nLayersWithHitsInSuperLayerDT(unsigned int) const;

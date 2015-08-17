@@ -329,10 +329,13 @@ SimHitMatcher::matchGEMSimHitsToSimTrack(std::vector<unsigned int> track_ids, co
       if (simMuOnlyGEM_ && std::abs(pdgid) != 13) continue;
       // discard electron hits in the GEM chambers
       if (discardEleHitsGEM_ && pdgid == 11) continue;
+      
+      GEMDetId p_id( h.detUnitId() );
+      // ignore hits in the short GE21
+      if (p_id.station()==2) continue;
 
       gem_detid_to_hits_[ h.detUnitId() ].push_back(h);
       gem_hits_.push_back(h);
-      GEMDetId p_id( h.detUnitId() );
       gem_chamber_to_hits_[ p_id.chamberId().rawId() ].push_back(h);
       GEMDetId superch_id(p_id.region(), p_id.ring(), p_id.station(), 1, p_id.chamber(), 0);
       gem_superchamber_to_hits_[ superch_id() ].push_back(h);
@@ -853,9 +856,8 @@ SimHitMatcher::hitStationRPC(int st) const
 {
   int nst=0;
   for(auto ddt: chamberIdsRPC()) {
-
     const RPCDetId id(ddt);
-    if (id.station()!=st) continue;
+    if (id.station()!=st) continue;    
     ++nst;    
   }
   return nst;
@@ -944,8 +946,7 @@ SimHitMatcher::nStationsRPC() const
 int 
 SimHitMatcher::nStationsGEM(int nlayers) const
 {
-  return (hitStationGEM(1, nlayers) + hitStationGEM(2, nlayers) + 
-	  hitStationGEM(3, nlayers) + hitStationGEM(4, nlayers));
+  return (hitStationGEM(1, nlayers) + hitStationGEM(3, nlayers));
 }
 
 int 

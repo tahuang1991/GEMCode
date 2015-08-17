@@ -61,6 +61,9 @@ public:
   /// How many recHits in GEM did this simtrack get in total?
   int nRecHits() const;
 
+  /// How many GEM chambers with minimum number of layer with rechits did this simtrack get?
+  int nCoincidenceGEMChambers(int st, int min_n_layers = 2) const;
+
   bool gemRecHitInContainer(const GEMRecHit&, const GEMRecHitContainer&) const;
   bool isGEMRecHitMatched(const GEMRecHit&) const;
   bool areGEMRecHitSame(const GEMRecHit&, const GEMRecHit&) const;

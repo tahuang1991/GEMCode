@@ -75,10 +75,9 @@ DTRecHitMatcher::matchDTRecHit1DPairsToSimTrack(const DTRecHitCollection& rechit
       int wiresFound = 0;
       if (verboseDTRecHit1DPair_)cout<< rechitsIds.size() << " hit wires dt from rechit "<<endl;
       for (auto rh: rechitsIds) {
-	if (verboseDTRecHit1DPair_)cout << "\t"<<rh << " " << DTWireId(rh) << endl;
-	// is this "rechit" wire also a "simhit wire"?
-	if (hit_wires.find(rh) != hit_wires.end()) ++wiresFound;
-
+        if (verboseDTRecHit1DPair_)cout << "\t"<<rh << " " << DTWireId(rh) << endl;
+        // is this "rechit" wire also a "simhit wire"?
+        if (hit_wires.find(rh) != hit_wires.end()) ++wiresFound;        
       }
       if (verboseDTRecHit1DPair_)cout << "Found " << wiresFound << " rechit wires out of " << hit_wires.size() << " simhit wires" << endl;
       if (wiresFound==0) continue;

@@ -72,6 +72,8 @@ GEMDigiMatcher::matchDigisToSimTrack(const GEMDigiCollection& digis)
       // check that it matches a strip that was hit by SimHits from our track
       if (hit_strips.find(d->strip()) == hit_strips.end()) continue;
       if (verboseDigi_) cout<<"...was matched!"<<endl;
+      // ignore hits in the short GE21
+      if (p_id.station()==2) continue;
 
       auto mydigi = make_digi(id, d->strip(), d->bx(), GEM_STRIP);
       detid_to_digis_[id].push_back(mydigi);
@@ -117,6 +119,8 @@ GEMDigiMatcher::matchPadsToSimTrack(const GEMCSCPadDigiCollection& pads)
       // check that it matches a pad that was hit by SimHits from our track
       if (hit_pads.find(pad->pad()) == hit_pads.end()) continue;
       if (verbosePad_) cout<<"chp2"<<endl;
+      // ignore hits in the short GE21
+      if (p_id.station()==2) continue;
 
       auto mydigi = make_digi(id, pad->pad(), pad->bx(), GEM_PAD);
       detid_to_pads_[id].push_back(mydigi);

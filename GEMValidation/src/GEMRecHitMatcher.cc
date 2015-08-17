@@ -48,6 +48,8 @@ GEMRecHitMatcher::matchRecHitsToSimTrack(const GEMRecHitCollection& rechits)
     for (auto d = rechits_in_det.first; d != rechits_in_det.second; ++d)
     {
       if (verboseGEMRecHit_) cout<<"GEMRecHit "<<p_id<<" "<<*d<<endl;
+      // ignore hits in the short GE21
+      if (p_id.station()==2) continue;
       // check that the rechit is within BX range
       if (d->BunchX() < minBXGEM_ || d->BunchX() > maxBXGEM_) continue;
       // check that it matches a strip that was hit by SimHits from our track
@@ -162,14 +164,12 @@ int
 GEMRecHitMatcher::nLayersWithRecHitsInSuperChamber(unsigned int detid) const
 {
   set<int> layers;
-  /*
   auto recHits = recHitsInSuperChamber(detid);
   for (auto& d: recHits)
   {
     GEMDetId idd(digi_id(d));
     layers.insert(idd.layer());
   }
-  */
   return layers.size();
 }
 
@@ -275,4 +275,15 @@ GEMRecHitMatcher::nRecHits() const
   auto ids = chamberIds();
   for (auto id: ids) n += gemRecHitsInChamber(id).size();
   return n;  
+}
+
+int
+GEMRecHitMatcher::nCoincidenceGEMChambers(int st, int min_n_layers) const
+{
+  bool result = 0;
+  for (auto id: superChamberIds()){
+    if (GEMDetId(id).station()!=st) continue;
+    if (nLayersWithRecHitsInSuperChamber(id) >= min_n_layers) result++;
+  }
+  return result;
 }

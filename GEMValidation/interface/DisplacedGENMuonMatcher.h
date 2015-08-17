@@ -41,6 +41,10 @@ public:
 private:
 
   void init();
+
+  std::vector<edm::InputTag> input_;
+  int verbose_;
+  bool run_;
  
   void matchDisplacedGENMuonMatcherToSimTrack(const reco::GenParticleCollection& genParticles);
 
@@ -49,10 +53,6 @@ private:
   double phiHeavyCorr(double pt, double eta, double phi, double q);
   double invariantMass(const reco::Candidate* p1, const reco::Candidate* p2);
 
-  Int_t run;   // run number   | these three numbers required to extract event
-  Int_t lumi;  // lumi number  | from sample (data or MC) and examine it in   
-  Int_t event; // event number | event display                                
-  
   Float_t beamSpot_x;
   Float_t beamSpot_y;
   Float_t beamSpot_z;
