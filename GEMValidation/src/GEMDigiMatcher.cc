@@ -52,8 +52,8 @@ GEMDigiMatcher::matchDigisToSimTrack(const GEMDigiCollection& digis)
   for (auto id: det_ids)
   {
     GEMDetId p_id(id);
+    if (p_id.station()==2) continue;
     GEMDetId superch_id(p_id.region(), p_id.ring(), p_id.station(), 1, p_id.chamber(), 0);
-
     auto hit_strips = simhit_matcher_->hitStripsInDetId(id, matchDeltaStrip_);
     if (verboseDigi_)
     {
@@ -98,6 +98,7 @@ GEMDigiMatcher::matchPadsToSimTrack(const GEMCSCPadDigiCollection& pads)
   for (auto id: det_ids)
   {
     GEMDetId p_id(id);
+    if (p_id.station()==2) continue;
     GEMDetId superch_id(p_id.region(), p_id.ring(), p_id.station(), 1, p_id.chamber(), 0);
 
     auto hit_pads = simhit_matcher_->hitPadsInDetId(id);

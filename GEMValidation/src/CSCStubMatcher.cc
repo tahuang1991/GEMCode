@@ -450,9 +450,11 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
              
              if (chamber_to_lct_.find(id) == chamber_to_lct_.end())   chamber_to_lct_[id] = lct;
              else if (chamber_to_lct_.find(id) != chamber_to_lct_.end() && abs(digi_dphi(chamber_to_lct_[id])) > abs(digi_dphi(lct))){
-                         cout<<"ALARM!!! here already was matching LCT "<<chamber_to_lct_[id]<<endl;
-                         cout<<"   new digi: "<<lct<<endl;
-                   chamber_to_lct_[id] = lct;
+               if (verbose()){
+                 cout<<"ALARM!!! here already was matching LCT "<<chamber_to_lct_[id]<<endl;
+                 cout<<"   new digi: "<<lct<<endl;
+               }
+               chamber_to_lct_[id] = lct;
              }
 	     
               chamber_to_lcts_[id].push_back(lct);

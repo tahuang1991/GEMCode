@@ -113,6 +113,7 @@ SimHitMatcher::init()
       edm::PSimHitContainer gem_hits_select;
       for (auto& h: *gem_hits.product()) {
         GEMDetId id(h.detUnitId());
+        if (id.station()==2) continue;
         if (useGEMChamberType(gemvalidation::toGEMType(id.station(), id.ring()))) gem_hits_select.push_back(h);
       }
 
@@ -128,9 +129,9 @@ SimHitMatcher::init()
             auto& gem_simhits = hitsInChamber(id);
             auto gem_simhits_gp = simHitsMeanPosition(gem_simhits);
             cout<<"cchid "<<GEMDetId(id)<<": nHits "<<gem_simhits.size()<<" phi "<<gem_simhits_gp.phi()<<" nCh "<< gem_chamber_to_hits_[id].size()<<endl;
-            auto strips = hitStripsInDetId(id);
-            cout<<"nStrip "<<strips.size()<<endl;
-            cout<<"strips : "; std::copy(strips.begin(), strips.end(), ostream_iterator<int>(cout, " ")); cout<<endl;
+            // auto strips = hitStripsInDetId(id);
+            // cout<<"nStrip "<<strips.size()<<endl;
+            // cout<<"strips : "; std::copy(strips.begin(), strips.end(), ostream_iterator<int>(cout, " ")); cout<<endl;
           }
           auto gem_sch_ids = superChamberIdsGEM();
           for (auto id: gem_sch_ids) {

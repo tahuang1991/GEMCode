@@ -33,6 +33,7 @@ GEMRecHitMatcher::matchRecHitsToSimTrack(const GEMRecHitCollection& rechits)
   for (auto id: det_ids)
   {
     GEMDetId p_id(id);
+    if (p_id.station()==2) continue;
     GEMDetId superch_id(p_id.region(), p_id.ring(), p_id.station(), 1, p_id.chamber(), 0);
 
     auto hit_strips = simhit_matcher_->hitStripsInDetId(id, matchDeltaStrip_);
@@ -148,11 +149,19 @@ GEMRecHitMatcher::gemRecHitsInChamber(unsigned int detid) const
 }
 
 
+const GEMRecHitMatcher::GEMRecHitContainer&
+GEMRecHitMatcher::gemRecHitsInSuperChamber(unsigned int detid) const
+{
+  if (superchamber_to_gemRecHits_.find(detid) == superchamber_to_gemRecHits_.end()) return no_gemRecHits_;
+  return superchamber_to_gemRecHits_.at(detid);
+}
+
+
 const GEMRecHitMatcher::GEMRecHitContainer
 GEMRecHitMatcher::gemRecHits() const
 {
   GEMRecHitContainer result;
-  for (auto id: chamberIds()){
+  for (auto id: chamberIds()) {
     auto rechitsInChamber(gemRecHitsInChamber(id));
     result.insert(result.end(), rechitsInChamber.begin(), rechitsInChamber.end());
   }
@@ -164,11 +173,8 @@ int
 GEMRecHitMatcher::nLayersWithRecHitsInSuperChamber(unsigned int detid) const
 {
   set<int> layers;
-  auto recHits = recHitsInSuperChamber(detid);
-  for (auto& d: recHits)
-  {
-    GEMDetId idd(digi_id(d));
-    layers.insert(idd.layer());
+  for (auto& d: gemRecHitsInSuperChamber(detid)) {
+    layers.insert(d.gemId().layer());
   }
   return layers.size();
 }
@@ -192,9 +198,7 @@ std::set<int>
 GEMRecHitMatcher::partitionNumbers() const
 {
   std::set<int> result;
-
-  auto detids = detIds();
-  for (auto id: detids)
+  for (auto id: detIds())
   {
     GEMDetId idd(id);
     result.insert( idd.roll() );
