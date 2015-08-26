@@ -62,22 +62,25 @@ def getRate(tree, cut):
 	h.SetBinContent(n, content)
 	n= n+1
     h.Sumw2()
-    print "before scale "
+    #print "before scale "
     #h.Print("all")
     ntotalEvents = getEventsNum(tree)
-    h.Scale(40000./ntotalEvents/3.*0.795)
+    h.Scale(40000./ntotalEvents/3./2.*0.795)
 #    print "after scale "
  #   h.Print("all")
     return h
 
 
 b1 = ROOT.TH1F("b1","b1",29,myptbin)
-b1.GetYaxis().SetRangeUser(0.01,10000)
+b1.GetYaxis().SetRangeUser(0.1,100000)
 b1.GetYaxis().SetTitleOffset(1.2)
 b1.GetYaxis().SetNdivisions(520)
-b1.GetYaxis().SetTitle("Trigger Rate [kHz]")
-b1.GetXaxis().SetTitle("L1 muon p_{T} [GeV]")
-b1.SetTitle("CMS Simulation Preliminary"+"  "*24 +" PU140 ")
+b1.GetYaxis().SetTitle("L1 Trigger Rate [kHz]")
+b1.GetXaxis().SetTitle("L1 muon p_{T} threshold [GeV]")
+b1.GetXaxis().SetTitleFont(62)
+b1.GetXaxis().SetTitleOffset(1.2)
+b1.GetXaxis().SetTitleSize(0.045)
+b1.SetTitle("CMS Simulation Preliminary"+" "*26 +" PU140, 14TeV")
 b1.SetStats(0)
 
 treename = "L1TTriggerRate/evtree"
@@ -94,12 +97,13 @@ tree2 = tfile2.Get(treename)
 tree3 = tfile3.Get(treename)
 tree4 = tfile4.Get(treename)
 #tree.Print()
-cut1 = "nl1tracks>0 && eta<2.14 && eta>1.64 && nstubs>2 && hasME1"
-cut2 = "nl1tracks>0 && eta<2.14 && eta>1.64 && nstubs>2 && passGE11"
+cut1 = "nl1tracks>0 && abs(eta)<2.14 && abs(eta)>1.64 && nstubs>1 && hasME1"
+cut2 = "nl1tracks>0 && abs(eta)<2.14 && abs(eta)>1.64 && nstubs>1 && passGE11"
+cut3 = "nl1tracks>0 && abs(eta)<2.14 && abs(eta)>1.64 && hasME1 && ((nstubs==2 && passGE11)||(nstubs>2 && (passGE11 || passGE21)))"
 e1 = getRate(tree1, cut1)
 e2 = getRate(tree2, cut2)
-e3 = getRate(tree3, cut2)
-e4 = getRate(tree4, cut2)
+e3 = getRate(tree3, cut3)
+e4 = getRate(tree4, cut3)
 #e4 = getRate("/uscms_data/d3/tahuang/CMSSW_6_2_0_SLHC25_patch1/src/GEMCode/GEMValidation/test/Rate_Neutrino_SLHC25_PU140_0706.root",treename, cut)
 
 #e0 = getAllEff("/eos/uscms/store/user/tahuang/SLHC25_patch1_2023Muon_1M_Ana_PU140_Pt2_50_ME11_step0/",treename, den, num)
@@ -118,24 +122,25 @@ ROOT.gPad.SetLogx()
 ROOT.gPad.SetLogy()
 
 
-legend = ROOT.TLegend(0.5,0.55,0.93,0.92)
+legend = ROOT.TLegend(0.5,0.52,0.93,0.92)
 legend.SetFillStyle(0)
 #legend.SetFillColor(ROOT.kWhite)
 legend.SetTextFont(62)
+legend.SetBorderSize(0)
 #legend.SetTextSize()
 #legend.SetHeader("p_{T}^{sim}>10,2.14>|#eta|>1.64, has at least 3stubs and hasME1")
-legend.AddEntry(e1,"#splitline{PhaseI, 3+stubs and}{ one stub in ME11}","f")
-legend.AddEntry(e2,"#splitline{PhaseII with GE11 only}{ 3+stubs and YE1/1 bending angle}","f")
-legend.AddEntry(e3,"#splitline{PhaseII with GE11GE21 only}{3+stubs and YE1/1 bending angle}","f")
-legend.AddEntry(e4,"#splitline{Full PhaseII, 3+stubs }{and YE1/1 bending angle}","f")
+legend.AddEntry(e1,"#splitline{PhaseI, 2+stubs with YE1/1}{}","f")
+legend.AddEntry(e2,"#splitline{PhaseII with GE11 only}{ 2+stubs and YE1/1 bending angle}","f")
+legend.AddEntry(e3,"#splitline{PhaseII with GE11GE21 only}{2+stubs and YE1/1 or YE2/1bending angle}","f")
+legend.AddEntry(e4,"#splitline{Full PhaseII, 2+stubs }{and YE1/1 or YE2/1 bending angle}","f")
 legend.Draw("same")
 
-tex = ROOT.TLatex(0.15,0.65,"1.64<|#eta|<2.14")
+tex = ROOT.TLatex(0.15,0.88,"1.64<|#eta|<2.14")
 tex.SetTextSize(0.05)
-tex.SetTextFont(42)
+tex.SetTextFont(62)
 tex.SetNDC()
 tex.Draw("same")
 
 
-c1.SaveAs("TFtrack_rate_4scenarios_3stubs_eta2_GE11_PU140_eta_pendcap_0810.pdf")
-c1.SaveAs("TFtrack_rate_4scenarios_3stubs_eta2_GE11_PU140_eta_pendcap_0810.png")
+c1.SaveAs("TFtrack_rate_4scenarios_2stubs_eta2_GE11orGE21_PU140_eta_0810.pdf")
+c1.SaveAs("TFtrack_rate_4scenarios_2stubs_eta2_GE11orGE21_PU140_eta_0810.png")
