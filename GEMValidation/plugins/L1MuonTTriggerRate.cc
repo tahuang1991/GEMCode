@@ -112,17 +112,9 @@ private:
   bool hasME1,hasME2;
   float GE11dPhi,GE21dPhi;
   bool passGE11,passGE21;
+  int firstl1mu;
+  unsigned int nl1tracks;
 
-//need to drop this
-  enum etabins{eta_all, eta_me1, eta_me2, eta_me3, netabins};
-  enum ptbins{pt_all, pt_15, pt_20, nptbins};
-  enum stubbins{stub_2, stub_3, stub_4, nstubbins};
-  enum MEbins{ME_all, ME_1, GE_1, passGE_1, ME_2, GE_2, passGE_2, GE_12, passGE1_GE2, passGE_12, passGE, nMEbins};
-  TH1F* h_L1CSCTrack_pt[netabins][nptbins][nstubbins][nMEbins];
-  TH1F* h_L1CSCTrack_eta[nptbins][nstubbins][nMEbins];
-  TH1F* h_L1CSCTrack_phi[netabins][nptbins][nstubbins][nMEbins];
-
-  TH1F* h_nStation;
 
 };
 
@@ -168,12 +160,17 @@ void L1MuonTTriggerRate::analyze(const edm::Event& iEvent, const edm::EventSetup
 
   //CSCTFPtLUT* ptLUT_ = new CSCTFPtLUT(ptLUTset_, muScalesHd_.product(), muPtScaleHd_.product());
 
-  ++ntotalEvents;
 
+  ++ntotalEvents;
+  firstl1mu = 1;
+
+  nl1tracks = l1csctracks->size();
   // lcts used in tracks
   L1CSCTrackCollection::const_iterator tmp_trk = l1csctracks->begin();
   for(; tmp_trk != l1csctracks->end(); tmp_trk++){
     //    float GEMdPhi = -99;
+    init();
+    if (tmp_trk != l1csctracks->begin()) firstl1mu = -1;//only first track firstl1mu =1
 
     TFTrack *track = new TFTrack(&tmp_trk->first,&tmp_trk->second);
     track->init(muScalesHd_, muPtScaleHd_);
@@ -205,6 +202,7 @@ void L1MuonTTriggerRate::analyze(const edm::Event& iEvent, const edm::EventSetup
        passGE11 = track->passDPhicutTFTrack(1);
        GE11dPhi = ((track->getTriggerDigis()).at(lct1))->getGEMDPhi();
     }
+//   if (pt<10 and passGE11 ) std::cout <<" passGE11  pt "<< pt <<" deltaphi " << GE11dPhi << std::endl;
    unsigned int lct2 = 999;
    lct2 = track->digiInME(2,1);
    if (lct2 < (track->getTriggerDigis()).size()) 
@@ -212,10 +210,18 @@ void L1MuonTTriggerRate::analyze(const edm::Event& iEvent, const edm::EventSetup
        passGE21 = track->passDPhicutTFTrack(2);
        GE21dPhi = ((track->getTriggerDigis()).at(lct2))->getGEMDPhi();
     }
- 
-    evtree->Fill();
-  }
 
+   if (nstubs>2 and pt>=30 and passGE11 and abs(eta)<2.14 and abs(eta)>1.64) std::cout <<" nevent "<< ntotalEvents <<" l1track passGE11, pt "<<pt <<" nstub "<<nstubs << std::endl;
+
+    //if (nstub) 
+    //std::cout <<" nevent "<< ntotalEvents  <<" l1track nstub "<< nstubs << " pt " << pt <<" eta "<< eta <<(passGE11?" passGE11 ":" failedGE11"  )<<" dphi at st1 " << GE11dPhi <<std::endl;
+    evtree->Fill();
+    delete track;
+  }
+  if (nl1tracks ==0 ) {
+      init();
+      evtree->Fill();
+   }
 }
 
 
@@ -225,6 +231,8 @@ void L1MuonTTriggerRate::beginJob()
    evtree = fs->make<TTree>("evtree", "evtree");
 
    evtree->Branch("nEvents", &ntotalEvents);
+   evtree->Branch("firstl1mu", &firstl1mu);//bincontent of x=1 is the total number of Events
+   evtree->Branch("nl1tracks", &nl1tracks);//
 
    evtree->Branch("eta", &eta);
    evtree->Branch("phi", &phi);
@@ -266,7 +274,8 @@ void L1MuonTTriggerRate::init(){
   hasME2 = false;
   passGE11 = false;
   passGE21 = false;
-  GE11dPhi = -999;
+  GE11dPhi = -99;
+  GE21dPhi =-99;
 
 
 }

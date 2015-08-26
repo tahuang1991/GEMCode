@@ -62,6 +62,7 @@ TFTrack::init(edm::ESHandle< L1MuTriggerScales > &muScales,
   phi_ = normalizedPhi(muScales->getPhiScale()->getLowEdge(phi_packed_));
 }
 
+
 void 
 TFTrack::setDR(double dr)
 {

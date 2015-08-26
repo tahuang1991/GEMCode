@@ -86,6 +86,8 @@ struct MyTrackEff
   Float_t pt, eta, phi;
   Char_t charge;
   Char_t endcap;
+  Char_t chamber_ME1_csc_sh;//bit1:odd, bit2:even
+  Char_t chamber_ME2_csc_sh;
   Char_t chamber_odd; // bit1: has GEM pad   bit2: has CSC LCT
   Char_t chamber_even; // bit1: has GEM pad   bit2: has CSC LCT
 
@@ -114,6 +116,8 @@ struct MyTrackEff
   Float_t eta_lct_even;
   Float_t dphi_lct_odd; // dphi stored as data member in LCT
   Float_t dphi_lct_even;
+  Bool_t passdphi_odd;
+  Bool_t passdphi_even;
 
   Int_t wiregroup_odd;
   Int_t wiregroup_even;
@@ -202,6 +206,8 @@ struct MyTrackEff
   UInt_t nstubs;
   UInt_t deltaphi12, deltaphi23; 
   Bool_t hasME1,hasME2;
+  Char_t chamberME1,chamberME2;//bit1: odd, bit2: even
+  Int_t ME1_hs, ME2_hs, ME1_wg,ME2_wg;
   Float_t dphiGE11,dphiGE21;
   Bool_t passGE11,passGE21;
   Float_t deltaR;
@@ -245,6 +251,8 @@ void MyTrackEff::init()
   eta = -9.;
   charge = -9;
   endcap = -9;
+  chamber_ME1_csc_sh=0;
+  chamber_ME2_csc_sh=0;
   chamber_odd = 0;
   chamber_even = 0;
   quality_odd = 0;
@@ -270,6 +278,8 @@ void MyTrackEff::init()
   eta_lct_even = -9.;
   dphi_lct_odd = -9.;
   dphi_lct_even = -9.;
+  passdphi_odd = false;
+  passdphi_even = false;
 
   wiregroup_odd = -1;
   wiregroup_even =-1; 
@@ -352,12 +362,18 @@ void MyTrackEff::init()
   pt_packed = 0;
   eta_packed = 0;
   phi_packed = 0;
+  ME1_hs = -1;
+  ME1_wg = -1;
+  ME2_hs = -1;
+  ME2_wg = -1;
   chargesign =99;
   rank = 0;
   deltaphi12 = 0;
   deltaphi23 = 0;; 
   hasME1 = false;
   hasME2 = false;
+  chamberME1 = 0;
+  chamberME2 = 0;
   dphiGE11 = -99.0;
   dphiGE21 = -99.0;
   passGE11 = false;
@@ -408,6 +424,8 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("phi", &phi);
   t->Branch("charge", &charge);
   t->Branch("endcap", &endcap);
+  t->Branch("chamber_ME1_csc_sh", &chamber_ME1_csc_sh);
+  t->Branch("chamber_ME2_csc_sh", &chamber_ME2_csc_sh);
   t->Branch("chamber_odd", &chamber_odd);
   t->Branch("chamber_even", &chamber_even);
   t->Branch("quality_odd", &quality_odd);
@@ -432,6 +450,8 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("eta_lct_even", &eta_lct_even);
   t->Branch("dphi_lct_odd", &dphi_lct_odd);
   t->Branch("dphi_lct_even", &dphi_lct_even);
+  t->Branch("passdphi_odd", &passdphi_odd);
+  t->Branch("passdphi_even", &passdphi_even);
   
   t->Branch("wiregroup_odd", &wiregroup_odd);
   t->Branch("wiregroup_even", &wiregroup_even);
@@ -519,6 +539,12 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("deltaphi23",&deltaphi23);
   t->Branch("hasME1",&hasME1);
   t->Branch("hasME2",&hasME2);
+  t->Branch("chamberME1",&chamberME1);
+  t->Branch("chamberME2",&chamberME2);
+  t->Branch("ME1_hs",&ME1_hs);
+  t->Branch("ME1_wg",&ME1_wg);
+  t->Branch("ME2_hs",&ME2_hs);
+  t->Branch("ME2_wg",&ME2_wg);
   t->Branch("dphiGE11",&dphiGE11);
   t->Branch("dphiGE21",&dphiGE21);
   t->Branch("passGE11",&passGE11);
@@ -784,7 +810,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     etrk_[s].charge = t.charge();
     etrk_[s].endcap = (etrk_[s].eta > 0.) ? 1 : -1;
   }
-
+  int chargesign = (t.charge()>0? 1:0);
+  float pt = t.momentum().pt();
   // SimHits
   auto csc_simhits(match_sh.chamberIdsCSC(0));
   for(auto d: csc_simhits)
@@ -794,7 +821,10 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     const int st(detIdToMEStation(id.station(),id.ring()));
     if (stations_to_use_.count(st) == 0) continue;
     int nlayers(match_sh.nLayersWithHitsInSuperChamber(d));
-
+    if (id.station() == 1 and id.chamber()%2 == 1) etrk_[0].chamber_ME1_csc_sh |= 1;
+    if (id.station() == 1 and id.chamber()%2 == 0) etrk_[0].chamber_ME1_csc_sh |= 2;
+    if (id.station() == 2 and id.chamber()%2 == 1) etrk_[0].chamber_ME2_csc_sh |= 1;
+    if (id.station() == 2 and id.chamber()%2 == 0) etrk_[0].chamber_ME2_csc_sh |= 2;
     // case ME11
     if (id.station()==1 and (id.ring()==4 or id.ring()==1)){
       // get the detId of the pairing subchamber
@@ -1005,6 +1035,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       etrk_[st].wg_lct_odd = digi_wg(lct);
       etrk_[st].chamber_odd |= 2;
       etrk_[st].quality_odd = digi_quality(lct);
+      etrk_[st].passdphi_odd = match_lct.passDPhicut(id, chargesign, digi_dphi(lct), pt);
     }
     else
     {
@@ -1019,6 +1050,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       etrk_[st].wg_lct_even = digi_wg(lct);
       etrk_[st].chamber_even |= 2;
       etrk_[st].quality_even = digi_quality(lct);
+      etrk_[st].passdphi_even = match_lct.passDPhicut(id, chargesign, digi_dphi(lct), pt);
     }
 
     // case ME11
@@ -1036,6 +1068,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         etrk_[1].wg_lct_odd = digi_wg(lct);
         etrk_[1].chamber_odd |= 2;
         etrk_[1].quality_odd = digi_quality(lct);
+        etrk_[1].passdphi_odd = match_lct.passDPhicut(id, chargesign, digi_dphi(lct), pt);
       }
       else
       {
@@ -1050,6 +1083,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         etrk_[1].wg_lct_even = digi_wg(lct);
         etrk_[1].chamber_even |= 2;
         etrk_[1].quality_even = digi_quality(lct);
+        etrk_[1].passdphi_even = match_lct.passDPhicut(id, chargesign, digi_dphi(lct), pt);
       }
     }
   }
@@ -1395,8 +1429,13 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
    if (lct1 < (besttrack->getTriggerDigis()).size()) 
    {
+       auto id_me1((besttrack->getTriggerDigisIds()).at(lct1));
+       if (id_me1.chamber()%2 == 1)  etrk_[0].chamberME1 |= 1;
+       if (id_me1.chamber()%2 == 0)  etrk_[0].chamberME1 |= 2;
        etrk_[0].passGE11 = besttrack->passDPhicutTFTrack(1);
        etrk_[0].dphiGE11 = ((besttrack->getTriggerDigis()).at(lct1))->getGEMDPhi();
+       etrk_[0].ME1_hs = ((besttrack->getTriggerDigis()).at(lct1))->getStrip();
+       etrk_[0].ME1_wg = ((besttrack->getTriggerDigis()).at(lct1))->getKeyWG();
        if (fabs(etrk_[0].dphiGE11)>1 and fabs(etrk_[0].dphiGE11)<99) std::cout <<" dphiGE11 " << etrk_[0].dphiGE11  << std::endl;
    }
 
@@ -1404,8 +1443,13 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
    if (lct2 < (besttrack->getTriggerDigis()).size()) 
    {
+       auto id_me2((besttrack->getTriggerDigisIds()).at(lct2));
+       if (id_me2.chamber()%2 == 1)  etrk_[0].chamberME2 |= 1;
+       if (id_me2.chamber()%2 == 0)  etrk_[0].chamberME2 |= 2;
        etrk_[0].passGE21 = besttrack->passDPhicutTFTrack(2);
        etrk_[0].dphiGE21 = ((besttrack->getTriggerDigis()).at(lct2))->getGEMDPhi();
+       etrk_[0].ME2_hs = ((besttrack->getTriggerDigis()).at(lct2))->getStrip();
+       etrk_[0].ME2_wg = ((besttrack->getTriggerDigis()).at(lct2))->getKeyWG();
        if (fabs(etrk_[0].dphiGE21)>1 and fabs(etrk_[0].dphiGE21)<99) std::cout <<" dphiGE21 " << etrk_[0].dphiGE21  << std::endl;
    }
      auto propagate_odd_gp(match_track.simTrackPropagateGPs_odd());

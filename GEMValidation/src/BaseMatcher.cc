@@ -178,32 +178,38 @@ double BaseMatcher::phiHeavyCorr(double pt, double eta, double phi, double charg
 
 
 
-bool BaseMatcher::passDPhicut(CSCDetId id, float dPhi, float pt) const
+bool BaseMatcher::passDPhicut(CSCDetId id, int chargesign, float dphi, float pt) const
 {
   //  const double GEMdPhi[9][3];
   if (!(id.station()==1 and (id.ring()==1 or id.ring()==4)) &&
 	!(id.station()==2 and id.ring()==1))  return true;
-   
   auto GEMdPhi( id.station()==1 ? ME11GEMdPhi : ME21GEMdPhi);
    // std::copy(&ME11GEMdPhi[0][0], &ME11GEMdPhi[0][0]+9*3,&GEMdPhi[0][0]);
    //else if (id.station()==2 and id.ring()==1) 
    // std::copy(&ME21GEMdPhi[0][0], &ME21GEMdPhi[0][0]+9*3,&GEMdPhi[0][0]);
-   
-   bool is_odd(id.chamber()%2==1);
-   bool pass = false;
-
-   for (int b = 0; b < 9; b++)
+  int st = id.station(); 
+  bool is_odd(id.chamber()%2==1);
+  bool pass = false;
+  unsigned int LUTsize = (st==1)? sizeof(ME11GEMdPhi)/sizeof(ME11GEMdPhi[0]) :sizeof(ME21GEMdPhi)/sizeof(ME21GEMdPhi[0]);
+  bool smalldphi = ((is_odd and fabs(dphi)<GEMdPhi[LUTsize-2][1]) || (!is_odd and fabs(dphi)<GEMdPhi[LUTsize-2][2]));
+  if (fabs(dphi) < 99 and ((chargesign == 1 and dphi < 0) || (chargesign == 0 and dphi > 0) || smalldphi)){
+   for (unsigned int b = 0; b < LUTsize; b++)
    {
+       //std::cout <<"  b " << " odd " << GEMdPhi[b][1]  <<" even " << GEMdPhi[b][2] << std::endl;
 	if (double(pt) >= GEMdPhi[b][0])
 	{
 		
-	    if ((is_odd && GEMdPhi[b][1] > fabs(dPhi)) ||
-		(!is_odd && GEMdPhi[b][2] > fabs(dPhi)))
+	    if ((is_odd && GEMdPhi[b][1] > fabs(dphi)) ||
+		(!is_odd && GEMdPhi[b][2] > fabs(dphi)))
 		    pass = true;
 	    else    pass = false;
 	}
     }
-   if (dPhi < -50) pass = true;
+  }
+  else pass = false;
+
+  if (st==2 and pt>=15 and ((is_odd and fabs(dphi)<GEMdPhi[4][1]) || (!is_odd and fabs(dphi)<GEMdPhi[4][2]))) pass = true;
+
 
    return pass;
 

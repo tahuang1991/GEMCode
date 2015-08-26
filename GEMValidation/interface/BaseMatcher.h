@@ -165,7 +165,7 @@ public:
 
   std::pair<unsigned int, unsigned int> gemDetsFromCSCDet(unsigned int id);
   double phiHeavyCorr(double pt, double eta, double phi, double charge) const;
-  bool passDPhicut(CSCDetId id, float dphi, float pt) const;
+  bool passDPhicut(CSCDetId id, int chargesign, float dphi, float pt) const;
 
  protected:
   
