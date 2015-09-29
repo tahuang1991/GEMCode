@@ -181,6 +181,7 @@ double BaseMatcher::phiHeavyCorr(double pt, double eta, double phi, double charg
 bool BaseMatcher::passDPhicut(CSCDetId id, int chargesign, float dphi, float pt) const
 {
   //  const double GEMdPhi[9][3];
+    //std::cout <<"passdphicut  id " << id << std::endl;
   if (!(id.station()==1 and (id.ring()==1 or id.ring()==4)) &&
 	!(id.station()==2 and id.ring()==1))  return true;
   auto GEMdPhi( id.station()==1 ? ME11GEMdPhi : ME21GEMdPhi);
@@ -195,7 +196,7 @@ bool BaseMatcher::passDPhicut(CSCDetId id, int chargesign, float dphi, float pt)
   if (fabs(dphi) < 99 and ((chargesign == 1 and dphi < 0) || (chargesign == 0 and dphi > 0) || smalldphi)){
    for (unsigned int b = 0; b < LUTsize; b++)
    {
-       //std::cout <<"  b " << " odd " << GEMdPhi[b][1]  <<" even " << GEMdPhi[b][2] << std::endl;
+//if (st==2) std::cout <<"BaseMatcher LUTpt "<<GEMdPhi[b][0] << " odd " << GEMdPhi[b][1]  <<" even " << GEMdPhi[b][2] <<" dphi "<<dphi <<std::endl;
 	if (double(pt) >= GEMdPhi[b][0])
 	{
 		
@@ -208,7 +209,13 @@ bool BaseMatcher::passDPhicut(CSCDetId id, int chargesign, float dphi, float pt)
   }
   else pass = false;
 
+ // if (id.station() == 2 and pass) std::cout <<" st2 pass dphicut after comparing with LUT " << std::endl;
+ // else if (id.station() == 2 and !pass) std::cout <<" st2 failed to pass dphicut after comparing " << std::endl;
+
   if (st==2 and pt>=15 and ((is_odd and fabs(dphi)<GEMdPhi[4][1]) || (!is_odd and fabs(dphi)<GEMdPhi[4][2]))) pass = true;
+
+ // if (id.station() == 2 and pass) std::cout <<" st2 pass dphicut after pt>15 " << std::endl;
+//  else if (id.station() == 2 and !pass) std::cout <<" st2 failed to pass dphicut after pt>15" << std::endl;
 
 
    return pass;

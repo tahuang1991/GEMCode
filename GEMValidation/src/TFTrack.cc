@@ -216,7 +216,7 @@ bool TFTrack::passDPhicutTFTrack(int st) const
   if (fabs(dphi) < 99 and ((chargesign_ == 1 and dphi < 0) || (chargesign_ == 0 and dphi > 0) || smalldphi)){
    for (unsigned int b = 0; b < LUTsize; b++)
    {
-       //std::cout <<"  b " << " odd " << GEMdPhi[b][1]  <<" even " << GEMdPhi[b][2] << std::endl;
+  //      if (st==2)  std::cout <<"TFTrack  LUTpt "<< GEMdPhi[b][0] << " odd " << GEMdPhi[b][1]  <<" even " << GEMdPhi[b][2] <<" dphi "<< dphi <<std::endl;
 	if (double(pt_) >= GEMdPhi[b][0])
 	{
 		
@@ -228,8 +228,11 @@ bool TFTrack::passDPhicutTFTrack(int st) const
     }
   }
   else pass = false;
-
+//if (st==2 and pass) std::cout <<"TFTrack st=2 and pass dphi after comparing with LUT " << std::endl;
+ // else if (st==2 and !pass) std::cout <<"TFTrack st=2 and failed to pass dphi after comparing " << std::endl;
   if (st==2 and pt_>=15 and ((is_odd and fabs(dphi)<GEMdPhi[4][1]) || (!is_odd and fabs(dphi)<GEMdPhi[4][2]))) pass = true;
+ // if (st==2 and pass) std::cout <<"TFTrack st=2 and pass dphi after pt>15 " << std::endl;
+//  else if (st==2 and !pass) std::cout <<"TFTrack st=2 and failed to pass dphi after pt>15 " << std::endl;
 
    return pass;
 

@@ -191,33 +191,34 @@ void L1MuonTTriggerRate::analyze(const edm::Event& iEvent, const edm::EventSetup
     
 
     //std::cout <<" charge sign " << sign << std::endl;
-   unsigned int lct1 = 999;
-   auto me1b(track->digiInME(1,1));
-   auto me1a(track->digiInME(1,4));
-   if (me1a != 999) lct1 = me1a;
-   if (me1b != 999) lct1 = me1b;
+    unsigned int lct1 = 999;
+    auto me1b(track->digiInME(1,1));
+    auto me1a(track->digiInME(1,4));
+    if (me1a != 999) lct1 = me1a;
+    if (me1b != 999) lct1 = me1b;
 
-   if (lct1 < (track->getTriggerDigis()).size()) 
-   {
+    if (lct1 < (track->getTriggerDigis()).size()) 
+    {
        passGE11 = track->passDPhicutTFTrack(1);
        GE11dPhi = ((track->getTriggerDigis()).at(lct1))->getGEMDPhi();
     }
 //   if (pt<10 and passGE11 ) std::cout <<" passGE11  pt "<< pt <<" deltaphi " << GE11dPhi << std::endl;
-   unsigned int lct2 = 999;
-   lct2 = track->digiInME(2,1);
-   if (lct2 < (track->getTriggerDigis()).size()) 
-   {
+    unsigned int lct2 = 999;
+    lct2 = track->digiInME(2,1);
+    if (lct2 < (track->getTriggerDigis()).size()) 
+    {
        passGE21 = track->passDPhicutTFTrack(2);
        GE21dPhi = ((track->getTriggerDigis()).at(lct2))->getGEMDPhi();
     }
 
-   if (nstubs>2 and pt>=30 and passGE11 and abs(eta)<2.14 and abs(eta)>1.64) std::cout <<" nevent "<< ntotalEvents <<" l1track passGE11, pt "<<pt <<" nstub "<<nstubs << std::endl;
+   //if (nstubs>2 and pt>=30 and passGE11 and abs(eta)<2.14 and abs(eta)>1.64) std::cout <<" nevent "<< ntotalEvents <<" l1track passGE11, pt "<<pt <<" nstub "<<nstubs << std::endl;
 
     //if (nstub) 
     //std::cout <<" nevent "<< ntotalEvents  <<" l1track nstub "<< nstubs << " pt " << pt <<" eta "<< eta <<(passGE11?" passGE11 ":" failedGE11"  )<<" dphi at st1 " << GE11dPhi <<std::endl;
     evtree->Fill();
     delete track;
   }
+// can not find any tracks, still fill evtree to record this event so finally script could count total events correctly
   if (nl1tracks ==0 ) {
       init();
       evtree->Fill();
