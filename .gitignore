@@ -6,5 +6,4 @@
 *.cc~
 *.h~
 *.py~
-*.txt
 *__init__.py

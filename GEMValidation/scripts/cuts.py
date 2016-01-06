@@ -57,6 +57,14 @@ def OR(*arg):
 
 
 #_______________________________________________________________________________
+def re(i):
+    if i==1:
+        return TCut("region==1")
+    else:
+        return TCut("region==-1")
+    
+
+#_______________________________________________________________________________
 def la(i):
     return TCut("layer==%d"%(i))
 
@@ -86,33 +94,15 @@ all = OR(muon,nonMuon)
 rm1 = TCut("region==-1")
 rp1 = TCut("region==1")
 
-ec2 = TCut("endcap==2") 
-ec1 = TCut("endcap==1")
-
 even = TCut("chamber%2==0")
 odd  = TCut("chamber%2==1")
+evenodd = [even, odd, TCut("")]
 
 rpc_sector_even = TCut("sector%2==0")
 rpc_sector_odd  = TCut("sector%2==1")
 
 rpc_subsector_even = TCut("subsector%2==0")
 rpc_subsector_odd  = TCut("subsector%2==1")
-
-l1 = TCut("layer==1")
-l2 = TCut("layer==2")
-l3 = TCut("layer==3")
-l4 = TCut("layer==4")
-l5 = TCut("layer==5")
-l6 = TCut("layer==6")
-
-st1 = TCut("station==1")
-st2 = TCut("station==2")
-st3 = TCut("station==3")
-st4 = TCut("station==4")
-
-ri1 = TCut("ring==1")
-ri2 = TCut("ring==2")
-ri3 = TCut("ring==3")
 
 eta_min = 1.64
 eta_max = 2.12

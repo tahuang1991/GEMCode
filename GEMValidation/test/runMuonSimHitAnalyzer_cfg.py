@@ -18,11 +18,7 @@ process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAl
 
 ## global tag for 2019 upgrade studies
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2019', '')
-
-## geometry customization
-from Geometry.GEMGeometry.gemGeometryCustoms import custom_GE11_9and10partitions_v1
-process = custom_GE11_9and10partitions_v1(process)
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgradePLS3', '')
 
 # the analyzer configuration
 from GEMCode.GEMValidation.simTrackMatching_cfi import SimTrackMatching
@@ -31,8 +27,8 @@ process.MuonSimHitAnalyzer = cms.EDAnalyzer("MuonSimHitAnalyzer",
 )
 
 ## only simhits
-from GEMCode.GEMValidation.simTrackMatching_cfi import useOnlySimHitCollections
-process.MuonSimHitAnalyzer = useOnlySimHitCollections(process.MuonSimHitAnalyzer)
+from GEMCode.GEMValidation.simTrackMatching_cfi import onlySimHitCollections
+process.MuonSimHitAnalyzer = onlySimHitCollections(process.MuonSimHitAnalyzer)
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
@@ -45,10 +41,10 @@ process.source = cms.Source("PoolSource",
 ## input
 from GEMCode.SimMuL1.GEMCSCTriggerSamplesLib import *
 from GEMCode.GEMValidation.InputFileHelpers import *
-process = useInputDir(process, ['/eos/uscms/store/user/dildick/dildick/SingleMuPt2-50Fwdv2_50k_test5DegBugfix_2/SingleMuPt2-50Fwdv2_50k_test5DegBugfix_2/3e47eaf3967164550497ab5804eb1831/'], True)
+process = useInputDir(process, eosfiles['_pt2-50_SLHC11_2023Muon_PU0'], True)
 
 process.TFileService = cms.Service("TFileService",
-  fileName = cms.string("gem_sh_ana_2.root")
+  fileName = cms.string("gem_sh_ana.root")
 )
 
 process.p = cms.Path(process.MuonSimHitAnalyzer)

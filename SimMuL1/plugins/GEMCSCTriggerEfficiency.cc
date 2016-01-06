@@ -22,7 +22,7 @@
 #include "L1Trigger/CSCTrackFinder/interface/CSCTFSectorProcessor.h"
 #include "L1Trigger/CSCTrackFinder/interface/CSCSectorReceiverLUT.h"
 #include "L1Trigger/CSCTrackFinder/interface/CSCTrackFinderDataTypes.h"
-#include <L1Trigger/CSCTrackFinder/src/CSCTFDTReceiver.h>
+//#include <L1Trigger/CSCTrackFinder/src/CSCTFDTReceiver.h>
 
 #include "RecoMuon/DetLayers/interface/MuonDetLayerGeometry.h"
 #include "RecoMuon/Records/interface/MuonRecoGeometryRecord.h"
@@ -954,6 +954,7 @@ GEMCSCTriggerEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup
     iSetup.get<TrackingComponentsRecord>().get("SmartPropagatorAnyRK", propagatorAlong);
     iSetup.get<TrackingComponentsRecord>().get("SmartPropagatorAnyOpposite", propagatorOpposite);
 
+    if (mufiducial_) delete mufiducial_;
     mufiducial_ = new MuFiducial();
     mufiducial_->setGEMGeometry(gemGeometry);    
     mufiducial_->setCSCGeometry(cscGeometry);

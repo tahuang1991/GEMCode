@@ -1,14 +1,3 @@
-//
-// Package:    MuonSimHitAnalyzer
-// Class:      MuonSimHitAnalyzer
-// 
-// \class MuonSimHitAnalyzer
-//
-// Description: Analyzer GEM SimHit information
-// To be used for GEM algorithm development.
-//
-//
-
 // system include files
 #include <memory>
 #include <algorithm>
@@ -37,10 +26,11 @@
 #include "Geometry/CommonTopologies/interface/StripTopology.h"
 
 #include "DataFormats/Math/interface/deltaPhi.h"
+#include "DataFormats/MuonDetId/interface/CSCTriggerNumbering.h"
 
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
-#include "GEMCode/GEMValidation/src/SimTrackMatchManager.h"
+#include "GEMCode/GEMValidation/interface/SimTrackMatchManager.h"
 
 #include "TTree.h"
 
@@ -72,7 +62,7 @@ struct MyCSCSimHit
   Int_t eventNumber;
   Int_t detUnitId, particleType;
   Float_t x, y, energyLoss, pabs, timeOfFlight;
-  Int_t endcap, ring, station, chamber, layer;
+  Int_t region, ring, station, chamber, layer;
   Float_t globalR, globalEta, globalPhi, globalX, globalY, globalZ;
   Float_t Phi_0, DeltaPhi, R_0;
 };
@@ -82,7 +72,8 @@ struct MyRPCSimHit
   Int_t eventNumber;
   Int_t detUnitId, particleType;
   Float_t x, y, energyLoss, pabs, timeOfFlight;
-  Int_t region, ring, station, sector, layer, subsector, roll, chamber;
+  Int_t region, ring, station, sector, layer, subsector, roll;
+  Int_t chamber, chamber_type1, chamber_type2;
   Float_t globalR, globalEta, globalPhi, globalX, globalY, globalZ;
   Int_t strip;
 };
@@ -90,7 +81,7 @@ struct MyRPCSimHit
 struct MySimTrack
 {
   Float_t charge, pt, eta, phi;
-  Char_t endcap;
+  Char_t region;
   Char_t gem_sh_layer1, gem_sh_layer2; // bit1: in odd  bit2: even
   Float_t gem_sh_eta, gem_sh_phi;
   Float_t gem_trk_eta, gem_trk_phi, gem_trk_rho;
@@ -323,7 +314,7 @@ void MuonSimHitAnalyzer::bookCSCSimHitsTree()
   csc_sh_tree_->Branch("pabs",&csc_sh.pabs);
   csc_sh_tree_->Branch("timeOfFlight",&csc_sh.timeOfFlight);
   csc_sh_tree_->Branch("timeOfFlight",&csc_sh.timeOfFlight);
-  csc_sh_tree_->Branch("endcap",&csc_sh.endcap);
+  csc_sh_tree_->Branch("region",&csc_sh.region);
   csc_sh_tree_->Branch("ring",&csc_sh.ring);
   csc_sh_tree_->Branch("station",&csc_sh.station);
   csc_sh_tree_->Branch("chamber",&csc_sh.chamber);
@@ -361,6 +352,8 @@ void MuonSimHitAnalyzer::bookRPCSimHitsTree()
   rpc_sh_tree_->Branch("subsector", &rpc_sh.subsector);
   rpc_sh_tree_->Branch("roll", &rpc_sh.roll);
   rpc_sh_tree_->Branch("chamber", &rpc_sh.chamber);
+  rpc_sh_tree_->Branch("chamber_type1", &rpc_sh.chamber_type1);
+  rpc_sh_tree_->Branch("chamber_type2", &rpc_sh.chamber_type2);
   rpc_sh_tree_->Branch("globalR", &rpc_sh.globalR);
   rpc_sh_tree_->Branch("globalEta", &rpc_sh.globalEta);
   rpc_sh_tree_->Branch("globalPhi", &rpc_sh.globalPhi);
@@ -439,7 +432,7 @@ void MuonSimHitAnalyzer::bookSimTracksTree()
   track_tree_->Branch("pt",&track.pt);
   track_tree_->Branch("eta",&track.eta);
   track_tree_->Branch("phi",&track.phi);
-  track_tree_->Branch("endcap",&track.endcap);
+  track_tree_->Branch("region",&track.region);
   track_tree_->Branch("gem_sh_layer1",&track.gem_sh_layer1);
   track_tree_->Branch("gem_sh_layer2",&track.gem_sh_layer2);
   track_tree_->Branch("gem_sh_eta",&track.gem_sh_eta);
@@ -565,12 +558,16 @@ void MuonSimHitAnalyzer::analyzeCSC( const edm::Event& iEvent )
     csc_sh.pabs = itHit->pabs();
     csc_sh.timeOfFlight = itHit->timeOfFlight();
 
-    csc_sh.endcap = id.endcap();
+    csc_sh.region = id.zendcap();
     csc_sh.ring = id.ring();
     csc_sh.station = id.station();
     csc_sh.chamber = id.chamber();
     csc_sh.layer = id.layer();
 
+    if (id.station()==3 and id.ring()==1 and itHit->pabs() > 20 )
+      std::cout << "cscdet " << id <<" " << CSCTriggerNumbering::triggerSectorFromLabels(id) << " " 
+                << CSCTriggerNumbering::triggerCscIdFromLabels(id) << " "
+                << CSCTriggerNumbering::triggerSubSectorFromLabels(id) << std::endl;
     const LocalPoint p0(0., 0., 0.);
     const GlobalPoint Gp0(csc_geometry_->idToDet(itHit->detUnitId())->surface().toGlobal(p0));
     csc_sh.Phi_0 = Gp0.phi();
@@ -619,9 +616,7 @@ void MuonSimHitAnalyzer::analyzeRPC( const edm::Event& iEvent )
     rpc_sh.layer = id.layer();
     rpc_sh.subsector = id.subsector();
     rpc_sh.roll = id.roll();
-    const int nSubSectors(id.station()>1 and id.ring()==1 ? 3 : 6);
-    rpc_sh.chamber = ((id.sector()-1)*nSubSectors + id.subsector())%18+1;
-    
+    rpc_sh.chamber = CSCTriggerNumbering::chamberFromTriggerLabels(id.sector(), 0, id.station(), id.subsector());
     const LocalPoint hitLP(itHit->localPosition());
     const GlobalPoint hitGP(rpc_geometry_->idToDet(itHit->detUnitId())->surface().toGlobal(hitLP));
 
@@ -669,7 +664,7 @@ void MuonSimHitAnalyzer::analyzeTracks(const edm::Event& iEvent, const edm::Even
     track.phi = t.momentum().phi();
     track.eta = t.momentum().eta();
     track.charge = t.charge();
-    track.endcap = (track.eta > 0.) ? 1 : -1;
+    track.region = (track.eta > 0.) ? 1 : -1;
     track.gem_sh_layer1 = 0;
     track.gem_sh_layer2 = 0;
     track.gem_sh_eta = -9.;

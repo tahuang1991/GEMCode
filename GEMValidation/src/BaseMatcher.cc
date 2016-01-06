@@ -1,9 +1,10 @@
-#include "GEMCode/GEMValidation/src/BaseMatcher.h"
+#include "GEMCode/GEMValidation/interface/BaseMatcher.h"
 
 #include "TrackingTools/TrajectoryState/interface/TrajectoryStateOnSurface.h"
 #include "TrackingTools/Records/interface/TrackingComponentsRecord.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 #include "DataFormats/GeometrySurface/interface/Plane.h"
+#include "GEMCode/GEMValidation/interface/GEMCSCdphi_LUT.h"
 
 
 BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
@@ -21,24 +22,25 @@ BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
   if (csc_types.empty()) useCSCChamberTypes_[CSC_ALL] = 1;
 
   // Get the magnetic field
-  es.get< IdealMagneticFieldRecord >().get(magfield_);
+  es.get<IdealMagneticFieldRecord>().get(magfield_);
 
   // Get the propagators                                                                                  
-  es.get< TrackingComponentsRecord >().get("SteppingHelixPropagatorAlong", propagator_);
-  es.get< TrackingComponentsRecord >().get("SteppingHelixPropagatorOpposite", propagatorOpposite_);
+  es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator_);
+  es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorOpposite", propagatorOpposite_);
 
   /// get the geometry
-  hasGEMGeometry_ = false;
-  hasRPCGeometry_ = false;
-  hasCSCGeometry_ = false;
-  hasME0Geometry_ = false;
+  hasGEMGeometry_ = true;
+  hasRPCGeometry_ = true;
+  hasCSCGeometry_ = true;
+  hasME0Geometry_ = true;
+  hasDTGeometry_ = true;
 
   try {
     es.get<MuonGeometryRecord>().get(gem_geom);
     gemGeometry_ = &*gem_geom;
   } catch (edm::eventsetup::NoProxyException<GEMGeometry>& e) {
     hasGEMGeometry_ = false;
-    LogDebug("MuonSimHitAnalyzer") << "+++ Info: GEM geometry is unavailable. +++\n";
+    LogDebug("BaseMatcher") << "+++ Info: GEM geometry is unavailable. +++\n";
   }
 
   try {
@@ -46,7 +48,7 @@ BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
     me0Geometry_ = &*me0_geom;
   } catch (edm::eventsetup::NoProxyException<ME0Geometry>& e) {
     hasME0Geometry_ = false;
-    LogDebug("MuonSimHitAnalyzer") << "+++ Info: ME0 geometry is unavailable. +++\n";
+    LogDebug("BaseMatcher") << "+++ Info: ME0 geometry is unavailable. +++\n";
   }
 
   try {
@@ -54,7 +56,7 @@ BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
     cscGeometry_ = &*csc_geom;
   } catch (edm::eventsetup::NoProxyException<CSCGeometry>& e) {
     hasCSCGeometry_ = false;
-    LogDebug("MuonSimHitAnalyzer") << "+++ Info: CSC geometry is unavailable. +++\n";
+    LogDebug("BaseMatcher") << "+++ Info: CSC geometry is unavailable. +++\n";
   }
 
   try {
@@ -62,7 +64,15 @@ BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
     rpcGeometry_ = &*rpc_geom;
   } catch (edm::eventsetup::NoProxyException<RPCGeometry>& e) {
     hasRPCGeometry_ = false;
-    LogDebug("MuonSimHitAnalyzer") << "+++ Info: RPC geometry is unavailable. +++\n";
+    LogDebug("BaseMatcher") << "+++ Info: RPC geometry is unavailable. +++\n";
+  }
+
+  try {
+    es.get<MuonGeometryRecord>().get(dt_geom);
+    dtGeometry_ = &*dt_geom;
+  } catch (edm::eventsetup::NoProxyException<DTGeometry>& e) {
+    hasDTGeometry_ = false;
+    LogDebug("BaseMatcher") << "+++ Info: DT geometry is unavailable. +++\n";
   }
 }
 
@@ -128,4 +138,86 @@ std::pair<unsigned int, unsigned int>
 BaseMatcher::gemDetsFromCSCDet(unsigned int id)
 {
   return std::make_pair(gemDetFromCSCDet(id,1),gemDetFromCSCDet(id,2));
+}
+
+
+int 
+chamber(const DetId& id)
+{
+  if (id.det() != DetId::Detector::Muon) return -99;
+  int chamberN = 0;
+  switch(id.subdetId()){
+  case MuonSubdetId::GEM:
+    chamberN = GEMDetId(id).chamber();
+    break;
+  case MuonSubdetId::RPC:
+    // works only for endcap!!
+    chamberN = RPCDetId(id).sector();
+    break;
+  case MuonSubdetId::CSC:
+    chamberN = CSCDetId(id).chamber();
+    break;
+  case MuonSubdetId::ME0:
+    chamberN = ME0DetId(id).chamber();
+    break;
+  };
+  return chamberN;
+}
+
+
+double BaseMatcher::phiHeavyCorr(double pt, double eta, double phi, double charge) const
+{
+    // float resEta = eta;
+    float etaProp = std::abs(eta);
+    if (etaProp< 1.1) etaProp = 1.1;
+    float resPhi = phi - 1.464*charge*cosh(1.7)/cosh(etaProp)/pt - M_PI/144.;
+    if (resPhi > M_PI) resPhi -= 2.*M_PI;
+    if (resPhi < -M_PI) resPhi += 2.*M_PI;
+    return resPhi;
+}
+
+
+
+bool BaseMatcher::passDPhicut(CSCDetId id, int chargesign, float dphi, float pt) const
+{
+  //  const double GEMdPhi[9][3];
+    //std::cout <<"passdphicut  id " << id << std::endl;
+  if (!(id.station()==1 and (id.ring()==1 or id.ring()==4)) &&
+	!(id.station()==2 and id.ring()==1))  return true;
+  auto GEMdPhi( id.station()==1 ? ME11GEMdPhi : ME21GEMdPhi);
+   // std::copy(&ME11GEMdPhi[0][0], &ME11GEMdPhi[0][0]+9*3,&GEMdPhi[0][0]);
+   //else if (id.station()==2 and id.ring()==1) 
+   // std::copy(&ME21GEMdPhi[0][0], &ME21GEMdPhi[0][0]+9*3,&GEMdPhi[0][0]);
+  int st = id.station(); 
+  bool is_odd(id.chamber()%2==1);
+  bool pass = false;
+  unsigned int LUTsize = (st==1)? sizeof(ME11GEMdPhi)/sizeof(ME11GEMdPhi[0]) :sizeof(ME21GEMdPhi)/sizeof(ME21GEMdPhi[0]);
+  bool smalldphi = ((is_odd and fabs(dphi)<GEMdPhi[LUTsize-2][1]) || (!is_odd and fabs(dphi)<GEMdPhi[LUTsize-2][2]));
+  if (fabs(dphi) < 99 and ((chargesign == 1 and dphi < 0) || (chargesign == 0 and dphi > 0) || smalldphi)){
+   for (unsigned int b = 0; b < LUTsize; b++)
+   {
+//if (st==2) std::cout <<"BaseMatcher LUTpt "<<GEMdPhi[b][0] << " odd " << GEMdPhi[b][1]  <<" even " << GEMdPhi[b][2] <<" dphi "<<dphi <<std::endl;
+	if (double(pt) >= GEMdPhi[b][0])
+	{
+		
+	    if ((is_odd && GEMdPhi[b][1] > fabs(dphi)) ||
+		(!is_odd && GEMdPhi[b][2] > fabs(dphi)))
+		    pass = true;
+	    else    pass = false;
+	}
+    }
+  }
+  else pass = false;
+
+ // if (id.station() == 2 and pass) std::cout <<" st2 pass dphicut after comparing with LUT " << std::endl;
+ // else if (id.station() == 2 and !pass) std::cout <<" st2 failed to pass dphicut after comparing " << std::endl;
+
+  if (st==2 and pt>=15 and ((is_odd and fabs(dphi)<GEMdPhi[4][1]) || (!is_odd and fabs(dphi)<GEMdPhi[4][2]))) pass = true;
+
+ // if (id.station() == 2 and pass) std::cout <<" st2 pass dphicut after pt>15 " << std::endl;
+//  else if (id.station() == 2 and !pass) std::cout <<" st2 failed to pass dphicut after pt>15" << std::endl;
+
+
+   return pass;
+
 }

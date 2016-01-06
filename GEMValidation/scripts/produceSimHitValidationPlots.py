@@ -25,8 +25,12 @@ def produceOccupanyPlots(plotter):
     gemSimHitTOF(plotter,i)
     cscSimHitOccupancyXY(plotter,i)
     rpcSimHitOccupancyXY(plotter,i)
-    #   gemSimhitMomentum(plotter,i) 
-    #   GEMSimValidation.SimhitMomentum(plotter,i)
+
+    me0SimHitOccupancyRZ(plotter,i)
+    me0SimHitTOF(plotter,i)
+    me0SimHitOccupancyXY(plotter,i)
+    #gemSimhitMomentum(plotter,i) 
+    #GEMSimValidation.SimhitMomentum(plotter,i)
 
     """
     rpcSimHitOccupancyXY(plotter,i)
@@ -37,9 +41,6 @@ def produceOccupanyPlots(plotter):
     cscSimHitOccupancyRZ(plotter,i)
     cscSimHitTOF(plotter,i)
     
-    me0SimHitOccupancyXY(plotter,i)
-    me0SimHitOccupancyRZ(plotter,i)
-    me0SimHitTOF(plotter,i)
     """
 
 
@@ -65,6 +66,7 @@ if __name__ == "__main__":
   """
   simTrackProperties(plotter)
   gemChamberNumbering(plotter)
-  produceMatchingPlots(plotter)
+  
   """
+  produceMatchingPlots(plotter)
   produceOccupanyPlots(plotter)

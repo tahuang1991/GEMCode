@@ -19,7 +19,7 @@ class SimHitPlotter():
   def __init__(self):
     self.inputDir = os.getenv("CMSSW_BASE") + "/src/"
     self.inputFile = "gem_sh_ana.root"
-    self.targetDir = "testDirectory/"
+    self.targetDir = "simHitValidationPlots/"
     self.ext = ".png"
     self.analyzer = "MuonSimHitAnalyzer"
     self.gemSimHits = "GEMSimHits"
@@ -37,14 +37,14 @@ class SimHitPlotter():
     self.sel = [muon,nonMuon,all]
     self.pre = ["Muon","Non muon","All"]
     self.suff = ["_muon","_nonmuon","_all"]
-    self.geometry = "custom_GE11_6partitions_v1"
+    self.geometry = "custom_GE11_9-10partitions_v1"
 
     
 class DigiPlotter():
   def __init__(self):
     self.inputDir = os.getenv("CMSSW_BASE") + "/src/"
     self.inputFile = "gem_digi_ana.root"
-    self.targetDir = "testDirectory/"
+    self.targetDir = "digiValidationPlots/"
     self.ext = ".png"
     self.analyzer = "MuonDigiAnalyzer"
     self.gemDigis = "GEMDigiTree"
@@ -61,7 +61,7 @@ class DigiPlotter():
     self.treeTracks = (self.dirAna).Get(self.simTracks)
     self.nstripsGE11 = 384
     self.nstripsGE21 = 768
-    self.npadsGE11 = 96
+    self.npadsGE11 = 192
     self.npadsGE21 = 192
 
 class GEMCSCStubPlotter():
@@ -85,3 +85,4 @@ class GEMCSCStubPlotter():
     self.etaMin = 1.5
     self.etaMax = 2.5
     self.pu = 140
+    self.matchAlctGem = True

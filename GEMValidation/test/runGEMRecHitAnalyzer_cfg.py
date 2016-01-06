@@ -6,6 +6,7 @@ process = cms.Process("GEMRECOANA")
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
+process.load('Configuration.Geometry.GeometryExtended2019_cff')
 process.load('Configuration.Geometry.GeometryExtended2019Reco_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
@@ -20,23 +21,14 @@ from Configuration.AlCa.GlobalTag import GlobalTag
 process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgrade2019', '')
 
 # the analyzer configuration
-from GEMCode.GEMValidation.simTrackMatching_cfi import SimTrackMatching
+from GEMCode.GEMValidation.simTrackMatching_cfi import *
 process.GEMRecHitAnalyzer = cms.EDAnalyzer("GEMRecHitAnalyzer",
     simTrackMatching = SimTrackMatching
 )
-process.GEMRecHitAnalyzer.simTrackMatching.gemStripDigi.input = ""
-process.GEMRecHitAnalyzer.simTrackMatching.gemPadDigi.input = ""
-process.GEMRecHitAnalyzer.simTrackMatching.gemCoPadDigi.input = ""
-process.GEMRecHitAnalyzer.simTrackMatching.cscStripDigi.input = ""
-process.GEMRecHitAnalyzer.simTrackMatching.cscWireDigi.input = ""
-process.GEMRecHitAnalyzer.simTrackMatching.cscCLCT.input = ""
-process.GEMRecHitAnalyzer.simTrackMatching.cscALCT.input = ""
-process.GEMRecHitAnalyzer.simTrackMatching.cscLCT.input = ""
-process.GEMRecHitAnalyzer.simTrackMatching.cscMPLCT.input = ""
-process.GEMRecHitAnalyzer.simTrackMatching.tfTrack.input = ""
-process.GEMRecHitAnalyzer.simTrackMatching.tfCand.input = ""
-process.GEMRecHitAnalyzer.simTrackMatching.gmtCand.input = ""
-process.GEMRecHitAnalyzer.simTrackMatching.l1Extra.input = ""
+## simhits and rechits
+process.GEMRecHitAnalyzer = noDigiCollections(process.GEMRecHitAnalyzer)
+process.GEMRecHitAnalyzer = noL1Collections(process.GEMRecHitAnalyzer)
+process.GEMRecHitAnalyzer = noTrackCollections(process.GEMRecHitAnalyzer)
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
