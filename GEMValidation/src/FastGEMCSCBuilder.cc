@@ -1,7 +1,3 @@
-//
-
-#include "GEMCode/SimMuL1/interface/FastGEMCSCBuilder.h"
-
 #include "DataFormats/MuonDetId/interface/CSCDetId.h"
 
 #include "Geometry/Records/interface/MuonGeometryRecord.h"
@@ -9,7 +5,8 @@
 
 #include "L1Trigger/CSCCommonTrigger/interface/CSCConstants.h"
 
-#include "GEMCode/GEMValidation/src/SimTrackMatchManager.h"
+#include "GEMCode/GEMValidation/interface/SimTrackMatchManager.h"
+#include "GEMCode/GEMValidation/interface/FastGEMCSCBuilder.h"
 
 using namespace std;
 using namespace matching;

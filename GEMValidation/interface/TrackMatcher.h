@@ -1,5 +1,5 @@
-#ifndef GEMValidation_TrackMatcher_h
-#define GEMValidation_TrackMatcher_h
+#ifndef GEMCode_GEMValidation_TrackMatcher_h
+#define GEMCode_GEMValidation_TrackMatcher_h
 
 /**\class TrackMatcher
 
@@ -37,8 +37,8 @@
 #include "DataFormats/L1Trigger/interface/L1MuonParticleFwd.h"
 #include "DataFormats/L1Trigger/interface/L1MuonParticle.h"
 
-
 typedef std::pair<float, float> EtaPhi;
+typedef std::vector<L1MuRegionalCand> L1MuRegionalCandCollection;
 //typedef std::pair<PSimHit, GlobalPoint> HitAndGP;
 
 class TrackMatcher : public CSCStubMatcher
@@ -87,9 +87,10 @@ class TrackMatcher : public CSCStubMatcher
   float simCharge;
 
   void matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks);
-  void matchTfCandToSimTrack(const std::vector<L1MuRegionalCand>* tracks);
+  void matchTfCandToSimTrack(const L1MuRegionalCandCollection& tracks);
   void matchGmtRegCandToSimTrack(const L1MuRegionalCand& tracks);
   void matchGmtCandToSimTrack(const L1MuGMTExtendedCand& tracks);
+  void matchL1MuonParticleToSimTrack(const l1extra::L1MuonParticleCollection& tracks);
 
   csctf::TrackStub buildTrackStub(const CSCCorrelatedLCTDigi& d, CSCDetId id);
   std::pair<float, float> intersectionEtaPhi(CSCDetId id, int wg, int hs);

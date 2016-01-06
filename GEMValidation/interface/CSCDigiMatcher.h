@@ -1,5 +1,5 @@
-#ifndef GEMValidation_CSCDigiMatcher_h
-#define GEMValidation_CSCDigiMatcher_h
+#ifndef GEMCode_GEMValidation_CSCDigiMatcher_h
+#define GEMCode_GEMValidation_CSCDigiMatcher_h
 
 /**\class CSCDigiMatcher
 
@@ -10,7 +10,6 @@
 
 #include "GEMCode/GEMValidation/interface/DigiMatcher.h"
 
-#include "FWCore/Utilities/interface/InputTag.h"
 #include "DataFormats/CSCDigi/interface/CSCComparatorDigiCollection.h"
 #include "DataFormats/CSCDigi/interface/CSCWireDigiCollection.h"
 
@@ -19,8 +18,10 @@
 #include <set>
 #include <tuple>
 
-class SimHitMatcher;
+typedef std::vector<CSCComparatorDigi> CSCStripDigiContainer;
+typedef std::vector<CSCWireDigi> CSCWireDigiContainer;
 
+class SimHitMatcher;
 
 class CSCDigiMatcher : public DigiMatcher
 {
@@ -32,12 +33,12 @@ public:
 
   /// layer detIds with digis
   /// by default, only returns those from ME1b; use al chambers if csc_type=0
-  std::set<unsigned int> detIdsStrip(int csc_type = CSC_ME1b) const;
-  std::set<unsigned int> detIdsWire(int csc_type = CSC_ME1b) const;
+  std::set<unsigned int> detIdsStrip(int csc_type = CSC_ALL) const;
+  std::set<unsigned int> detIdsWire(int csc_type = CSC_ALL) const;
 
   /// chamber detIds with digis
-  std::set<unsigned int> chamberIdsStrip(int csc_type = CSC_ME1b) const;
-  std::set<unsigned int> chamberIdsWire(int csc_type = CSC_ME1b) const;
+  std::set<unsigned int> chamberIdsStrip(int csc_type = CSC_ALL) const;
+  std::set<unsigned int> chamberIdsWire(int csc_type = CSC_ALL) const;
 
   /// CSC strip digis from a particular layer or chamber
   const DigiContainer& stripDigisInDetId(unsigned int) const;
@@ -46,6 +47,14 @@ public:
   /// CSC wire digis from a particular layer or chamber
   const DigiContainer& wireDigisInDetId(unsigned int) const;
   const DigiContainer& wireDigisInChamber(unsigned int) const;
+
+  /// CSC strip digis from a particular layer or chamber
+  const CSCStripDigiContainer& cscStripDigisInDetId(unsigned int) const;
+  const CSCStripDigiContainer& cscStripDigisInChamber(unsigned int) const;
+
+  /// CSC wire digis from a particular layer or chamber
+  const CSCWireDigiContainer& cscWireDigisInDetId(unsigned int) const;
+  const CSCWireDigiContainer& cscWireDigisInChamber(unsigned int) const;
 
   // #layers with hits
   int nLayersWithStripInChamber(unsigned int) const;
@@ -67,12 +76,13 @@ public:
 
 private:
 
-  void init();
+  void matchStripsToSimTrack(const CSCComparatorDigiCollection& comparators);
+  void matchWiresToSimTrack(const CSCWireDigiCollection& wires);
 
-  void matchTriggerDigisToSimTrack(const CSCComparatorDigiCollection& comparators, const CSCWireDigiCollection& wires);
-
-  edm::InputTag cscComparatorDigiInput_;
-  edm::InputTag cscWireDigiInput_;
+  std::set<unsigned int> selectDetIds(const Id2DigiContainer &digis, int csc_type) const;
+  
+  std::vector<edm::InputTag> cscComparatorDigiInput_;
+  std::vector<edm::InputTag> cscWireDigiInput_;
 
   int minBXCSCComp_, maxBXCSCComp_;
   int minBXCSCWire_, maxBXCSCWire_;
@@ -80,21 +90,26 @@ private:
   int matchDeltaStrip_;
   int matchDeltaWG_;
 
-  typedef std::map<unsigned int, DigiContainer> Id2DigiContainer;
-
   Id2DigiContainer detid_to_halfstrips_;
   Id2DigiContainer chamber_to_halfstrips_;
 
   Id2DigiContainer detid_to_wires_;
   Id2DigiContainer chamber_to_wires_;
 
-  std::set<unsigned int> selectDetIds(const Id2DigiContainer &digis, int csc_type) const;
-  
+  std::map<unsigned int, CSCStripDigiContainer> detid_to_cschalfstrips_;
+  std::map<unsigned int, CSCStripDigiContainer> chamber_to_cschalfstrips_;
+
+  std::map<unsigned int, CSCWireDigiContainer> detid_to_cscwires_;
+  std::map<unsigned int, CSCWireDigiContainer> chamber_to_cscwires_;
+
   int verboseStrip_;
   int verboseWG_;
 
   bool runStrip_;
   bool runWG_;
+
+  CSCStripDigiContainer no_csc_strips_;
+  CSCWireDigiContainer no_csc_wires_;
 };
 
 #endif

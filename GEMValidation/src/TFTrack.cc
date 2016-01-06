@@ -1,5 +1,5 @@
 #include "GEMCode/GEMValidation/interface/TFTrack.h"
-#include "GEMCode/GEMValidation/interface/GEMCSCdphi_LUT.h"
+#include "GEMCode/GEMValidation/interface/Helpers.h"
 
 TFTrack::TFTrack(const csc::L1Track* t, const CSCCorrelatedLCTDigiCollection* lcts)
 {
@@ -192,7 +192,7 @@ unsigned int TFTrack::digiInME(int st, int ring) const
 
 }
 
-bool TFTrack::passDPhicutTFTrack(int st) const
+bool TFTrack::passDPhicutTFTrack(int st, float pt) const
 {
 
   //std::cout <<"TFTracks size() " << tfTracks().size() << std::endl;
@@ -217,7 +217,7 @@ bool TFTrack::passDPhicutTFTrack(int st) const
    for (unsigned int b = 0; b < LUTsize; b++)
    {
   //      if (st==2)  std::cout <<"TFTrack  LUTpt "<< GEMdPhi[b][0] << " odd " << GEMdPhi[b][1]  <<" even " << GEMdPhi[b][2] <<" dphi "<< dphi <<std::endl;
-	if (double(pt_) >= GEMdPhi[b][0])
+	if (double(pt) >= GEMdPhi[b][0])
 	{
 		
 	    if ((is_odd && GEMdPhi[b][1] > fabs(dphi)) ||
@@ -230,7 +230,7 @@ bool TFTrack::passDPhicutTFTrack(int st) const
   else pass = false;
 //if (st==2 and pass) std::cout <<"TFTrack st=2 and pass dphi after comparing with LUT " << std::endl;
  // else if (st==2 and !pass) std::cout <<"TFTrack st=2 and failed to pass dphi after comparing " << std::endl;
-  if (st==2 and pt_>=15 and ((is_odd and fabs(dphi)<GEMdPhi[4][1]) || (!is_odd and fabs(dphi)<GEMdPhi[4][2]))) pass = true;
+  //if (st==2 and pt>=15 and ((is_odd and fabs(dphi)<GEMdPhi[4][1]) || (!is_odd and fabs(dphi)<GEMdPhi[4][2]))) pass = true;
  // if (st==2 and pass) std::cout <<"TFTrack st=2 and pass dphi after pt>15 " << std::endl;
 //  else if (st==2 and !pass) std::cout <<"TFTrack st=2 and failed to pass dphi after pt>15 " << std::endl;
 

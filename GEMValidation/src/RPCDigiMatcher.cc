@@ -1,9 +1,6 @@
 #include "GEMCode/GEMValidation/interface/RPCDigiMatcher.h"
 #include "GEMCode/GEMValidation/interface/SimHitMatcher.h"
 
-#include "DataFormats/MuonDetId/interface/CSCDetId.h"
-#include "DataFormats/MuonDetId/interface/CSCTriggerNumbering.h"
-
 using namespace std;
 using namespace matching;
 
@@ -12,38 +9,27 @@ RPCDigiMatcher::RPCDigiMatcher(SimHitMatcher& sh)
 : DigiMatcher(sh)
 {
   auto rpcDigi_= conf().getParameter<edm::ParameterSet>("rpcStripDigi");
-  rpcDigiInput_ = rpcDigi_.getParameter<edm::InputTag>("input");
+  rpcDigiInput_ = rpcDigi_.getParameter<std::vector<edm::InputTag>>("validInputTags");
   minBXRPC_ = rpcDigi_.getParameter<int>("minBX");
   maxBXRPC_ = rpcDigi_.getParameter<int>("maxBX");
   matchDeltaStrip_ = rpcDigi_.getParameter<int>("matchDeltaStrip");
   verboseDigi_ = rpcDigi_.getParameter<int>("verbose");
   runRPCDigi_ = rpcDigi_.getParameter<bool>("run");
 
-  matchDeltaStrip_ = conf().getUntrackedParameter<int>("matchDeltaStripRPC", 1);
-
   setVerbose(conf().getUntrackedParameter<int>("verboseRPCDigi", 0));
 
-  if (!rpcDigiInput_.label().empty())
-  {
-    init();
+  if (hasRPCGeometry_) {
+    edm::Handle<RPCDigiCollection> rpc_digis;
+    if (gemvalidation::getByLabel(rpcDigiInput_, rpc_digis, event())) if (runRPCDigi_) matchDigisToSimTrack(*rpc_digis.product());
   }
 }
 
 RPCDigiMatcher::~RPCDigiMatcher() {}
 
-
-void
-RPCDigiMatcher::init()
-{
-  edm::Handle<RPCDigiCollection> rpc_digis;
-  event().getByLabel(rpcDigiInput_, rpc_digis);
-  if (runRPCDigi_) matchDigisToSimTrack(*rpc_digis.product());
-}
-
-
 void
 RPCDigiMatcher::matchDigisToSimTrack(const RPCDigiCollection& digis)
 {
+  if (verboseDigi_) cout << "Matching simtrack to RPC digis" << endl;
   auto det_ids = simhit_matcher_->detIdsRPC();
   for (auto id: det_ids)
   {
@@ -61,34 +47,52 @@ RPCDigiMatcher::matchDigisToSimTrack(const RPCDigiCollection& digis)
 
     for (auto d = digis_in_det.first; d != digis_in_det.second; ++d)
     {
-      if (verboseDigi_) cout<<"gdigi "<<p_id<<" "<<*d<<endl;
+      if (verboseDigi_) cout<<"RPCDigi "<<p_id<<" "<<*d<<endl;
       // check that the digi is within BX range
       if (d->bx() < minBXRPC_ || d->bx() > maxBXRPC_) continue;
       // check that it matches a strip that was hit by SimHits from our track
       if (hit_strips.find(d->strip()) == hit_strips.end()) continue;
-      if (verboseDigi_) cout<<"oki"<<endl;
+      if (verboseDigi_) cout<<"...was matched!"<<endl;
 
       auto mydigi = make_digi(id, d->strip(), d->bx(), RPC_STRIP);
       detid_to_digis_[id].push_back(mydigi);
       chamber_to_digis_[p_id.chamberId().rawId()].push_back(mydigi);
-      //std::cout << "RPC det id " << (RPCDetId)id << " "<< p_id << std::endl;
-      //std::cout<<"  chamber raw id "<<  p_id.chamberId().rawId()<<""<< p_id.chamberId() << std::endl;
+
+      detid_to_rpcDigis_[id].push_back(*d);
+      chamber_to_rpcDigis_[p_id.chamberId().rawId()].push_back(*d);
     }
   }
 }
 
 
-
-
 std::set<unsigned int>
-RPCDigiMatcher::detIds() const
+RPCDigiMatcher::selectDetIds(const Id2DigiContainer &digis, int rpc_type) const
 {
   std::set<unsigned int> result;
-  for (auto& p: detid_to_digis_) result.insert(p.first);
+  for (auto& p: digis)
+  {
+    auto id = p.first;
+    if (rpc_type > 0)
+    {
+      RPCDetId detId(id);
+      if (gemvalidation::toRPCType(detId.region(), detId.station(), detId.ring()) != rpc_type) continue;
+    }
+    result.insert(p.first);
+  }
   return result;
 }
 
+std::set<unsigned int>
+RPCDigiMatcher::detIds(int rpc_type) const
+{
+  return selectDetIds(detid_to_digis_, rpc_type);
+}
 
+std::set<unsigned int>
+RPCDigiMatcher::chamberIds(int rpc_type) const
+{
+  return selectDetIds(chamber_to_digis_, rpc_type);
+}
 
 const matching::DigiContainer&
 RPCDigiMatcher::digisInDetId(unsigned int detid) const
@@ -97,19 +101,25 @@ RPCDigiMatcher::digisInDetId(unsigned int detid) const
   return detid_to_digis_.at(detid);
 }
 
-std::set<unsigned int>
-RPCDigiMatcher::chamberIds() const
-{
-   std::set<unsigned int> result;
-   for (auto& p: chamber_to_digis_) result.insert(p.first);
-   return result;
-}
-
 const matching::DigiContainer&
 RPCDigiMatcher::digisInChamber(unsigned int detid) const  //use chamber raw id here
 {
-   if (chamber_to_digis_.find(detid) == chamber_to_digis_.end()) return no_digis_;
-   return chamber_to_digis_.at(detid);
+  if (chamber_to_digis_.find(detid) == chamber_to_digis_.end()) return no_digis_;
+  return chamber_to_digis_.at(detid);
+}
+
+const RPCDigiMatcher::RPCDigiContainer& 
+RPCDigiMatcher::rpcDigisInDetId(unsigned int detid) const
+{
+  if (detid_to_rpcDigis_.find(detid) == detid_to_rpcDigis_.end()) return no_rpc_digis_;
+  return detid_to_rpcDigis_.at(detid);
+}
+
+const RPCDigiMatcher::RPCDigiContainer& 
+RPCDigiMatcher::rpcDigisInChamber(unsigned int detid) const
+{
+  if (chamber_to_rpcDigis_.find(detid) == chamber_to_rpcDigis_.end()) return no_rpc_digis_;
+  return chamber_to_rpcDigis_.at(detid);
 }
 
 int
@@ -123,7 +133,6 @@ RPCDigiMatcher::nStrips() const
   }
   return n;
 }
-
 
 std::set<int>
 RPCDigiMatcher::stripsInDetId(unsigned int detid) const
@@ -164,11 +173,11 @@ RPCDigiMatcher::extrapolateHsfromRPC(unsigned int id, int rpcstrip) const
   CSCDetId csc_id(endcap, rpc_id.station(), rpc_id.ring(), cscchamber, 0);
   
   //std::cout <<"RPC det " << rpc_id <<"  CSC det " << csc_id << std::endl;
-  const CSCChamber* cscChamber(cscGeometry_->chamber(csc_id));
+  const CSCChamber* cscChamber(getCSCGeometry()->chamber(csc_id));
   const CSCLayer* cscKeyLayer(cscChamber->layer(3));
   const CSCLayerGeometry* cscKeyLayerGeometry(cscKeyLayer->geometry());
 
-  const RPCChamber* rpcChamber(rpcGeometry_->chamber(rpc_id));
+  const RPCChamber* rpcChamber(getRPCGeometry()->chamber(rpc_id));
   auto rpcRoll(rpcChamber->roll(2));//any roll
   const int nStrips(rpcRoll->nstrips());
   if (rpcstrip > nStrips or rpcstrip < 0) return result;

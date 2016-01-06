@@ -1,5 +1,5 @@
-#ifndef GEMValidation_DigiMatcher_h
-#define GEMValidation_DigiMatcher_h
+#ifndef GEMCode_GEMValidation_DigiMatcher_h
+#define GEMCode_GEMValidation_DigiMatcher_h
 
 /**\class DigiMatcher
 
@@ -9,11 +9,10 @@
 */
 
 #include "GEMCode/GEMValidation/interface/BaseMatcher.h"
+#include "GEMCode/GEMValidation/interface/SimHitMatcher.h"
 #include "GEMCode/GEMValidation/interface/GenericDigi.h"
 
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
-
-class SimHitMatcher;
 
 class DigiMatcher : public BaseMatcher
 {
@@ -21,6 +20,9 @@ public:
 
   typedef matching::Digi Digi;
   typedef matching::DigiContainer DigiContainer;
+  typedef std::map<unsigned int, Digi> Id2Digi;
+
+  typedef std::map<unsigned int, DigiContainer> Id2DigiContainer;
 
   DigiMatcher(SimHitMatcher& sh);
   
@@ -52,6 +54,8 @@ public:
   /// find a RPC digi with its position that is the closest in deltaR to the provided CSC global position
   std::pair<Digi, GlobalPoint>
   digiInRPCClosestToCSC(const DigiContainer& rpc_digis, const GlobalPoint& csc_gp) const;
+
+  const SimHitMatcher* simHitMatcher() const {return simhit_matcher_;}
 
 protected:
 

@@ -44,24 +44,24 @@ DigiMatcher::digiPosition(const Digi& digi) const
   if ( t == GEM_STRIP )
   {
     GEMDetId idd(id);
-    LocalPoint lp = gemGeometry_->etaPartition(idd)->centreOfStrip(strip);
-    gp = gemGeometry_->idToDet(id)->surface().toGlobal(lp);
+    LocalPoint lp = getGEMGeometry()->etaPartition(idd)->centreOfStrip(strip);
+    gp = getGEMGeometry()->idToDet(id)->surface().toGlobal(lp);
   }
   else if ( t == GEM_PAD )
   {
     GEMDetId idd(id);
-    LocalPoint lp = gemGeometry_->etaPartition(idd)->centreOfPad(strip);
-    gp = gemGeometry_->idToDet(id)->surface().toGlobal(lp);
+    LocalPoint lp = getGEMGeometry()->etaPartition(idd)->centreOfPad(strip);
+    gp = getGEMGeometry()->idToDet(id)->surface().toGlobal(lp);
   }
   else if ( t == GEM_COPAD)
   {
     GEMDetId id1(id);
-    LocalPoint lp1 = gemGeometry_->etaPartition(id1)->centreOfPad(strip);
-    GlobalPoint gp1 = gemGeometry_->idToDet(id)->surface().toGlobal(lp1);
+    LocalPoint lp1 = getGEMGeometry()->etaPartition(id1)->centreOfPad(strip);
+    GlobalPoint gp1 = getGEMGeometry()->idToDet(id)->surface().toGlobal(lp1);
 
     GEMDetId id2(id1.region(), id1.ring(), id1.station(), 2, id1.chamber(), id1.roll());
-    LocalPoint lp2 = gemGeometry_->etaPartition(id2)->centreOfPad(strip);
-    GlobalPoint gp2 = gemGeometry_->idToDet(id2())->surface().toGlobal(lp2);
+    LocalPoint lp2 = getGEMGeometry()->etaPartition(id2)->centreOfPad(strip);
+    GlobalPoint gp2 = getGEMGeometry()->idToDet(id2())->surface().toGlobal(lp2);
 
     gp = GlobalPoint( (gp1.x()+gp2.x())/2., (gp1.y()+gp2.y())/2., (gp1.z()+gp2.z())/2.);
   }
@@ -70,26 +70,26 @@ DigiMatcher::digiPosition(const Digi& digi) const
     CSCDetId idd(id);
     // "strip" here is actually a half-strip in geometry's terms
     int fractional_strip = halfstripToStrip(strip);
-    auto strip_topo = cscGeometry_->layer(id)->geometry()->topology();
+    auto strip_topo = getCSCGeometry()->layer(id)->geometry()->topology();
     LocalPoint lp = strip_topo->localPosition(fractional_strip);
-    gp = cscGeometry_->idToDet(id)->surface().toGlobal(lp);
+    gp = getCSCGeometry()->idToDet(id)->surface().toGlobal(lp);
   }
   else if ( t == CSC_CLCT )
   {
     CSCDetId idd(id);
     // "strip" here is actually a half-strip in geometry's terms
     int fractional_strip = halfstripToStrip(strip);
-    auto strip_topo = cscGeometry_->chamber(id)->layer(CSCConstants::KEY_CLCT_LAYER)->geometry()->topology();
+    auto strip_topo = getCSCGeometry()->chamber(id)->layer(CSCConstants::KEY_CLCT_LAYER)->geometry()->topology();
     LocalPoint lp = strip_topo->localPosition(fractional_strip);
 
     // return global point on the KEY_CLCT_LAYER layer
     CSCDetId key_id(idd.endcap(), idd.station(), idd.ring(), idd.chamber(), CSCConstants::KEY_CLCT_LAYER);
-    gp = cscGeometry_->idToDet(key_id)->surface().toGlobal(lp);
+    gp = getCSCGeometry()->idToDet(key_id)->surface().toGlobal(lp);
   }
   else if ( t == CSC_LCT )
   {
     CSCDetId idd(id);
-    auto layer_geo = cscGeometry_->chamber(idd)->layer(CSCConstants::KEY_CLCT_LAYER)->geometry();
+    auto layer_geo = getCSCGeometry()->chamber(idd)->layer(CSCConstants::KEY_CLCT_LAYER)->geometry();
 
     // "strip" here is actually a half-strip in geometry's terms
     float fractional_strip = halfstripToStrip(strip);
@@ -99,7 +99,7 @@ DigiMatcher::digiPosition(const Digi& digi) const
 
     // return global point on the KEY_CLCT_LAYER layer
     CSCDetId key_id(idd.endcap(), idd.station(), idd.ring(), idd.chamber(), CSCConstants::KEY_CLCT_LAYER);
-    gp = cscGeometry_->idToDet(key_id)->surface().toGlobal(intersect);
+    gp = getCSCGeometry()->idToDet(key_id)->surface().toGlobal(intersect);
 
     if (! layer_geo->inside(intersect))
     {
@@ -163,7 +163,7 @@ DigiMatcher::digisCSCMedianPosition(const DigiMatcher::DigiContainer& strip_digi
 
   // assume all strip and wire digis were from the same chamber
   CSCDetId id(digi_id(strip_digis[0]));
-  auto layer_geo = cscGeometry_->chamber(id)->layer(CSCConstants::KEY_CLCT_LAYER)->geometry();
+  auto layer_geo = getCSCGeometry()->chamber(id)->layer(CSCConstants::KEY_CLCT_LAYER)->geometry();
 
   int median_hs = median(strip_digis);
   int median_wg = median(wire_digis);
@@ -178,7 +178,7 @@ DigiMatcher::digisCSCMedianPosition(const DigiMatcher::DigiContainer& strip_digi
 
   // return global point on the KEY_CLCT_LAYER layer
   CSCDetId key_id(id.endcap(), id.station(), id.ring(), id.chamber(), CSCConstants::KEY_CLCT_LAYER);
-  return cscGeometry_->idToDet(key_id)->surface().toGlobal(intersect);
+  return getCSCGeometry()->idToDet(key_id)->surface().toGlobal(intersect);
 }
 
 

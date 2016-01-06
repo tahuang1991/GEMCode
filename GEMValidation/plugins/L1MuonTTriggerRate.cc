@@ -43,7 +43,7 @@
 #include "FWCore/Framework/interface/ESHandle.h"
 
 
-#include "GEMCode/GEMValidation/interface/GEMCSCdphi_LUT.h"
+#include "GEMCode/GEMValidation/interface/Helpers.h"
 #include "GEMCode/GEMValidation/interface/TFTrack.h" 
 
 #include "TH1F.h"
@@ -112,6 +112,8 @@ private:
   bool hasME1,hasME2;
   float GE11dPhi,GE21dPhi;
   bool passGE11,passGE21;
+  bool passGE11_pt5, passGE11_pt7, passGE11_pt10, passGE11_pt15, passGE11_pt20, passGE11_pt30, passGE11_pt40;
+  bool passGE21_pt5, passGE21_pt7, passGE21_pt10, passGE21_pt15, passGE21_pt20, passGE21_pt30, passGE21_pt40;
   int firstl1mu;
   unsigned int nl1tracks;
 
@@ -122,8 +124,8 @@ L1MuonTTriggerRate::L1MuonTTriggerRate(const edm::ParameterSet& iConfig)
 {
   //now do what ever initialization is needed
   //  runSRLUTs = new csctf_analysis::RunSRLUTs();
-  min_pt = iConfig.getParameter<double>("minPt");
-  max_pt = iConfig.getParameter<double>("maxPt");
+  min_pt = iConfig.getParameter<double>("minpt");
+  max_pt = iConfig.getParameter<double>("maxpt");
   min_aEta = iConfig.getParameter<double>("minEta");
   max_aEta = iConfig.getParameter<double>("maxEta");
 
@@ -143,9 +145,9 @@ void L1MuonTTriggerRate::analyze(const edm::Event& iEvent, const edm::EventSetup
   iEvent.getByLabel("simCscTriggerPrimitiveDigis","MPCSORTED", lcts);
 
   edm::ESHandle<L1MuTriggerScales> muScalesHd_;
-  edm::ESHandle<L1MuTriggerPtScale> muPtScaleHd_;
+  edm::ESHandle<L1MuTriggerPtScale> muptScaleHd_;
   //const L1MuTriggerScales* muScales_;
-  //const L1MuTriggerPtScale* muPtScale_;
+  //const L1MuTriggerPtScale* muptScale_;
   try {
     iSetup.get<L1MuTriggerScalesRcd>().get(muScalesHd_);
   } catch (edm::eventsetup::NoProxyException<L1MuTriggerScalesRcd>& e) {
@@ -153,12 +155,12 @@ void L1MuonTTriggerRate::analyze(const edm::Event& iEvent, const edm::EventSetup
   }
 
   try {
-    iSetup.get<L1MuTriggerPtScaleRcd>().get(muPtScaleHd_);
+    iSetup.get<L1MuTriggerPtScaleRcd>().get(muptScaleHd_);
   } catch (edm::eventsetup::NoProxyException<L1MuTriggerPtScaleRcd>& e) {
-    LogDebug("TrackMatcher") << "+++ Info: L1MuTriggerPtScaleRcd is unavailable. +++\n";
+    LogDebug("TrackMatcher") << "+++ Info: L1MuTriggerptScaleRcd is unavailable. +++\n";
   }
 
-  //CSCTFPtLUT* ptLUT_ = new CSCTFPtLUT(ptLUTset_, muScalesHd_.product(), muPtScaleHd_.product());
+  //CSCTFptLUT* ptLUT_ = new CSCTFptLUT(ptLUTset_, muScalesHd_.product(), muptScaleHd_.product());
 
 
   ++ntotalEvents;
@@ -173,7 +175,7 @@ void L1MuonTTriggerRate::analyze(const edm::Event& iEvent, const edm::EventSetup
     if (tmp_trk != l1csctracks->begin()) firstl1mu = -1;//only first track firstl1mu =1
 
     TFTrack *track = new TFTrack(&tmp_trk->first,&tmp_trk->second);
-    track->init(muScalesHd_, muPtScaleHd_);
+    track->init(muScalesHd_, muptScaleHd_);
 
     pt = track->pt();
     eta = track->eta();
@@ -199,7 +201,14 @@ void L1MuonTTriggerRate::analyze(const edm::Event& iEvent, const edm::EventSetup
 
     if (lct1 < (track->getTriggerDigis()).size()) 
     {
-       passGE11 = track->passDPhicutTFTrack(1);
+       //passGE11 = track->passDPhicutTFTrack(1);
+       passGE11_pt5 = track->passDPhicutTFTrack(1, 5);
+       passGE11_pt7 = track->passDPhicutTFTrack(1, 7);
+       passGE11_pt10 = track->passDPhicutTFTrack(1, 10);
+       passGE11_pt15 = track->passDPhicutTFTrack(1, 15);
+       passGE11_pt20 = track->passDPhicutTFTrack(1, 20);
+       passGE11_pt30 = track->passDPhicutTFTrack(1, 30);
+       passGE11_pt40 = track->passDPhicutTFTrack(1, 40);
        GE11dPhi = ((track->getTriggerDigis()).at(lct1))->getGEMDPhi();
     }
 //   if (pt<10 and passGE11 ) std::cout <<" passGE11  pt "<< pt <<" deltaphi " << GE11dPhi << std::endl;
@@ -207,7 +216,14 @@ void L1MuonTTriggerRate::analyze(const edm::Event& iEvent, const edm::EventSetup
     lct2 = track->digiInME(2,1);
     if (lct2 < (track->getTriggerDigis()).size()) 
     {
-       passGE21 = track->passDPhicutTFTrack(2);
+       //passGE21 = track->passDPhicutTFTrack(2);
+       passGE21_pt5 = track->passDPhicutTFTrack(2, 5);
+       passGE21_pt7 = track->passDPhicutTFTrack(2, 7);
+       passGE21_pt10 = track->passDPhicutTFTrack(2, 10);
+       passGE21_pt15 = track->passDPhicutTFTrack(2, 15);
+       passGE21_pt20 = track->passDPhicutTFTrack(2, 20);
+       passGE21_pt30 = track->passDPhicutTFTrack(2, 30);
+       passGE21_pt40 = track->passDPhicutTFTrack(2, 40);
        GE21dPhi = ((track->getTriggerDigis()).at(lct2))->getGEMDPhi();
     }
 
@@ -252,6 +268,20 @@ void L1MuonTTriggerRate::beginJob()
    evtree->Branch("dphiGE21",&GE21dPhi);
    evtree->Branch("passGE11",&passGE11);
    evtree->Branch("passGE21",&passGE21);
+   evtree->Branch("passGE11_pt5",&passGE11_pt5);
+   evtree->Branch("passGE21_pt5",&passGE21_pt5);
+   evtree->Branch("passGE11_pt7",&passGE11_pt7);
+   evtree->Branch("passGE21_pt7",&passGE21_pt7);
+   evtree->Branch("passGE11_pt10",&passGE11_pt10);
+   evtree->Branch("passGE21_pt10",&passGE21_pt10);
+   evtree->Branch("passGE11_pt15",&passGE11_pt15);
+   evtree->Branch("passGE21_pt15",&passGE21_pt15);
+   evtree->Branch("passGE11_pt20",&passGE11_pt20);
+   evtree->Branch("passGE21_pt20",&passGE21_pt20);
+   evtree->Branch("passGE11_pt30",&passGE11_pt30);
+   evtree->Branch("passGE21_pt30",&passGE21_pt30);
+   evtree->Branch("passGE11_pt40",&passGE11_pt40);
+   evtree->Branch("passGE21_pt40",&passGE21_pt40);
    evtree->Branch("nstubs",&nstubs);
    
 
@@ -277,6 +307,20 @@ void L1MuonTTriggerRate::init(){
   passGE21 = false;
   GE11dPhi = -99;
   GE21dPhi =-99;
+  passGE11_pt5=false;
+  passGE11_pt7=false;
+  passGE11_pt10=false;
+  passGE11_pt15=false;
+  passGE11_pt20=false;
+  passGE11_pt30=false;
+  passGE11_pt40=false;
+  passGE21_pt5=false;
+  passGE21_pt7=false;
+  passGE21_pt10=false;
+  passGE21_pt15=false;
+  passGE21_pt20=false;
+  passGE21_pt30=false;
+  passGE21_pt40=false;
 
 
 }

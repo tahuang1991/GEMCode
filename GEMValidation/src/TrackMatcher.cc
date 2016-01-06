@@ -1,5 +1,5 @@
 #include "GEMCode/GEMValidation/interface/TrackMatcher.h"
-#include "GEMCode/GEMValidation/interface/GEMCSCdphi_LUT.h"
+#include "GEMCode/GEMValidation/interface/Helpers.h"
 #include "TLorentzVector.h"
 #include <map>
 
@@ -13,35 +13,35 @@ TrackMatcher::TrackMatcher(SimHitMatcher& sh, CSCDigiMatcher& csc_dg,
 , rpc_digi_matcher_(&rpc_dg)                 
 {
   auto tfTrack = conf().getParameter<edm::ParameterSet>("cscTfTrack");
-  cscTfTrackInputLabel_ = tfTrack.getParameter<edm::InputTag>("input");
+  //  cscTfTrackInputLabel_ = tfTrack.getParameter<edm::InputTag>("input");
   minBXTFTrack_ = tfTrack.getParameter<int>("minBX");
   maxBXTFTrack_ = tfTrack.getParameter<int>("minBX");
   verboseTFTrack_ = tfTrack.getParameter<int>("verbose");
   deltaRTFTrack_ = tfTrack.getParameter<double>("deltaR");
   
   auto tfCand = conf().getParameter<edm::ParameterSet>("cscTfCand");
-  cscTfCandInputLabel_ = tfCand.getParameter<edm::InputTag>("input");
+  // cscTfCandInputLabel_ = tfCand.getParameter<edm::InputTag>("input");
   minBXTFCand_ = tfCand.getParameter<int>("minBX");
   maxBXTFCand_ = tfCand.getParameter<int>("minBX");
   verboseTFCand_ = tfCand.getParameter<int>("verbose");
   deltaRTFCand_ = tfCand.getParameter<double>("deltaR");
   
-  auto gmtRegCand = conf().getParameter<edm::ParameterSet>("gmtRegCand");
-  gmtRegCandInputLabel_ = gmtRegCand.getParameter<edm::InputTag>("input");
+  auto gmtRegCand = conf().getParameter<edm::ParameterSet>("gmtRegCandCSC");
+  // gmtRegCandInputLabel_ = gmtRegCand.getParameter<edm::InputTag>("input");
   minBXGMTRegCand_ = gmtRegCand.getParameter<int>("minBX");
   maxBXGMTRegCand_ = gmtRegCand.getParameter<int>("minBX");
   verboseGMTRegCand_ = gmtRegCand.getParameter<int>("verbose");
   deltaRGMTRegCand_ = gmtRegCand.getParameter<double>("deltaR");
   
   auto gmtCand = conf().getParameter<edm::ParameterSet>("gmtCand");
-  gmtCandInputLabel_ = gmtCand.getParameter<edm::InputTag>("input");
+  //  gmtCandInputLabel_ = gmtCand.getParameter<edm::InputTag>("input");
   minBXGMTCand_ = gmtCand.getParameter<int>("minBX");
   maxBXGMTCand_ = gmtCand.getParameter<int>("minBX");
   verboseGMTCand_ = gmtCand.getParameter<int>("verbose");
   deltaRGMTCand_ = gmtCand.getParameter<double>("deltaR");
   
-  auto l1Extra = conf().getParameter<edm::ParameterSet>("l1Extra");
-  l1ExtraInputLabel_ = l1Extra.getParameter<edm::InputTag>("input");
+  auto l1Extra = conf().getParameter<edm::ParameterSet>("l1ExtraMuonParticle");
+  // l1ExtraInputLabel_ = l1Extra.getParameter<edm::InputTag>("input");
   minBXL1Extra_ = l1Extra.getParameter<int>("minBX");
   maxBXL1Extra_ = l1Extra.getParameter<int>("minBX");
   verboseL1Extra_ = l1Extra.getParameter<int>("verbose");
@@ -96,12 +96,12 @@ TrackMatcher::~TrackMatcher()
 
 
   for (auto trk:tfTracks_)  delete trk;
-
- // if(dtrc_) 
-      delete dtrc_;
+  
+  if(dtrc_) 
+    delete dtrc_;
   dtrc_ = nullptr;
   clear();
-
+  
 //  delete sh_matcher_;
 //  delete gem_digi_matcher_;
 //  delete csc_digi_matcher_;
@@ -163,25 +163,32 @@ TrackMatcher::init()
 
   dtrc_ = new CSCTFDTReceiver();
   
+  propagateSimTrack();
+  propagationInterStation();
+
+  /*
   // tracks produced by TF
   edm::Handle<L1CSCTrackCollection> hl1Tracks;
   event().getByLabel(cscTfTrackInputLabel_,hl1Tracks);
   matchTfTrackToSimTrack(*hl1Tracks.product());
-  propagateSimTrack();
-  propagationInterStation();
   
   // L1 muon candidates after CSC sorter
-  edm::Handle<std::vector<L1MuRegionalCand> > hl1TfCands;
+  edm::Handle<L1MuRegionalCandCollection> hl1TfCands;
   event().getByLabel(cscTfCandInputLabel_, hl1TfCands);
-  const std::vector<L1MuRegionalCand>* l1TfCands = hl1TfCands.product();
-  matchTfCandToSimTrack(l1TfCands);
+  matchTfCandToSimTrack(*hl1TfCands.product());
+
+  // L1 muon candidates
+  edm::Handle<l1extra::L1MuonParticleCollection> l1_particles;
+  event().getByLabel(l1ExtraInputLabel_, l1_particles);
+  matchL1MuonParticleToSimTrack(*l1_particles.product());
+  */
 }
 
 void 
 TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
 {
 
-  for (L1CSCTrackCollection::const_iterator trk = tracks.begin(); trk != tracks.end(); trk++) {
+  for (auto trk = tracks.begin(); trk != tracks.end(); trk++) {
      verboseTFTrack_ = 0;
     TFTrack *track = new TFTrack(&trk->first,&trk->second);
     track->init(muScalesHd_, muPtScaleHd_);
@@ -265,14 +272,14 @@ TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
     if (verboseTFTrack_ > 1){
       std::cout << " \t\tStubs:" << std::endl;
     }
-    for (CSCCorrelatedLCTDigiCollection::DigiRangeIterator detUnitIt = trk->second.begin(); 
+    for (auto  detUnitIt = trk->second.begin(); 
          detUnitIt != trk->second.end(); detUnitIt++) {
       const CSCDetId& id = (*detUnitIt).first;
       if (verboseTFTrack_ > 1){
         std::cout << "\t\tDetId: " << id << std::endl;
       }
       const CSCCorrelatedLCTDigiCollection::Range& range = (*detUnitIt).second;
-      for (CSCCorrelatedLCTDigiCollection::const_iterator digiIt = range.first; digiIt != range.second; digiIt++) {
+      for (auto digiIt = range.first; digiIt != range.second; digiIt++) {
         auto lct(*digiIt);
         // check for valid stubs
         if (!(lct.isValid())) continue;
@@ -307,9 +314,9 @@ TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
 }
 
 void 
-TrackMatcher::matchTfCandToSimTrack(const std::vector<L1MuRegionalCand>* tracks)
+TrackMatcher::matchTfCandToSimTrack(const L1MuRegionalCandCollection& tracks)
 {
-  for (std::vector<L1MuRegionalCand>::const_iterator trk = tracks->begin(); trk != tracks->end(); trk++) {
+  for (auto trk = tracks.begin(); trk != tracks.end(); trk++) {
     TFCand track(&*trk);
     track.init(ptLUT_, muScalesHd_, muPtScaleHd_);
     // calculate the DR
@@ -317,7 +324,7 @@ TrackMatcher::matchTfCandToSimTrack(const std::vector<L1MuRegionalCand>* tracks)
 
     // debugging
     if (verboseTFCand_){
-      std::cout << "\tL1CSC TFCand "<< trk-tracks->begin() << " information:" << std::endl;
+      std::cout << "\tL1CSC TFCand "<< trk-tracks.begin() << " information:" << std::endl;
       std::cout << "\tpt (GeV/c) = " << track.pt() << ", eta = " << track.eta() 
                 << "\t, phi = " << track.phi() << ", dR(sim,L1) = " << track.dr() << std::endl;      
     }
@@ -326,7 +333,6 @@ TrackMatcher::matchTfCandToSimTrack(const std::vector<L1MuRegionalCand>* tracks)
 //       tfCands_.push_back(track);
 //     }
   }
-
 }
 
 void 
@@ -336,6 +342,11 @@ TrackMatcher::matchGmtRegCandToSimTrack(const L1MuRegionalCand& tracks)
 
 void 
 TrackMatcher::matchGmtCandToSimTrack(const L1MuGMTExtendedCand& tracks)
+{
+}
+
+void 
+TrackMatcher::matchL1MuonParticleToSimTrack(const l1extra::L1MuonParticleCollection& tracks)
 {
 }
 
@@ -569,7 +580,7 @@ std::pair<float, float>
 TrackMatcher::intersectionEtaPhi(CSCDetId id, int wg, int hs)
 {
   const CSCDetId layerId(id.endcap(), id.station(), id.ring(), id.chamber(), CSCConstants::KEY_CLCT_LAYER);
-  const CSCLayer* csclayer(cscGeometry_->layer(layerId));
+  const CSCLayer* csclayer(getCSCGeometry()->layer(layerId));
   const CSCLayerGeometry* layer_geo(csclayer->geometry());
 
   // LCT::getKeyWG() starts from 0
@@ -579,7 +590,7 @@ TrackMatcher::intersectionEtaPhi(CSCDetId id, int wg, int hs)
   // note that LCT's HS starts from 0, but in geometry strips start from 1
   const float fractional_strip(0.5 * (hs + 1) - 0.25);
   const LocalPoint csc_intersect(layer_geo->intersectionOfStripAndWire(fractional_strip, wire));
-  const GlobalPoint csc_gp(cscGeometry_->idToDet(layerId)->surface().toGlobal(csc_intersect));
+  const GlobalPoint csc_gp(getCSCGeometry()->idToDet(layerId)->surface().toGlobal(csc_intersect));
   //std::cout << " simcharge " << simCharge << "  CSCDet Id  " << id << "   csc_gp.phi" << csc_gp.phi() << std::endl;
   return std::make_pair(csc_gp.eta(), csc_gp.phi());
 }
@@ -596,7 +607,7 @@ void TrackMatcher::propagateSimTrack()
   {
      int chamber = 1;
      const CSCDetId layerId(endcap, st, ring, chamber, CSCConstants::KEY_CLCT_LAYER);
-     const CSCLayer* csclayer(cscGeometry_->layer(layerId));
+     const CSCLayer* csclayer(getCSCGeometry()->layer(layerId));
      const GlobalPoint gp = csclayer->centerOfWireGroup(10);
    //  std::cout <<" layerId " << layerId << "z position: " << gp.z() << std::endl;
      GlobalPoint gp_propagate(propagateToZ(gp.z()));
@@ -610,7 +621,7 @@ void TrackMatcher::propagateSimTrack()
   {
      int chamber = 2;
      const CSCDetId layerId(endcap, st, ring, chamber, CSCConstants::KEY_CLCT_LAYER);
-     const CSCLayer* csclayer(cscGeometry_->layer(layerId));
+     const CSCLayer* csclayer(getCSCGeometry()->layer(layerId));
      GlobalPoint gp = csclayer->centerOfWireGroup(10);
      //std::cout <<" layerId " << layerId << "z position: " << gp.z() << std::endl;
      GlobalPoint gp_propagate(propagateToZ(gp.z()));
@@ -631,7 +642,7 @@ GlobalPoint TrackMatcher::propagationInterStation(int firstSt, int SecondSt, boo
     CSCDetId id(d);
     int chamber(odd ? 1:2);
     const CSCDetId layerId(id.endcap(), SecondSt, 1, chamber, CSCConstants::KEY_CLCT_LAYER);
-    const CSCLayer* csclayer(cscGeometry_->layer(layerId));
+    const CSCLayer* csclayer(getCSCGeometry()->layer(layerId));
     const GlobalPoint gpAtSecondSt = csclayer->centerOfWireGroup(10);
     if (id.station()==firstSt)
     {
@@ -641,9 +652,9 @@ GlobalPoint TrackMatcher::propagationInterStation(int firstSt, int SecondSt, boo
 	auto onehit(hits.at(0));
 	//std::cout <<" detId " << onehit.detUnitId() << "  momentu "<< onehit.momentumAtEntry() <<" entry point " << onehit.entryPoint() << std::endl;
         LocalPoint lp(onehit.entryPoint());
-	GlobalPoint gp(cscGeometry_->idToDet(onehit.detUnitId())->surface().toGlobal(lp));
+	GlobalPoint gp(getCSCGeometry()->idToDet(onehit.detUnitId())->surface().toGlobal(lp));
         LocalVector lv(onehit.momentumAtEntry());
-        GlobalVector gv(cscGeometry_->idToDet(onehit.detUnitId())->surface().toGlobal(lv));
+        GlobalVector gv(getCSCGeometry()->idToDet(onehit.detUnitId())->surface().toGlobal(lv));
 
         GlobalPoint gp_propagate(propagateToZ(gp, gv, gpAtSecondSt.z()));
 	return gp_propagate;

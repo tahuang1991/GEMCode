@@ -1,10 +1,9 @@
 #include "GEMCode/GEMValidation/interface/BaseMatcher.h"
-
 #include "TrackingTools/TrajectoryState/interface/TrajectoryStateOnSurface.h"
 #include "TrackingTools/Records/interface/TrackingComponentsRecord.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 #include "DataFormats/GeometrySurface/interface/Plane.h"
-#include "GEMCode/GEMValidation/interface/GEMCSCdphi_LUT.h"
+#include "GEMCode/GEMValidation/interface/Helpers.h"
 
 
 BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
@@ -12,14 +11,44 @@ BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
 : trk_(t), vtx_(v), conf_(ps), ev_(ev), es_(es), verbose_(0)
 {
   // list of CSC chamber type numbers to use
-  std::vector<int> csc_types = conf().getUntrackedParameter<std::vector<int> >("useCSCChamberTypes", std::vector<int>() );
-  for (int i=0; i <= CSC_ME42; ++i) useCSCChamberTypes_[i] = false;
+  std::vector<int> csc_types = conf().getParameter<std::vector<int> >("cscStationsToUse");
+  for (int i = CSC_ALL; i != CSC_ME42; i++) useCSCChamberTypes_[i] = false;
   for (auto t: csc_types)
   {
-    if (t >= 0 && t <= CSC_ME42) useCSCChamberTypes_[t] = 1;
+    if (t >= 0 && t <= CSC_ME42) useCSCChamberTypes_[t] = true;
   }
   // empty list means use all the chamber types
-  if (csc_types.empty()) useCSCChamberTypes_[CSC_ALL] = 1;
+  if (csc_types.empty()) useCSCChamberTypes_[CSC_ALL] = true;
+
+  // list of RPC chamber type numbers to use
+  std::vector<int> rpc_types = conf().getParameter<std::vector<int> >("rpcStationsToUse");
+  for (int i = RPC_ALL; i != RPC_MB24n; i++) useRPCChamberTypes_[i] = false;
+  for (auto t: rpc_types)
+  {
+    if (t >= 0 && t <= RPC_MB24n) useRPCChamberTypes_[t] = true;
+  }
+  // empty list means use all the chamber types
+  if (rpc_types.empty()) useRPCChamberTypes_[RPC_ALL] = true;
+
+  // list of DT chamber type numbers to use
+  std::vector<int> dt_types = conf().getParameter<std::vector<int> >("dtStationsToUse");
+  for (int i = DT_ALL; i != DT_MB24n; i++) useDTChamberTypes_[i] = false;
+  for (auto t: dt_types)
+  {
+    if (t >= 0 && t <= DT_MB24n) useDTChamberTypes_[t] = true;
+  }
+  // empty list means use all the chamber types
+  if (dt_types.empty()) useDTChamberTypes_[DT_ALL] = true;
+
+  // list of GEM chamber type numbers to use
+  std::vector<int> gem_types = conf().getParameter<std::vector<int> >("gemStationsToUse");
+  for (int i = GEM_ALL; i != GEM_ME21; i++) useGEMChamberTypes_[i] = false;
+  for (auto t: gem_types)
+  {
+    if (t >= 0 && t <= GEM_ME21) useGEMChamberTypes_[t] = true;
+  }
+  // empty list means use all the chamber types
+  if (gem_types.empty()) useGEMChamberTypes_[GEM_ALL] = true;
 
   // Get the magnetic field
   es.get<IdealMagneticFieldRecord>().get(magfield_);
@@ -36,44 +65,47 @@ BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
   hasDTGeometry_ = true;
 
   try {
-    es.get<MuonGeometryRecord>().get(gem_geom);
-    gemGeometry_ = &*gem_geom;
+    es.get<MuonGeometryRecord>().get(gem_geom_);
+    gemGeometry_ = &*gem_geom_;
   } catch (edm::eventsetup::NoProxyException<GEMGeometry>& e) {
     hasGEMGeometry_ = false;
     LogDebug("BaseMatcher") << "+++ Info: GEM geometry is unavailable. +++\n";
   }
 
   try {
-    es.get<MuonGeometryRecord>().get(me0_geom);
-    me0Geometry_ = &*me0_geom;
+    es.get<MuonGeometryRecord>().get(me0_geom_);
+    me0Geometry_ = &*me0_geom_;
   } catch (edm::eventsetup::NoProxyException<ME0Geometry>& e) {
     hasME0Geometry_ = false;
     LogDebug("BaseMatcher") << "+++ Info: ME0 geometry is unavailable. +++\n";
   }
 
   try {
-    es.get<MuonGeometryRecord>().get(csc_geom);
-    cscGeometry_ = &*csc_geom;
+    es.get<MuonGeometryRecord>().get(csc_geom_);
+    cscGeometry_ = &*csc_geom_;
   } catch (edm::eventsetup::NoProxyException<CSCGeometry>& e) {
     hasCSCGeometry_ = false;
     LogDebug("BaseMatcher") << "+++ Info: CSC geometry is unavailable. +++\n";
   }
 
   try {
-    es.get<MuonGeometryRecord>().get(rpc_geom);
-    rpcGeometry_ = &*rpc_geom;
+    es.get<MuonGeometryRecord>().get(rpc_geom_);
+    rpcGeometry_ = &*rpc_geom_;
   } catch (edm::eventsetup::NoProxyException<RPCGeometry>& e) {
     hasRPCGeometry_ = false;
     LogDebug("BaseMatcher") << "+++ Info: RPC geometry is unavailable. +++\n";
   }
 
   try {
-    es.get<MuonGeometryRecord>().get(dt_geom);
-    dtGeometry_ = &*dt_geom;
+    es.get<MuonGeometryRecord>().get(dt_geom_);
+    dtGeometry_ = &*dt_geom_;
   } catch (edm::eventsetup::NoProxyException<DTGeometry>& e) {
     hasDTGeometry_ = false;
     LogDebug("BaseMatcher") << "+++ Info: DT geometry is unavailable. +++\n";
   }
+
+  simTrackPSet_ = conf().getParameter<edm::ParameterSet>("simTrack");
+  verboseSimTrack_ = simTrackPSet_.getParameter<int>("verbose");
 }
 
 
@@ -82,7 +114,29 @@ BaseMatcher::~BaseMatcher()
 }
 
 
-bool BaseMatcher::useCSCChamberType(int csc_type)
+bool 
+BaseMatcher::useGEMChamberType(int gem_type)
+{
+  if (gem_type < 0 || gem_type > GEM_ME21) return false;
+  return useGEMChamberTypes_[gem_type];
+}
+
+bool 
+BaseMatcher::useRPCChamberType(int rpc_type)
+{
+  if (rpc_type < 0 || rpc_type > RPC_MB24n) return false;
+  return useRPCChamberTypes_[rpc_type];
+}
+
+bool 
+BaseMatcher::useDTChamberType(int dt_type)
+{
+  if (dt_type < 0 || dt_type > DT_MB24n) return false;
+  return useDTChamberTypes_[dt_type];
+}
+
+bool 
+BaseMatcher::useCSCChamberType(int csc_type)
 {
   if (csc_type < 0 || csc_type > CSC_ME42) return false;
   return useCSCChamberTypes_[csc_type];
@@ -124,48 +178,8 @@ BaseMatcher::propagatedPositionGEM() const
 }
 
 
-unsigned int
-BaseMatcher::gemDetFromCSCDet(unsigned int id,int layer)
-{
-  CSCDetId cscId(id);
-  // returns the gem superr chamber for a given ME1/1 chamber(ME1/1a + ME1/1b)
-  GEMDetId gemId(cscId.zendcap(), 1, cscId.station(), layer, cscId.chamber(),0); 
-  return gemId.rawId();
-}
-
-
-std::pair<unsigned int, unsigned int> 
-BaseMatcher::gemDetsFromCSCDet(unsigned int id)
-{
-  return std::make_pair(gemDetFromCSCDet(id,1),gemDetFromCSCDet(id,2));
-}
-
-
-int 
-chamber(const DetId& id)
-{
-  if (id.det() != DetId::Detector::Muon) return -99;
-  int chamberN = 0;
-  switch(id.subdetId()){
-  case MuonSubdetId::GEM:
-    chamberN = GEMDetId(id).chamber();
-    break;
-  case MuonSubdetId::RPC:
-    // works only for endcap!!
-    chamberN = RPCDetId(id).sector();
-    break;
-  case MuonSubdetId::CSC:
-    chamberN = CSCDetId(id).chamber();
-    break;
-  case MuonSubdetId::ME0:
-    chamberN = ME0DetId(id).chamber();
-    break;
-  };
-  return chamberN;
-}
-
-
-double BaseMatcher::phiHeavyCorr(double pt, double eta, double phi, double charge) const
+double 
+BaseMatcher::phiHeavyCorr(double pt, double eta, double phi, double charge) const
 {
     // float resEta = eta;
     float etaProp = std::abs(eta);
@@ -179,6 +193,7 @@ double BaseMatcher::phiHeavyCorr(double pt, double eta, double phi, double charg
 
 
 bool BaseMatcher::passDPhicut(CSCDetId id, int chargesign, float dphi, float pt) const
+//BaseMatcher::passDPhicut(CSCDetId id, float dPhi, float pt) const
 {
   //  const double GEMdPhi[9][3];
     //std::cout <<"passdphicut  id " << id << std::endl;
@@ -221,3 +236,5 @@ bool BaseMatcher::passDPhicut(CSCDetId id, int chargesign, float dphi, float pt)
    return pass;
 
 }
+
+

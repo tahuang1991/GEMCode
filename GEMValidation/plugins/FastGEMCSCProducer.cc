@@ -34,8 +34,8 @@
 
 #include "L1Trigger/CSCCommonTrigger/interface/CSCConstants.h"
 
-#include "GEMCode/GEMValidation/src/SimTrackMatchManager.h"
-#include "GEMCode/SimMuL1/interface/FastGEMCSCBuilder.h"
+#include "GEMCode/GEMValidation/interface/SimTrackMatchManager.h"
+#include "GEMCode/GEMValidation/interface/FastGEMCSCBuilder.h"
 
 #include "CLHEP/Random/RandomEngine.h"
 
@@ -48,8 +48,8 @@ using namespace matching;
 
 
 // CSC chamber types, according to CSCDetId::iChamberType()
-enum {CSC_ALL = 0, CSC_ME1a, CSC_ME1b, CSC_ME12, CSC_ME13,
-      CSC_ME21, CSC_ME22, CSC_ME31, CSC_ME32, CSC_ME41, CSC_ME42};
+//enum {CSC_ALL = 0, CSC_ME1a, CSC_ME1b, CSC_ME12, CSC_ME13,
+//      CSC_ME21, CSC_ME22, CSC_ME31, CSC_ME32, CSC_ME41, CSC_ME42};
 
 
 class FastGEMCSCProducer : public edm::EDProducer

@@ -1,5 +1,5 @@
-#ifndef GEMValidation_TFTrack_h
-#define GEMValidation_TFTrack_h
+#ifndef GEMCode_GEMValidation_TFTrack_h
+#define GEMCode_GEMValidation_TFTrack_h
 
 // system include files
 #include <memory>
@@ -108,7 +108,7 @@ class TFTrack
   double dr() const {return dr_;}
   std::vector<bool> deltaOk();
   bool debug() const {return debug_;}
-  bool passDPhicutTFTrack(int st) const;
+  bool passDPhicutTFTrack(int st, float pt) const;
    
  private:
   const csc::L1Track* l1track_;

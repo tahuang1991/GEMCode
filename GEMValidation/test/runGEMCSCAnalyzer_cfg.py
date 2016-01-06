@@ -6,8 +6,7 @@ process = cms.Process("GEMCSCANA")
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
-process.load('Configuration.Geometry.GeometryExtended2023Muon_cff')
-process.load('Configuration.Geometry.GeometryExtended2023MuonReco_cff')
+process.load('Configuration.Geometry.GeometryExtended2023HGCalMuonReco_cff')
 process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -17,45 +16,47 @@ process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorOp
 process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAlong_cfi')
 
 process.source = cms.Source("PoolSource",
-	fileNames = cms.untracked.vstring('file:out_L1.root'),
+	fileNames = cms.untracked.vstring('file:out_hlt.test.root'),
 )
 
-from GEMCode.SimMuL1.GEMCSCTriggerSamplesLib import *
 from GEMCode.GEMValidation.InputFileHelpers import *
-#process = useInputDir(process, InputDir, True)
-#process = useInputDir(process, files['_gem98_pt2-50_PU0_pt0_new'], False)
+#from L1Trigger.L1IntegratedMuonTrigger.hltSamples import *
+"""
+eosfiles["cT_100_14TeV_PU140_HLT_fullScope"] 
+eosfiles["cT_100_14TeV_PU140_HLT_descope235MCHF"] 
+eosfiles["cT_100_14TeV_PU140_HLT_descope235MCHFaging"] 
+eosfiles["cT_100_14TeV_PU140_HLT_descope200MCHF"] 
+eosfiles["cT_100_14TeV_PU140_HLT_descope200MCHFaging"] 
+
+eosfiles["cT_1000_14TeV_PU140_HLT_fullScope"] 
+eosfiles["cT_1000_14TeV_PU140_HLT_descope235MCHFaging"] 
+eosfiles["cT_1000_14TeV_PU140_HLT_descope200MCHF"] 
+eosfiles["cT_1000_14TeV_PU140_HLT_descope200MCHFaging"] 
+"""
+
+Inputdir=['/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/SLHC25_patch1_2023Muon_1M_L1_PU0_Pt2_50_updategemeta/1bf93df4dfbb43dc918bd6e47dedbf79/']
+process = useInputDir(process, Inputdir)
+#process = useInputDir(process, eosfiles["cT_100_14TeV_PU140_HLT_fullScope"])
+#print process.source.fileNames
 
 process.TFileService = cms.Service("TFileService",
+    #fileName = cms.string("out_ana_DarkSUSY_mH_125_mGammaD_20000_cT_100_14TeV_PU140_HLT_fullScope.root")
     fileName = cms.string("out_ana.root")
 )
 
 ## global tag for upgrade studies
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgradePLS3', '')
-
-# the analyzer configuration
-def enum(*sequential, **named):
-  enums = dict(zip(sequential, range(len(sequential))), **named)
-  return type('Enum', (), enums)
-Stations = enum('ALL','ME11','ME1a','ME1b','ME12','ME13','ME21','ME22','ME31','ME32','ME41','ME42')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'PH2_1K_FB_V6::All', '')
 
 from GEMCode.GEMValidation.simTrackMatching_cfi import SimTrackMatching
 process.GEMCSCAnalyzer = cms.EDAnalyzer("GEMCSCAnalyzer",
     verbose = cms.untracked.int32(0),
-    stationsToUse = cms.vint32(Stations.ALL,Stations.ME11,Stations.ME1a,Stations.ME1b,
-                              Stations.ME21,Stations.ME31,Stations.ME41),
     simTrackMatching = SimTrackMatching
 )
 matching = process.GEMCSCAnalyzer.simTrackMatching
 matching.simTrack.minPt = 1.5
 matching.matchprint = cms.bool(False)
-matching.gemRecHit.input = ""
-"""
-matching.cscTfTrack.input = ""
-matching.tfCand.input = ""
-matching.gmtCand.input = ""
-matching.l1Extra.input = ""
-"""
+
 doGem = True
 if doGem:
   matching.cscSimHit.minNHitsChamber = 3
@@ -67,11 +68,11 @@ if doGem:
   matching.cscLCT.matchAlctGemME11 = True
   matching.cscLCT.matchAlctGemME21 = True
   matching.cscMPLCT.minNHitsChamber = 3
-doRpc = True
+doRpc = False
 if doRpc:
   matching.cscLCT.matchAlctRpc = True
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
 
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 

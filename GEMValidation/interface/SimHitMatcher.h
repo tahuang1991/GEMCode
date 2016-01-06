@@ -1,5 +1,5 @@
-#ifndef GEMValidation_SimHitMatcher_h
-#define GEMValidation_SimHitMatcher_h
+#ifndef GEMCode_GEMValidation_SimHitMatcher_h
+#define GEMCode_GEMValidation_SimHitMatcher_h
 
 /**\class SimHitMatcher
 
@@ -32,6 +32,8 @@ public:
   
   ~SimHitMatcher();
 
+  /// access to all the Muon SimHits (use MuonSubdetId::SubSystem)
+  const edm::PSimHitContainer& simHits(enum MuonType) const;
   /// access to all the GEM SimHits
   const edm::PSimHitContainer& simHitsGEM() const {return gem_hits_;}
   /// access to all the CSC SimHits
@@ -44,16 +46,16 @@ public:
   const edm::PSimHitContainer& simHitsDT() const {return dt_hits_;}
 
   /// GEM partitions' detIds with SimHits
-  std::set<unsigned int> detIdsGEM() const;
+  std::set<unsigned int> detIdsGEM(int csc_type = GEM_ALL) const;
   /// ME0 partitions' detIds with SimHits
   std::set<unsigned int> detIdsME0() const;
   /// RPC partitions' detIds with SimHits
-  std::set<unsigned int> detIdsRPC() const;
+  std::set<unsigned int> detIdsRPC(int csc_type = RPC_ALL) const;
   /// CSC layers' detIds with SimHits
   /// by default, only returns those from ME1b
-  std::set<unsigned int> detIdsCSC(int csc_type = CSC_ME1b) const;
+  std::set<unsigned int> detIdsCSC(int csc_type = CSC_ALL) const;
   /// DT partitions' detIds with SimHits
-  std::set<unsigned int> detIdsDT() const;
+  std::set<unsigned int> detIdsDT(int csc_type = DT_ALL) const;
 
   /// GEM detid's with hits in 2 layers of coincidence pads
   /// those are layer==1 only detid's
@@ -63,13 +65,21 @@ public:
   std::set<unsigned int> detIdsME0Coincidences(int min_n_layers = 2) const;
 
   /// GEM chamber detIds with SimHits
-  std::set<unsigned int> chamberIdsGEM() const;
+  std::set<unsigned int> chamberIdsGEM(int csc_type = GEM_ALL) const;
   /// ME0 chamber detIds with SimHits
   std::set<unsigned int> chamberIdsME0() const;
   /// RPC chamber detIds with SimHits
-  std::set<unsigned int> chamberIdsRPC() const;
+  std::set<unsigned int> chamberIdsRPC(int csc_type = RPC_ALL) const;
   /// CSC chamber detIds with SimHits
-  std::set<unsigned int> chamberIdsCSC(int csc_type = CSC_ME1b) const;
+  std::set<unsigned int> chamberIdsCSC(int csc_type = CSC_ALL) const;
+  /// DT chamber detIds with SimHits
+  std::set<unsigned int> chamberIdsDT(int csc_type = DT_ALL) const;
+
+  /// DT station detIds with SimHits
+  std::set<unsigned int> chamberIdsCSCStation(int station) const;
+  /// DT station detIds with SimHits
+  std::set<unsigned int> chamberIdsDTStation(int station) const;
+
 
   /// GEM superchamber detIds with SimHits
   std::set<unsigned int> superChamberIdsGEM() const;
@@ -81,18 +91,34 @@ public:
   /// ME0 superchamber detIds with SimHits >=2 layers of coincidence pads
   std::set<unsigned int> superChamberIdsME0Coincidences(int min_n_layers = 2) const;
 
+  /// DT layer detIds with SimHits
+  std::set<unsigned int> layerIdsDT() const;
+  /// DT super layer detIds with SimHits
+  std::set<unsigned int> superlayerIdsDT() const;
+
   /// simhits from a particular partition (GEM)/layer (CSC), chamber or superchamber
   const edm::PSimHitContainer& hitsInDetId(unsigned int) const;
   const edm::PSimHitContainer& hitsInChamber(unsigned int) const;
   const edm::PSimHitContainer& hitsInSuperChamber(unsigned int) const;
 
-  std::set<unsigned int> superlayerIdsDT() const;
-  std::set<unsigned int> chamberIdsDT() const;
+  // was there a hit in a particular DT/CSC station?
+  bool hitStationCSC(int, int) const;
+  bool hitStationDT(int, int, int) const;
+  bool hitStationGEM(int, int) const;
+  bool hitStationRPC(int) const;
 
-  int nLayerWithHitsInChamberDT (unsigned int) const;
-  int nLayerWithHitsInSuperlayerDT (unsigned int) const;
-  const edm::PSimHitContainer& hitsInDetIdDT(unsigned int) const;
-  const edm::PSimHitContainer& hitsInSuperlayerDT(unsigned int) const;
+  // number of stations with hits in at least X layers
+  int nStationsCSC(int nl=4) const;
+  int nStationsDT(int nsl=1, int nl=3) const;
+  int nStationsRPC() const;
+  int nStationsGEM(int nl=2) const;
+
+  int nCellsWithHitsInLayerDT(unsigned int) const;
+  int nLayersWithHitsInSuperLayerDT(unsigned int) const;
+  int nSuperLayersWithHitsInChamberDT(unsigned int) const;
+  int nLayersWithHitsInChamberDT(unsigned int) const;
+  const edm::PSimHitContainer& hitsInLayerDT(unsigned int) const;
+  const edm::PSimHitContainer& hitsInSuperLayerDT(unsigned int) const;
   const edm::PSimHitContainer& hitsInChamberDT(unsigned int) const;
 
   /// #layers with hits
@@ -113,19 +139,31 @@ public:
   /// calculate Global average position for a provided collection of simhits
   GlobalPoint simHitsMeanPosition(const edm::PSimHitContainer& sim_hits) const;
 
+  /// calculate Global average momentum for a provided collection of simhits
+  GlobalVector simHitsMeanMomentum(const edm::PSimHitContainer& sim_hits) const;
+
   /// calculate average strip (strip for GEM/ME0, half-strip for CSC) number for a provided collection of simhits
   float simHitsMeanStrip(const edm::PSimHitContainer& sim_hits) const;
 
-  /// calculate average wg number for a provided collection of simhits
+  /// calculate average wg number for a provided collection of simhits (for CSC)
   float simHitsMeanWG(const edm::PSimHitContainer& sim_hits) const;
+
+  /// calculate average wg number for a provided collection of simhits (for DT)
+  float simHitsMeanWire(const edm::PSimHitContainer& sim_hits) const;
 
   std::set<int> hitStripsInDetId(unsigned int, int margin_n_strips = 0) const;  // GEM/ME0 or CSC
   std::set<int> hitWiregroupsInDetId(unsigned int, int margin_n_wg = 0) const; // CSC
   std::set<int> hitPadsInDetId(unsigned int) const; // GEM
   std::set<int> hitCoPadsInDetId(unsigned int) const; // GEM coincidence pads with hits
+  std::set<unsigned int> hitWiresInDTLayerId(unsigned int, int margin_n_wires = 0) const;  // DT
+  std::set<unsigned int> hitWiresInDTSuperLayerId(unsigned int, int margin_n_wires = 0) const;  // DT
+  std::set<unsigned int> hitWiresInDTChamberId(unsigned int, int margin_n_wires = 0) const;  // DT
 
   // what unique partitions numbers were hit by this simtrack?
   std::set<int> hitPartitions() const; // GEM
+
+  void cscChamberIdsToString(const std::set<unsigned int>&) const;
+  void dtChamberIdsToString(const std::set<unsigned int>&) const;
 
 private:
 
@@ -134,11 +172,11 @@ private:
   std::vector<unsigned int> getIdsOfSimTrackShower(unsigned  trk_id,
       const edm::SimTrackContainer& simTracks, const edm::SimVertexContainer& simVertices);
 
-  void matchSimHitsToSimTrack(std::vector<unsigned int> track_ids,
-                              const edm::PSimHitContainer& csc_hits, 
-                              const edm::PSimHitContainer& gem_hits,
-                              const edm::PSimHitContainer& rpc_hits,
-                              const edm::PSimHitContainer& me0_hits);
+  void matchCSCSimHitsToSimTrack(std::vector<unsigned int> track_ids, const edm::PSimHitContainer& csc_hits);
+  void matchRPCSimHitsToSimTrack(std::vector<unsigned int> track_ids, const edm::PSimHitContainer& rpc_hits);
+  void matchGEMSimHitsToSimTrack(std::vector<unsigned int> track_ids, const edm::PSimHitContainer& gem_hits);
+  void matchME0SimHitsToSimTrack(std::vector<unsigned int> track_ids, const edm::PSimHitContainer& me0_hits);
+  void matchDTSimHitsToSimTrack(std::vector<unsigned int> track_ids, const edm::PSimHitContainer& dt_hits);
 
   bool simMuOnlyCSC_;
   bool simMuOnlyGEM_;
@@ -159,7 +197,7 @@ private:
   bool runDTSimHit_;
 
   std::string simInputLabel_;
-
+  
   std::map<unsigned int, unsigned int> trkid_to_index_;
 
   edm::PSimHitContainer no_hits_;
@@ -184,6 +222,7 @@ private:
 
   edm::PSimHitContainer dt_hits_;
   std::map<unsigned int, edm::PSimHitContainer > dt_detid_to_hits_;
+  std::map<unsigned int, edm::PSimHitContainer > dt_layer_to_hits_;
   std::map<unsigned int, edm::PSimHitContainer > dt_superlayer_to_hits_;
   std::map<unsigned int, edm::PSimHitContainer > dt_chamber_to_hits_;
 
@@ -198,17 +237,12 @@ private:
   bool verboseME0_;
   bool verboseDT_;
 
-  edm::InputTag gemSimHitInput_;
-  edm::InputTag cscSimHitInput_;
-  edm::InputTag rpcSimHitInput_;
-  edm::InputTag me0SimHitInput_;
-  edm::InputTag dtSimHitInput_;
+  std::vector<edm::InputTag> gemSimHitInput_;
+  std::vector<edm::InputTag> cscSimHitInput_;
+  std::vector<edm::InputTag> rpcSimHitInput_;
+  std::vector<edm::InputTag> me0SimHitInput_;
+  std::vector<edm::InputTag> dtSimHitInput_;
 
-  edm::Handle<edm::PSimHitContainer> csc_hits;
-  edm::Handle<edm::PSimHitContainer> gem_hits;
-  edm::Handle<edm::PSimHitContainer> rpc_hits;
-  edm::Handle<edm::PSimHitContainer> me0_hits;
-  edm::Handle<edm::PSimHitContainer> dt_hits;
   edm::Handle<edm::SimTrackContainer> sim_tracks;
   edm::Handle<edm::SimVertexContainer> sim_vertices;
 };

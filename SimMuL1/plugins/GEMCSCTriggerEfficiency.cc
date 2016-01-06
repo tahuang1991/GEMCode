@@ -35,7 +35,7 @@
 #include <Geometry/CSCGeometry/interface/CSCChamberSpecs.h>
 #include "Geometry/GEMGeometry/interface/GEMGeometry.h"
 
-#include "GEMCode/GEMValidation/src/SimTrackMatchManager.h"
+#include "GEMCode/GEMValidation/interface/SimTrackMatchManager.h"
 
 using namespace mugeo;
 
@@ -1760,7 +1760,7 @@ GEMCSCTriggerEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup
 
         int match_has_gem = 0;
         std::vector<int> match_gem_chambers;
-        auto gem_superch_ids = match_gem.superChamberIds();
+        auto gem_superch_ids = match_gem.superChamberIdsDigi();
         for(auto d: gem_superch_ids)
         {
             GEMDetId id(d);

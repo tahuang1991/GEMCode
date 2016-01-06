@@ -1,5 +1,5 @@
-#ifndef SimMuL1_FastGEMCSCBuilder_h
-#define SimMuL1_FastGEMCSCBuilder_h
+#ifndef GEMCode_GEMValidation_FastGEMCSCBuilder_h
+#define GEMCode_GEMValidation_FastGEMCSCBuilder_h
 
 /**\class FastGEMCSCBuilder
 
@@ -19,7 +19,7 @@
 #include "CLHEP/Random/RandomEngine.h"
 #include "CLHEP/Random/RandFlat.h"
 
-#include "GEMCode/GEMValidation/src/SimHitMatcher.h"
+#include "GEMCode/GEMValidation/interface/SimHitMatcher.h"
 
 #include "TLinearFitter.h"
 
