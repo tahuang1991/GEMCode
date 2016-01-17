@@ -49,6 +49,8 @@ L1TrackFinderTrackMatcher::init()
 void 
 L1TrackFinderTrackMatcher::matchCSCTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
 {
+
+  return;
   for (auto trk : tracks) {
     auto tfTrack(trk.first);
     std::cout << "Stubs in CSCTF Track" << std::endl;

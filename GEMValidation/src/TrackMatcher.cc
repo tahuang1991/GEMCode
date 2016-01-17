@@ -13,7 +13,7 @@ TrackMatcher::TrackMatcher(SimHitMatcher& sh, CSCDigiMatcher& csc_dg,
 , rpc_digi_matcher_(&rpc_dg)                 
 {
   auto tfTrack = conf().getParameter<edm::ParameterSet>("cscTfTrack");
-  //  cscTfTrackInputLabel_ = tfTrack.getParameter<edm::InputTag>("input");
+  cscTfTrackInputLabel_ = tfTrack.getParameter<edm::InputTag>("input");
   minBXTFTrack_ = tfTrack.getParameter<int>("minBX");
   maxBXTFTrack_ = tfTrack.getParameter<int>("minBX");
   verboseTFTrack_ = tfTrack.getParameter<int>("verbose");
@@ -166,12 +166,12 @@ TrackMatcher::init()
   propagateSimTrack();
   propagationInterStation();
 
-  /*
   // tracks produced by TF
   edm::Handle<L1CSCTrackCollection> hl1Tracks;
   event().getByLabel(cscTfTrackInputLabel_,hl1Tracks);
   matchTfTrackToSimTrack(*hl1Tracks.product());
   
+  /*
   // L1 muon candidates after CSC sorter
   edm::Handle<L1MuRegionalCandCollection> hl1TfCands;
   event().getByLabel(cscTfCandInputLabel_, hl1TfCands);
@@ -187,9 +187,7 @@ TrackMatcher::init()
 void 
 TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
 {
-
   for (auto trk = tracks.begin(); trk != tracks.end(); trk++) {
-     verboseTFTrack_ = 0;
     TFTrack *track = new TFTrack(&trk->first,&trk->second);
     track->init(muScalesHd_, muPtScaleHd_);
     
