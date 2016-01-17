@@ -142,6 +142,9 @@ public:
   /// calculate Global average momentum for a provided collection of simhits
   GlobalVector simHitsMeanMomentum(const edm::PSimHitContainer& sim_hits) const;
 
+  /// 
+  float LocalBendingInChamber(unsigned int detid) const;
+
   /// calculate average strip (strip for GEM/ME0, half-strip for CSC) number for a provided collection of simhits
   float simHitsMeanStrip(const edm::PSimHitContainer& sim_hits) const;
 

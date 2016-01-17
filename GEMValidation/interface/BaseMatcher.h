@@ -37,20 +37,6 @@ class BaseMatcher
 {
 public:
   
-  /// CSC chamber types, according to CSCDetId::iChamberType()
-  enum CSCType {CSC_ALL = 0, CSC_ME1a, CSC_ME1b, CSC_ME12, CSC_ME13,
-                CSC_ME21, CSC_ME22, CSC_ME31, CSC_ME32, CSC_ME41, CSC_ME42};
-
-  /// GEM chamber types
-  enum GEMType {GEM_ALL = 0, GEM_ME11, GEM_ME21};
-  
-  /// RPC endcap chamber types
-  enum RPCType {RPC_ALL = 0, RPC_ME12, RPC_ME13, RPC_ME22, RPC_ME23, 
-                RPC_ME31, RPC_ME32, RPC_ME33, RPC_ME41, RPC_ME42, RPC_ME43};
-
-  /// DT chamber types
-  enum DTType { DT_ALL = 0, DT_MB10, DT_MB11, DT_MB12, DT_MB20, DT_MB21, 
-		DT_MB22, DT_MB30, DT_MB31, DT_MB32, DT_MB40, DT_MB41, DT_MB42};
 
   BaseMatcher(const SimTrack& t, const SimVertex& v,
       const edm::ParameterSet& ps, const edm::Event& ev, const edm::EventSetup& es);
