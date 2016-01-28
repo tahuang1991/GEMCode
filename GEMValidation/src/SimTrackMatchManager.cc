@@ -2,8 +2,9 @@
 
 SimTrackMatchManager::SimTrackMatchManager(const SimTrack& t, const SimVertex& v,
       const edm::ParameterSet& ps, const edm::Event& ev, const edm::EventSetup& es)
-: genMuons_(t, v, ps, ev, es)
-, simhits_(t, v, ps, ev, es)
+: 
+ //genMuons_(t, v, ps, ev, es)
+simhits_(t, v, ps, ev, es)
 , gem_digis_(simhits_)
 , gem_rechits_(simhits_)
 , me0_digis_(simhits_)

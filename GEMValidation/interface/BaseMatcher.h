@@ -36,6 +36,7 @@
 class BaseMatcher
 {
 public:
+  
 
   BaseMatcher(const SimTrack& t, const SimVertex& v,
       const edm::ParameterSet& ps, const edm::Event& ev, const edm::EventSetup& es);
@@ -86,7 +87,7 @@ public:
   const DTGeometry* getDTGeometry() const {return dtGeometry_;}
 
   double phiHeavyCorr(double pt, double eta, double phi, double charge) const;
-  bool passDPhicut(CSCDetId id, float dphi, float pt) const;
+  bool passDPhicut(CSCDetId id, int chargesign, float dphi, float pt) const;
 
  protected:
   
@@ -99,13 +100,13 @@ public:
   edm::ParameterSet simTrackPSet_;
   bool verboseSimTrack_;
 
- private:
-
   const CSCGeometry* cscGeometry_;
   const RPCGeometry* rpcGeometry_;
   const GEMGeometry* gemGeometry_;
   const ME0Geometry* me0Geometry_;
   const DTGeometry* dtGeometry_;
+
+ private:
 
   const SimTrack& trk_;
   const SimVertex& vtx_;

@@ -41,7 +41,7 @@ public:
   
   ~SimTrackMatchManager();
 
-  const DisplacedGENMuonMatcher& genMuons() const {return genMuons_;}
+  //const DisplacedGENMuonMatcher& genMuons() const {return genMuons_;}
   const SimHitMatcher& simhits() const {return simhits_;}
   const GEMDigiMatcher& gemDigis() const {return gem_digis_;}
   const GEMRecHitMatcher& gemRecHits() const {return gem_rechits_;}
@@ -63,7 +63,7 @@ public:
   
 private:
 
-  DisplacedGENMuonMatcher genMuons_;
+  //DisplacedGENMuonMatcher genMuons_;
   SimHitMatcher simhits_;
   GEMDigiMatcher gem_digis_;
   GEMRecHitMatcher gem_rechits_;
