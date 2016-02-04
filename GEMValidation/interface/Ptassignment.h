@@ -9,7 +9,7 @@
 enum {EtaPartitions=6, Parity=4};
 const double PositionEpLUT[Parity][EtaPartitions][3] = {
     		//prop_factor, slope, intercept
-		{{1.279, 0.04784, 0.1122},
+		{{1.279, 0.04784, 0.1122}, //eta 1.2-1.4
 		 {1.279, 0.65424, 0.09761},
     		 {0.648, 0.05527, 0.08944},
 		 {0.648, 0.08295, 0.1294 },
@@ -71,7 +71,7 @@ const double DirectionEpLUT[Parity][EtaPartitions][2]={
 	       },
 	};
 
-int GetEtaPartition(float eta ){
+int GetEtaPartition_direction(float eta ){
 
     int neta=-1;
     if (fabs(eta)>=1.6 and fabs(eta)<1.8)
@@ -87,8 +87,31 @@ int GetEtaPartition(float eta ){
 
 }
 
+int GetEtaPartition_position(float eta ){
+
+    int neta=-1;
+
+    if (fabs(eta)>=1.2 and fabs(eta)<1.4)
+	neta=0;
+    else if (fabs(eta)>=1.4 and fabs(eta)<1.6)
+	neta=1;
+    else if (fabs(eta)>=1.6 and fabs(eta)<1.8)
+	neta=2;
+    else if (fabs(eta)>=1.8 and fabs(eta)<2.0)
+	neta=3;
+    else if (fabs(eta)>=2.0 and fabs(eta)<2.2)
+	neta=4;
+    else if (fabs(eta)>2.2 and fabs(eta)<2.4)
+	neta=5;
+
+    return neta;
+
+}
+
+
+
 float Ptassign_Position(float deltay12, float deltay23, float eta, int par){
-    int neta = GetEtaPartition(eta);
+    int neta = GetEtaPartition_position(eta);
     if (par<0 or par>3 or neta==-1) return -1;
     
     //std::cout <<" npar "<< par <<" neta "<< neta <<" prop "<< PositionEpLUT[par][neta][0] <<" slope "<< PositionEpLUT[par][neta][1]<<" intercep "<< PositionEpLUT[par][neta][2] << " ddY " <<fabs(deltay23)-PositionEpLUT[par][neta][0]*fabs(deltay12) << std::endl;
@@ -114,7 +137,7 @@ float Ptassign_Position_gp(GlobalPoint gp1, GlobalPoint gp2, GlobalPoint gp3, fl
 
 
 float Ptassign_Direction(float bending_12, float eta, int par){
-    int neta = GetEtaPartition(eta);
+    int neta = GetEtaPartition_direction(eta);
     if (par<0 or par>3 or neta==-1) return -1;
 
     //std::cout <<"Direction Based method  npar "<< par <<" neta "<<neta <<" slope "<< DirectionEpLUT[par][neta][1]<<" intercep "<< DirectionEpLUT[par][neta][1] << " bending_12 " << bending_12 << std::endl;
