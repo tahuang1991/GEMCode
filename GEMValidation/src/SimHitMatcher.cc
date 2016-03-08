@@ -1086,7 +1086,7 @@ SimHitMatcher::LocalBendingInChamber(unsigned int detid) const
 		if (hits6a.size()>0 or hits6b.size()>0) 
 			break;
 	}
-	if (layerk==2 ){
+	if (layern==2 ){
 		std::cerr <<" error !!, ME11 layern "<< layern <<" total layers "<<nLayersWithHitsInSuperChamber(detid)  << std::endl;
 		return -100;
 	}
