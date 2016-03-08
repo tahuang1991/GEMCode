@@ -971,7 +971,7 @@ SimHitMatcher::simHitsMeanPosition(const edm::PSimHitContainer& sim_hits) const
     {
       gp = getGEMGeometry()->idToDet(h.detUnitId())->surface().toGlobal(lp);
     }
-    if ( gemvalidation::is_me0(h.detUnitId()) )
+    else if ( gemvalidation::is_me0(h.detUnitId()) )
     {
       gp = getME0Geometry()->idToDet(h.detUnitId())->surface().toGlobal(lp);
     }
@@ -1014,7 +1014,7 @@ SimHitMatcher::simHitsMeanMomentum(const edm::PSimHitContainer& sim_hits) const
     {
       gv = getGEMGeometry()->idToDet(h.detUnitId())->surface().toGlobal(lv);
     }
-    if ( gemvalidation::is_me0(h.detUnitId()) )
+    else if ( gemvalidation::is_me0(h.detUnitId()) )
     {
       gv = getME0Geometry()->idToDet(h.detUnitId())->surface().toGlobal(lv);
     }
@@ -1046,13 +1046,26 @@ float
 SimHitMatcher::LocalBendingInChamber(unsigned int detid) const
 {
   const CSCDetId cscid(detid);
-  if (nLayersWithHitsInSuperChamber(detid)<6) return -100;
+  if (nLayersWithHitsInSuperChamber(detid)<3) return -100;
   float phi_layer1=-10;
   float phi_layer6=10;
 
   if (cscid.station()==1 and (cscid.ring()==1 or cscid.ring()==4)){
-  	const CSCDetId cscid1a(cscid.endcap(), cscid.station(), 4, cscid.chamber(), 1);
-  	const CSCDetId cscid1b(cscid.endcap(), cscid.station(), 1, cscid.chamber(), 1);
+	int layerk=1;
+        for (; layerk<=4; layerk++){ 
+  		const CSCDetId cscid1a(cscid.endcap(), cscid.station(), 4, cscid.chamber(), layerk);
+  		const CSCDetId cscid1b(cscid.endcap(), cscid.station(), 1, cscid.chamber(), layerk);
+		const edm::PSimHitContainer hits1a = hitsInDetId(cscid1a.rawId());
+		const edm::PSimHitContainer hits1b = hitsInDetId(cscid1b.rawId());
+		if (hits1a.size()>0 or hits1b.size()>0) 
+			break;
+	}
+	if (layerk==5 ){
+		std::cerr <<" error !!, ME11 layerk "<< layerk <<" total layers "<<nLayersWithHitsInSuperChamber(detid) << std::endl;
+		return -100;
+	}
+  	const CSCDetId cscid1a(cscid.endcap(), cscid.station(), 4, cscid.chamber(), layerk);
+  	const CSCDetId cscid1b(cscid.endcap(), cscid.station(), 1, cscid.chamber(), layerk);
 	const edm::PSimHitContainer hits1a = hitsInDetId(cscid1a.rawId());
 	const edm::PSimHitContainer hits1b = hitsInDetId(cscid1b.rawId());
 	GlobalPoint gp1a = simHitsMeanPosition(hitsInDetId(cscid1a.rawId()));	
@@ -1062,10 +1075,23 @@ SimHitMatcher::LocalBendingInChamber(unsigned int detid) const
 	    phi_layer1 = (gp1a.phi()+gp1b.phi())/2.0;
 	else if (hits1a.size()>0) phi_layer1 = gp1a.phi();
 	else if (hits1b.size()>0) phi_layer1 = gp1b.phi();
-	else std::cerr <<" no hits in layer1, cant not find global phi of hits " << std::endl;
-
-  	const CSCDetId cscid6a(cscid.endcap(), cscid.station(), 4, cscid.chamber(), 6);
-  	const CSCDetId cscid6b(cscid.endcap(), cscid.station(), 1, cscid.chamber(), 6);
+	else std::cerr <<" no hits in layerk "<< layerk <<", cant not find global phi of hits " << std::endl;
+	
+	int layern = 6;
+  	for (; layern>=3; layern--){
+  		const CSCDetId cscid6a(cscid.endcap(), cscid.station(), 4, cscid.chamber(), layern);
+  		const CSCDetId cscid6b(cscid.endcap(), cscid.station(), 1, cscid.chamber(), layern);
+		const edm::PSimHitContainer hits6a = hitsInDetId(cscid6a.rawId());
+		const edm::PSimHitContainer hits6b = hitsInDetId(cscid6b.rawId());
+		if (hits6a.size()>0 or hits6b.size()>0) 
+			break;
+	}
+	if (layerk==2 ){
+		std::cerr <<" error !!, ME11 layern "<< layern <<" total layers "<<nLayersWithHitsInSuperChamber(detid)  << std::endl;
+		return -100;
+	}
+  	const CSCDetId cscid6a(cscid.endcap(), cscid.station(), 4, cscid.chamber(), layern);
+  	const CSCDetId cscid6b(cscid.endcap(), cscid.station(), 1, cscid.chamber(), layern);
 	const edm::PSimHitContainer hits6a = hitsInDetId(cscid6a.rawId());
 	const edm::PSimHitContainer hits6b = hitsInDetId(cscid6b.rawId());
 	GlobalPoint gp6a = simHitsMeanPosition(hitsInDetId(cscid6a.rawId()));	
@@ -1075,20 +1101,42 @@ SimHitMatcher::LocalBendingInChamber(unsigned int detid) const
 	    phi_layer6 = (gp6a.phi()+gp6b.phi())/2.0;
 	else if (hits6a.size()>0) phi_layer6 = gp6a.phi();
 	else if (hits6b.size()>0) phi_layer6 = gp6b.phi();
-	else std::cerr <<" no hits in layer6, cant not find global phi of hits " << std::endl;
+	else std::cerr <<" no hits in layern " << layern <<", cant not find global phi of hits " << std::endl;
    
 
   }
   else {
-  	const CSCDetId cscid1(cscid.endcap(), cscid.station(), cscid.ring(), cscid.chamber(), 1);
+	int layerk=1;
+        for (; layerk<=4; layerk++){ 
+  		const CSCDetId cscid1(cscid.endcap(), cscid.station(), cscid.ring(), cscid.chamber(), layerk);
+		const edm::PSimHitContainer hits1 = hitsInDetId(cscid1.rawId());
+		if (hits1.size()>0) 
+			break;
+	}
+	if (layerk==5 ){
+		std::cerr <<" error !! layerk "<< layerk <<" total layers "<<nLayersWithHitsInSuperChamber(detid) << std::endl;
+		return -100;
+	}
+  	const CSCDetId cscid1(cscid.endcap(), cscid.station(), cscid.ring(), cscid.chamber(), layerk);
 	const edm::PSimHitContainer hits1 = hitsInDetId(cscid1.rawId());
-	if (hits1.size()==0) std::cerr <<" no hits in layer1, cant not find global phi of hits " << std::endl;
+	if (hits1.size()==0) std::cerr <<" no hits in layer1" << layerk <<" cant not find global phi of hits " << std::endl;
 	GlobalPoint gp1 = simHitsMeanPosition(hitsInDetId(cscid1.rawId()));	
 	phi_layer1 = gp1.phi();
 
-  	const CSCDetId cscid6(cscid.endcap(), cscid.station(), cscid.ring(), cscid.chamber(), 6);
+	int layern = 6;
+  	for (; layern>=3; layern--){
+  		const CSCDetId cscid6(cscid.endcap(), cscid.station(), cscid.ring(), cscid.chamber(), layern);
+		const edm::PSimHitContainer hits6 = hitsInDetId(cscid6.rawId());
+		if (hits6.size()>0) 
+			break;
+	}
+	if (layern==2 ){
+		std::cerr <<" error !! layern "<< layern <<" total layers "<<nLayersWithHitsInSuperChamber(detid) << std::endl;
+		return -100;
+	}
+  	const CSCDetId cscid6(cscid.endcap(), cscid.station(), cscid.ring(), cscid.chamber(), layern);
 	const edm::PSimHitContainer hits6 = hitsInDetId(cscid6.rawId());
-	if (hits6.size()==0) std::cerr <<" no hits in layer6, cant not find global phi of hits " << std::endl;
+	if (hits6.size()==0) std::cerr <<" no hits in layern "<< layern << " cant not find global phi of hits " << std::endl;
 	GlobalPoint gp6 = simHitsMeanPosition(hitsInDetId(cscid6.rawId()));	
 	phi_layer6 = gp6.phi();
   }
@@ -1113,7 +1161,7 @@ SimHitMatcher::simHitsMeanStrip(const edm::PSimHitContainer& sim_hits) const
     {
       s = getGEMGeometry()->etaPartition(d)->strip(lp);
     }
-    if ( gemvalidation::is_me0(d) )
+    else if ( gemvalidation::is_me0(d) )
     {
       s = getME0Geometry()->etaPartition(d)->strip(lp);
     }
