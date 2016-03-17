@@ -129,6 +129,8 @@ class TrackMatcher : public CSCStubMatcher
   double deltaRGMTRegCand_;
   double deltaRGMTCand_;
   double deltaRL1Extra_;
+  
+  bool runTFTrack_;
 
   std::vector<TFTrack*> tfTracks_;
   std::vector<TFCand*> tfCands_;

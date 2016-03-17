@@ -18,6 +18,7 @@ TrackMatcher::TrackMatcher(SimHitMatcher& sh, CSCDigiMatcher& csc_dg,
   maxBXTFTrack_ = tfTrack.getParameter<int>("minBX");
   verboseTFTrack_ = tfTrack.getParameter<int>("verbose");
   deltaRTFTrack_ = tfTrack.getParameter<double>("deltaR");
+  runTFTrack_ = tfTrack.getParameter<bool>("run");
   
   auto tfCand = conf().getParameter<edm::ParameterSet>("cscTfCand");
   // cscTfCandInputLabel_ = tfCand.getParameter<edm::InputTag>("input");
@@ -168,8 +169,10 @@ TrackMatcher::init()
 
   // tracks produced by TF
   edm::Handle<L1CSCTrackCollection> hl1Tracks;
-  event().getByLabel(cscTfTrackInputLabel_,hl1Tracks);
-  matchTfTrackToSimTrack(*hl1Tracks.product());
+  if (runTFTrack_) {
+    event().getByLabel(cscTfTrackInputLabel_,hl1Tracks);
+    matchTfTrackToSimTrack(*hl1Tracks.product());
+  }
   
   /*
   // L1 muon candidates after CSC sorter
