@@ -51,6 +51,7 @@ GEMRecHitMatcher::matchRecHitsToSimTrack(const GEMRecHitCollection& rechits)
       if (verboseGEMRecHit_) cout<<"GEMRecHit "<<p_id<<" "<<*d<<endl;
       // ignore hits in the short GE21
       if (p_id.station()==2) continue;
+      if (!d->isValid()) continue;
       // check that the rechit is within BX range
       if (d->BunchX() < minBXGEM_ || d->BunchX() > maxBXGEM_) continue;
       // check that it matches a strip that was hit by SimHits from our track

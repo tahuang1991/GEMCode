@@ -63,6 +63,7 @@ CSCRecHitMatcher::matchCSCRecHit2DsToSimTrack(const CSCRecHit2DCollection& rechi
     auto rechits_in_det = rechits.get(p_id);    
     for (auto d = rechits_in_det.first; d != rechits_in_det.second; ++d) {
       if (verboseCSCRecHit2D_) cout<<"rechit "<<p_id<<" "<<*d;
+      if (!d->isValid()) continue;
       
       const bool wireMatch(std::find(hit_wg.begin(), hit_wg.end(),d->hitWire())!=hit_wg.end());
       bool stripMatch(false);
@@ -102,6 +103,7 @@ CSCRecHitMatcher::matchCSCSegmentsToSimTrack(const CSCSegmentCollection& cscSegm
     auto segments_in_det = cscSegments.get(p_id);
     for (auto d = segments_in_det.first; d != segments_in_det.second; ++d) {
       if (verboseCSCSegment_) cout<<"segment "<<p_id<<" "<<*d<<endl;
+      if (!d->isValid()) continue;
       
       //access the rechits
       auto recHits(d->recHits());

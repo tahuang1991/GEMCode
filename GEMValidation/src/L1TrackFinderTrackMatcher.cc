@@ -37,13 +37,13 @@ void
 L1TrackFinderTrackMatcher::init()
 {
   edm::Handle<L1CSCTrackCollection> hCscTfTrack;
-  if (gemvalidation::getByLabel(cscTfTrackInputLabel_, hCscTfTrack, event())) if (runCscTfTrack_) matchCSCTfTrackToSimTrack(*hCscTfTrack.product());
+  if (runCscTfTrack_) if (gemvalidation::getByLabel(cscTfTrackInputLabel_, hCscTfTrack, event())) matchCSCTfTrackToSimTrack(*hCscTfTrack.product());
 
   edm::Handle<L1CSCTrackCollection> hDtTfTrack;
-  if (gemvalidation::getByLabel(dtTfTrackInputLabel_, hDtTfTrack, event())) if (runDtTfTrack_) matchDTTfTrackToSimTrack(*hDtTfTrack.product());
+  if (runDtTfTrack_) if (gemvalidation::getByLabel(dtTfTrackInputLabel_, hDtTfTrack, event())) matchDTTfTrackToSimTrack(*hDtTfTrack.product());
 
   edm::Handle<L1CSCTrackCollection> hRpcTfTrack;
-  if (gemvalidation::getByLabel(rpcTfTrackInputLabel_, hRpcTfTrack, event())) if (runRpcTfTrack_) matchRPCTfTrackToSimTrack(*hRpcTfTrack.product());
+  if (runRpcTfTrack_) if (gemvalidation::getByLabel(rpcTfTrackInputLabel_, hRpcTfTrack, event())) matchRPCTfTrackToSimTrack(*hRpcTfTrack.product());
 }
 
 void 

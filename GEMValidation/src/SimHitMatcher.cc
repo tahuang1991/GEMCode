@@ -308,7 +308,6 @@ SimHitMatcher::matchRPCSimHitsToSimTrack(std::vector<unsigned int> track_ids, co
       if (simMuOnlyRPC_ && std::abs(pdgid) != 13) continue;
       // discard electron hits in the RPC chambers
       if (discardEleHitsRPC_ && pdgid == 11) continue;
-
       rpc_detid_to_hits_[ h.detUnitId() ].push_back(h);
       rpc_hits_.push_back(h);
       RPCDetId layer_id( h.detUnitId() );
@@ -1020,7 +1019,7 @@ SimHitMatcher::simHitsMeanPosition(const edm::PSimHitContainer& sim_hits) const
     {
       gp = getGEMGeometry()->idToDet(h.detUnitId())->surface().toGlobal(lp);
     }
-    if ( gemvalidation::is_me0(h.detUnitId()) )
+    else if ( gemvalidation::is_me0(h.detUnitId()) )
     {
       gp = getME0Geometry()->idToDet(h.detUnitId())->surface().toGlobal(lp);
     }
@@ -1063,7 +1062,7 @@ SimHitMatcher::simHitsMeanMomentum(const edm::PSimHitContainer& sim_hits) const
     {
       gv = getGEMGeometry()->idToDet(h.detUnitId())->surface().toGlobal(lv);
     }
-    if ( gemvalidation::is_me0(h.detUnitId()) )
+    else if ( gemvalidation::is_me0(h.detUnitId()) )
     {
       gv = getME0Geometry()->idToDet(h.detUnitId())->surface().toGlobal(lv);
     }
@@ -1162,7 +1161,7 @@ SimHitMatcher::simHitsMeanStrip(const edm::PSimHitContainer& sim_hits) const
     {
       s = getGEMGeometry()->etaPartition(d)->strip(lp);
     }
-    if ( gemvalidation::is_me0(d) )
+    else if ( gemvalidation::is_me0(d) )
     {
       s = getME0Geometry()->etaPartition(d)->strip(lp);
     }
