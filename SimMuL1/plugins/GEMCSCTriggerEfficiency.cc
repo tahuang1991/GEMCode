@@ -22,7 +22,7 @@
 #include "L1Trigger/CSCTrackFinder/interface/CSCTFSectorProcessor.h"
 #include "L1Trigger/CSCTrackFinder/interface/CSCSectorReceiverLUT.h"
 #include "L1Trigger/CSCTrackFinder/interface/CSCTrackFinderDataTypes.h"
-//#include <L1Trigger/CSCTrackFinder/src/CSCTFDTReceiver.h>
+#include "L1Trigger/CSCTrackFinder/src/CSCTFDTReceiver.h"
 
 #include "RecoMuon/DetLayers/interface/MuonDetLayerGeometry.h"
 #include "RecoMuon/Records/interface/MuonRecoGeometryRecord.h"
@@ -32,10 +32,10 @@
 
 #include "SimMuon/CSCDigitizer/src/CSCDbStripConditions.h"
 
-#include <Geometry/CSCGeometry/interface/CSCChamberSpecs.h>
+#include "Geometry/CSCGeometry/interface/CSCChamberSpecs.h"
 #include "Geometry/GEMGeometry/interface/GEMGeometry.h"
 
-#include "GEMCode/GEMValidation/interface/SimTrackMatchManager.h"
+//#include "GEMCode/GEMValidation/interface/SimTrackMatchManager.h"
 
 using namespace mugeo;
 
@@ -1754,28 +1754,28 @@ GEMCSCTriggerEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup
 
         //============ GEM ==================
 
-        SimTrackMatchManager gemcsc_match(*(match->strk), simVertices[match->strk->vertIndex()], gemMatchCfg_, iEvent, iSetup);
-        const GEMDigiMatcher& match_gem = gemcsc_match.gemDigis();
-        //const CSCStubMatcher& match_lct = gemcsc_match.cscStubs();
+        // SimTrackMatchManager gemcsc_match(*(match->strk), simVertices[match->strk->vertIndex()], gemMatchCfg_, iEvent, iSetup);
+        // const GEMDigiMatcher& match_gem = gemcsc_match.gemDigis();
+        // //const CSCStubMatcher& match_lct = gemcsc_match.cscStubs();
 
-        int match_has_gem = 0;
-        std::vector<int> match_gem_chambers;
-        auto gem_superch_ids = match_gem.superChamberIdsDigi();
-        for(auto d: gem_superch_ids)
-        {
-            GEMDetId id(d);
-            bool odd = id.chamber() & 1;
-            auto digis = match_gem.digisInSuperChamber(d);
-            if (digis.size() > 0)
-            {
-                match_gem_chambers.push_back(id.chamber());
-                if (odd) match_has_gem |= 1;
-                else     match_has_gem |= 2;
-            }
-        }
+        // int match_has_gem = 0;
+        // std::vector<int> match_gem_chambers;
+        // auto gem_superch_ids = match_gem.superChamberIdsDigi();
+        // for(auto d: gem_superch_ids)
+        // {
+        //     GEMDetId id(d);
+        //     bool odd = id.chamber() & 1;
+        //     auto digis = match_gem.digisInSuperChamber(d);
+        //     if (digis.size() > 0)
+        //     {
+        //         match_gem_chambers.push_back(id.chamber());
+        //         if (odd) match_has_gem |= 1;
+        //         else     match_has_gem |= 2;
+        //     }
+        // }
 
-        if (eta_gem_1b && match_has_gem) h_pt_gem_1b->Fill(stpt);
-        if (eta_gem_1b && match_has_gem && has_mplct_me1b) h_pt_lctgem_1b->Fill(stpt);
+        // if (eta_gem_1b && match_has_gem) h_pt_gem_1b->Fill(stpt);
+        // if (eta_gem_1b && match_has_gem && has_mplct_me1b) h_pt_lctgem_1b->Fill(stpt);
 
 
         //============ ALCTs ==================
@@ -2472,34 +2472,34 @@ GEMCSCTriggerEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup
             }
 
             // TF GEM & ME1b
-            if ( eta_gem_1b && match_has_gem && has_mplct_me1b && nTFstubsOk >= 2 && okME1tf )
-            {
-                const int Nthr = 7;
-                float tfc_pt_thr[Nthr] = {0., 10., 15., 20., 25., 30., 40.};
+            // if ( eta_gem_1b && match_has_gem && has_mplct_me1b && nTFstubsOk >= 2 && okME1tf )
+            //   {
+            //     const int Nthr = 7;
+            //     float tfc_pt_thr[Nthr] = {0., 10., 15., 20., 25., 30., 40.};
 
-                for (int i=0; i<Nthr; ++i) 
-                    if (tfc_pt >= tfc_pt_thr[i]) 
-                    {
-                        h_mode_tfcand_gem1b_2s1b_1b[i]->Fill(tf_mode);
+            //     for (int i=0; i<Nthr; ++i) 
+            //       if (tfc_pt >= tfc_pt_thr[i]) 
+            //         {
+            //           h_mode_tfcand_gem1b_2s1b_1b[i]->Fill(tf_mode);
 
-                        h_pt_after_tfcand_gem1b_2s1b[i]->Fill(stpt);
-                        if (ok_2s123) h_pt_after_tfcand_gem1b_2s123[i]->Fill(stpt);
-                        if (ok_2s13) h_pt_after_tfcand_gem1b_2s13[i]->Fill(stpt);
+            //           h_pt_after_tfcand_gem1b_2s1b[i]->Fill(stpt);
+            //           if (ok_2s123) h_pt_after_tfcand_gem1b_2s123[i]->Fill(stpt);
+            //           if (ok_2s13) h_pt_after_tfcand_gem1b_2s13[i]->Fill(stpt);
 
-                        if ( nTFstubsOk >= 3 )  h_pt_after_tfcand_gem1b_3s1b[i]->Fill(stpt);
+            //           if ( nTFstubsOk >= 3 )  h_pt_after_tfcand_gem1b_3s1b[i]->Fill(stpt);
 
-                        if (   (gem_dphi_odd < -99. && gem_dphi_even < 99.)  // both just dummy default values
-                                || (gem_dphi_odd  > -9. && isGEMDPhiGood(gem_dphi_odd, tfc_pt_thr[i], 1) )  // good dphi odd
-                                || (gem_dphi_even > -9. && isGEMDPhiGood(gem_dphi_even, tfc_pt_thr[i], 0) ) ) // good dphi even
-                        {
-                            h_pt_after_tfcand_dphigem1b_2s1b[i]->Fill(stpt);
-                            if (ok_2s123) h_pt_after_tfcand_dphigem1b_2s123[i]->Fill(stpt);
-                            if (ok_2s13) h_pt_after_tfcand_dphigem1b_2s13[i]->Fill(stpt);
-                            if ( nTFstubsOk >= 3 )  h_pt_after_tfcand_dphigem1b_3s1b[i]->Fill(stpt);
-                        }
-                    }
-            }
-
+            //           if (   (gem_dphi_odd < -99. && gem_dphi_even < 99.)  // both just dummy default values
+            //                  || (gem_dphi_odd  > -9. && isGEMDPhiGood(gem_dphi_odd, tfc_pt_thr[i], 1) )  // good dphi odd
+            //                  || (gem_dphi_even > -9. && isGEMDPhiGood(gem_dphi_even, tfc_pt_thr[i], 0) ) ) // good dphi even
+            //             {
+            //               h_pt_after_tfcand_dphigem1b_2s1b[i]->Fill(stpt);
+            //               if (ok_2s123) h_pt_after_tfcand_dphigem1b_2s123[i]->Fill(stpt);
+            //               if (ok_2s13) h_pt_after_tfcand_dphigem1b_2s13[i]->Fill(stpt);
+            //               if ( nTFstubsOk >= 3 )  h_pt_after_tfcand_dphigem1b_3s1b[i]->Fill(stpt);
+            //             }
+            //         }
+            //   }
+            
             if (eta_high) 
             {
                 h_pth_after_tfcand->Fill(stpt);
@@ -2782,17 +2782,17 @@ GEMCSCTriggerEfficiency::analyze(const edm::Event& iEvent, const edm::EventSetup
                     {
                         h_pt_after_gmt_eta1b_1mu[i]->Fill(stpt);
 
-                        if (eta_gem_1b && match_has_gem && has_mplct_me1b) 
-                        {
-                            h_pt_after_gmt_gem1b_1mu[i]->Fill(stpt);
+                        // if (eta_gem_1b && match_has_gem && has_mplct_me1b) 
+                        // {
+                        //     h_pt_after_gmt_gem1b_1mu[i]->Fill(stpt);
 
-                            if (   (gem_dphi_odd < -99. && gem_dphi_even < 99.)  // both just dummy default values
-                                    || (gem_dphi_odd  > -9. && isGEMDPhiGood(gem_dphi_odd, tfc_pt_thr[i], 1) )  // good dphi odd
-                                    || (gem_dphi_even > -9. && isGEMDPhiGood(gem_dphi_even, tfc_pt_thr[i], 0) ) ) // good dphi even
-                            {
-                                h_pt_after_gmt_dphigem1b_1mu[i]->Fill(stpt);
-                            }
-                        }
+                        //     if (   (gem_dphi_odd < -99. && gem_dphi_even < 99.)  // both just dummy default values
+                        //             || (gem_dphi_odd  > -9. && isGEMDPhiGood(gem_dphi_odd, tfc_pt_thr[i], 1) )  // good dphi odd
+                        //             || (gem_dphi_even > -9. && isGEMDPhiGood(gem_dphi_even, tfc_pt_thr[i], 0) ) ) // good dphi even
+                        //     {
+                        //         h_pt_after_gmt_dphigem1b_1mu[i]->Fill(stpt);
+                        //     }
+                        // }
                     }
             }
 
