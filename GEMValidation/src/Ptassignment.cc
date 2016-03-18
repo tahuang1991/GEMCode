@@ -30,7 +30,8 @@ float Ptassign_Position(float deltay12, float deltay23, float eta, int par){
     
     //std::cout <<"Pt position, npar "<< par <<" neta "<< neta <<" prop "<< PositionEpLUT[par][neta][0] <<" slope "<< PositionEpLUT[par][neta][1]<<" intercep "<< PositionEpLUT[par][neta][2] << " deltay12 " << deltay12 <<" deltay23 "<< deltay23 << std::endl;
     //if (fabs(fabs(deltay23)-PositionEpLUT[par][neta][0]*fabs(deltay12))<0.005) return 100;
-    float pt=(1/fabs(fabs(deltay23)-PositionEpLUT[par][neta][0]*fabs(deltay12))+PositionEpLUT[par][neta][2])/PositionEpLUT[par][neta][1]; 
+    //float pt=(1/fabs(fabs(deltay23)-PositionEpLUT[par][neta][0]*fabs(deltay12))+PositionEpLUT[par][neta][2])/PositionEpLUT[par][neta][1]; 
+    float pt=(1/fabs(deltay23-PositionEpLUT[par][neta][0]*deltay12)+PositionEpLUT[par][neta][2])/PositionEpLUT[par][neta][1]; 
     //std::cout <<" Ptassgin Position pt "<< pt << std::endl;
     return pt;
 }
