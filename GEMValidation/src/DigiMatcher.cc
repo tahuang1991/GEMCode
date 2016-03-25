@@ -205,7 +205,7 @@ DigiMatcher::digiInGEMClosestToCSC(const DigiContainer& gem_digis, const GlobalP
 
     // in deltaR calculation, give x20 larger weight to deltaPhi to make them comparable
     // but with slight bias towards dphi:
-    float dphi = 20.*deltaPhi(csc_gp.phi(), curr_gp.phi());
+    float dphi = 20.*reco::deltaPhi((float)csc_gp.phi(), (float)curr_gp.phi());
     float deta = csc_gp.eta() - curr_gp.eta();
     float curr_dr2 = dphi*dphi + deta*deta;
     if (std::abs(gp.z()) < 000.1 || // gp was not assigned yet
@@ -244,7 +244,7 @@ DigiMatcher::digiInRPCClosestToCSC(const DigiContainer& rpc_digis, const GlobalP
 
     // in deltaR calculation, give x20 larger weight to deltaPhi to make them comparable
     // but with slight bias towards dphi:
-    float dphi = 20.*deltaPhi(csc_gp.phi(), curr_gp.phi());
+    float dphi = 20.*reco::deltaPhi((float)csc_gp.phi(), (float)curr_gp.phi());
     float deta = csc_gp.eta() - curr_gp.eta();
     float curr_dr2 = dphi*dphi + deta*deta;
     if (std::abs(gp.z()) < 000.1 || // gp was not assigned yet

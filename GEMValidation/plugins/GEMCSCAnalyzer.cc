@@ -1157,7 +1157,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         etrk_[st].bx_pad_odd = digi_bx(gem_dg_and_gp.first);
         etrk_[st].phi_pad_odd = best_pad_odd[st].phi();
         etrk_[st].eta_pad_odd = best_pad_odd[st].eta();
-        etrk_[st].dphi_pad_odd = deltaPhi(etrk_[st].phi_lct_odd, etrk_[st].phi_pad_odd);
+        etrk_[st].dphi_pad_odd = reco::deltaPhi((float)etrk_[st].phi_lct_odd, (float)etrk_[st].phi_pad_odd);
         etrk_[st].deta_pad_odd = etrk_[st].eta_lct_odd - etrk_[st].eta_pad_odd;
       }
     }
@@ -1174,7 +1174,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         etrk_[st].bx_pad_even = digi_bx(gem_dg_and_gp.first);
         etrk_[st].phi_pad_even = best_pad_even[st].phi();
         etrk_[st].eta_pad_even = best_pad_even[st].eta();
-        etrk_[st].dphi_pad_even = deltaPhi(etrk_[st].phi_lct_even, etrk_[st].phi_pad_even);
+        etrk_[st].dphi_pad_even = reco::deltaPhi((float)etrk_[st].phi_lct_even, (float)etrk_[st].phi_pad_even);
         etrk_[st].deta_pad_even = etrk_[st].eta_lct_even - etrk_[st].eta_pad_even;
       }
     }
@@ -1236,7 +1236,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         etrk_[st].bx_pad_odd = digi_bx(gem_dg_and_gp.first);
         etrk_[st].phi_pad_odd = best_pad_odd[st].phi();
         etrk_[st].eta_pad_odd = best_pad_odd[st].eta();
-        etrk_[st].dphi_pad_odd = deltaPhi(etrk_[st].phi_lct_odd, etrk_[st].phi_pad_odd);
+        etrk_[st].dphi_pad_odd = reco::deltaPhi((float)etrk_[st].phi_lct_odd, (float)etrk_[st].phi_pad_odd);
         etrk_[st].deta_pad_odd = etrk_[st].eta_lct_odd - etrk_[st].eta_pad_odd;
       }
     }
@@ -1252,7 +1252,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         etrk_[st].bx_pad_even = digi_bx(gem_dg_and_gp.first);
         etrk_[st].phi_pad_even = best_pad_even[st].phi();
         etrk_[st].eta_pad_even = best_pad_even[st].eta();
-        etrk_[st].dphi_pad_even = deltaPhi(etrk_[st].phi_lct_even, etrk_[st].phi_pad_even);
+        etrk_[st].dphi_pad_even = reco::deltaPhi((float)etrk_[st].phi_lct_even, (float)etrk_[st].phi_pad_even);
         etrk_[st].deta_pad_even = etrk_[st].eta_lct_even - etrk_[st].eta_pad_even;
       }
     }
@@ -1333,7 +1333,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         etrk_[st].bx_rpcstrip_odd = digi_bx(rpc_dg_and_gp.first);
         etrk_[st].phi_rpcstrip_odd = best_rpcstrip_odd[st].phi();
         etrk_[st].eta_rpcstrip_odd = best_rpcstrip_odd[st].eta();
-        etrk_[st].dphi_rpcstrip_odd = deltaPhi(etrk_[st].phi_lct_odd, etrk_[st].phi_rpcstrip_odd);
+        etrk_[st].dphi_rpcstrip_odd = reco::deltaPhi((float)etrk_[st].phi_lct_odd, (float)etrk_[st].phi_rpcstrip_odd);
         etrk_[st].deta_rpcstrip_odd = etrk_[st].eta_lct_odd - etrk_[st].eta_rpcstrip_odd;
       }
     }
@@ -1350,7 +1350,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         etrk_[st].bx_rpcstrip_even = digi_bx(rpc_dg_and_gp.first);
         etrk_[st].phi_rpcstrip_even = best_rpcstrip_even[st].phi();
         etrk_[st].eta_rpcstrip_even = best_rpcstrip_even[st].eta();
-        etrk_[st].dphi_rpcstrip_even = deltaPhi(etrk_[st].phi_lct_even, etrk_[st].phi_rpcstrip_even);
+        etrk_[st].dphi_rpcstrip_even = reco::deltaPhi((float)etrk_[st].phi_lct_even, (float)etrk_[st].phi_rpcstrip_even);
         etrk_[st].deta_rpcstrip_even = etrk_[st].eta_lct_even - etrk_[st].eta_rpcstrip_even;
       }
     }
@@ -1734,9 +1734,9 @@ void GEMCSCAnalyzer::analyzeTrackChamberDeltas(SimTrackMatchManager& match, int 
         dtrk_.gem_sh_phi = gem_sh_gp.phi();
         dtrk_.gem_dg_phi = gem_dg_gp.phi();
         dtrk_.gem_pad_phi = gem_pad_gp.phi();
-        dtrk_.dphi_sh = deltaPhi(csc_sh_gp.phi(), gem_sh_gp.phi());
-        dtrk_.dphi_dg = deltaPhi(csc_dg_gp.phi(), gem_dg_gp.phi());
-        dtrk_.dphi_pad = deltaPhi(csc_dg_gp.phi(), gem_pad_gp.phi());
+        dtrk_.dphi_sh = reco::deltaPhi((float)csc_sh_gp.phi(), (float)gem_sh_gp.phi());
+        dtrk_.dphi_dg = reco::deltaPhi((float)csc_dg_gp.phi(), (float)gem_dg_gp.phi());
+        dtrk_.dphi_pad = reco::deltaPhi((float)csc_dg_gp.phi(), (float)gem_pad_gp.phi());
         dtrk_.csc_sh_eta = csc_sh_gp.eta();
         dtrk_.csc_dg_eta = csc_dg_gp.eta();
         dtrk_.gem_sh_eta = gem_sh_gp.eta();
@@ -1754,7 +1754,7 @@ void GEMCSCAnalyzer::analyzeTrackChamberDeltas(SimTrackMatchManager& match, int 
         {
           dtrk_.bend = LCT_BEND_PATTERN[digi_pattern(lct_digi)];
           dtrk_.csc_lct_phi = csc_lct_gp.phi();
-          dtrk_.dphi_lct_pad = deltaPhi(csc_lct_gp.phi(), gem_pad_gp.phi());
+          dtrk_.dphi_lct_pad = reco::deltaPhi((float)csc_lct_gp.phi(), (float)gem_pad_gp.phi());
           dtrk_.csc_lct_eta = csc_lct_gp.eta();
           dtrk_.deta_lct_pad = csc_lct_gp.eta() - gem_pad_gp.eta();
         }
