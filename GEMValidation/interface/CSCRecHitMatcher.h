@@ -62,6 +62,8 @@ public:
 
   CSCSegment bestCSCSegment(unsigned int);
 
+  GlobalPoint globalPoint(const CSCSegment&) const;
+
 private:
 
   const SimHitMatcher* simhit_matcher_;

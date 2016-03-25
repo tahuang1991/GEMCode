@@ -46,11 +46,12 @@ const int LCT_BEND_PATTERN[11] = { -99,  -5,  4, -4,  3, -3,  2, -2,  1, -1,  0}
 struct MyTrackChamberDelta
 {
   Bool_t odd;
-  Char_t charge;
-  Char_t chamber;
-  Char_t endcap;
-  Char_t roll;
-  Char_t bend;
+  Int_t charge;
+  Int_t endcap;
+  Int_t station;
+  Int_t chamber;
+  Int_t roll;
+  Int_t bend;
   Float_t pt, eta, phi;
   Float_t csc_sh_phi;
   Float_t csc_dg_phi;
@@ -72,6 +73,10 @@ struct MyTrackChamberDelta
   Float_t dphi_lct_pad;
   Float_t csc_lct_eta;
   Float_t deta_lct_pad;
+  Float_t dphi_gem_sh_csc_sh;
+  Float_t dphi_gem_dg_csc_dg;
+  Float_t dphi_gem_pad_csc_lct;
+  Float_t dphi_gem_rh_csc_seg;
 };
 
 
@@ -2015,6 +2020,7 @@ void GEMCSCAnalyzer::analyzeTrackChamberDeltas(SimTrackMatchManager& match, int 
 
   if (verbose_ > 1) // ---- GEMDigiMatcher debug printouts
   {
+    cout<<"** GEM Digis **"<<endl;
     cout<<"n_gd_ids "<<match_gd.detIdsDigi().size()<<endl;
     auto gem_gd_sch_ids = match_gd.superChamberIdsDigi();
     cout<<"n_gd_ids_sch "<<gem_gd_sch_ids.size()<<endl;
@@ -2032,6 +2038,7 @@ void GEMCSCAnalyzer::analyzeTrackChamberDeltas(SimTrackMatchManager& match, int 
 
   if (verbose_ > 1) // ---- CSCDigiMatcher debug printouts
   {
+    cout<<"** CSC Digis **"<<endl;
     cout<<"n_sd_ids "<<match_cd.detIdsStrip().size()<<endl;
     auto csc_sd_ch_ids = match_cd.chamberIdsStrip();
     cout<<"n_sd_ids_ch "<<csc_sd_ch_ids.size()<<endl;
@@ -2255,6 +2262,10 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
   tree_delta_->Branch("csc_lct_eta", &dtrk_.csc_lct_eta);
   tree_delta_->Branch("deta_lct_pad", &dtrk_.deta_lct_pad);
   //tree_delta_->Branch("", &dtrk_.);
+  tree_delta_->Branch("dphi_gem_sh_csc_sh", &dtrk_.dphi_gem_sh_csc_sh);
+  tree_delta_->Branch("dphi_gem_dg_csc_dg", &dtrk_.dphi_gem_dg_csc_dg);
+  tree_delta_->Branch("dphi_gem_pad_csc_lct", &dtrk_.dphi_gem_pad_csc_lct);
+  tree_delta_->Branch("dphi_gem_rh_csc_seg", &dtrk_.dphi_gem_rh_csc_seg);
 }
 
 

@@ -308,3 +308,9 @@ CSCRecHitMatcher::bestCSCSegment(unsigned int id)
   return emptySegment;
 }
 
+GlobalPoint 
+CSCRecHitMatcher::globalPoint(const CSCSegment& c) const
+{
+  return getCSCGeometry()->idToDet(c.cscDetId())->surface().toGlobal(c.localPosition());
+}
+
