@@ -92,7 +92,7 @@ struct MyTrackEff
   Char_t chamber_odd; // bit1: has GEM pad   bit2: has CSC LCT
   Char_t chamber_even; // bit1: has GEM pad   bit2: has CSC LCT
   Float_t bending_sh;
-  Float_t phi_sh,eta_sh;
+  Float_t phi_cscsh_even, phi_cscsh_odd, eta_cscsh_even, eta_cscsh_odd;
   Float_t pt_sh,ptphi_sh,pteta_sh;
 
   Char_t has_csc_sh; // #layers with SimHits > minHitsChamber    bit1: in odd, bit2: even
@@ -158,6 +158,8 @@ struct MyTrackEff
   Float_t strip_gemsh_even;
   Float_t eta_gemsh_odd;
   Float_t eta_gemsh_even;
+  Float_t phi_gemsh_odd;
+  Float_t phi_gemsh_even;
   Int_t strip_gemdg_odd; // median digis' strip
   Int_t strip_gemdg_even;
 
@@ -298,8 +300,10 @@ void MyTrackEff::init()
   quality_odd = 0;
   quality_even = 0;
   bending_sh = -10;
-  eta_sh = 0;
-  phi_sh = -10.0;
+  phi_cscsh_even = -10.0;
+  phi_cscsh_odd = -10.0;
+  eta_cscsh_even = -10.0;
+  eta_cscsh_odd = -10.0;
   pt_sh = -10.0;
   pteta_sh = 0;
   ptphi_sh = -10.0;
@@ -360,6 +364,8 @@ void MyTrackEff::init()
   strip_gemsh_even = -9.;
   eta_gemsh_odd = -9.;
   eta_gemsh_even = -9.;
+  phi_gemsh_odd = -9.;
+  phi_gemsh_even = -9.;
   strip_gemdg_odd = -9;
   strip_gemdg_even = -9;
  
@@ -525,8 +531,10 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("quality_odd", &quality_odd);
   t->Branch("quality_even", &quality_even);
   t->Branch("bending_sh", &bending_sh);
-  t->Branch("eta_sh", &eta_sh);
-  t->Branch("phi_sh", &phi_sh);
+  t->Branch("phi_cscsh_even", &phi_cscsh_even);
+  t->Branch("phi_cscsh_odd", &phi_cscsh_odd);
+  t->Branch("eta_cscsh_even", &eta_cscsh_even);
+  t->Branch("eta_cscsh_odd", &eta_cscsh_odd);
   t->Branch("pt_sh", &pt_sh);
   t->Branch("pteta_sh", &pteta_sh);
   t->Branch("ptphi_sh", &ptphi_sh);
@@ -587,6 +595,8 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("strip_gemsh_even", &strip_gemsh_even);
   t->Branch("eta_gemsh_odd", &eta_gemsh_odd);
   t->Branch("eta_gemsh_even", &eta_gemsh_even);
+  t->Branch("phi_gemsh_odd", &phi_gemsh_odd);
+  t->Branch("phi_gemsh_even", &phi_gemsh_even);
   t->Branch("strip_gemdg_odd", &strip_gemdg_odd);
   t->Branch("strip_gemdg_even", &strip_gemdg_even);
 
@@ -1002,8 +1012,6 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     
     GlobalVector ym = match_sh.simHitsMeanMomentum(match_sh.hitsInChamber(d));
     GlobalPoint gp = match_sh.simHitsMeanPosition(match_sh.hitsInChamber(d));
-    etrk_[st].eta_sh = gp.eta();
-    etrk_[st].phi_sh = gp.phi();
     etrk_[st].pteta_sh = ym.eta();
     etrk_[st].ptphi_sh = ym.phi();
     etrk_[st].pt_sh = ym.perp();
@@ -1017,6 +1025,11 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     
     if (odd) gp_sh_odd[st] = gp;
     else gp_sh_even[st] = gp;
+
+    if (odd) etrk_[st].eta_cscsh_odd = gp.eta();
+    else     etrk_[st].eta_cscsh_even = gp.eta();
+    if (odd) etrk_[st].phi_cscsh_odd = gp.phi();
+    else     etrk_[st].phi_cscsh_even = gp.phi();
     // std::cout<<"nlayer "<<nlayers <<" odd: "<< etrk_[st].nlayers_csc_sh_odd<<" even: "<<etrk_[st].nlayers_csc_sh_even
 //	 <<" "<< (odd ? "odd":"even")<<" csc det " <<id <<std::endl;
   //  std::cout<<" "<<((etrk_[st].has_csc_sh&1)>0 ? "odd true":"odd false" ) <<" "<<((etrk_[st].has_csc_sh&2)>0 ? "even true":"even false")<<std::endl;
@@ -1030,8 +1043,12 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
       if (odd) gp_sh_odd[1] = gp;
       else gp_sh_even[1] = gp;
-      etrk_[1].eta_sh = gp.eta();
-      etrk_[1].phi_sh = gp.phi();
+
+      if (odd) etrk_[1].eta_cscsh_odd = gp.eta();
+      else     etrk_[1].eta_cscsh_even = gp.eta();
+      if (odd) etrk_[1].phi_cscsh_odd = gp.phi();
+      else     etrk_[1].phi_cscsh_even = gp.phi();
+
       etrk_[1].pt_sh = ym.perp();
       etrk_[1].pteta_sh = ym.eta();
       etrk_[1].ptphi_sh = ym.phi();
@@ -1342,6 +1359,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       auto sh_gp = match_sh.simHitsMeanPosition(match_sh.hitsInSuperChamber(d));
       if (odd) etrk_[st].eta_gemsh_odd = sh_gp.eta();
       else     etrk_[st].eta_gemsh_even = sh_gp.eta();
+      if (odd) etrk_[st].phi_gemsh_odd = sh_gp.phi();
+      else     etrk_[st].phi_gemsh_even = sh_gp.phi();
 
       const float mean_strip(match_sh.simHitsMeanStrip(match_sh.hitsInSuperChamber(d)));
       if (odd) etrk_[st].strip_gemsh_odd = mean_strip;
@@ -1362,6 +1381,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       auto sh_gp = match_sh.simHitsMeanPosition(match_sh.hitsInSuperChamber(d));
       if (odd) etrk_[1].eta_gemsh_odd = sh_gp.eta();
       else     etrk_[1].eta_gemsh_even = sh_gp.eta();
+      if (odd) etrk_[1].phi_gemsh_odd = sh_gp.phi();
+      else     etrk_[1].phi_gemsh_even = sh_gp.phi();
 
       const float mean_strip(match_sh.simHitsMeanStrip(match_sh.hitsInSuperChamber(d)));
       if (odd) etrk_[1].strip_gemsh_odd = mean_strip;

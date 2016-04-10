@@ -1020,7 +1020,7 @@ SimHitMatcher::simHitsMeanPosition(const edm::PSimHitContainer& sim_hits) const
     {
       gp = getGEMGeometry()->idToDet(h.detUnitId())->surface().toGlobal(lp);
     }
-    if ( gemvalidation::is_me0(h.detUnitId()) )
+    else if ( gemvalidation::is_me0(h.detUnitId()) )
     {
       gp = getME0Geometry()->idToDet(h.detUnitId())->surface().toGlobal(lp);
     }
