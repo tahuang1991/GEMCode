@@ -71,7 +71,7 @@ SimTrackMatching = cms.PSet(
      ),
     gemCoPadDigi = cms.PSet(
         verbose = cms.int32(0),
-        validInputTags = cms.VInputTag(cms.InputTag("simCscTriggerPrimitiveDigis")),
+        validInputTags = cms.VInputTag(cms.InputTag("simMuonGEMCSCPadDigis")),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),

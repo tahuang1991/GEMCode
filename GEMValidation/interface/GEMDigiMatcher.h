@@ -33,6 +33,7 @@ public:
   // partition GEM detIds with digis
   std::set<unsigned int> detIdsDigi(int gem_type = GEM_ALL) const;
   std::set<unsigned int> detIdsPad(int gem_type = GEM_ALL) const;
+  //std::set<unsigned int> detIdsCoPad(int gem_type = GEM_ALL) const;
 
   // chamber detIds with digis
   std::set<unsigned int> chamberIdsDigi(int gem_type = GEM_ALL) const;
@@ -52,6 +53,7 @@ public:
   const DigiContainer& padsInDetId(unsigned int) const;
   const DigiContainer& padsInChamber(unsigned int) const;
   const DigiContainer& padsInSuperChamber(unsigned int) const;
+  //const DigiContainer& copadsInDetId(unsigned int) const;
 
   // GEM co-pads from a particular partition or superchamber
   const DigiContainer& coPadsInSuperChamber(unsigned int) const;
@@ -124,6 +126,7 @@ private:
   std::map<unsigned int, GEMCSCPadDigiContainer> chamber_to_gempads_;
   std::map<unsigned int, GEMCSCPadDigiContainer> superchamber_to_gempads_;
 
+  //std::map<unsigned int, DigiContainer> detid_to_copads_;
   std::map<unsigned int, GEMCSCPadDigiContainer> superchamber_to_gemcopads_;
 
   bool verboseDigi_;
