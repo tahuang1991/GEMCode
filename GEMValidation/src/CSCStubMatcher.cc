@@ -373,17 +373,26 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
         for (unsigned int j=0; j<alct.size();j++){
         for (unsigned int i=0; i<clct.size()+1;i++){
            
-	   if (verbose()) std::cout << " available LCT " << lct << std::endl;
-	   if (verbose()) std::cout << " available ALCT " << alct[j] << std::endl;
-	   if (verbose() && i<clct.size()) std::cout << " available CLCT " << clct[i] << std::endl; 
+	   if (verbose()) 
+	   	std::cout <<"lct size "<< lcts_tmp.size() << " available LCT " << lct << std::endl;
+	   if (verbose())
+	   	std::cout <<"alcts size "<< alct.size() <<" jth "<<j<< " available ALCT " << alct[j] << std::endl;
+	   if (verbose() and i<clct.size()) 
+	       	std::cout<<"clcts size"<< clct.size()<<" ith "<<i << " available CLCT " << clct[i] << std::endl; 
            auto hasPad(pads.size()!=0);
            auto hasDigis(rpcDigis.size()!=0);
-
+	   
            const bool caseAlctClct(j<alct.size() && i<clct.size());
-           const bool caseAlctGem(is_valid(alct[j]) and hasPad and i==clct.size() and (ch_id.station() == 1 or ch_id.station() == 2));
+           const bool caseAlctGem(is_valid(alct[j]) and i==clct.size() and (ch_id.station() == 1 or ch_id.station() == 2) and ch_id.ring()==1);
            //const bool caseClctGem(is_valid(clct[i]) and hasPad and !is_valid(alct[j]) and (ch_id.station() == 1 or ch_id.station() == 2));
-           const bool caseAlctRpc(is_valid(alct[j]) and hasDigis and i==clct.size() and (ch_id.station() == 3 or ch_id.station() == 4));
+           const bool caseAlctRpc(is_valid(alct[j]) and i==clct.size() and (ch_id.station() == 3 or ch_id.station() == 4) and ch_id.ring()==1);
            //const bool caseClctRpc(is_valid(clct[i]) and hasDigis and !is_valid(alct[j]) and (ch_id.station() == 3 or ch_id.station() == 4));
+	   if(verbose()){
+	   if (caseAlctGem and hasPad) std::cout <<" caseAlctGem and hasPad "<< std::endl;
+	   else if (caseAlctGem and not(hasPad)) cout <<" caseAlct Gem and not hasPad "<< std::endl;
+	   if (caseAlctRpc and hasDigis) std::cout <<" caseAlctRpc and hasDigis "<< std::endl;
+	   else if (caseAlctRpc and not(hasDigis)) cout <<" caseAlctRpc and not hasDigis "<< std::endl;
+	   }
           const CSCChamber* cscChamber(cscGeometry_->chamber(CSCDetId(id)));
 
           const CSCLayer* cscKeyLayer(cscChamber->layer(3));
@@ -405,9 +414,9 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
               std::cout << "mean half strip from simhits " << sh_matcher_->simHitsMeanStrip(hits)
               <<"   half strip by propagating track " << my_hs_gem_propagate << std::endl;
         */
-         float my_hs_gemrpc;
-         if (hsFromSimHitMean_)  my_hs_gemrpc= my_hs_gemrpc_mean;
-         else my_hs_gemrpc = my_hs_gem_propagate;
+          float my_hs_gemrpc;
+          if (hsFromSimHitMean_)  my_hs_gemrpc= my_hs_gemrpc_mean;
+          else my_hs_gemrpc = my_hs_gem_propagate;
 
             //All the matching information can go here.
 
@@ -425,8 +434,8 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
                     continue;
                 }
 
-
-               if (matchAlctGem_ and caseAlctGem and !(my_bx == digi_bx(lct) and std::abs(my_hs_gemrpc - digi_channel(lct))<3 and my_wg == digi_wg(lct) ) ){
+					//add hadPad here
+               if (matchAlctGem_ and caseAlctGem and !( my_bx == digi_bx(lct) and std::abs(my_hs_gemrpc - digi_channel(lct))<3 and my_wg == digi_wg(lct) ) ){
                     if (verbose()) cout<<"  BAD LCT in AlctGem case"<<endl;
                     continue;
                }
@@ -438,7 +447,7 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
                }*/
 
               //if (matchAlctRpc_ and caseAlctRpc and !(my_bx == digi_bx(lct) and std::abs(my_hs_gemrpc - digi_channel(lct))<3 and my_wg == digi_wg(lct) ) ){
-              if (matchAlctRpc_ and caseAlctRpc and !( std::fabs(my_hs_gemrpc - digi_channel(lct))<3.0 and my_wg == digi_wg(lct) ) ){
+              if (matchAlctRpc_ and caseAlctRpc and !(hasDigis and  std::fabs(my_hs_gemrpc - digi_channel(lct))<3.0 and my_wg == digi_wg(lct) ) ){
                    if (verbose()) cout<<"  BAD LCT in AlctRpc case"<<endl;
 		   //std::cout << "my_hs_gemrpc " << my_hs_gemrpc << "  hs from LCT " << digi_channel(lct) 
 		     //        <<" my_wg " << my_wg << " wg in LCT "<<digi_wg(lct) <<std::endl;
@@ -450,9 +459,11 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
                     continue;
               }*/
  
-             if (ch_id.station()==1 && !caseAlctClct && !caseAlctGem) std::cout <<"st1 not caseAlctClct caseAlctGemi, LCT "<< lct << std::endl; 
+             if (verbose() and ch_id.ring()==1 and (ch_id.station()==1 or ch_id.station()==2) and !caseAlctClct and !caseAlctGem) 
+		 std::cout <<"ME11 or ME21: jth alct "<< j<<" ith clct "<<i <<"  not caseAlctClct caseAlctGem, LCT "<< lct << std::endl; 
              if (chamber_to_lct_.find(id) == chamber_to_lct_.end())   chamber_to_lct_[id] = lct;
-             else if (chamber_to_lct_.find(id) != chamber_to_lct_.end() && abs(digi_dphi(chamber_to_lct_[id])) > abs(digi_dphi(lct))){
+             else if (chamber_to_lct_.find(id) != chamber_to_lct_.end() and 
+		     fabs(digi_channel(chamber_to_lct_[id])-my_hs_gemrpc) > fabs(digi_channel(lct)-my_hs_gemrpc)){
                if (verbose()){
                  cout<<"ALARM!!! here already was matching LCT "<<chamber_to_lct_[id]<<endl;
                  cout<<"   new digi: "<<lct<<endl;
@@ -463,9 +474,9 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
               chamber_to_lcts_[id].push_back(lct);
 	      lct_matched = true;
 	      
-              if (verbose() && caseAlctClct)  std::cout << " this LCT is matched to simtrack in AlctClct case" << std::endl;
-              if (verbose() && caseAlctGem)  std::cout << " this LCT is matched to simtrack in AlctGem case" << std::endl;
-              if (verbose() && caseAlctRpc)  std::cout << " this LCT is matched to simtrack in AlctRpc case" << std::endl;
+              if (verbose() and caseAlctClct)  std::cout << " this LCT is matched to simtrack in AlctClct case" << std::endl;
+              if (verbose() and caseAlctGem)  std::cout << " this LCT is matched to simtrack in AlctGem case" << std::endl;
+              if (verbose() and caseAlctRpc)  std::cout << " this LCT is matched to simtrack in AlctRpc case" << std::endl;
               break;
             } //clct loop over
 	if (lct_matched) break;
