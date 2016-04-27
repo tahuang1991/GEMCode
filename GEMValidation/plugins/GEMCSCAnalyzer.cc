@@ -1268,8 +1268,6 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         etrk_[1].chamber_odd |= 2;
         etrk_[1].quality_odd = digi_quality(lct);
         etrk_[1].passdphi_odd = match_lct.passDPhicut(id, chargesign, digi_dphi(lct), pt);
-        if (pt<10 and fabs(etrk_[1].phi_lct_odd-etrk_[1].phi_cscsh_odd)>0.008 and etrk_[1].phi_lct_odd>-4 and etrk_[1].phi_cscsh_odd>-4) 
-	    std::cout <<"pt "<< etrk_[1].pt <<" debug here phi_cscsh_odd "<< etrk_[1].phi_cscsh_odd<<" eta_cscsh_odd "<< etrk_[1].eta_cscsh_odd <<" phi_lct_odd "<< etrk_[1].phi_lct_odd<<" eta_lct_odd "<< etrk_[1].eta_lct_odd<<" LCT hs "<< etrk_[1].hs_lct_odd << std::endl;
       }
       else
       {
@@ -1285,8 +1283,6 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         etrk_[1].chamber_even |= 2;
         etrk_[1].quality_even = digi_quality(lct);
         etrk_[1].passdphi_even = match_lct.passDPhicut(id, chargesign, digi_dphi(lct), pt);
-        if (etrk_[1].pt<10 and fabs(etrk_[1].phi_lct_even-etrk_[1].phi_cscsh_even)>0.008 and etrk_[1].phi_lct_even>-4 and etrk_[1].phi_cscsh_even>-4) 
-	    std::cout<<"pt "<< etrk_[1].pt <<" debug here phi_cscsh_even "<< etrk_[1].phi_cscsh_even<<" eta_cscsh_even "<< etrk_[1].eta_cscsh_even <<" phi_lct_even "<< etrk_[1].phi_lct_even<<" eta_lct_even "<< etrk_[1].eta_lct_even <<" LCT hs "<< etrk_[1].hs_lct_even << std::endl;
       }
 
     }
