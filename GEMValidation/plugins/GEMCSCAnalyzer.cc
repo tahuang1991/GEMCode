@@ -26,6 +26,8 @@
 #include "GEMCode/GEMValidation/interface/SimTrackMatchManager.h"
 #include "GEMCode/GEMValidation/interface/Helpers.h"
 #include "GEMCode/GEMValidation/interface/Ptassignment.h"
+#include "CLHEP/Random/RandomEngine.h"
+#include "CLHEP/Random/Randomize.h"
 
 #include "TTree.h"
 
@@ -46,12 +48,11 @@ const int LCT_BEND_PATTERN[11] = { -99,  -5,  4, -4,  3, -3,  2, -2,  1, -1,  0}
 struct MyTrackChamberDelta
 {
   Bool_t odd;
-  Int_t charge;
-  Int_t endcap;
-  Int_t station;
-  Int_t chamber;
-  Int_t roll;
-  Int_t bend;
+  Char_t charge;
+  Char_t chamber;
+  Char_t endcap;
+  Char_t roll;
+  Char_t bend;
   Float_t pt, eta, phi;
   Float_t csc_sh_phi;
   Float_t csc_dg_phi;
@@ -99,7 +100,7 @@ struct MyTrackEff
   Float_t bending_sh;
   Float_t phi_cscsh_even, phi_cscsh_odd, eta_cscsh_even, eta_cscsh_odd;
   Float_t dphi_sh_even,dphi_sh_odd;
-  Float_t pt_sh,ptphi_sh,pteta_sh;
+  Float_t pt_sh_even,pt_sh_odd,ptphi_sh_even,ptphi_sh_odd,pteta_sh_even,pteta_sh_odd;
 
   Char_t has_csc_sh; // #layers with SimHits > minHitsChamber    bit1: in odd, bit2: even
   Char_t has_csc_strips; // #layers with comparator digis > minHitsChamber    bit1: in odd, bit2: even
@@ -109,16 +110,16 @@ struct MyTrackEff
   Char_t has_alct; // bit1: in odd, bit2: even
   Char_t has_lct; // bit1: in odd, bit2: even
 
-  Int_t bend_lct_odd;
-  Int_t bend_lct_even;
-  Int_t bx_lct_odd;
-  Int_t bx_lct_even;
+  Char_t bend_lct_odd;
+  Char_t bend_lct_even;
+  Char_t bx_lct_odd;
+  Char_t bx_lct_even;
 
 
-  Float_t hs_lct_odd;
-  Float_t wg_lct_odd;
-  Float_t hs_lct_even;
-  Float_t wg_lct_even;
+  UChar_t hs_lct_odd;
+  UChar_t wg_lct_odd;
+  UChar_t hs_lct_even;
+  UChar_t wg_lct_even;
 
   Float_t phi_lct_odd;
   Float_t phi_lct_even;
@@ -168,14 +169,15 @@ struct MyTrackEff
   Float_t phi_gemsh_even;
   Int_t strip_gemdg_odd; // median digis' strip
   Int_t strip_gemdg_even;
+   
 
   Char_t has_rpc_sh; // bit1: in odd, bit2: even
   Char_t has_rpc_dg; // bit1: in odd, bit2: even
   Int_t strip_rpcdg_odd; // median digis' strip
   Int_t strip_rpcdg_even;
 
-  Int_t bx_pad_odd;
-  Int_t bx_pad_even;
+  Char_t bx_pad_odd;
+  Char_t bx_pad_even;
   Float_t phi_pad_odd;
   Float_t phi_pad_even;
   Float_t eta_pad_odd;
@@ -192,8 +194,8 @@ struct MyTrackEff
   Int_t hsfromrpc_odd; // extraplotate hs from rpc
   Int_t hsfromrpc_even;
 
-  Int_t bx_rpcstrip_odd;
-  Int_t bx_rpcstrip_even;
+  Char_t bx_rpcstrip_odd;
+  Char_t bx_rpcstrip_even;
   Float_t phi_rpcstrip_odd;
   Float_t phi_rpcstrip_even;
   Float_t eta_rpcstrip_odd;
@@ -281,9 +283,9 @@ struct MyTrackEff
 
 
   // pt assginment
-  Float_t pt_position_sh;
-  Float_t pt_position;
-  Float_t pt_position2;
+  Float_t pt_position_sh, pt_direction_sh;
+  Float_t pt_position, pt_direction;
+  Float_t pt_position_smeared, pt_direction_smeared;
   Bool_t hasSt1St2St3;
   Bool_t hasSt1St2St3_sh;
 };
@@ -310,9 +312,12 @@ void MyTrackEff::init()
   phi_cscsh_odd = -9.0;
   eta_cscsh_even = -9.0;
   eta_cscsh_odd = -9.0;
-  pt_sh = -9.0;
-  pteta_sh = 0;
-  ptphi_sh = -9.0;
+  pt_sh_even = -9.0;
+  pteta_sh_even = 0;
+  ptphi_sh_even = -9.0;
+  pt_sh_odd = -9.0;
+  pteta_sh_odd = 0;
+  ptphi_sh_odd = -9.0;
 
   has_csc_sh = 0;
   has_csc_strips = 0;
@@ -512,7 +517,9 @@ void MyTrackEff::init()
 
   pt_position_sh=-1;
   pt_position=-1;
-  pt_position2=-1;
+  pt_position_smeared=-1;
+  pt_direction_sh=-1;
+  pt_direction_smeared=-1;
   hasSt1St2St3=false;
   hasSt1St2St3_sh=false;
 }
@@ -543,9 +550,12 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("phi_cscsh_odd", &phi_cscsh_odd);
   t->Branch("eta_cscsh_even", &eta_cscsh_even);
   t->Branch("eta_cscsh_odd", &eta_cscsh_odd);
-  t->Branch("pt_sh", &pt_sh);
-  t->Branch("pteta_sh", &pteta_sh);
-  t->Branch("ptphi_sh", &ptphi_sh);
+  t->Branch("pt_sh_even", &pt_sh_even);
+  t->Branch("pteta_sh_even", &pteta_sh_even);
+  t->Branch("ptphi_sh_even", &ptphi_sh_even);
+  t->Branch("pt_sh_odd", &pt_sh_odd);
+  t->Branch("pteta_sh_odd", &pteta_sh_odd);
+  t->Branch("ptphi_sh_odd", &ptphi_sh_odd);
   t->Branch("has_csc_sh", &has_csc_sh);
   t->Branch("has_csc_strips", &has_csc_strips);
   t->Branch("has_csc_wires", &has_csc_wires);
@@ -745,7 +755,10 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   
   t->Branch("pt_position_sh", &pt_position_sh); 
   t->Branch("pt_position", &pt_position); 
-  t->Branch("pt_position2", &pt_position2); 
+  t->Branch("pt_position_smeared", &pt_position_smeared); 
+  t->Branch("pt_direction_sh", &pt_direction_sh); 
+  t->Branch("pt_direction", &pt_direction); 
+  t->Branch("pt_direction_smeared", &pt_direction_smeared); 
   t->Branch("hasSt1St2St3", &hasSt1St2St3); 
   t->Branch("hasSt1St2St3_sh", &hasSt1St2St3_sh); 
 
@@ -994,6 +1007,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   auto csc_simhits(match_sh.chamberIdsCSC(0));
   GlobalPoint gp_sh_odd[12];
   GlobalPoint gp_sh_even[12];
+  GlobalVector gv_sh_odd[12];
+  GlobalVector gv_sh_even[12];
   for(auto d: csc_simhits)
   {
 
@@ -1024,19 +1039,27 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     if (nlayers < minNHitsChamberCSCSimHit_) continue;
     GlobalVector ym = match_sh.simHitsMeanMomentum(match_sh.hitsInChamber(d));
     GlobalPoint gp = match_sh.simHitsMeanPosition(match_sh.hitsInChamber(d));
-    etrk_[st].pteta_sh = ym.eta();
-    etrk_[st].ptphi_sh = ym.phi();
-    etrk_[st].pt_sh = ym.perp();
     etrk_[st].bending_sh = match_sh.LocalBendingInChamber(d);
     const bool odd(id.chamber()%2==1);
     if (odd) etrk_[st].has_csc_sh |= 1;
     else etrk_[st].has_csc_sh |= 2;
+    if (odd){
+    	etrk_[st].pteta_sh_odd = ym.eta();
+    	etrk_[st].ptphi_sh_odd = ym.phi();
+    	etrk_[st].pt_sh_odd = ym.perp();
+    }else{
+    	etrk_[st].pteta_sh_even = ym.eta();
+    	etrk_[st].ptphi_sh_even = ym.phi();
+    	etrk_[st].pt_sh_even = ym.perp();
+    }
 
     if (odd) etrk_[st].nlayers_csc_sh_odd = nlayers;
     else etrk_[st].nlayers_csc_sh_even = nlayers;
     
     if (odd) gp_sh_odd[st] = gp;
     else gp_sh_even[st] = gp;
+    if (odd) gv_sh_odd[st] = ym;
+    else gv_sh_even[st] = ym;
     //std::cout <<" CSC id "<< id <<" gp.eta "<< gp.eta() <<" gp.phi "<< gp.phi() << std::endl;
     for (int layer=3;layer<5; layer++){
     	const CSCDetId csckeyid(id.endcap(), id.station(), id.ring(), id.chamber(), layer); 
@@ -1067,11 +1090,19 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
       if (odd) gp_sh_odd[1] = gp;
       else gp_sh_even[1] = gp;
+      if (odd) gv_sh_odd[1] = ym;
+      else gv_sh_even[1] = ym;
 
 
-      etrk_[1].pt_sh = ym.perp();
-      etrk_[1].pteta_sh = ym.eta();
-      etrk_[1].ptphi_sh = ym.phi();
+      if (odd){
+      	etrk_[1].pt_sh_odd = ym.perp();
+      	etrk_[1].pteta_sh_odd = ym.eta();
+      	etrk_[1].ptphi_sh_odd = ym.phi();
+      }else {
+      	etrk_[1].pt_sh_even = ym.perp();
+      	etrk_[1].pteta_sh_even = ym.eta();
+      	etrk_[1].ptphi_sh_even = ym.phi();
+      }
       etrk_[1].bending_sh = match_sh.LocalBendingInChamber(d);
     }
 
@@ -1300,33 +1331,64 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     }
   }
    
-  if (etrk_[1].has_csc_sh>0 and etrk_[6].has_csc_sh>0 and etrk_[8].has_csc_sh>0){
+  GlobalPoint gp1,gp2, gp3;
+  GlobalVector gv1,gv2;
+  if (etrk_[1].has_csc_sh>0 and etrk_[6].has_csc_sh>0){
      int npar=-1;
-     GlobalPoint gp1,gp2, gp3;
-     if ((etrk_[1].has_csc_sh&1)>0 and (etrk_[6].has_csc_sh&2)>0 and (etrk_[8].has_csc_sh&2)>0){
+     if ((etrk_[1].has_csc_sh&1)>0 and (etrk_[6].has_csc_sh&2)>0){
         gp1=gp_sh_odd[1];
         gp2=gp_sh_even[6];
-        gp3=gp_sh_even[8];
+        gv1=gv_sh_odd[1];
+        gv2=gv_sh_even[6];
 	npar=0;
-     }else if ((etrk_[1].has_csc_sh&1)>0 and (etrk_[6].has_csc_sh&1)>0 and (etrk_[8].has_csc_sh&1)>0){ 
+	if ((etrk_[8].has_csc_sh&2)>0)
+	    gp3=gp_sh_even[8];
+     }else if ((etrk_[1].has_csc_sh&1)>0 and (etrk_[6].has_csc_sh&1)>0 ){ 
         gp1=gp_sh_odd[1];
         gp2=gp_sh_odd[6];
-        gp3=gp_sh_odd[8];
+        gv1=gv_sh_odd[1];
+        gv2=gv_sh_odd[6];
 	npar=1;
-     }else if ((etrk_[1].has_csc_sh&2)>0 and (etrk_[6].has_csc_sh&2)>0 and (etrk_[8].has_csc_sh&2)>0){ 
+	if ((etrk_[8].has_csc_sh&1)>0)
+	    gp3=gp_sh_odd[8];
+     }else if ((etrk_[1].has_csc_sh&2)>0 and (etrk_[6].has_csc_sh&2)>0 ){ 
         gp1=gp_sh_even[1];
         gp2=gp_sh_even[6];
-        gp3=gp_sh_even[8];
+        gv1=gv_sh_even[1];
+        gv2=gv_sh_even[6];
 	npar=2;
-     }else if ((etrk_[1].has_csc_sh&2)>0 and (etrk_[6].has_csc_sh&1)>0 and (etrk_[8].has_csc_sh&1)>0){ 
+	if ((etrk_[8].has_csc_sh&2)>0)
+	    gp3=gp_sh_even[8];
+     }else if ((etrk_[1].has_csc_sh&2)>0 and (etrk_[6].has_csc_sh&1)>0 ){ 
         gp1=gp_sh_even[1];
         gp2=gp_sh_odd[6];
-        gp3=gp_sh_odd[8];
+        gv1=gv_sh_even[1];
+        gv2=gv_sh_odd[6];
 	npar=3;
+	if ((etrk_[8].has_csc_sh&1)>0)
+	    gp3=gp_sh_odd[8];
      }
-     etrk_[0].hasSt1St2St3_sh=true; 
+     if (etrk_[8].has_csc_sh)
+     	etrk_[0].hasSt1St2St3_sh=true; 
 
-     etrk_[0].pt_position_sh=Ptassign_Position_gp(gp1, gp2, gp3, etrk_[0].eta, npar);  
+     float csc_bending_angle_12=deltaPhi(gv1.phi(), gv2.phi());
+     etrk_[0].pt_direction_sh=Ptassign_Direction(csc_bending_angle_12, gp2.eta(), npar);  
+     
+     double gv1_phi_gauss = CLHEP::RandGauss::shoot(gv1.phi(), .00055);
+     double gv2_phi_gauss = CLHEP::RandGauss::shoot(gv2.phi(), .00095);
+     double csc_bending_angle12_smeared = deltaPhi(gv1_phi_gauss, gv2_phi_gauss);
+     etrk_[0].pt_direction_smeared=Ptassign_Direction(csc_bending_angle12_smeared, gp2.eta(), npar);  
+
+     if (etrk_[8].has_csc_sh){
+        double gp1_phi_gauss = CLHEP::RandGauss::shoot(gp1.phi(), .00055);
+        double gp2_phi_gauss = CLHEP::RandGauss::shoot(gp2.phi(), .00075);
+        double gp3_phi_gauss = CLHEP::RandGauss::shoot(gp3.phi(), .00075);
+        GlobalPoint gp1_smeared( GlobalPoint::Cylindrical(gp1.perp(), gp1_phi_gauss, gp1.z()) );
+        GlobalPoint gp2_smeared( GlobalPoint::Cylindrical(gp2.perp(), gp2_phi_gauss, gp2.z()) );
+        GlobalPoint gp3_smeared( GlobalPoint::Cylindrical(gp3.perp(), gp3_phi_gauss, gp3.z()) );
+	etrk_[0].pt_position_sh=Ptassign_Position_gp(gp1, gp2, gp3, gp2.eta(), npar); //t.momentum().eta() 
+	etrk_[0].pt_position_smeared=Ptassign_Position_gp(gp1_smeared, gp2_smeared, gp3_smeared, gp2_smeared.eta(), npar); //t.momentum().eta() 
+     }
   
   } 
 
@@ -1493,8 +1555,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         	etrk_[st].deta_pad_odd = etrk_[st].eta_lct_odd - etrk_[st].eta_pad_odd;
       	}
     	}
-       else
-       {
+      else
+      {
       	etrk_[st].has_gem_pad |= 2;
         etrk_[st].chamber_even |= 1;
         etrk_[st].pad_even = digi_channel(pads.at(0));
@@ -2370,7 +2432,7 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
     int cscchamber = CSCTriggerNumbering::chamberFromTriggerLabels(id.sector(), 0, id.station(), id.subsector());
     std::cout <<"rpc detid " << id << " csc chamebr:"<< cscchamber << std::endl;
   }     
-  
+
   for(auto d: match_sh.superChamberIdsGEM())
   {
     GEMDetId id(d);
@@ -2388,7 +2450,7 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
     std::cout << "GEM Chamber: "<<d<<" "<<id<<" layerswithhits:"<<nlayers<<" global eta:"<<gp.eta()<<" mean strip:"<<mean_strip<<endl;
 
   }
-
+  
   std::cout << "######matching Cathode Digi to simtrack " << std::endl;
   for (auto d: match_cd.chamberIdsStrip(0))
   {
@@ -2476,33 +2538,6 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
     for (auto p : rpcdigis)
     	std::cout << p << std::endl;
    
-  }
-
-  std::cout << "######matching CLCT to Simtrack " << std::endl;
-  for(auto d: match_lct.chamberIdsAllCLCT(0))
-  {
-    CSCDetId id(d);
-    const int st(detIdToMEStation(id.station(),id.ring()));
-    if (stations_to_use_.count(st) == 0) continue;
-    auto clcts = match_lct.allCLCTsInChamber(d);
-//    auto clct = match_lct.clctInChamber(d);
-//    if (std::find(clcts.begin(),clcts.end(),clct) != clcts.end())  std::cout<<"the matching clct ";
-//    else std::cout <<" another clct "; 
-    for (auto p : clcts)    
-       std::cout<<id<< p <<std::endl;
-    
-  }
-
-  std::cout << "######matching ALCT to Simtrack " << std::endl;
-  for(auto d: match_lct.chamberIdsAllALCT(0))
-  {
-    CSCDetId id(d);
-    const int st(detIdToMEStation(id.station(),id.ring()));
-    if (stations_to_use_.count(st) == 0) continue;
-    auto alcts = match_lct.allALCTsInChamber(d);
-    for (auto p : alcts)    
-       std::cout<<id<< p <<std::endl;
-    
   }
 
   std::cout << "######matching LCT to Simtrack " << std::endl;
