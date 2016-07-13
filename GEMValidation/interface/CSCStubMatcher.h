@@ -175,6 +175,7 @@ private:
   CSCCLCTDigiContainer no_csc_clcts_;
   CSCALCTDigiContainer no_csc_alcts_;
   CSCCorrelatedLCTDigiContainer no_csc_lcts_;
+  CSCCorrelatedLCTDigiContainer no_csc_mplcts_;
 };
 
 

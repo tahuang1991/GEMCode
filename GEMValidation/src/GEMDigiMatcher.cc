@@ -31,15 +31,15 @@ GEMDigiMatcher::GEMDigiMatcher(SimHitMatcher& sh)
   if (hasGEMGeometry_) {
     edm::Handle<GEMDigiCollection> gem_digis;
     if (gemvalidation::getByLabel(gemDigiInput_, gem_digis, event()) and runGEMDigi_) {
-	if(verbose()) std::cout <<" to do matchDigisToSimTrack"<< std::endl;
-	matchDigisToSimTrack(*gem_digis.product());
+      if(verbose()) std::cout <<" to do matchDigisToSimTrack"<< std::endl;
+      matchDigisToSimTrack(*gem_digis.product());
     }
     
     edm::Handle<GEMCSCPadDigiCollection> gem_pads;
-    //std::cout <<" for gemPadDigiInput "<<(gemvalidation::getByLabel(gemPadDigiInput_, gem_pads, event())?"true":"false")<< std::endl;
+    if (verbose()) std::cout <<" for gemPadDigiInput "<<(gemvalidation::getByLabel(gemPadDigiInput_, gem_pads, event())?"true":"false")<< std::endl;
     if (gemvalidation::getByLabel(gemPadDigiInput_, gem_pads, event()) and runGEMPad_) {
-	if (verbose()) std::cout <<" to do matchPadsToSimTrack"<< std::endl;
-	matchPadsToSimTrack(*gem_pads.product());
+      if (verbose()) std::cout <<" to do matchPadsToSimTrack"<< std::endl;
+      matchPadsToSimTrack(*gem_pads.product());
     }
     
     edm::Handle<GEMCSCPadDigiCollection> gem_co_pads;
