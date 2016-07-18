@@ -1,6 +1,6 @@
 
 
-#include "MuJetAnalysis/HLTBendingAngle/interface/Ptassignment.h"
+#include "GEMCode/GEMValidation/interface/Ptassignment.h"
 #include <iostream>
 
 
@@ -60,3 +60,19 @@ float Ptassign_Direction(float bending_12, float eta, int par){
     
     return pt;
 }
+
+
+
+float PhiMomentum(float dphi, float phi_position, int st, bool evenodd){
+	
+    //even->0, odd->1
+    int cham = (evenodd ? 0:1);
+    float slope = BendingAngleLUT[st-1][cham];
+    float phi_m = dphi*slope+phi_position;
+    //std::cout <<"st "<< st <<" cham "<< cham <<" gemcsc dphi "<< dphi <<" phi position "<< phi_position <<" slope "<< slope <<" phi momentum "<< phi_m << std::endl;
+    return phi_m;
+
+
+}
+
+

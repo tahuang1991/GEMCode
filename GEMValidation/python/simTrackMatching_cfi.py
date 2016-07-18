@@ -346,9 +346,9 @@ SimTrackMatching = cms.PSet(
         deltaR = cms.double(0.05),
     ),    
     displacedGenMu = cms.PSet(
-	validInputTags = cms.VInputTag(cms.InputTag("Notreal","test")),
+	validInputTags = cms.VInputTag(cms.InputTag("genParticles")),
 	verbose = cms.int32(0),
-	run = cms.bool(False),
+	run = cms.bool(True),
     ),
     sectorProcessor = csctfTrackDigis.SectorProcessor,
 #       SRLUT = cms.PSet(

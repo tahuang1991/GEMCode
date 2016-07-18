@@ -1,6 +1,6 @@
 
-#ifndef MuJetAnalysis_HLTBendingAngle_Ptassignment_h
-#define MuJetAnalysis_HLTBendingAngle_Ptassignment_h
+#ifndef GEMCode_GEMValidation_Ptassignment_h
+#define GEMCode_GEMValidation_Ptassignment_h
 
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 
@@ -43,7 +43,7 @@ const double PositionEpLUT[Parity][EtaPartitions][3] = {
 const double DirectionEpLUT[Parity][EtaPartitions][2]={
     	       {{2.907, 5.906},
 		{2.600, 5.191},
-		{4.530, 9.442},
+		{4.530, 9.422},
 		{5.788, 9.743},
 		{8.367, 10.22},
 		{11.02, 14.84},
@@ -71,6 +71,13 @@ const double DirectionEpLUT[Parity][EtaPartitions][2]={
 	       },
 	};
 
+// phi_momentum = phi_position+gem-csc_bending*slope
+const double BendingAngleLUT[2][2] = {
+	{28.71,12.86},//even,odd for ME11
+	{39.11,18.31},
+
+};
+
 int GetEtaPartition(float eta );
 
 float Ptassign_Position(float deltay12, float deltay23, float eta, int par);
@@ -78,6 +85,8 @@ float Ptassign_Position(float deltay12, float deltay23, float eta, int par);
 float Ptassign_Position_gp(GlobalPoint gp1, GlobalPoint gp2, GlobalPoint gp3, float eta, int par);
 
 float Ptassign_Direction(float bending_12, float eta, int par);
+
+float PhiMomentum(float dphi, float phi_position, int st, bool evenodd);
 
 
 #endif
