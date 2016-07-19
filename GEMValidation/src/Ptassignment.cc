@@ -2,6 +2,8 @@
 
 #include "GEMCode/GEMValidation/interface/Ptassignment.h"
 #include <iostream>
+#include <math.h>       /* atan */
+#define PI 3.14159265
 
 
 int GetEtaPartition(float eta ){
@@ -53,10 +55,10 @@ float Ptassign_Position_gp(GlobalPoint gp1, GlobalPoint gp2, GlobalPoint gp3, fl
 
 float Ptassign_Direction(float bending_12, float eta, int par){
     int neta = GetEtaPartition(eta);
-    if (par<0 or par>3 or neta==-1) return -1;
+    if (par<0 or par>3 or neta==-1 or fabs(bending_12) > PI) return -1;
 
-    //std::cout <<"Pt Direction, npar "<< par <<" neta "<<neta <<" slope "<< DirectionEpLUT[par][neta][0]<<" intercep "<< DirectionEpLUT[par][neta][1] << " bending_12 " << bending_12 << std::endl;
     float pt=(1/fabs(bending_12)+DirectionEpLUT[par][neta][1])/DirectionEpLUT[par][neta][0];
+    std::cout <<"Pt Direction, npar "<< par <<" neta "<<neta <<" slope "<< DirectionEpLUT[par][neta][0]<<" intercep "<< DirectionEpLUT[par][neta][1] << " bending_12 " << bending_12 <<" pt "<<pt <<std::endl;
     
     return pt;
 }
@@ -76,3 +78,23 @@ float PhiMomentum(float dphi, float phi_position, int st, bool evenodd){
 }
 
 
+float PhiMomentum_Radius(float dphi, float phi_position, float radius_csc, float radius_gem){
+    
+     // usually radius_csc>radius_gem
+     if (fabs(dphi) > PI or fabs(phi_position) > PI or radius_csc<radius_gem) return -9;
+     float radius_diff = radius_gem-radius_csc*cos(dphi);
+     float phi_diff = 0.0;
+     if (fabs(radius_diff) > 0.0) phi_diff = atan(radius_csc*sin(dphi)/radius_diff);
+     else phi_diff = PI/2.0;
+     
+     if (phi_diff <= -PI) phi_diff = phi_diff+2*PI;
+     else if (phi_diff > PI) phi_diff = phi_diff-2*PI;
+
+     float phiM = phi_position-phi_diff;
+     if (phiM <= -PI) phiM = phiM+2*PI;
+     else if (phiM > PI) phiM = phiM-2*PI;
+
+     std::cout <<" radius_csc "<< radius_csc <<" radius_gem "<< radius_gem <<" dphi "<< dphi << " phi_position "<< phi_position<<" radius_diff "<< radius_diff <<" phi_diff "<< phi_diff <<" phiM "<< phiM << std::endl;
+     return phiM;
+
+}

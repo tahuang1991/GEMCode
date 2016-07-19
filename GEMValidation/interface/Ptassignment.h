@@ -87,6 +87,7 @@ float Ptassign_Position_gp(GlobalPoint gp1, GlobalPoint gp2, GlobalPoint gp3, fl
 float Ptassign_Direction(float bending_12, float eta, int par);
 
 float PhiMomentum(float dphi, float phi_position, int st, bool evenodd);
+float PhiMomentum_Radius(float dphi, float phi_position, float radius_csc, float radius_gem);
 
 
 #endif

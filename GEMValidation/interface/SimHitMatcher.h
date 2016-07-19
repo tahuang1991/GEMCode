@@ -142,6 +142,7 @@ public:
   /// calculate Global average momentum for a provided collection of simhits
   GlobalVector simHitsMeanMomentum(const edm::PSimHitContainer& sim_hits) const;
 
+  float	simHitsGEMCentralPosition(const edm::PSimHitContainer& sim_hits) const;
   /// 
   float LocalBendingInChamber(unsigned int detid) const;
 

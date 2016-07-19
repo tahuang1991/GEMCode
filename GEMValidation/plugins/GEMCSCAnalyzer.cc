@@ -147,10 +147,12 @@ struct MyTrackEff
   Char_t chamber_even; // bit1: has GEM pad   bit2: has CSC LCT
   Float_t bending_sh;
   Float_t phi_cscsh_even, phi_cscsh_odd, eta_cscsh_even, eta_cscsh_odd;
-  Float_t perp_gemsh_even, perp_gemsh_odd, perp_cscsh_even, perp_cscsh_odd;
+  Float_t perp_gemsh_even, perp_gemsh_odd, perp_cscsh_even, perp_cscsh_odd,centralperp_gemsh_even, centralperp_gemsh_odd;
   Float_t dphi_sh_even,dphi_sh_odd;
-  Float_t phiM_gemcsc_even,phiM_gemcsc_odd;
+  Float_t dphipositionpt_cscsh_even, dphipositionpt_cscsh_odd, dphipositionpt_gemsh_even,dphipositionpt_gemsh_odd;
+  Float_t phiM_gemcsc_even,phiM_gemcsc_odd,phiM_gemcsc_central_even, phiM_gemcsc_central_odd;
   Float_t pt_sh_even,pt_sh_odd,ptphi_sh_even,ptphi_sh_odd,pteta_sh_even,pteta_sh_odd;
+  Float_t ptphi_gemsh_odd, ptphi_gemsh_even;
   //Float_t ptphi_diff_sh_11,ptphi_diff_sh_12,ptphi_diff_sh_21,ptphi_diff_sh_22; 
   //Float_t bendphi_diff_sh_11,bendphi_diff_sh_12,bendphi_diff_sh_21,bendphi_diff_sh_22; 
   Float_t ptphi_diff_sh,bendphi_diff_sh;
@@ -338,7 +340,7 @@ struct MyTrackEff
 
   // pt assginment
   Float_t pt_position_sh, pt_direction_sh;
-  Float_t pt_position, pt_direction_gemcsc;
+  Float_t pt_position, pt_direction_gemcsc, pt_direction_gemcsc_central;
   Float_t pt_position_smeared, pt_direction_gemcsc_smeared;
   Int_t npar;
   Int_t npar_jose;
@@ -416,6 +418,8 @@ void MyTrackEff::init()
   perp_cscsh_even = -0.0;
   perp_gemsh_odd = -0.0;
   perp_gemsh_even = -0.0;
+  centralperp_gemsh_odd = -0.0;
+  centralperp_gemsh_even = -0.0;
   phi_cscsh_even = -9.0;
   phi_cscsh_odd = -9.0;
   eta_cscsh_even = -9.0;
@@ -426,6 +430,8 @@ void MyTrackEff::init()
   pt_sh_odd = -9.0;
   pteta_sh_odd = 0;
   ptphi_sh_odd = -9.0;
+  ptphi_gemsh_even = -9.0;
+  ptphi_gemsh_odd = -9.0;
 
   eta_st1_sh = -9;
   eta_st2_sh = -9;
@@ -500,8 +506,14 @@ void MyTrackEff::init()
   phi_gemsh_even = -9.;
   dphi_sh_odd = -9;
   dphi_sh_even = -9;
+  dphipositionpt_gemsh_even = -9;
+  dphipositionpt_gemsh_odd = -9;
+  dphipositionpt_cscsh_even = -9;
+  dphipositionpt_cscsh_odd = -9;
   phiM_gemcsc_odd = -9;
   phiM_gemcsc_even =-9;
+  phiM_gemcsc_central_odd = -9;
+  phiM_gemcsc_central_even =-9;
   strip_gemdg_odd = -9;
   strip_gemdg_even = -9;
  
@@ -644,6 +656,7 @@ void MyTrackEff::init()
   pt_position=-1;
   pt_position_smeared=-1;
   pt_direction_gemcsc = -1;
+  pt_direction_gemcsc_central = -1;
   pt_direction_sh=-1;
   pt_direction_gemcsc_smeared=-1;
   hasSt1St2St3=false;
@@ -718,6 +731,8 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("perp_cscsh_even", &perp_cscsh_even);
   t->Branch("perp_gemsh_odd", &perp_gemsh_odd);
   t->Branch("perp_gemsh_even", &perp_gemsh_even);
+  t->Branch("centralperp_gemsh_odd", &centralperp_gemsh_odd);
+  t->Branch("centralperp_gemsh_even", &centralperp_gemsh_even);
   t->Branch("phi_cscsh_even", &phi_cscsh_even);
   t->Branch("phi_cscsh_odd", &phi_cscsh_odd);
   t->Branch("eta_cscsh_even", &eta_cscsh_even);
@@ -730,6 +745,8 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("ptphi_sh_odd", &ptphi_sh_odd);
   t->Branch("eta_st1_sh", &eta_st1_sh);
   t->Branch("eta_st2_sh", &eta_st2_sh);
+  t->Branch("ptphi_gemsh_even", &ptphi_gemsh_even);
+  t->Branch("ptphi_gemsh_odd", &ptphi_gemsh_odd);
   //t->Branch("ptphi_diff_sh_11", &ptphi_diff_sh_11);
   //t->Branch("ptphi_diff_sh_12", &ptphi_diff_sh_12);
   //t->Branch("ptphi_diff_sh_21", &ptphi_diff_sh_21);
@@ -802,8 +819,14 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("phi_gemsh_even", &phi_gemsh_even);
   t->Branch("dphi_sh_odd", &dphi_sh_odd);
   t->Branch("dphi_sh_even", &dphi_sh_even);
+  t->Branch("dphipositionpt_gemsh_even", &dphipositionpt_gemsh_even);
+  t->Branch("dphipositionpt_gemsh_odd", &dphipositionpt_gemsh_odd);
+  t->Branch("dphipositionpt_cscsh_even", &dphipositionpt_cscsh_even);
+  t->Branch("dphipositionpt_cscsh_odd", &dphipositionpt_cscsh_odd);
   t->Branch("phiM_gemcsc_odd", &phiM_gemcsc_odd);
   t->Branch("phiM_gemcsc_even", &phiM_gemcsc_even);
+  t->Branch("phiM_gemcsc_central_odd", &phiM_gemcsc_central_odd);
+  t->Branch("phiM_gemcsc_central_even", &phiM_gemcsc_central_even);
   t->Branch("strip_gemdg_odd", &strip_gemdg_odd);
   t->Branch("strip_gemdg_even", &strip_gemdg_even);
 
@@ -947,6 +970,7 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("pt_position_smeared", &pt_position_smeared); 
   t->Branch("pt_direction_sh", &pt_direction_sh); 
   t->Branch("pt_direction_gemcsc", &pt_direction_gemcsc); 
+  t->Branch("pt_direction_gemcsc_central", &pt_direction_gemcsc_central); 
   t->Branch("pt_direction_gemcsc_smeared", &pt_direction_gemcsc_smeared); 
   t->Branch("hasSt1St2St3", &hasSt1St2St3); 
   t->Branch("hasSt3orSt4_sh", &hasSt3orSt4_sh); 
@@ -1309,6 +1333,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     		else     etrk_[st].phi_cscsh_even = keygp.phi();
     		if (odd) etrk_[st].perp_cscsh_odd = keygp.perp();
     		else     etrk_[st].perp_cscsh_even = keygp.perp();
+    		if (odd) etrk_[st].dphipositionpt_cscsh_odd = deltaPhi(keygp.phi(),etrk_[st].ptphi_sh_odd);
+    		else     etrk_[st].dphipositionpt_cscsh_even = deltaPhi(keygp.phi(),etrk_[st].ptphi_sh_even);
 
 		if (st==2 or st==3){
       			if (odd) etrk_[1].eta_cscsh_odd = keygp.eta();
@@ -1317,6 +1343,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       			else     etrk_[1].phi_cscsh_even = keygp.phi();
       			if (odd) etrk_[1].perp_cscsh_odd = keygp.perp();
       			else     etrk_[1].perp_cscsh_even = keygp.perp();
+    			if (odd) etrk_[1].dphipositionpt_cscsh_odd = deltaPhi(keygp.phi(),etrk_[st].ptphi_sh_odd);
+    			else     etrk_[1].dphipositionpt_cscsh_even = deltaPhi(keygp.phi(),etrk_[st].ptphi_sh_even);
 		}
 		//std::cout <<" csckeyid "<< csckeyid<<" simhits size "<< match_sh.hitsInDetId(csckeyid.rawId()).size() <<" keygp.eta "<< keygp.eta() << " keygp.phi "<< keygp.phi() << std::endl;
 		break;
@@ -1586,6 +1614,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     else MEStation = id.station();
 
     const int st(detIdToMEStation(MEStation,id.ring()));
+    std::cout <<" GEM id "<<id <<" st "<< st << std::endl;
     if (stations_to_use_.count(st) == 0) continue;
 
     const bool odd(id.chamber()%2==1);
@@ -1597,6 +1626,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       for (int layer=1; layer<3; layer++){
 	GEMDetId id_tmp(id.region(), id.ring(), id.station(), layer, id.chamber(), 0);
 	GlobalPoint keygp = match_sh.simHitsMeanPosition(match_sh.hitsInChamber(id_tmp.rawId()));
+	GlobalVector keygv = match_sh.simHitsMeanMomentum(match_sh.hitsInChamber(id_tmp.rawId()));
+	float centralperp_gemsh = match_sh.simHitsGEMCentralPosition(match_sh.hitsInChamber(id_tmp.rawId()));match_sh.simHitsMeanPosition(match_sh.hitsInChamber(id_tmp.rawId()));
 	if(match_sh.hitsInChamber(id_tmp).size()==0) continue;
 	//std::cout <<" GEM Id "<< id <<" gp.eta "<< sh_gp.eta() <<" gp.phi "<< sh_gp.phi() << std::endl;
         std::cout <<" GEM Id "<< id_tmp <<" eta "<< keygp.eta() <<" phi "<< keygp.phi()<<" perp "<< keygp.perp() <<" x " << keygp.x() <<" y "<< keygp.y() << " z "<< keygp.z()<< std::endl;
@@ -1604,34 +1635,54 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
      	else     etrk_[st].eta_gemsh_even = keygp.eta();
       	if (odd) etrk_[st].phi_gemsh_odd = keygp.phi();
       	else     etrk_[st].phi_gemsh_even = keygp.phi();
+      	if (odd) etrk_[st].ptphi_gemsh_odd = keygv.phi();
+      	else     etrk_[st].ptphi_gemsh_even = keygv.phi();
       	if (odd) etrk_[st].perp_gemsh_odd = keygp.perp();
       	else     etrk_[st].perp_gemsh_even = keygp.perp();
+	if (odd) etrk_[st].centralperp_gemsh_odd = centralperp_gemsh;
+	else     etrk_[st].centralperp_gemsh_even = centralperp_gemsh;
 	float phi_m = -9;
-      	if (odd and etrk_[st].phi_cscsh_odd>-9){
-	    etrk_[st].dphi_sh_odd = deltaPhi(etrk_[st].phi_cscsh_odd, keygp.phi());
-	    phi_m =  PhiMomentum(etrk_[st].dphi_sh_odd, etrk_[st].phi_gemsh_odd, MEStation, false);
+	float phi_m2 = -9;
+	int st_csc = (st==3 and (etrk_[st].has_csc_sh&3)==0)? 1:st;
+      	if (odd and etrk_[st_csc].phi_cscsh_odd>-9){
+	    etrk_[st].dphi_sh_odd = deltaPhi(etrk_[st_csc].phi_cscsh_odd, keygp.phi());// here should we use st or st_csc?
+    	    etrk_[st].dphipositionpt_gemsh_odd = deltaPhi(keygp.phi(),etrk_[st_csc].ptphi_sh_odd);
+	    phi_m =  PhiMomentum_Radius(etrk_[st].dphi_sh_odd, etrk_[st].phi_gemsh_odd, etrk_[st_csc].perp_cscsh_odd, etrk_[st].perp_gemsh_odd);
+	    phi_m2 =  PhiMomentum_Radius(etrk_[st].dphi_sh_odd, etrk_[st].phi_gemsh_odd, etrk_[st_csc].perp_cscsh_odd, etrk_[st].centralperp_gemsh_odd);
 	    etrk_[st].phiM_gemcsc_odd = phi_m;
-	    //std::cout <<"momentum phi from simhits "<< gv_sh_odd[st].phi() <<" phi from gem-csc "<< phi_m << std::endl;
+	    etrk_[st].phiM_gemcsc_central_odd = phi_m2;
+	    std::cout <<"dphi(M,P) "<< deltaPhi(etrk_[st].phi_gemsh_odd, gv_sh_odd[st_csc].phi())<<" momentum phi from simhits "<< gv_sh_odd[st_csc].phi() <<" phi from gem-csc "<< phi_m <<" central "<< phi_m2<< std::endl;
 	}
-      	else if (etrk_[st].phi_cscsh_even>-9) {
-	    etrk_[st].dphi_sh_even = deltaPhi(etrk_[st].phi_cscsh_even, keygp.phi());
-	    phi_m =  PhiMomentum(etrk_[st].dphi_sh_even, etrk_[st].phi_gemsh_even, MEStation, true);
+      	else if (not(odd) and etrk_[st_csc].phi_cscsh_even>-9) {
+	    etrk_[st].dphi_sh_even = deltaPhi(etrk_[st_csc].phi_cscsh_even, keygp.phi());
+    	    etrk_[st].dphipositionpt_gemsh_even = deltaPhi(keygp.phi(),etrk_[st_csc].ptphi_sh_even);
+	    phi_m =  PhiMomentum_Radius(etrk_[st].dphi_sh_even, etrk_[st].phi_gemsh_even, etrk_[st_csc].perp_cscsh_even, etrk_[st].perp_gemsh_even);
+	    phi_m2 =  PhiMomentum_Radius(etrk_[st].dphi_sh_even, etrk_[st].phi_gemsh_even, etrk_[st_csc].perp_cscsh_even, etrk_[st].centralperp_gemsh_even);
 	    etrk_[st].phiM_gemcsc_even = phi_m;
-	    //std::cout <<"momentum phi from simhits "<< gv_sh_even[st].phi() <<" phi from gem-csc "<< phi_m << std::endl;
+	    etrk_[st].phiM_gemcsc_central_even = phi_m2;
+	    std::cout <<"dphi(M,P) "<< deltaPhi(etrk_[st].phi_gemsh_even, gv_sh_even[st_csc].phi())<<" momentum phi from simhits "<< gv_sh_even[st_csc].phi() <<" phi from gem-csc "<< phi_m <<" central "<< phi_m2<< std::endl;
 	}
-	std::cout <<"dphi(GEM, CSC) at sim "<<(odd? etrk_[st].dphi_sh_odd:etrk_[st].dphi_sh_even)<< std::endl;
 	if (st==2 or st==3){
       		if (odd) etrk_[1].eta_gemsh_odd = keygp.eta();
       		else     etrk_[1].eta_gemsh_even = keygp.eta();
       		if (odd) etrk_[1].phi_gemsh_odd = keygp.phi();
       		else     etrk_[1].phi_gemsh_even = keygp.phi();
+      		if (odd) etrk_[1].ptphi_gemsh_odd = keygv.phi();
+      		else     etrk_[1].ptphi_gemsh_even = keygv.phi();
       		if (odd) etrk_[1].perp_gemsh_odd = keygp.perp();
       		else     etrk_[1].perp_gemsh_even = keygp.perp();
+		if (odd) etrk_[1].centralperp_gemsh_odd = centralperp_gemsh;
+		else     etrk_[1].centralperp_gemsh_even = centralperp_gemsh;
       		if (odd and etrk_[1].phi_cscsh_odd>-9) etrk_[1].dphi_sh_odd = deltaPhi(etrk_[1].phi_cscsh_odd,keygp.phi());
       		else if (etrk_[1].phi_cscsh_even>-9)     etrk_[1].dphi_sh_even = deltaPhi(etrk_[1].phi_cscsh_even,keygp.phi());
 		if (odd) etrk_[1].phiM_gemcsc_odd = phi_m;
 		else etrk_[1].phiM_gemcsc_even = phi_m;
+		if (odd) etrk_[1].phiM_gemcsc_central_odd = phi_m2;
+		else etrk_[1].phiM_gemcsc_central_even = phi_m2;
+		if (odd) etrk_[1].dphipositionpt_gemsh_odd = deltaPhi(keygp.phi(),etrk_[1].ptphi_sh_odd);
+		else etrk_[1].dphipositionpt_gemsh_even = deltaPhi(keygp.phi(),etrk_[1].ptphi_sh_even);
 	}
+	std::cout <<"dphi(GEM, CSC) at sim "<<(odd? etrk_[st].dphi_sh_odd:etrk_[st].dphi_sh_even) <<" phi_csc "<< (odd? etrk_[st_csc].phi_cscsh_odd:etrk_[st_csc].phi_cscsh_even) <<" phi_gp "<< keygp.phi()<< std::endl;
 	if (id_tmp.layer()==1) break;
   		
       }
@@ -1937,6 +1988,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   float bendphi_diff = -9;
   float csc_bending_angle12_gemcsc_smeared = -9; 
   float csc_bending_angle12_gemcsc = -9;
+  float csc_bending_angle12_gemcsc_central = -9;
   float dphiME11 = -9;
   float dphiME21 = -9;
    
@@ -1953,7 +2005,10 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	if (etrk_[1].dphi_sh_odd>-9 and etrk_[6].dphi_sh_even>-9)
 	{
 	    bendphi_diff = deltaPhi(etrk_[1].dphi_sh_odd, etrk_[6].dphi_sh_even);
-     	    csc_bending_angle12_gemcsc = deltaPhi(etrk_[1].phiM_gemcsc_odd, etrk_[6].phiM_gemcsc_even);
+	    if (etrk_[1].phiM_gemcsc_odd>-9 and etrk_[6].phiM_gemcsc_even>-9)
+     	    	csc_bending_angle12_gemcsc = deltaPhi(etrk_[1].phiM_gemcsc_odd, etrk_[6].phiM_gemcsc_even);
+	    if (etrk_[1].phiM_gemcsc_central_odd>-9 and etrk_[6].phiM_gemcsc_central_even>-9)
+     	    	csc_bending_angle12_gemcsc_central = deltaPhi(etrk_[1].phiM_gemcsc_central_odd, etrk_[6].phiM_gemcsc_central_even);
 	    dphiME11 = etrk_[1].dphi_sh_odd;
 	    dphiME21 = etrk_[6].dphi_sh_even;
 	}
@@ -1968,7 +2023,10 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	if (etrk_[1].dphi_sh_odd>-9 and etrk_[6].dphi_sh_odd>-9)
 	{
 	    bendphi_diff = deltaPhi(etrk_[1].dphi_sh_odd, etrk_[6].dphi_sh_odd);
-     	    csc_bending_angle12_gemcsc = deltaPhi(etrk_[1].phiM_gemcsc_odd, etrk_[6].phiM_gemcsc_odd);
+	    if (etrk_[1].phiM_gemcsc_odd>-9 and etrk_[6].phiM_gemcsc_odd>-9)
+     	    	csc_bending_angle12_gemcsc = deltaPhi(etrk_[1].phiM_gemcsc_odd, etrk_[6].phiM_gemcsc_odd);
+	    if (etrk_[1].phiM_gemcsc_central_odd>-9 and etrk_[6].phiM_gemcsc_central_odd>-9)
+     	    	csc_bending_angle12_gemcsc_central = deltaPhi(etrk_[1].phiM_gemcsc_central_odd, etrk_[6].phiM_gemcsc_central_odd);
 	    dphiME11 = etrk_[1].dphi_sh_odd;
 	    dphiME21 = etrk_[6].dphi_sh_odd;
 	}
@@ -1983,7 +2041,10 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	if (etrk_[1].dphi_sh_even>-9 and etrk_[6].dphi_sh_even>-9)
 	{
 	    bendphi_diff = deltaPhi(etrk_[1].dphi_sh_even, etrk_[6].dphi_sh_even);
-     	    csc_bending_angle12_gemcsc = deltaPhi(etrk_[1].phiM_gemcsc_even, etrk_[6].phiM_gemcsc_even);
+	    if (etrk_[1].phiM_gemcsc_even>-9 and etrk_[6].phiM_gemcsc_even>-9)
+     	    	csc_bending_angle12_gemcsc = deltaPhi(etrk_[1].phiM_gemcsc_even, etrk_[6].phiM_gemcsc_even);
+	    if (etrk_[1].phiM_gemcsc_central_even>-9 and etrk_[6].phiM_gemcsc_central_even>-9)
+     	    	csc_bending_angle12_gemcsc_central = deltaPhi(etrk_[1].phiM_gemcsc_central_even, etrk_[6].phiM_gemcsc_central_even);
 	    dphiME11 = etrk_[1].dphi_sh_even;
 	    dphiME21 = etrk_[6].dphi_sh_even;
 	}
@@ -1998,7 +2059,10 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	if (etrk_[1].dphi_sh_even>-9 and etrk_[6].dphi_sh_odd>-9)
 	{
 	    bendphi_diff = deltaPhi(etrk_[1].dphi_sh_even, etrk_[6].dphi_sh_odd);
-     	    csc_bending_angle12_gemcsc = deltaPhi(etrk_[1].phiM_gemcsc_even, etrk_[6].phiM_gemcsc_odd);
+	    if (etrk_[1].phiM_gemcsc_even>-9 and etrk_[6].phiM_gemcsc_odd>-9)
+     	    	csc_bending_angle12_gemcsc = deltaPhi(etrk_[1].phiM_gemcsc_even, etrk_[6].phiM_gemcsc_odd);
+	    if (etrk_[1].phiM_gemcsc_central_even>-9 and etrk_[6].phiM_gemcsc_central_odd>-9)
+     	    	csc_bending_angle12_gemcsc_central = deltaPhi(etrk_[1].phiM_gemcsc_central_even, etrk_[6].phiM_gemcsc_central_odd);
 	    dphiME11 = etrk_[1].dphi_sh_even;
 	    dphiME21 = etrk_[6].dphi_sh_odd;
 	}
@@ -2027,7 +2091,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
      csc_bending_angle12_gemcsc_smeared = deltaPhi(phiM_smeared_ME11, phiM_smeared_ME21);
 
      etrk_[0].pt_direction_gemcsc=Ptassign_Direction(csc_bending_angle12_gemcsc, gp2_smeared.eta(), npar);  
+     etrk_[0].pt_direction_gemcsc_central=Ptassign_Direction(csc_bending_angle12_gemcsc_central, gp2_smeared.eta(), npar);  
      etrk_[0].pt_direction_gemcsc_smeared=Ptassign_Direction(csc_bending_angle12_gemcsc_smeared, gp2_smeared.eta(), npar);  
+     std::cout <<" pt direction sh "<< etrk_[0].pt_direction_sh <<" pt_direction_gemcsc "<<etrk_[0].pt_direction_gemcsc<<"  pt_direction_gemcsc_central "<<  etrk_[0].pt_direction_gemcsc_central << std::endl;
 
      if (etrk_[8].has_csc_sh){
         double gp3_phi_gauss = CLHEP::RandGauss::shoot(gp3.phi(), .00075);
