@@ -16,6 +16,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <unordered_set>
 
 typedef std::vector<GEMDigi> GEMDigiContainer;
 typedef std::vector<GEMCSCPadDigi> GEMCSCPadDigiContainer;
@@ -89,6 +90,11 @@ public:
   // what unique partitions numbers with digis from this simtrack?
   std::set<int> partitionNumbers() const;
   std::set<int> partitionNumbersWithCoPads() const;
+
+  std::vector<GlobalPoint> positionPad1InDetId(unsigned int) const;
+  std::vector<GlobalPoint> positionPad2InDetId(unsigned int) const;
+  std::vector<GlobalPoint> positionPad4InDetId(unsigned int) const;
+  std::vector<GlobalPoint> positionPad8InDetId(unsigned int) const;
 
 private:
 

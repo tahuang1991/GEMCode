@@ -64,7 +64,7 @@ CSCDigiMatcher::matchStripsToSimTrack(const CSCComparatorDigiCollection& compara
       int strip = c->getStrip(); // strips are counted from 1
       // check that it matches a strip that was hit by SimHits from our track
       if (hit_strips.find(strip) == hit_strips.end()) continue;
-      if (verboseStrip_) cout<<"oki"<<endl;
+      if (verboseStrip_) cout<<"\toki"<<endl;
 
       // get half-strip, counting from 1
       int half_strip = 2*strip - 1 + c->getComparator();
