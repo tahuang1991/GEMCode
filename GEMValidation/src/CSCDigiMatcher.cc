@@ -195,16 +195,16 @@ CSCDigiMatcher::wireDigisInChamber(unsigned int detid) const
 }
 
 
-const CSCStripDigiContainer&
-CSCDigiMatcher::cscStripDigisInDetId(unsigned int detid) const
+const CSCComparatorDigiContainer&
+CSCDigiMatcher::cscComparatorDigisInDetId(unsigned int detid) const
 {
   if (detid_to_cschalfstrips_.find(detid) == detid_to_cschalfstrips_.end()) return no_csc_strips_;
   return detid_to_cschalfstrips_.at(detid);
 }
 
 
-const CSCStripDigiContainer&
-CSCDigiMatcher::cscStripDigisInChamber(unsigned int detid) const
+const CSCComparatorDigiContainer&
+CSCDigiMatcher::cscComparatorDigisInChamber(unsigned int detid) const
 {
   if (chamber_to_cschalfstrips_.find(detid) == chamber_to_cschalfstrips_.end()) return no_csc_strips_;
   return chamber_to_cschalfstrips_.at(detid);

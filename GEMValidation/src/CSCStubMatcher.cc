@@ -1,5 +1,6 @@
 #include "GEMCode/GEMValidation/interface/CSCStubMatcher.h"
 #include "GEMCode/GEMValidation/interface/SimHitMatcher.h"
+#include "L1Trigger/CSCTriggerPrimitives/src/CSCCathodeLCTProcessor.h"
 
 #include <algorithm>
 
@@ -878,6 +879,227 @@ CSCStubMatcher::cscMplctsInChamber(unsigned int detid) const
   if (chamber_to_cscMplcts_.find(detid) == chamber_to_cscMplcts_.end()) return no_csc_mplcts_;
   return chamber_to_cscMplcts_.at(detid);
 }
+
+CSCCLCTDigi 
+CSCStubMatcher::bestCscClctInChamber(unsigned int detid) const
+{
+  //sort stubs based on quality
+  auto input(cscClctsInChamber(detid));
+  int bestQ = 0;
+  int index = -1;
+  for (unsigned int i=0; i<input.size(); ++i){
+    int quality = input[i].getQuality();
+    if (quality>bestQ){
+      bestQ = quality;
+      index = i;
+    }
+  }
+  if (index != -1) return input[index];
+  return CSCCLCTDigi();
+}
+
+CSCALCTDigi 
+CSCStubMatcher::bestCscAlctInChamber(unsigned int detid) const
+{
+  //sort stubs based on quality
+  auto input(cscAlctsInChamber(detid));
+  int bestQ = 0;
+  int index = -1;
+  for (unsigned int i=0; i<input.size(); ++i){
+    int quality = input[i].getQuality();
+    if (quality>bestQ){
+      bestQ = quality;
+      index = i;
+    }
+  }
+  if (index != -1) return input[index];
+  return CSCALCTDigi();
+}
+
+CSCCorrelatedLCTDigi 
+CSCStubMatcher::bestCscLctInChamber(unsigned int detid) const
+{
+  //sort stubs based on quality
+  auto input(cscLctsInChamber(detid));
+  int bestQ = 0;
+  int index = -1;
+  for (unsigned int i=0; i<input.size(); ++i){
+    int quality = input[i].getQuality();
+    if (quality>bestQ){
+      bestQ = quality;
+      index = i;
+    }
+  }
+  if (index != -1) return input[index];
+  return CSCCorrelatedLCTDigi();
+}
+
+CSCComparatorDigiDetIdContainer 
+CSCStubMatcher::matchingComparatorDigisLCT(unsigned int detid, const CSCCorrelatedLCTDigi& stub)
+{
+  std::cout << "In function matchingComparatorDigisLCT" << std::endl;
+  CSCComparatorDigiDetIdContainer output;
+  //1) get the keystrip of the stub
+  int keyStrip = stub.getStrip();
+  int patternNumber = stub.getPattern();
+  //2) loop on the layers
+  auto chamberId = CSCDetId(detid);
+  std::cout << chamberId << std::endl;
+  for (int ilayer=1; ilayer<=6; ilayer++){
+    auto layer(cscGeometry_->chamber(chamberId)->layer(ilayer));
+    auto layerId(layer->id());
+    std::cout << "\t" << layerId << std::endl;
+    // get the comparator digis in this layer
+    auto comps(digi_matcher_->cscComparatorDigisInDetId(layerId));
+    // loop on the comparator digis
+    for (auto comp: comps){
+      //check if they match the LCT pattern
+      int halfStrip = 2*comp.getStrip() - 1 + comp.getComparator();
+      std::cout << "\t\t"<<comp<<" "<<halfStrip<<endl;
+      // auto pattern = CSCCathodeLCTProcessor::pattern2007[patternNumber];
+      // int actualLayer = ilayer - 1;
+      // auto subPatternL0 = 
+      if (this->comparatorInCLCTPattern(keyStrip, patternNumber, ilayer, halfStrip))
+        output.push_back(std::make_pair(layerId.rawId(), comp));
+    }
+  }
+  return output;
+}
+
+bool 
+CSCStubMatcher::comparatorInCLCTPattern(int keyStrip, int pattern, int layer, int halfstrip)
+{
+  // first, get the pattern
+  //auto pat = CSCCathodeLCTProcessor::pattern2007[pattern];
+  // get the the sub-array for the particular pattern
+  // 11-5-1-5-9-11
+  //const int layertopat[6] = {11,5,1,5,9,11};
+  auto arr = patternCLCT(pattern, layer);
+  std::vector<int> subpat(arr, arr + sizeof(arr) / sizeof(arr[0]) );
+  std::cout << "Printing..." << pattern << " " << layer << std::endl;
+  for (auto p: subpat) std::cout << "\t" << p << std::endl;
+  /*
+  switch(layer){
+  case 1:
+    int subpat[11] = { pat[0], pat[1], pat[2], pat[3],
+                       pat[4], pat[5], pat[6], pat[7],
+                       pat[8], pat[9], pat[10] };
+    int dist[11];
+    for (int i=0; i<11; ++i) if (subpat[i] != 999) dist[i] = i-4;
+    
+    int minDistPattern = std::min_element(dist,dist+11);
+    int maxDistPattern = std::max_element(dist,dist+11);
+    if (halfstrip-keyStrip >=minDistPattern and halfstrip-keyStrip <=maxDistPattern) return true;
+    break;
+  case 2:
+    int subpat[5] = { pat[11], pat[12], pat[13], pat[14],
+                      pat[15] };
+    break;
+  case 3:
+    int subpat[1] = { pat[16] };
+    if (keyStrip == halfstrip) return true;
+    break;
+  case 4:
+    int subpat[5] = { pat[17], pat[18], pat[19], pat[20],
+                      pat[21] };
+    break;
+  case 5:
+    int subpat[9] = { pat[22], pat[23], pat[24], pat[25],
+                      pat[26], pat[27], pat[28], pat[29],
+                      pat[30] };
+    break;
+  case 6:
+    int subpat[11] = { pat[31], pat[32], pat[33], pat[34],
+                       pat[35], pat[36], pat[37], pat[38],
+                       pat[39], pat[40], pat[41] };
+    break;
+  }
+  */
+  return false;
+}
+
+int*
+CSCStubMatcher::patternCLCT(int pattern, int layer)
+{
+  auto pat = CSCCathodeLCTProcessor::pattern2007[pattern];
+  if (layer==1){
+    int *subpat = new int[11];
+    subpat[0] = pat[0];
+    subpat[1] = pat[1]; 
+    subpat[2] = pat[2]; 
+    subpat[3] = pat[3];
+    subpat[4] = pat[4]; 
+    subpat[5] = pat[5]; 
+    subpat[6] = pat[6]; 
+    subpat[7] = pat[7];
+    subpat[8] = pat[8]; 
+    subpat[9] = pat[9]; 
+    subpat[10] = pat[10];
+    return subpat;
+  }
+  else if (layer==2){
+    int*subpat = new int[5];
+    subpat[0] = pat[11];
+    subpat[1] = pat[12]; 
+    subpat[2] = pat[13]; 
+    subpat[3] = pat[14];
+    subpat[4] = pat[15];
+    return subpat;
+  }
+  else if (layer==3){
+    int*subpat = new int[1];
+    subpat[0] = pat[16];
+    return subpat;
+  }
+  else if (layer==4){
+    int*subpat = new int[5];
+    subpat[0] = pat[17];
+    subpat[1] = pat[18]; 
+    subpat[2] = pat[19]; 
+    subpat[3] = pat[20];
+    subpat[4] = pat[21];
+    return subpat;
+  } 
+  else if (layer==5){
+    int*subpat = new int[9];
+    subpat[0] = pat[22];
+    subpat[1] = pat[23]; 
+    subpat[2] = pat[24]; 
+    subpat[3] = pat[25];
+    subpat[4] = pat[26]; 
+    subpat[5] = pat[27]; 
+    subpat[6] = pat[28]; 
+    subpat[7] = pat[29];
+    subpat[8] = pat[30];
+    return subpat; 
+  }
+  else if (layer==6){
+    int*subpat = new int[11];
+    subpat[0] = pat[31];
+    subpat[1] = pat[32]; 
+    subpat[2] = pat[33]; 
+    subpat[3] = pat[34];
+    subpat[4] = pat[35]; 
+    subpat[5] = pat[36]; 
+    subpat[6] = pat[37]; 
+    subpat[7] = pat[38];
+    subpat[8] = pat[39]; 
+    subpat[9] = pat[40]; 
+    subpat[10] = pat[41];
+    return subpat;
+  }
+  else{
+    int*subpat = new int[0];
+    return subpat;
+  }
+}
+
+
+// const CSCWireDigiContainer& 
+// CSCStubMatcher::matchingWireDigisLCT(unsigned int detid, const CSCCorrelatedLCTDigi& stub) const
+// {
+
+// }
 
 int
 CSCStubMatcher::nChambersWithCLCT(int min_quality) const

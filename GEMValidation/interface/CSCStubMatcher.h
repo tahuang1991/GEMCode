@@ -82,6 +82,22 @@ public:
   const CSCCorrelatedLCTDigiContainer& cscLctsInChamber(unsigned int) const;
   const CSCCorrelatedLCTDigiContainer& cscMplctsInChamber(unsigned int) const;
 
+  /// best matching from a particular crossed chamber
+  CSCCLCTDigi bestCscClctInChamber(unsigned int) const;
+  CSCALCTDigi bestCscAlctInChamber(unsigned int) const;
+  CSCCorrelatedLCTDigi bestCscLctInChamber(unsigned int) const;
+  CSCCorrelatedLCTDigi bestCscMplctInChamber(unsigned int) const;
+
+  // get matching comparator digis for a given stub in a chamber
+  CSCComparatorDigiDetIdContainer 
+    matchingComparatorDigisLCT(unsigned int, const CSCCorrelatedLCTDigi&);
+  CSCWireDigiDetIdContainer 
+    matchingWireDigisLCT(unsigned int, const CSCCorrelatedLCTDigi&);
+
+  // check if comp digis belongs to CLCT pattern
+  bool comparatorInCLCTPattern(int keyStrip, int pattern, int layer, int halfstrip);
+  int* patternCLCT(int pattern, int layer);
+
   const DigiContainer lctsInStation(int) const;
   /// How many CSC chambers with matching stubs of some minimal quality did this SimTrack hit?
   int nChambersWithCLCT(int min_quality = 0) const;

@@ -545,12 +545,14 @@ std::vector<GlobalPoint>
 GEMDigiMatcher::positionPad1InDetId(unsigned int id) const
 {
   std::vector<GlobalPoint> result;
+  bool verbose = false;
+  GEMDetId gem_id(id);
+  if (verbose) std::cout << "In function positionPad2InDetId gem_id " << gem_id << std::endl;
   for (auto p: gemDigisInDetId(id)){
-    GEMDetId gem_id(id);
     LocalPoint gem_lp = getGEMGeometry()->etaPartition(gem_id)->centreOfStrip(p.strip());
     GlobalPoint gem_gp = getGEMGeometry()->idToDet(gem_id)->surface().toGlobal(gem_lp);
     // check if GP is already in container
-    if (std::find(result.begin(), result.end(), gem_gp) != result.end()) result.push_back(gem_gp);
+    if (std::find(result.begin(), result.end(), gem_gp) == result.end()) result.push_back(gem_gp);
   }
   return result;
 }
@@ -574,7 +576,7 @@ GEMDigiMatcher::positionPad2InDetId(unsigned int id) const
     if (verbose) std::cout << "average Strip " << averageStrip << std::endl;
     LocalPoint gem_lp = getGEMGeometry()->etaPartition(gem_id)->centreOfStrip(averageStrip);
     GlobalPoint gem_gp = getGEMGeometry()->idToDet(gem_id)->surface().toGlobal(gem_lp);
-    if (std::find(result.begin(), result.end(), gem_gp) != result.end()) result.push_back(gem_gp);
+    if (std::find(result.begin(), result.end(), gem_gp) == result.end()) result.push_back(gem_gp);
   }
   return result;
 }
@@ -604,7 +606,7 @@ GEMDigiMatcher::positionPad4InDetId(unsigned int id) const
     if (verbose) std::cout << "average Strip " << averageStrip << std::endl;
     LocalPoint gem_lp = getGEMGeometry()->etaPartition(gem_id)->centreOfStrip(averageStrip);
     GlobalPoint gem_gp = getGEMGeometry()->idToDet(gem_id)->surface().toGlobal(gem_lp);
-    if (std::find(result.begin(), result.end(), gem_gp) != result.end()) result.push_back(gem_gp);
+    if (std::find(result.begin(), result.end(), gem_gp) == result.end()) result.push_back(gem_gp);
   }
   return result;
 }
@@ -646,7 +648,7 @@ GEMDigiMatcher::positionPad8InDetId(unsigned int id) const
     if (verbose) std::cout << "average Strip " << averageStrip << std::endl;
     LocalPoint gem_lp = getGEMGeometry()->etaPartition(gem_id)->centreOfStrip(averageStrip);
     GlobalPoint gem_gp = getGEMGeometry()->idToDet(gem_id)->surface().toGlobal(gem_lp);
-    if (std::find(result.begin(), result.end(), gem_gp) != result.end()) result.push_back(gem_gp);
+    if (std::find(result.begin(), result.end(), gem_gp) == result.end()) result.push_back(gem_gp);
   }
   return result;
 }
