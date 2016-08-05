@@ -78,6 +78,11 @@ public:
   std::set<int> stripsInChamber(unsigned int, int max_gap_to_fill = 0) const;
   std::set<int> wiregroupsInChamber(unsigned int, int max_gap_to_fill = 0) const;
 
+  // return the halfstrip for a given comparator digi
+  // the detid is the Id for the layer where the digi is at
+  // halfstrip starts at 0!
+  int getHalfStrip(unsigned detid, const CSCComparatorDigi&) const;
+
 private:
 
   void matchStripsToSimTrack(const CSCComparatorDigiCollection& comparators);

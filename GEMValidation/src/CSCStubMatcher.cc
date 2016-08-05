@@ -932,10 +932,33 @@ CSCStubMatcher::bestCscLctInChamber(unsigned int detid) const
   }
   if (index != -1) return input[index];
   return CSCCorrelatedLCTDigi();
+  /* 
+ // get the detid of the keylayer of this chamber
+  auto chamberId = CSCDetId(detid);
+  auto layer(cscGeometry_->chamber(chamberId)->layer(3));
+  auto layerId(layer->id());
+  auto hit_strips(sh_matcher_->hitStripsInDetId(layerId,0));
+  std::cout << "In function bestCscLctInChamber " << std::endl;
+  std::cout << "hit CSC strips (delta0) " << std::endl;
+  copy(hit_strips.begin(), hit_strips.end(), ostream_iterator<int>(cout, " "));
+  auto input(cscLctsInChamber(detid));
+  int minDeltaStrip = 99;
+  int index = -1;
+  for (unsigned int i=0; i<input.size(); ++i){
+    std::cout << input[i] << std::endl;
+    int quality = input[i].getQuality();
+    if (quality<minDeltaStrip){
+      minDeltaStrip = quality;
+      index = i;
+    }
+  }
+  if (index != -1) return input[index];
+  return CSCCorrelatedLCTDigi();
+  */
 }
 
 CSCComparatorDigiDetIdContainer 
-CSCStubMatcher::matchingComparatorDigisLCT(unsigned int detid, const CSCCorrelatedLCTDigi& stub)
+CSCStubMatcher::matchingComparatorDigisLCT(unsigned int detid, const CSCCorrelatedLCTDigi& stub) const
 {
   std::cout << "In function matchingComparatorDigisLCT" << std::endl;
   CSCComparatorDigiDetIdContainer output;
@@ -954,8 +977,8 @@ CSCStubMatcher::matchingComparatorDigisLCT(unsigned int detid, const CSCCorrelat
     // loop on the comparator digis
     for (auto comp: comps){
       //check if they match the LCT pattern
-      int halfStrip = 2*comp.getStrip() - 1 + comp.getComparator();
-      std::cout << "\t\t"<<comp<<" "<<halfStrip<<endl;
+      int halfStrip = digi_matcher_->getHalfStrip(layerId.rawId(), comp);
+      std::cout << "\t"<<comp<<" "<<halfStrip<<endl;
       // auto pattern = CSCCathodeLCTProcessor::pattern2007[patternNumber];
       // int actualLayer = ilayer - 1;
       // auto subPatternL0 = 
@@ -967,17 +990,24 @@ CSCStubMatcher::matchingComparatorDigisLCT(unsigned int detid, const CSCCorrelat
 }
 
 bool 
-CSCStubMatcher::comparatorInCLCTPattern(int keyStrip, int pattern, int layer, int halfstrip)
+CSCStubMatcher::comparatorInCLCTPattern(int keyStrip, int pattern, int layer, int halfstrip) const
 {
+  
   // first, get the pattern
   //auto pat = CSCCathodeLCTProcessor::pattern2007[pattern];
   // get the the sub-array for the particular pattern
   // 11-5-1-5-9-11
-  //const int layertopat[6] = {11,5,1,5,9,11};
-  auto arr = patternCLCT(pattern, layer);
-  std::vector<int> subpat(arr, arr + sizeof(arr) / sizeof(arr[0]) );
-  std::cout << "Printing..." << pattern << " " << layer << std::endl;
-  for (auto p: subpat) std::cout << "\t" << p << std::endl;
+  // const int layertopat[6] = {11,5,1,5,9,11};
+  // std::cout << "In function comparatorInCLCTPattern" << std::endl;
+  // std::cout << "Printing..." << pattern << " " << layer << std::endl;
+  // const int arr[layertopat[layer]] = patternCLCT(pattern, layer);
+  // for (unsigned int i = 0; i <= sizeof(arr) / sizeof(arr[0]); i++)
+  //   {
+  //     cout << arr[i] << " ";
+  //   }
+
+  // std::vector<int> subpat(arr, arr + sizeof(arr) / sizeof(arr[0]) );
+  // for (auto p: subpat) std::cout << "\t" << p << std::endl;
   /*
   switch(layer){
   case 1:
@@ -1019,80 +1049,67 @@ CSCStubMatcher::comparatorInCLCTPattern(int keyStrip, int pattern, int layer, in
 }
 
 int*
-CSCStubMatcher::patternCLCT(int pattern, int layer)
+CSCStubMatcher::patternCLCT(int pattern, int layer) const
 {
-  auto pat = CSCCathodeLCTProcessor::pattern2007[pattern];
-  if (layer==1){
-    int *subpat = new int[11];
-    subpat[0] = pat[0];
-    subpat[1] = pat[1]; 
-    subpat[2] = pat[2]; 
-    subpat[3] = pat[3];
-    subpat[4] = pat[4]; 
-    subpat[5] = pat[5]; 
-    subpat[6] = pat[6]; 
-    subpat[7] = pat[7];
-    subpat[8] = pat[8]; 
-    subpat[9] = pat[9]; 
-    subpat[10] = pat[10];
-    return subpat;
-  }
-  else if (layer==2){
-    int*subpat = new int[5];
-    subpat[0] = pat[11];
-    subpat[1] = pat[12]; 
-    subpat[2] = pat[13]; 
-    subpat[3] = pat[14];
-    subpat[4] = pat[15];
-    return subpat;
-  }
-  else if (layer==3){
-    int*subpat = new int[1];
-    subpat[0] = pat[16];
-    return subpat;
-  }
-  else if (layer==4){
-    int*subpat = new int[5];
-    subpat[0] = pat[17];
-    subpat[1] = pat[18]; 
-    subpat[2] = pat[19]; 
-    subpat[3] = pat[20];
-    subpat[4] = pat[21];
-    return subpat;
-  } 
-  else if (layer==5){
-    int*subpat = new int[9];
-    subpat[0] = pat[22];
-    subpat[1] = pat[23]; 
-    subpat[2] = pat[24]; 
-    subpat[3] = pat[25];
-    subpat[4] = pat[26]; 
-    subpat[5] = pat[27]; 
-    subpat[6] = pat[28]; 
-    subpat[7] = pat[29];
-    subpat[8] = pat[30];
-    return subpat; 
-  }
-  else if (layer==6){
-    int*subpat = new int[11];
-    subpat[0] = pat[31];
-    subpat[1] = pat[32]; 
-    subpat[2] = pat[33]; 
-    subpat[3] = pat[34];
-    subpat[4] = pat[35]; 
-    subpat[5] = pat[36]; 
-    subpat[6] = pat[37]; 
-    subpat[7] = pat[38];
-    subpat[8] = pat[39]; 
-    subpat[9] = pat[40]; 
-    subpat[10] = pat[41];
-    return subpat;
-  }
-  else{
-    int*subpat = new int[0];
-    return subpat;
-  }
+  std::vector<std::vector<int> > pat0 { 
+    { 999, 999, 999, 999, 999, 999, 999, 999, 999, 999, 999},
+      { 999, 999, 999, 999, 999},
+        {999},            
+          {999, 999, 999, 999, 999},
+            {999, 999, 999, 999, 999, 999, 999, 999, 999},
+              {999, 999, 999, 999, 999, 999, 999, 999, 999, 999, 999}
+  };
+  
+  std::vector<std::vector<int> > pat0 { 
+    {   0,   0,   0,   0,   0,   0,   0,   0,   0,   0,   0},
+      {1,   1,   1,   1,   1},
+        {2},             // pid=1: layer-OR trigger
+          {3,   3,   3,   3,   3},
+            {4,   4,   4,   4,   4,   4,   4,   4,   4},
+              {5,   5,   5,   5,   5,   5,   5,   5,   5,   5,   5, -1, 11}
+  };
+
+  return 0;
 }
+// }
+//   std::vecor<int> pat6_L1 = { 999, 999, 999, 999, 999, 999,   0,   0,   0, 999, 999};
+//   std::vecor<int> pat6_L2 = {                999, 999,   1,   1, 999 };
+//   std::vecor<int> pat6_L3 = {                            2 }; 
+//   std::vecor<int> pat6_L4 = {                999,   3,   3, 999, 999 };
+//   std::vecor<int> pat6_L5 = {      999, 999,   4,   4, 999, 999, 999, 999, 999 };
+//   std::vecor<int> pat6_L6 = { 999, 999,   5,   5,   5, 999, 999, 999, 999, 999, 999};
+
+//   std::vector<std::vector<int> > pat7;
+//   std::vecor<int> pat7_L1 = { 999, 999,   0,   0,   0, 999, 999, 999, 999, 999, 999};
+//   std::vecor<int> pat7_L2 = {                999,   1,   1, 999, 999};
+//   std::vecor<int> pat7_L3 = {                            2};
+//   std::vecor<int> pat7_L4 = {                999, 999,   3,   3, 999};
+//   std::vecor<int> pat7_L5 = {           999, 999, 999, 999, 999,   4,   4, 999, 999};
+//   std::vecor<int> pat7_L6 = { 999, 999, 999, 999, 999, 999,   5,   5,   5, 999, 999};
+
+//   std::vector<std::vector<int> > pat8;
+//   std::vecor<int> pat8_L1 = { 999, 999, 999, 999, 999,   0,   0,   0, 999, 999, 999};
+//   std::vecor<int> pat8_L2 = {                999, 999,   1,   1, 999};
+//   std::vecor<int> pat8_L3 = {                            2};
+//   std::vecor<int> pat8_L4 = {                999,   3,   3, 999, 999};
+//   std::vecor<int> pat8_L5 = {      999, 999,   4,   4,   4, 999, 999, 999, 999};
+//   std::vecor<int> pat8_L6 = { 999, 999, 999,   5,   5,   5, 999, 999, 999, 999, 999};
+  
+// std::vector<std::vector<int> > pat9;
+//  std::vecor<int> pat8_L1 = { 999, 999, 999,   0,   0,   0, 999, 999, 999, 999, 999}
+//  std::vecor<int> pat8_L1 = { 999,   1,   1, 999, 999}
+//  std::vecor<int> pat8_L1 = { 2}             // pid=9: left-bending (small)
+//  std::vecor<int> pat8_L1 = { 999, 999,   3,   3, 999}
+//  std::vecor<int> pat8_L1 = { 999, 999, 999, 999,   4,   4,   4, 999, 999,
+//             std::vecor<int> pat8_L1 = { 999, 999, 999, 999, 999,   5,   5,   5, 999, 999, 999,  1, 5},
+
+//   std::vector<std::vector<int> > patA;
+//   std::vecor<int> patA_L1 = { 999, 999, 999, 999,   0,   0,   0, 999, 999, 999, 999};
+//   std::vecor<int> patA_L2 = {                999, 999,   1, 999, 999 };
+//   std::vecor<int> patA_L3 = {                            2 }; 
+//   std::vecor<int> patA_L4 = {                999, 999,   3, 999, 999 };
+//   std::vecor<int> patA_L5 = {      999, 999, 999,   4,   4,   4, 999, 999, 999 };
+//   std::vecor<int> patA_L6 = { 999, 999, 999, 999,   5,   5,   5, 999, 999, 999, 999};
 
 
 // const CSCWireDigiContainer& 

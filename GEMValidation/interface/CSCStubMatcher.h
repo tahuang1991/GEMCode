@@ -90,13 +90,13 @@ public:
 
   // get matching comparator digis for a given stub in a chamber
   CSCComparatorDigiDetIdContainer 
-    matchingComparatorDigisLCT(unsigned int, const CSCCorrelatedLCTDigi&);
+    matchingComparatorDigisLCT(unsigned int, const CSCCorrelatedLCTDigi&) const;
   CSCWireDigiDetIdContainer 
-    matchingWireDigisLCT(unsigned int, const CSCCorrelatedLCTDigi&);
+    matchingWireDigisLCT(unsigned int, const CSCCorrelatedLCTDigi&) const;
 
   // check if comp digis belongs to CLCT pattern
-  bool comparatorInCLCTPattern(int keyStrip, int pattern, int layer, int halfstrip);
-  int* patternCLCT(int pattern, int layer);
+  bool comparatorInCLCTPattern(int keyStrip, int pattern, int layer, int halfstrip) const;
+  int* patternCLCT(int pattern, int layer) const;
 
   const DigiContainer lctsInStation(int) const;
   /// How many CSC chambers with matching stubs of some minimal quality did this SimTrack hit?

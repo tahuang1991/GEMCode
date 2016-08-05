@@ -67,7 +67,7 @@ CSCDigiMatcher::matchStripsToSimTrack(const CSCComparatorDigiCollection& compara
       if (verboseStrip_) cout<<"\toki"<<endl;
 
       // get half-strip, counting from 1
-      int half_strip = 2*strip - 1 + c->getComparator();
+      int half_strip = getHalfStrip(id, *c);
 
       auto mydigi = make_digi(id, half_strip, c->getTimeBin(), CSC_STRIP);
       detid_to_halfstrips_[id].push_back(mydigi);
@@ -358,4 +358,15 @@ CSCDigiMatcher::wiregroupsInChamber(unsigned int detid, int max_gap_to_fill) con
     }
   }
   return result;
+}
+
+int 
+CSCDigiMatcher::getHalfStrip(unsigned  int detid, const CSCComparatorDigi&d) const
+{
+  // see https://github.com/cms-sw/cmssw/blob/CMSSW_6_0_X/L1Trigger/CSCTriggerPrimitives/src/CSCCathodeLCTProcessor.cc#L2079-L2080
+  // halfstrips start at 0 according to 
+  // https://github.com/cms-sw/cmssw/blob/CMSSW_8_1_X/DataFormats/CSCDigi/interface/CSCCLCTDigi.h#L65
+  auto layer = getCSCGeometry()->layer(CSCDetId(detid));
+  int stagger = (layer->geometry()->stagger() + 1) / 2;
+  return 2*d.getStrip() -1 + d.getComparator() - stagger;
 }
