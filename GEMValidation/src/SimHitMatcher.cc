@@ -1,5 +1,9 @@
 #include "GEMCode/GEMValidation/interface/SimHitMatcher.h"
 
+#include "TF1.h"
+#include "TGraph.h"
+#include "TFitResult.h"
+
 #include <algorithm>
 #include <iomanip>
 
@@ -1045,6 +1049,57 @@ SimHitMatcher::simHitsMeanPosition(const edm::PSimHitContainer& sim_hits) const
   return GlobalPoint(sumx/n, sumy/n, sumz/n);
 }
 
+float 
+SimHitMatcher::simHitPositionKeyLayer(unsigned int chid) const
+{
+  /*
+    1. Return the (average) position of the keylayer simhit if available
+    2. Return the fitted position of the simhit in the keylayer if fit good
+    3. Return average position of the simhits in the chamber if all else fails
+  */
+  const CSCDetId chamberId(chid);
+  const CSCDetId keyLayerId(chamberId.endcap(), chamberId.station(),
+                            chamberId.ring(), chamberId.chamber(), 3);
+  
+  const edm::PSimHitContainer keyLayerIdHits(hitsInDetId(keyLayerId.rawId()));
+  if (keyLayerIdHits.size()!=0) return simHitsMeanPosition(keyLayerIdHits).phi();
+  else{
+    // check if the chamber has hits at all
+    if (hitsInChamber(chid).size()==0) return -99;
+    else {
+      std::vector<float> v; 
+      std::vector<float> w;
+      // add the positions of all hits in a chamber
+      for (int l=1; l<=6; l++){
+        CSCDetId l_id(chamberId.endcap(), chamberId.station(), 
+                      chamberId.ring(), chamberId.chamber(), l);
+        for (auto p: hitsInDetId(l_id.rawId())) {
+          LocalPoint lp = p.entryPoint();
+          GlobalPoint gp = getCSCGeometry()->idToDet(p.detUnitId())->surface().toGlobal(lp);
+          v.push_back(gp.z());
+          w.push_back(gp.phi());
+        }
+      }
+      // fit a straight line through the hits (bending is negligible
+      float zmin;
+      float zmax;
+      if (v.front() < v.back())  { zmin = v.front(); zmax = v.back();  }
+      else                       { zmin = v.back();  zmax = v.front(); }
+      
+      TF1* fit = new TF1("fit","pol1",zmin,zmax); 
+      TGraph* gr = new TGraph(v.size(),&(v[0]),&(w[0]));
+      TFitResultPtr r = gr->Fit(fit,"RQS"); 
+      if (r->Status()==0){    
+        float z_pos_L3 = getCSCGeometry()->layer(keyLayerId)->centerOfStrip(20).z();
+        return fit->GetParameter(0) + fit->GetParameter(1) * z_pos_L3;
+      }
+      else{
+        return simHitsMeanPosition(hitsInChamber(chid)).phi();
+      }
+    } 
+  }
+}
+   
 
 GlobalVector
 SimHitMatcher::simHitsMeanMomentum(const edm::PSimHitContainer& sim_hits) const
