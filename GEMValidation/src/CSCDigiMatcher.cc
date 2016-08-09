@@ -369,4 +369,5 @@ CSCDigiMatcher::getHalfStrip(unsigned  int detid, const CSCComparatorDigi&d) con
   auto layer = getCSCGeometry()->layer(CSCDetId(detid));
   int stagger = (layer->geometry()->stagger() + 1) / 2;
   return 2*d.getStrip() -1 + d.getComparator() - stagger;
+  //return 2*d.getStrip() + d.getComparator() - 1;
 }

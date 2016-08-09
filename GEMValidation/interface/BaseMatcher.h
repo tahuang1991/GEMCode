@@ -32,6 +32,7 @@
 #include "Geometry/DTGeometry/interface/DTGeometry.h"
 
 #include "GEMCode/GEMValidation/interface/Helpers.h"
+#include "GEMCode/GEMValidation/interface/CSCStubPatterns.h"
 
 class BaseMatcher
 {
