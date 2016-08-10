@@ -31,15 +31,15 @@ GEMDigiMatcher::GEMDigiMatcher(SimHitMatcher& sh)
   if (hasGEMGeometry_) {
     edm::Handle<GEMDigiCollection> gem_digis;
     if (gemvalidation::getByLabel(gemDigiInput_, gem_digis, event()) and runGEMDigi_) {
-	if(verbose()) std::cout <<" to do matchDigisToSimTrack"<< std::endl;
-	matchDigisToSimTrack(*gem_digis.product());
+      if(verbose()) std::cout <<" to do matchDigisToSimTrack"<< std::endl;
+      matchDigisToSimTrack(*gem_digis.product());
     }
     
     edm::Handle<GEMCSCPadDigiCollection> gem_pads;
-    //std::cout <<" for gemPadDigiInput "<<(gemvalidation::getByLabel(gemPadDigiInput_, gem_pads, event())?"true":"false")<< std::endl;
+    if (verbose()) std::cout <<" for gemPadDigiInput "<<(gemvalidation::getByLabel(gemPadDigiInput_, gem_pads, event())?"true":"false")<< std::endl;
     if (gemvalidation::getByLabel(gemPadDigiInput_, gem_pads, event()) and runGEMPad_) {
-	if (verbose()) std::cout <<" to do matchPadsToSimTrack"<< std::endl;
-	matchPadsToSimTrack(*gem_pads.product());
+      if (verbose()) std::cout <<" to do matchPadsToSimTrack"<< std::endl;
+      matchPadsToSimTrack(*gem_pads.product());
     }
     
     edm::Handle<GEMCSCPadDigiCollection> gem_co_pads;
@@ -541,3 +541,114 @@ GEMDigiMatcher::extrapolateHsfromGEMStrip(unsigned int id, int gemstrip) const
   return result;
 }
 
+std::vector<GlobalPoint> 
+GEMDigiMatcher::positionPad1InDetId(unsigned int id) const
+{
+  std::vector<GlobalPoint> result;
+  bool verbose = false;
+  GEMDetId gem_id(id);
+  if (verbose) std::cout << "In function positionPad2InDetId gem_id " << gem_id << std::endl;
+  for (auto p: gemDigisInDetId(id)){
+    LocalPoint gem_lp = getGEMGeometry()->etaPartition(gem_id)->centreOfStrip(p.strip());
+    GlobalPoint gem_gp = getGEMGeometry()->idToDet(gem_id)->surface().toGlobal(gem_lp);
+    // check if GP is already in container
+    if (std::find(result.begin(), result.end(), gem_gp) == result.end()) result.push_back(gem_gp);
+  }
+  return result;
+}
+
+std::vector<GlobalPoint> 
+GEMDigiMatcher::positionPad2InDetId(unsigned int id) const
+{
+  bool verbose = false;
+  std::vector<GlobalPoint> result;
+  GEMDetId gem_id(id);
+  if (verbose) std::cout << "In function positionPad2InDetId gem_id " << gem_id << std::endl;
+  for (auto p: gemDigisInDetId(id)){
+    if (verbose) std::cout << "Strip " << p.strip() << std::endl;
+    float averageStrip = 0;
+    if (p.strip()%2==0){
+      averageStrip = p.strip() - 0.5;
+    }
+    else{
+      averageStrip = p.strip() + 0.5;
+    }
+    if (verbose) std::cout << "average Strip " << averageStrip << std::endl;
+    LocalPoint gem_lp = getGEMGeometry()->etaPartition(gem_id)->centreOfStrip(averageStrip);
+    GlobalPoint gem_gp = getGEMGeometry()->idToDet(gem_id)->surface().toGlobal(gem_lp);
+    if (std::find(result.begin(), result.end(), gem_gp) == result.end()) result.push_back(gem_gp);
+  }
+  return result;
+}
+
+std::vector<GlobalPoint> 
+GEMDigiMatcher::positionPad4InDetId(unsigned int id) const
+{
+  bool verbose = false;
+  std::vector<GlobalPoint> result;
+  GEMDetId gem_id(id);
+  if (verbose) std::cout << "In function positionPad4InDetId gem_id " << gem_id << std::endl;
+  for (auto p: gemDigisInDetId(id)){
+    if (verbose) std::cout << "Strip " << p.strip() << std::endl;
+    float averageStrip = 0;
+    if (p.strip()%4==0){
+      averageStrip = p.strip() - 1.5;
+    }
+    else if (p.strip()%4==3){
+      averageStrip = p.strip() - 0.5;
+    }
+    else if (p.strip()%4==2){
+      averageStrip = p.strip() + 0.5;
+    }
+    else{
+      averageStrip = p.strip() + 1.5;
+    }
+    if (verbose) std::cout << "average Strip " << averageStrip << std::endl;
+    LocalPoint gem_lp = getGEMGeometry()->etaPartition(gem_id)->centreOfStrip(averageStrip);
+    GlobalPoint gem_gp = getGEMGeometry()->idToDet(gem_id)->surface().toGlobal(gem_lp);
+    if (std::find(result.begin(), result.end(), gem_gp) == result.end()) result.push_back(gem_gp);
+  }
+  return result;
+}
+
+std::vector<GlobalPoint> 
+GEMDigiMatcher::positionPad8InDetId(unsigned int id) const
+{
+  bool verbose = false;
+  std::vector<GlobalPoint> result;
+  GEMDetId gem_id(id);
+  if (verbose) std::cout << "In function positionPad8InDetId gem_id " << gem_id << std::endl;
+  for (auto p: gemDigisInDetId(id)){
+    if (verbose) std::cout << "Strip " << p.strip() << std::endl;
+    float averageStrip = 0;
+    if (p.strip()%8==0){
+      averageStrip = p.strip() - 3.5;
+    }
+    else if (p.strip()%8==7){
+      averageStrip = p.strip() - 2.5;
+    }
+    else if (p.strip()%8==6){
+      averageStrip = p.strip() - 1.5;
+    }
+    else if (p.strip()%8==5){
+      averageStrip = p.strip() - 0.5;
+    }
+    else if (p.strip()%8==4){
+      averageStrip = p.strip() + 0.5;
+    }
+    else if (p.strip()%8==3){
+      averageStrip = p.strip() + 1.5;
+    }
+    else if (p.strip()%8==2){
+      averageStrip = p.strip() + 2.5;
+    }
+    else{
+      averageStrip = p.strip() + 3.5;
+    }
+    if (verbose) std::cout << "average Strip " << averageStrip << std::endl;
+    LocalPoint gem_lp = getGEMGeometry()->etaPartition(gem_id)->centreOfStrip(averageStrip);
+    GlobalPoint gem_gp = getGEMGeometry()->idToDet(gem_id)->surface().toGlobal(gem_lp);
+    if (std::find(result.begin(), result.end(), gem_gp) == result.end()) result.push_back(gem_gp);
+  }
+  return result;
+}
