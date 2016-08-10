@@ -366,8 +366,8 @@ CSCDigiMatcher::getHalfStrip(unsigned  int detid, const CSCComparatorDigi&d) con
   // see https://github.com/cms-sw/cmssw/blob/CMSSW_6_0_X/L1Trigger/CSCTriggerPrimitives/src/CSCCathodeLCTProcessor.cc#L2079-L2080
   // halfstrips start at 0 according to 
   // https://github.com/cms-sw/cmssw/blob/CMSSW_8_1_X/DataFormats/CSCDigi/interface/CSCCLCTDigi.h#L65
-  auto layer = getCSCGeometry()->layer(CSCDetId(detid));
-  int stagger = (layer->geometry()->stagger() + 1) / 2;
-  return 2*d.getStrip() -1 + d.getComparator() - stagger;
-  //return 2*d.getStrip() + d.getComparator() - 1;
+  //auto layer = getCSCGeometry()->layer(CSCDetId(detid));
+  //int stagger = (layer->geometry()->stagger() + 1) / 2;
+  //return 2*d.getStrip() -1 + d.getComparator() - stagger;
+  return 2*d.getStrip() + d.getComparator() - 1;
 }
