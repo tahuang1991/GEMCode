@@ -1108,7 +1108,7 @@ CSCStubMatcher::getGlobalPosition(unsigned int rawId, const CSCCorrelatedLCTDigi
   CSCDetId cscId = CSCDetId(rawId);
   CSCDetId key_id(cscId.endcap(), cscId.station(), cscId.ring(), 
                   cscId.chamber(), CSCConstants::KEY_CLCT_LAYER);
-  auto cscChamber = getCSCGeometry_->chamber(cscId);
+  auto cscChamber = getCSCGeometry()->chamber(cscId);
   float fractional_strip = getFractionalStrip(lct);
   auto layer_geo = cscChamber->layer(CSCConstants::KEY_CLCT_LAYER)->geometry();
   // LCT::getKeyWG() also starts from 0
