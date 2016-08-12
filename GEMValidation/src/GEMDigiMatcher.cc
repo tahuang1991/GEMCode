@@ -652,3 +652,21 @@ GEMDigiMatcher::positionPad8InDetId(unsigned int id) const
   }
   return result;
 }
+
+GlobalPoint 
+GEMDigiMatcher::getGlobalPointDigi(unsigned int rawId, const GEMDigi& d) const
+{
+  GEMDetId gem_id(rawId);
+  LocalPoint gem_lp = getGEMGeometry()->etaPartition(gem_id)->centreOfStrip(d.strip());
+  GlobalPoint gem_gp = getGEMGeometry()->idToDet(gem_id)->surface().toGlobal(gem_lp);
+  return gem_gp;
+}
+
+GlobalPoint 
+GEMDigiMatcher::getGlobalPointPad(unsigned int rawId, const GEMCSCPadDigi& tp) const;
+{
+  GEMDetId gem_id(rawId);
+  LocalPoint gem_lp = getGEMGeometry()->etaPartition(gem_id)->centreOfPad(tp.pad());
+  GlobalPoint gem_gp = getGEMGeometry()->idToDet(gem_id)->surface().toGlobal(gem_lp);
+  return gem_gp;
+}

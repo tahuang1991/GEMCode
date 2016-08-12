@@ -361,7 +361,7 @@ CSCDigiMatcher::wiregroupsInChamber(unsigned int detid, int max_gap_to_fill) con
 }
 
 int 
-CSCDigiMatcher::getHalfStrip(unsigned  int detid, const CSCComparatorDigi&d) const
+CSCDigiMatcher::getHalfStrip(const CSCComparatorDigi&d) const
 {
   // Here, getStrip returns the strip number of a comparator digi
   // getComparator returns 0 or 1 depending on whether most of the charge is on the first
@@ -373,7 +373,7 @@ CSCDigiMatcher::getHalfStrip(unsigned  int detid, const CSCComparatorDigi&d) con
 }
 
 float 
-CSCDigiMatcher::getFractionalStrip(int hs) const
+CSCDigiMatcher::getFractionalStrip(const CSCComparatorDigi&d) const
 {
-  return 0.5 * (hs + 1.) - 0.25;
+  return d.getStrip() + d.getComparator()/2. - 3/4.
 }
