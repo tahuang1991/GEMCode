@@ -1066,6 +1066,7 @@ SimHitMatcher::simHitPositionKeyLayer(unsigned int chid) const
   else{
     // check if the chamber has hits at all
     if (hitsInChamber(chid).size()==0) return -99;
+    else if (hitsInChamber(chid).size()==1) return simHitsMeanPosition(hitsInChamber(chid)).phi();
     else {
       std::vector<float> v; 
       std::vector<float> w;
@@ -1088,7 +1089,7 @@ SimHitMatcher::simHitPositionKeyLayer(unsigned int chid) const
       
       TF1* fit = new TF1("fit","pol1",zmin,zmax); 
       TGraph* gr = new TGraph(v.size(),&(v[0]),&(w[0]));
-      TFitResultPtr r = gr->Fit(fit,"RQS"); 
+      TFitResultPtr r = gr->Fit(fit,"RQ"); 
       if (r->Status()==0){    
         float z_pos_L3 = getCSCGeometry()->layer(keyLayerId)->centerOfStrip(20).z();
         return fit->GetParameter(0) + fit->GetParameter(1) * z_pos_L3;
