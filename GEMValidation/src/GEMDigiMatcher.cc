@@ -663,7 +663,7 @@ GEMDigiMatcher::getGlobalPointDigi(unsigned int rawId, const GEMDigi& d) const
 }
 
 GlobalPoint 
-GEMDigiMatcher::getGlobalPointPad(unsigned int rawId, const GEMCSCPadDigi& tp) const;
+GEMDigiMatcher::getGlobalPointPad(unsigned int rawId, const GEMCSCPadDigi& tp) const
 {
   GEMDetId gem_id(rawId);
   LocalPoint gem_lp = getGEMGeometry()->etaPartition(gem_id)->centreOfPad(tp.pad());

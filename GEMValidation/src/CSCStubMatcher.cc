@@ -979,7 +979,7 @@ CSCStubMatcher::matchingComparatorDigisLCT(unsigned int detid, const CSCCorrelat
     // loop on the comparator digis
     for (auto comp: comps){
       //check if they match the LCT pattern
-      int halfStrip = digi_matcher_->getHalfStrip(layerId.rawId(), comp);
+      int halfStrip = digi_matcher_->getHalfStrip(comp);
       //std::cout << "\t"<<comp<<" "<<halfStrip<<endl;
       // auto pattern = CSCCathodeLCTProcessor::pattern2007[patternNumber];
       // int actualLayer = ilayer - 1;

@@ -67,7 +67,7 @@ CSCDigiMatcher::matchStripsToSimTrack(const CSCComparatorDigiCollection& compara
       if (verboseStrip_) cout<<"\toki"<<endl;
 
       // get half-strip, counting from 1
-      int half_strip = getHalfStrip(id, *c);
+      int half_strip = getHalfStrip(*c) + 1;
 
       auto mydigi = make_digi(id, half_strip, c->getTimeBin(), CSC_STRIP);
       detid_to_halfstrips_[id].push_back(mydigi);
@@ -375,5 +375,5 @@ CSCDigiMatcher::getHalfStrip(const CSCComparatorDigi&d) const
 float 
 CSCDigiMatcher::getFractionalStrip(const CSCComparatorDigi&d) const
 {
-  return d.getStrip() + d.getComparator()/2. - 3/4.
+  return d.getStrip() + d.getComparator()/2. - 3/4.;
 }
