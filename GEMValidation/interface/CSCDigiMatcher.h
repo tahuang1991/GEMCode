@@ -83,6 +83,12 @@ public:
   // halfstrip starts at 0!
   int getHalfStrip(unsigned detid, const CSCComparatorDigi&) const;
 
+  // returns the fractional strip of a halfstrip
+  // to be used in the function CSCLayerGeometry::intersectionOfStripAndWire()
+  // note that LCT's HS starts from 0, but in geometry strips start from 1
+  float getFractionalStrip(int hs) const;
+
+  
 private:
 
   void matchStripsToSimTrack(const CSCComparatorDigiCollection& comparators);
