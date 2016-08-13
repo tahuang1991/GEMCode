@@ -107,6 +107,12 @@ public:
 
   bool checkStubInChamber(CSCDetId id, CSCCorrelatedLCTDigi lct) const;
 
+  // get the position of an LCT in global coordinates
+  GlobalPoint getGlobalPosition(unsigned int rawId, const CSCCorrelatedLCTDigi& lct) const;
+
+  // get the fractional strip for an LCT that can be used in the geometry
+  float getFractionalStrip(const CSCCorrelatedLCTDigi& lct) const;
+  
 private:
 
   void matchCLCTsToSimTrack(const CSCCLCTDigiCollection&);

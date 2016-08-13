@@ -96,6 +96,9 @@ public:
   std::vector<GlobalPoint> positionPad4InDetId(unsigned int) const;
   std::vector<GlobalPoint> positionPad8InDetId(unsigned int) const;
 
+  GlobalPoint getGlobalPointDigi(unsigned int rawId, const GEMDigi& d) const;
+  GlobalPoint getGlobalPointPad(unsigned int rawId, const GEMCSCPadDigi& tp) const;
+
 private:
 
   void matchDigisToSimTrack(const GEMDigiCollection&);

@@ -979,7 +979,7 @@ CSCStubMatcher::matchingComparatorDigisLCT(unsigned int detid, const CSCCorrelat
     // loop on the comparator digis
     for (auto comp: comps){
       //check if they match the LCT pattern
-      int halfStrip = digi_matcher_->getHalfStrip(layerId.rawId(), comp);
+      int halfStrip = digi_matcher_->getHalfStrip(comp);
       //std::cout << "\t"<<comp<<" "<<halfStrip<<endl;
       // auto pattern = CSCCathodeLCTProcessor::pattern2007[patternNumber];
       // int actualLayer = ilayer - 1;
@@ -1100,3 +1100,28 @@ CSCStubMatcher::checkStubInChamber(CSCDetId id, CSCCorrelatedLCTDigi lct) const
  return false;
 }
 
+
+GlobalPoint 
+CSCStubMatcher::getGlobalPosition(unsigned int rawId, const CSCCorrelatedLCTDigi& lct) const
+{
+  // taken from https://github.com/cms-sw/cmssw/blob/dc9f78b6af4ad56c9342cf14041b6485a60b0691/L1Trigger/CSCTriggerPrimitives/src/CSCMotherboardME11GEM.cc
+  CSCDetId cscId = CSCDetId(rawId);
+  CSCDetId key_id(cscId.endcap(), cscId.station(), cscId.ring(), 
+                  cscId.chamber(), CSCConstants::KEY_CLCT_LAYER);
+  auto cscChamber = getCSCGeometry()->chamber(cscId);
+  float fractional_strip = getFractionalStrip(lct);
+  auto layer_geo = cscChamber->layer(CSCConstants::KEY_CLCT_LAYER)->geometry();
+  // LCT::getKeyWG() also starts from 0
+  float wire = layer_geo->middleWireOfGroup(lct.getKeyWG() + 1);
+  LocalPoint csc_intersect = layer_geo->intersectionOfStripAndWire(fractional_strip, wire);
+  GlobalPoint csc_gp = cscGeometry_->idToDet(key_id)->surface().toGlobal(csc_intersect);
+  return csc_gp;
+
+}
+
+
+float 
+CSCStubMatcher::getFractionalStrip(const CSCCorrelatedLCTDigi& lct) const
+{
+  return 0.5 * (lct.getStrip() + 1) - 0.25;
+}
