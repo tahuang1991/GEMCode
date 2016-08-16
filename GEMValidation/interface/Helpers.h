@@ -123,6 +123,9 @@ chamber(const DetId& id);
 unsigned int
 gemDetFromCSCDet(unsigned int id,int layer);
 
+float 
+cscHalfStripWidth(CSCDetId id);
+
 std::pair<unsigned int, unsigned int> 
 gemDetsFromCSCDet(unsigned int id);
 

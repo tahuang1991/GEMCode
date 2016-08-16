@@ -42,6 +42,17 @@ gemvalidation::gemDetsFromCSCDet(unsigned int id)
   return std::make_pair(gemDetFromCSCDet(id,1),gemDetFromCSCDet(id,2));
 }
 
+float
+gemvalidation::cscHalfStripWidth(CSCDetId id)
+{
+  // ME1a ME1b ME12 ME13 ME21 ME22 ME31 ME32 ME41 ME42
+  int strips[10] = {48,64,80,64, 80,80, 80,80, 80,80};
+  int degrees[10] = {10,10,10,10, 20,10, 20,10, 20,10};
+  int index = id.iChamberType()-1;
+  float width = float(degrees[index]) * 3.14159265358979323846/180. / float(2 * strips[index]);
+  return width;
+}
+
 // return MuonType for a particular DetId
 int 
 gemvalidation::toGEMType(int st, int ri)
