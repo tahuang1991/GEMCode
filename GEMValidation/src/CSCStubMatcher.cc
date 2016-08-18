@@ -1029,7 +1029,7 @@ CSCStubMatcher::positionsOfComparatorInLCT(unsigned int detid, const CSCCorrelat
 		    auto comp = p.second;
           	    float fractional_strip = digi_matcher_->getFractionalStrip(comp);
     		    auto layer_geo(cscGeometry_->chamber(id)->layer(l)->geometry());
-          	    LocalPoint csc_intersect = layer_geo->intersectionOfStripAndWire(fractional_strip, 20);
+          	    LocalPoint csc_intersect = layer_geo->intersectionOfStripAndWire(fractional_strip, stub.getKeyWG() + 1);
           	    GlobalPoint csc_gp = cscGeometry_->idToDet(l_id)->surface().toGlobal(csc_intersect);
 		    //std::cout <<"In positionsOfComparatorInLCT local Point "<< csc_intersect <<" globalPoint "<< csc_gp << std::endl;
 		    sum_x += csc_gp.x();

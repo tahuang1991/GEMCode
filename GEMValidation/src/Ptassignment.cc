@@ -190,5 +190,5 @@ void calculateAlphaBeta(const std::vector<float>& v,
   delete fit1;
   delete gr;
   }
-  else {alpha = 0; beta=-99;}
+  else {alpha = -99; beta= 0.0;}
 }
