@@ -1,4 +1,5 @@
 #include "GEMCode/GEMValidation/interface/SimHitMatcher.h"
+#include "DataFormats/Math/interface/deltaPhi.h"
 
 #include "TF1.h"
 #include "TGraph.h"
@@ -1030,6 +1031,7 @@ SimHitMatcher::simHitsMeanPosition(const edm::PSimHitContainer& sim_hits) const
     else if (gemvalidation::is_csc(h.detUnitId()))
     {
       gp = getCSCGeometry()->idToDet(h.detUnitId())->surface().toGlobal(lp);
+      //std::cout <<"In simHitsMeanPosition localPoint "<< lp<<" gloablPoint "<< gp  << std::endl;
     }
     else if (gemvalidation::is_rpc(h.detUnitId()))
     {
@@ -1229,7 +1231,7 @@ SimHitMatcher::LocalBendingInChamber(unsigned int detid) const
 
   }
 	//std::cout <<" phi1 "<< phi_layer1 <<" phi6 " << phi_layer6 << std::endl;
-	return phi_layer6-phi_layer1;
+	return deltaPhi(phi_layer6,phi_layer1);
 }
 
 

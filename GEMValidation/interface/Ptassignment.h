@@ -40,6 +40,7 @@ const double PositionEpLUT[Parity][EtaPartitions][3] = {
 	};
 
 
+/*
 const double DirectionEpLUT[Parity][EtaPartitions][2]={
     	       {{2.907, 5.906},
 		{2.600, 5.191},
@@ -70,6 +71,38 @@ const double DirectionEpLUT[Parity][EtaPartitions][2]={
 		{11.83, 17.66},
 	       },
 	};
+*/
+//updated the LUT, by Tao, 20160724
+const double DirectionEpLUT[Parity][EtaPartitions][2]={
+    	       {{2.907, 5.906},
+		{2.600, 5.191},
+		{4.405, 8.809},
+		{7.332, 14.478},
+		{8.747, 12.265},
+		//{11.02, 14.84},
+	       },
+	       {{2.409, 5.198},
+		{2.467, 4.397},
+		{4.411, 8.621},
+		{7.333, 14.552},
+		{8.955, 13.093},
+		//{10.34, 11.02},
+	       },
+	       {{2.301, 4.929},
+		{2.230, 3.111},
+		{5.288, 10.987},
+		{8.242, 16.698},
+		{9.213, 13.111},
+		//{11.23, 13.44},
+	       },
+	       {{2.401, 4.758},
+		{2.383, 3.782},
+		{5.222, 10.769},
+		{8.292, 16.955},
+		{9.074, 12.083},
+		//{11.83, 17.66},
+	       },
+	};
 
 // phi_momentum = phi_position+gem-csc_bending*slope
 const double BendingAngleLUT[2][2] = {
@@ -88,6 +121,14 @@ float Ptassign_Direction(float bending_12, float eta, int par);
 
 float PhiMomentum(float dphi, float phi_position, int st, bool evenodd);
 float PhiMomentum_Radius(float dphi, float phi_position, float radius_csc, float radius_gem);
+float PhiMomentum_Xfactor(float dphi, float phi_position, float x);
+float PhiMomentum_Xfactor_V2(float phi_CSC, float phi_GEM, float x);
 
 
+void calculateAlphaBeta(const std::vector<float>& v, 
+                        const std::vector<float>& w, 
+                        const std::vector<float>& ev, 
+                        const std::vector<float>& ew, 
+                        const std::vector<float>& status,
+                        float& alpha, float& beta);
 #endif
