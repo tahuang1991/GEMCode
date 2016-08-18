@@ -125,14 +125,14 @@ SimTrackMatching = cms.PSet(
     rpcSimHit = cms.PSet(
         verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag("g4SimHits", "MuonRPCHits")),
-        run = cms.bool(True),
+        run = cms.bool(False),
         simMuOnly = cms.bool(True),
         discardEleHits = cms.bool(True),
     ),
     rpcStripDigi = cms.PSet(
         verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag("simMuonRPCDigis")),
-        run = cms.bool(True),
+        run = cms.bool(False),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
         matchDeltaStrip = cms.int32(1),
@@ -141,7 +141,7 @@ SimTrackMatching = cms.PSet(
         verbose = cms.int32(0),
         validInputTags = cms.VInputTag(cms.InputTag("rpcRecHits"),
                                        cms.InputTag("hltRpcRecHits")),
-        run = cms.bool(True),
+        run = cms.bool(False),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
         matchDeltaStrip = cms.int32(1),
@@ -346,9 +346,9 @@ SimTrackMatching = cms.PSet(
         deltaR = cms.double(0.05),
     ),    
     displacedGenMu = cms.PSet(
-	validInputTags = cms.VInputTag(cms.InputTag("Notreal","test")),
+	validInputTags = cms.VInputTag(cms.InputTag("genParticles")),
 	verbose = cms.int32(0),
-	run = cms.bool(False),
+	run = cms.bool(True),
     ),
     sectorProcessor = csctfTrackDigis.SectorProcessor,
 #       SRLUT = cms.PSet(

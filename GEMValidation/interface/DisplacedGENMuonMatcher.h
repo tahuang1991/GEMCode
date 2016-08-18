@@ -34,9 +34,14 @@ public:
 
   int darkBosonIndex() const {return darkBosonIndex_;}
   int genMuonIndex() const {return genMuonIndex_;}
+  bool checkRunOK() const {return runOK_;}
 
   double darkBosonDeltaR() const {return genGd0Gd1_m;}
   double darkBosonInvM() const {return genGd0Gd1_dR;}
+  double matchedGenMudxy() const {return matchedGenMu_dxy;}
+  double matchedGenMudR() const {return matchedGenMu_dR;}
+
+  void testprint() const ;
 
 private:
 
@@ -120,10 +125,14 @@ private:
   Float_t genGd0Gd1_m;
   Float_t genGd0Gd1_dR;
 
+  Float_t matchedGenMu_dR;
+  Float_t matchedGenMu_dxy;
+
   const reco::GenParticle* matchedGENMuon_;
   std::vector<const reco::GenParticle*> matchedGENMuons_;
   const reco::GenParticle* matchedDarkBoson_;
 
+  bool runOK_;
   int darkBosonIndex_;
   int genMuonIndex_;
 };

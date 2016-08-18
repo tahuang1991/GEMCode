@@ -145,6 +145,7 @@ public:
   /// calculate Global average momentum for a provided collection of simhits in CSC
   GlobalVector simHitsMeanMomentum(const edm::PSimHitContainer& sim_hits) const;
 
+  float	simHitsGEMCentralPosition(const edm::PSimHitContainer& sim_hits) const;
   /// 
   float LocalBendingInChamber(unsigned int detid) const;
 
@@ -156,6 +157,7 @@ public:
 
   /// calculate average wg number for a provided collection of simhits (for DT)
   float simHitsMeanWire(const edm::PSimHitContainer& sim_hits) const;
+   
 
 
   std::set<int> hitStripsInDetId(unsigned int, int margin_n_strips = 0) const;  // GEM/ME0 or CSC

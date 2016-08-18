@@ -1,4 +1,5 @@
 #include "GEMCode/GEMValidation/interface/SimHitMatcher.h"
+#include "DataFormats/Math/interface/deltaPhi.h"
 
 #include "TF1.h"
 #include "TGraph.h"
@@ -1030,6 +1031,7 @@ SimHitMatcher::simHitsMeanPosition(const edm::PSimHitContainer& sim_hits) const
     else if (gemvalidation::is_csc(h.detUnitId()))
     {
       gp = getCSCGeometry()->idToDet(h.detUnitId())->surface().toGlobal(lp);
+      //std::cout <<"In simHitsMeanPosition localPoint "<< lp<<" gloablPoint "<< gp  << std::endl;
     }
     else if (gemvalidation::is_rpc(h.detUnitId()))
     {
@@ -1145,6 +1147,38 @@ SimHitMatcher::simHitsMeanMomentum(const edm::PSimHitContainer& sim_hits) const
 }
 
 
+float
+SimHitMatcher::simHitsGEMCentralPosition(const edm::PSimHitContainer& sim_hits) const
+{
+  if (sim_hits.empty()) return -0.0; // point "zero"
+
+  float central = -0.0;
+  size_t n = 0;
+  for (auto& h: sim_hits)
+  {
+    LocalPoint lp( 0., 0., 0. );//local central
+    GlobalPoint gp;
+    if ( gemvalidation::is_gem(h.detUnitId()) )
+    {
+      gp = getGEMGeometry()->idToDet(h.detUnitId())->surface().toGlobal(lp);
+    }
+    else if ( gemvalidation::is_me0(h.detUnitId()) )
+    {
+      gp = getME0Geometry()->idToDet(h.detUnitId())->surface().toGlobal(lp);
+    }
+    else continue;
+    central = gp.perp();
+    //std::cout <<" GEMid "<< GEMDetId(h.detUnitId()) <<"cenral gp perp "<< gp.perp()<<" x "<< gp.x()<<" y "<< gp.y() <<" z "<< gp.z() <<std::endl;
+    if (n>=1) std::cout <<"warning! find more than one simhits in GEM chamber " << std::endl;
+    ++n;
+  }
+
+  return central;
+}
+
+
+
+
 float 
 SimHitMatcher::LocalBendingInChamber(unsigned int detid) const
 {
@@ -1197,7 +1231,7 @@ SimHitMatcher::LocalBendingInChamber(unsigned int detid) const
 
   }
 	//std::cout <<" phi1 "<< phi_layer1 <<" phi6 " << phi_layer6 << std::endl;
-	return phi_layer6-phi_layer1;
+	return deltaPhi(phi_layer6,phi_layer1);
 }
 
 

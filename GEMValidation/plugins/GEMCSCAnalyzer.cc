@@ -26,6 +26,8 @@
 #include "GEMCode/GEMValidation/interface/SimTrackMatchManager.h"
 #include "GEMCode/GEMValidation/interface/Helpers.h"
 #include "GEMCode/GEMValidation/interface/Ptassignment.h"
+#include "CLHEP/Random/RandomEngine.h"
+#include "CLHEP/Random/Randomize.h"
 
 #include "TTree.h"
 
@@ -34,6 +36,7 @@
 #include <memory>
 #include <math.h>
 #include <bitset>
+#include <vector>
 
 using namespace std;
 using namespace matching;
@@ -46,12 +49,11 @@ const int LCT_BEND_PATTERN[11] = { -99,  -5,  4, -4,  3, -3,  2, -2,  1, -1,  0}
 struct MyTrackChamberDelta
 {
   Bool_t odd;
-  Int_t charge;
-  Int_t endcap;
-  Int_t station;
-  Int_t chamber;
-  Int_t roll;
-  Int_t bend;
+  Char_t charge;
+  Char_t chamber;
+  Char_t endcap;
+  Char_t roll;
+  Char_t bend;
   Float_t pt, eta, phi;
   Float_t csc_sh_phi;
   Float_t csc_dg_phi;
@@ -89,36 +91,88 @@ struct MyTrackEff
   Int_t run;
   Int_t event;
 
-  Float_t pt, eta, phi;
+  Float_t pt, eta, phi, pz;
   Char_t charge;
   Char_t endcap;
+
+  // Dark photon  
+  Float_t genGd_m;
+  Float_t genGd_E;
+  Float_t genGd_p;
+  Float_t genGd_pt;
+  Float_t genGd_px;
+  Float_t genGd_py;
+  Float_t genGd_pz;
+  Float_t genGd_eta;
+  Float_t genGd_phi;
+  Float_t genGd_vx;
+  Float_t genGd_vy;
+  Float_t genGd_vz;
+  Float_t genGd_vLx;
+  Float_t genGd_vLy;
+  Float_t genGd_vLz;
+  Float_t genGd_lxy;
+  Float_t genGd_l;
+  Float_t genGd_dxy;
+  Float_t genGd0Gd1_dR;
+  Float_t genGd0Gd1_m;
+
+  Float_t genGdMu_dxy_max;
+  Float_t genGdMu_eta_max;
+
+  // Gen level muon
+  Int_t genGd_index;
+  Int_t genGdMu_index;
+  Float_t genGdMu_p;
+  Float_t genGdMu_pt;
+  Float_t genGdMu_px;
+  Float_t genGdMu_py;
+  Float_t genGdMu_pz;
+  Float_t genGdMu_eta;
+  Float_t genGdMu_phi;
+  Float_t genGdMu_phi_corr;
+  Float_t genGdMu_vx;
+  Float_t genGdMu_vy;
+  Float_t genGdMu_vz;
+  Float_t genGdMu_dxy;
+  Float_t genGdMu_dR;
+
+  Float_t beamSpot_x;
+  Float_t beamSpot_y;
+  Float_t beamSpot_z;
+
+
   Char_t chamber_ME1_csc_sh;//bit1:odd, bit2:even
   Char_t chamber_ME2_csc_sh;
   Char_t chamber_odd; // bit1: has GEM pad   bit2: has CSC LCT
   Char_t chamber_even; // bit1: has GEM pad   bit2: has CSC LCT
   Float_t bending_sh;
   Float_t phi_cscsh_even, phi_cscsh_odd, eta_cscsh_even, eta_cscsh_odd;
+  Float_t phi_layer1_sh_even, eta_layer1_sh_even, phi_layer1_sh_odd,eta_layer1_sh_odd, perp_layer1_sh_odd, perp_layer1_sh_even;
+  Float_t phi_layer6_sh_even, eta_layer6_sh_even, phi_layer6_sh_odd,eta_layer6_sh_odd, perp_layer6_sh_odd, perp_layer6_sh_even;
+  Float_t perp_gemsh_even, perp_gemsh_odd, perp_cscsh_even, perp_cscsh_odd,centralperp_gemsh_even, centralperp_gemsh_odd;
   Float_t dphi_sh_even,dphi_sh_odd;
-  Float_t pt_sh,ptphi_sh,pteta_sh;
+  Float_t dphipositionpt_cscsh_even, dphipositionpt_cscsh_odd, dphipositionpt_gemsh_even,dphipositionpt_gemsh_odd;
 
   Char_t has_csc_sh; // #layers with SimHits > minHitsChamber    bit1: in odd, bit2: even
   Char_t has_csc_strips; // #layers with comparator digis > minHitsChamber    bit1: in odd, bit2: even
   Char_t has_csc_wires; // #layers with wire digis > minHitsChamber    bit1: in odd, bit2: even
+  Float_t phi_layer1_fit_even, phi_layer3_fit_even, phi_layer6_fit_even, phi_layer1_fit_odd, phi_layer3_fit_odd, phi_layer6_fit_odd;
 
   Char_t has_clct; // bit1: in odd, bit2: even
   Char_t has_alct; // bit1: in odd, bit2: even
   Char_t has_lct; // bit1: in odd, bit2: even
 
-  Int_t bend_lct_odd;
-  Int_t bend_lct_even;
-  Int_t bx_lct_odd;
-  Int_t bx_lct_even;
+  Char_t bend_lct_odd;
+  Char_t bend_lct_even;
+  Char_t bx_lct_odd;
+  Char_t bx_lct_even;
 
 
-  Float_t hs_lct_odd;
-  Float_t wg_lct_odd;
-  Float_t hs_lct_even;
-  Float_t wg_lct_even;
+  UChar_t hs_lct_odd;
+  UChar_t wg_lct_odd;
+  UChar_t hs_lct_even;
+  UChar_t wg_lct_even;
 
   Float_t phi_lct_odd;
   Float_t phi_lct_even;
@@ -126,6 +180,8 @@ struct MyTrackEff
   Float_t eta_lct_even;
   Float_t dphi_lct_odd; // dphi stored as data member in LCT
   Float_t dphi_lct_even;
+  Float_t perp_lct_odd;
+  Float_t perp_lct_even;
   Bool_t passdphi_odd;
   Bool_t passdphi_even;
 
@@ -168,14 +224,15 @@ struct MyTrackEff
   Float_t phi_gemsh_even;
   Int_t strip_gemdg_odd; // median digis' strip
   Int_t strip_gemdg_even;
+   
 
   Char_t has_rpc_sh; // bit1: in odd, bit2: even
   Char_t has_rpc_dg; // bit1: in odd, bit2: even
   Int_t strip_rpcdg_odd; // median digis' strip
   Int_t strip_rpcdg_even;
 
-  Int_t bx_pad_odd;
-  Int_t bx_pad_even;
+  Char_t bx_pad_odd;
+  Char_t bx_pad_even;
   Float_t phi_pad_odd;
   Float_t phi_pad_even;
   Float_t eta_pad_odd;
@@ -192,8 +249,8 @@ struct MyTrackEff
   Int_t hsfromrpc_odd; // extraplotate hs from rpc
   Int_t hsfromrpc_even;
 
-  Int_t bx_rpcstrip_odd;
-  Int_t bx_rpcstrip_even;
+  Char_t bx_rpcstrip_odd;
+  Char_t bx_rpcstrip_even;
   Float_t phi_rpcstrip_odd;
   Float_t phi_rpcstrip_even;
   Float_t eta_rpcstrip_odd;
@@ -281,11 +338,26 @@ struct MyTrackEff
 
 
   // pt assginment
-  Float_t pt_position_sh;
-  Float_t pt_position;
-  Float_t pt_position2;
+  Float_t phiM_gemcsc_even,phiM_gemcsc_odd,phiM_gemcsc_central_even, phiM_gemcsc_central_odd;
+  Float_t phiM_fitxyz_even,phiM_fitxyz_odd;
+  Float_t pt_sh_even,pt_sh_odd,ptphi_sh_even,ptphi_sh_odd,pteta_sh_even,pteta_sh_odd;
+  Float_t ptphi_gemsh_odd, ptphi_gemsh_even;
+  Float_t csc_bending_angle12_gemcsc,csc_bending_angle12_gemcsc_central;
+  Float_t csc_bending_angle12_xfactor,csc_bending_angle12_xfactor_smear1,csc_bending_angle12_xfactor_smear2,csc_bending_angle12_xfactor_smear0;
+  Float_t csc_bending_angle12_xfactor_smear3; 
+  Float_t csc_bending_angle12_xfactor_L1_1, csc_bending_angle12_xfactor_L1_2;
+  //Float_t ptphi_diff_sh_11,ptphi_diff_sh_12,ptphi_diff_sh_21,ptphi_diff_sh_22; 
+  Float_t ptphi_diff_sh;
+  Float_t eta_st1_sh, eta_st2_sh;
+  Float_t pt_position_sh, pt_direction_sh;
+  Float_t pt_position, pt_direction_gemcsc, pt_direction_gemcsc_central, pt_direction_xfactor;
+  Float_t pt_direction_xfactor_smear0, pt_direction_xfactor_smear1,pt_direction_xfactor_smear2,pt_direction_xfactor_smear3;
+  Float_t pt_direction_xfactor_L1_1,pt_direction_xfactor_L1_2;
+  Float_t pt_position_smeared, pt_direction_gemcsc_smeared;
+  Int_t npar;
+  Int_t npar_jose;
   Bool_t hasSt1St2St3;
-  Bool_t hasSt1St2St3_sh;
+  Bool_t hasSt3orSt4_sh;
 };
 
 void MyTrackEff::init()
@@ -299,6 +371,54 @@ void MyTrackEff::init()
   eta = -9.;
   charge = -9;
   endcap = -9;
+
+  // Dark photon  
+  genGd_m =0.0;
+  genGd_E =0.0;
+  genGd_p =0.0;
+  genGd_pt =0.0;
+  genGd_px =0.0;
+  genGd_py =0.0;
+  genGd_pz =0.0;
+  genGd_eta =0.0;
+  genGd_phi =0.0;
+  genGd_vx =0.0;
+  genGd_vy =0.0;
+  genGd_vz =0.0;
+  genGd_vLx = -0.;
+  genGd_vLy = -0;
+  genGd_vLz= -0;
+  genGd_lxy = -0.;
+  genGd_l =-0.;
+  genGd_dxy =-1;
+  genGd0Gd1_dR =-1;
+  genGd0Gd1_m = 0;
+
+  genGdMu_dxy_max =0.0;
+  genGdMu_eta_max =0.0;
+
+  // Gen level muon
+  genGd_index = -99;
+  genGdMu_index = -99;
+  genGdMu_p =0.0;
+  genGdMu_pt =0.0;
+  genGdMu_px =0.0;
+  genGdMu_py =0.0;
+  genGdMu_pz =0.0;
+  genGdMu_eta =0.0;
+  genGdMu_phi =0.0;
+  genGdMu_phi_corr =0.0;
+  genGdMu_vx =0.0;
+  genGdMu_vy =0.0;
+  genGdMu_vz =0.0;
+  genGdMu_dxy =0.0;
+  genGdMu_dR = 10.0;
+
+  beamSpot_x =0.0;
+  beamSpot_y =0.0;
+  beamSpot_z =0.0;
+
+
   chamber_ME1_csc_sh=0;
   chamber_ME2_csc_sh=0;
   chamber_odd = 0;
@@ -306,14 +426,59 @@ void MyTrackEff::init()
   quality_odd = 0;
   quality_even = 0;
   bending_sh = -10;
+  perp_cscsh_odd = -0.0;
+  perp_cscsh_even = -0.0;
+  perp_gemsh_odd = -0.0;
+  perp_gemsh_even = -0.0;
+  centralperp_gemsh_odd = -0.0;
+  centralperp_gemsh_even = -0.0;
   phi_cscsh_even = -9.0;
   phi_cscsh_odd = -9.0;
   eta_cscsh_even = -9.0;
   eta_cscsh_odd = -9.0;
-  pt_sh = -9.0;
-  pteta_sh = 0;
-  ptphi_sh = -9.0;
+  phi_layer1_sh_even =-9.0;
+  phi_layer1_sh_odd =-9.0;
+  eta_layer1_sh_even =-9.0;
+  eta_layer1_sh_odd =-9.0;
+  perp_layer1_sh_even = -1;
+  perp_layer1_sh_odd = -1;
+  phi_layer6_sh_even =-9.0;
+  phi_layer6_sh_odd =-9.0;
+  eta_layer6_sh_even =-9.0;
+  eta_layer6_sh_odd =-9.0;
+  perp_layer6_sh_even = -1;
+  perp_layer6_sh_odd = -1;
+  pt_sh_even = -9.0;
+  pteta_sh_even = 0;
+  ptphi_sh_even = -9.0;
+  pt_sh_odd = -9.0;
+  pteta_sh_odd = 0;
+  ptphi_sh_odd = -9.0;
+  ptphi_gemsh_even = -9.0;
+  ptphi_gemsh_odd = -9.0;
 
+  eta_st1_sh = -9;
+  eta_st2_sh = -9;
+  //ptphi_diff_sh_11 = -9;
+  //ptphi_diff_sh_12 = -9;
+  //ptphi_diff_sh_21 = -9;
+  //ptphi_diff_sh_22 = -9;
+  ptphi_diff_sh = -9;
+  csc_bending_angle12_gemcsc = -9;
+  csc_bending_angle12_xfactor = -9;
+  csc_bending_angle12_xfactor_smear0 = -9;
+  csc_bending_angle12_xfactor_smear1 = -9;
+  csc_bending_angle12_xfactor_smear2 = -9;
+  csc_bending_angle12_xfactor_smear3 = -9;
+  csc_bending_angle12_xfactor_L1_1 = -9;
+  csc_bending_angle12_xfactor_L1_2 = -9;
+
+  phi_layer1_fit_even =-9.0;
+  phi_layer1_fit_odd =-9.0;
+  phi_layer3_fit_even =-9.0;
+  phi_layer3_fit_odd =-9.0;
+  phi_layer6_fit_even =-9.0;
+  phi_layer6_fit_odd =-9.0;
   has_csc_sh = 0;
   has_csc_strips = 0;
   has_csc_wires = 0;
@@ -374,6 +539,16 @@ void MyTrackEff::init()
   phi_gemsh_even = -9.;
   dphi_sh_odd = -9;
   dphi_sh_even = -9;
+  dphipositionpt_gemsh_even = -9;
+  dphipositionpt_gemsh_odd = -9;
+  dphipositionpt_cscsh_even = -9;
+  dphipositionpt_cscsh_odd = -9;
+  phiM_gemcsc_odd = -9;
+  phiM_gemcsc_even =-9;
+  phiM_gemcsc_central_odd = -9;
+  phiM_gemcsc_central_even =-9;
+  phiM_fitxyz_odd = -9;
+  phiM_fitxyz_even =-9;
   strip_gemdg_odd = -9;
   strip_gemdg_even = -9;
  
@@ -510,11 +685,24 @@ void MyTrackEff::init()
   recoChargedCandidate_nValidCSCHits = 0;
   recoChargedCandidate_nValidRPCHits = 0;
 
+  npar = -1;
+  npar_jose = -1;
   pt_position_sh=-1;
   pt_position=-1;
-  pt_position2=-1;
+  pt_position_smeared=-1;
+  pt_direction_gemcsc = -1;
+  pt_direction_gemcsc_central = -1;
+  pt_direction_sh=-1;
+  pt_direction_gemcsc_smeared=-1;
+  pt_direction_xfactor = -1;
+  pt_direction_xfactor_smear0 = -1;
+  pt_direction_xfactor_smear1 = -1;
+  pt_direction_xfactor_smear2 = -1;
+  pt_direction_xfactor_smear3 = -1;
+  pt_direction_xfactor_L1_1 = -1;
+  pt_direction_xfactor_L1_2 = -1;
   hasSt1St2St3=false;
-  hasSt1St2St3_sh=false;
+  hasSt3orSt4_sh=false;
 }
 
 
@@ -528,10 +716,52 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("event", &event);
 
   t->Branch("pt", &pt);
+  t->Branch("pz", &pz);
   t->Branch("eta", &eta);
   t->Branch("phi", &phi);
   t->Branch("charge", &charge);
   t->Branch("endcap", &endcap);
+
+  t->Branch("genGd_m",   &genGd_m,   "genGd_m/F");
+  t->Branch("genGd_E",   &genGd_E,   "genGd_E/F");
+  t->Branch("genGd_p",   &genGd_p,   "genGd_p/F");
+  t->Branch("genGd_pt",  &genGd_pt,  "genGd_pt/F");
+  t->Branch("genGd_px",  &genGd_px,  "genGd_px/F");
+  t->Branch("genGd_py",  &genGd_py,  "genGd_py/F");
+  t->Branch("genGd_pz",  &genGd_pz,  "genGd_pz/F");
+  t->Branch("genGd_eta", &genGd_eta, "genGd_eta/F");
+  t->Branch("genGd_phi", &genGd_phi, "genGd_phi/F");
+  t->Branch("genGd_vx",  &genGd_vx,  "genGd_vx/F");
+  t->Branch("genGd_vy",  &genGd_vy,  "genGd_vy/F");
+  t->Branch("genGd_vz",  &genGd_vz,  "genGd_vz/F");
+  t->Branch("genGd_vLx",  &genGd_vLx,  "genGd_vLx/F");
+  t->Branch("genGd_vLy",  &genGd_vLy,  "genGd_vLy/F");
+  t->Branch("genGd_vLz",  &genGd_vLz,  "genGd_vLz/F");
+  t->Branch("genGd_lxy",  &genGd_lxy,  "genGd_lxy/F");
+  t->Branch("genGd_l",  &genGd_l,  "genGd_l/F");
+  t->Branch("genGd_dxy",  &genGd_dxy,  "genGd_dxy/F");
+  t->Branch("genGd0Gd1_dR",  &genGd0Gd1_dR,  "genGd0Gd1_dR/F");
+  t->Branch("genGd0Gd1_m",  &genGd0Gd1_m,  "genGd0Gd1_m/F");
+  t->Branch("genGdMu_dxy_max",  &genGdMu_dxy_max,  "genGdMu_dxy_max/F");
+  t->Branch("genGdMu_eta_max",  &genGdMu_eta_max,  "genGdMu_eta_max/F");
+
+  t->Branch("genGd_index", &genGd_index, "genGd_index/F");
+  t->Branch("genGdMu_index", &genGdMu_index, "genGdMu_index/F");
+  t->Branch("genGdMu_p", &genGdMu_p, "genGdMu_p/F");
+  t->Branch("genGdMu_pt", &genGdMu_pt, "genGdMu_pt/F");
+  t->Branch("genGdMu_px", &genGdMu_px, "genGdMu_px/F");
+  t->Branch("genGdMu_py", &genGdMu_py, "genGdMu_py/F");
+  t->Branch("genGdMu_pz", &genGdMu_pz, "genGdMu_pz/F");
+  t->Branch("genGdMu_eta",& genGdMu_eta, "genGdMu_eta/F");
+  t->Branch("genGdMu_phi", &genGdMu_phi, "genGdMu_phi/F");
+  t->Branch("genGdMu_phi_corr", &genGdMu_phi_corr, "genGdMu_phi_corr/F");
+  t->Branch("genGdMu_vx", &genGdMu_vx, "genGdMu_vx/F");
+  t->Branch("genGdMu_vy", &genGdMu_vy, "genGdMu_vy/F");
+  t->Branch("genGdMu_vz", &genGdMu_vz, "genGdMu_vz/F");
+  t->Branch("genGdMu_dxy", &genGdMu_dxy, "genGdMu_dxy/F");
+  t->Branch("genGdMu_dR", &genGdMu_dR, "genGdMu_dR/F");
+
+
   t->Branch("chamber_ME1_csc_sh", &chamber_ME1_csc_sh);
   t->Branch("chamber_ME2_csc_sh", &chamber_ME2_csc_sh);
   t->Branch("chamber_odd", &chamber_odd);
@@ -539,13 +769,58 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("quality_odd", &quality_odd);
   t->Branch("quality_even", &quality_even);
   t->Branch("bending_sh", &bending_sh);
+  t->Branch("perp_cscsh_odd", &perp_cscsh_odd);
+  t->Branch("perp_cscsh_even", &perp_cscsh_even);
+  t->Branch("perp_gemsh_odd", &perp_gemsh_odd);
+  t->Branch("perp_gemsh_even", &perp_gemsh_even);
+  t->Branch("centralperp_gemsh_odd", &centralperp_gemsh_odd);
+  t->Branch("centralperp_gemsh_even", &centralperp_gemsh_even);
   t->Branch("phi_cscsh_even", &phi_cscsh_even);
   t->Branch("phi_cscsh_odd", &phi_cscsh_odd);
+  t->Branch("phi_layer1_sh_even", &phi_layer1_sh_even);
+  t->Branch("phi_layer1_sh_odd", &phi_layer1_sh_odd);
+  t->Branch("eta_layer1_sh_even", &eta_layer1_sh_even);
+  t->Branch("eta_layer1_sh_odd", &eta_layer1_sh_odd);
+  t->Branch("perp_layer1_sh_even", &perp_layer1_sh_even);
+  t->Branch("perp_layer1_sh_odd", &perp_layer1_sh_odd);
+  t->Branch("phi_layer6_sh_even", &phi_layer6_sh_even);
+  t->Branch("phi_layer6_sh_odd", &phi_layer6_sh_odd);
+  t->Branch("eta_layer6_sh_even", &eta_layer6_sh_even);
+  t->Branch("eta_layer6_sh_odd", &eta_layer6_sh_odd);
+  t->Branch("perp_layer6_sh_even", &perp_layer6_sh_even);
+  t->Branch("perp_layer6_sh_odd", &perp_layer6_sh_odd);
   t->Branch("eta_cscsh_even", &eta_cscsh_even);
   t->Branch("eta_cscsh_odd", &eta_cscsh_odd);
-  t->Branch("pt_sh", &pt_sh);
-  t->Branch("pteta_sh", &pteta_sh);
-  t->Branch("ptphi_sh", &ptphi_sh);
+  t->Branch("pt_sh_even", &pt_sh_even);
+  t->Branch("pteta_sh_even", &pteta_sh_even);
+  t->Branch("ptphi_sh_even", &ptphi_sh_even);
+  t->Branch("pt_sh_odd", &pt_sh_odd);
+  t->Branch("pteta_sh_odd", &pteta_sh_odd);
+  t->Branch("ptphi_sh_odd", &ptphi_sh_odd);
+  t->Branch("eta_st1_sh", &eta_st1_sh);
+  t->Branch("eta_st2_sh", &eta_st2_sh);
+  t->Branch("ptphi_gemsh_even", &ptphi_gemsh_even);
+  t->Branch("ptphi_gemsh_odd", &ptphi_gemsh_odd);
+  //t->Branch("ptphi_diff_sh_11", &ptphi_diff_sh_11);
+  //t->Branch("ptphi_diff_sh_12", &ptphi_diff_sh_12);
+  //t->Branch("ptphi_diff_sh_21", &ptphi_diff_sh_21);
+  //t->Branch("ptphi_diff_sh_22", &ptphi_diff_sh_22);
+  t->Branch("ptphi_diff_sh", &ptphi_diff_sh);
+  t->Branch("csc_bending_angle12_gemcsc", &csc_bending_angle12_gemcsc);
+  t->Branch("csc_bending_angle12_xfactor", &csc_bending_angle12_xfactor);
+  t->Branch("csc_bending_angle12_xfactor_smear0", &csc_bending_angle12_xfactor_smear0);
+  t->Branch("csc_bending_angle12_xfactor_smear1", &csc_bending_angle12_xfactor_smear1);
+  t->Branch("csc_bending_angle12_xfactor_smear2", &csc_bending_angle12_xfactor_smear2);
+  t->Branch("csc_bending_angle12_xfactor_smear3", &csc_bending_angle12_xfactor_smear3);
+  t->Branch("csc_bending_angle12_xfactor_L1_1", &csc_bending_angle12_xfactor_L1_1);
+  t->Branch("csc_bending_angle12_xfactor_L1_2", &csc_bending_angle12_xfactor_L1_2);
+
+  t->Branch("phi_layer1_fit_even", &phi_layer1_fit_even);
+  t->Branch("phi_layer1_fit_odd", &phi_layer1_fit_odd);
+  t->Branch("phi_layer3_fit_even", &phi_layer3_fit_even);
+  t->Branch("phi_layer3_fit_odd", &phi_layer3_fit_odd);
+  t->Branch("phi_layer6_fit_even", &phi_layer6_fit_even);
+  t->Branch("phi_layer6_fit_odd", &phi_layer6_fit_odd);
   t->Branch("has_csc_sh", &has_csc_sh);
   t->Branch("has_csc_strips", &has_csc_strips);
   t->Branch("has_csc_wires", &has_csc_wires);
@@ -564,6 +839,8 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("phi_lct_even", &phi_lct_even);
   t->Branch("eta_lct_odd", &eta_lct_odd);
   t->Branch("eta_lct_even", &eta_lct_even);
+  t->Branch("perp_lct_odd", &perp_lct_odd);
+  t->Branch("perp_lct_even", &perp_lct_even);
   t->Branch("dphi_lct_odd", &dphi_lct_odd);
   t->Branch("dphi_lct_even", &dphi_lct_even);
   t->Branch("passdphi_odd", &passdphi_odd);
@@ -607,6 +884,16 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("phi_gemsh_even", &phi_gemsh_even);
   t->Branch("dphi_sh_odd", &dphi_sh_odd);
   t->Branch("dphi_sh_even", &dphi_sh_even);
+  t->Branch("dphipositionpt_gemsh_even", &dphipositionpt_gemsh_even);
+  t->Branch("dphipositionpt_gemsh_odd", &dphipositionpt_gemsh_odd);
+  t->Branch("dphipositionpt_cscsh_even", &dphipositionpt_cscsh_even);
+  t->Branch("dphipositionpt_cscsh_odd", &dphipositionpt_cscsh_odd);
+  t->Branch("phiM_gemcsc_odd", &phiM_gemcsc_odd);
+  t->Branch("phiM_gemcsc_even", &phiM_gemcsc_even);
+  t->Branch("phiM_gemcsc_central_odd", &phiM_gemcsc_central_odd);
+  t->Branch("phiM_gemcsc_central_even", &phiM_gemcsc_central_even);
+  t->Branch("phiM_fitxyz_odd", &phiM_fitxyz_odd);
+  t->Branch("phiM_fitxyz_even", &phiM_fitxyz_even);
   t->Branch("strip_gemdg_odd", &strip_gemdg_odd);
   t->Branch("strip_gemdg_even", &strip_gemdg_even);
 
@@ -743,11 +1030,24 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("recoChargedCandidate_nValidRPCHits", &recoChargedCandidate_nValidRPCHits); 
 
   
+  t->Branch("npar", &npar); 
+  t->Branch("npar_jose", &npar_jose); 
   t->Branch("pt_position_sh", &pt_position_sh); 
   t->Branch("pt_position", &pt_position); 
-  t->Branch("pt_position2", &pt_position2); 
+  t->Branch("pt_position_smeared", &pt_position_smeared); 
+  t->Branch("pt_direction_sh", &pt_direction_sh); 
+  t->Branch("pt_direction_gemcsc", &pt_direction_gemcsc); 
+  t->Branch("pt_direction_xfactor", &pt_direction_xfactor); 
+  t->Branch("pt_direction_xfactor_smear0", &pt_direction_xfactor_smear0); 
+  t->Branch("pt_direction_xfactor_smear1", &pt_direction_xfactor_smear1); 
+  t->Branch("pt_direction_xfactor_smear2", &pt_direction_xfactor_smear2); 
+  t->Branch("pt_direction_xfactor_smear3", &pt_direction_xfactor_smear3); 
+  t->Branch("pt_direction_xfactor_L1_1", &pt_direction_xfactor_L1_1); 
+  t->Branch("pt_direction_xfactor_L1_2", &pt_direction_xfactor_L1_2); 
+  t->Branch("pt_direction_gemcsc_central", &pt_direction_gemcsc_central); 
+  t->Branch("pt_direction_gemcsc_smeared", &pt_direction_gemcsc_smeared); 
   t->Branch("hasSt1St2St3", &hasSt1St2St3); 
-  t->Branch("hasSt1St2St3_sh", &hasSt1St2St3_sh); 
+  t->Branch("hasSt3orSt4_sh", &hasSt3orSt4_sh); 
 
   return t;
 }
@@ -965,6 +1265,8 @@ void GEMCSCAnalyzer::analyze(const edm::Event& ev, const edm::EventSetup& es)
 
 void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 {
+
+  const DisplacedGENMuonMatcher& match_gen = match.genMuons();
   const SimHitMatcher& match_sh = match.simhits();
   const GEMDigiMatcher& match_gd = match.gemDigis();
   const RPCDigiMatcher& match_rd = match.rpcDigis();
@@ -975,6 +1277,17 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   const HLTTrackMatcher& match_hlt_track = match.hltTracks();
   const SimTrack &t = match_sh.trk();
    
+
+  auto matchedDarkBoson(match_gen.getMatchedDarkBoson());
+  auto matchedGENMuon(match_gen.getMatchedGENMuon());
+  /*
+  if (match_gen.checkRunOK()){
+  	std::cout <<" matched dark boson mass "<< matchedDarkBoson->mass() << std::endl;
+ 	std::cout <<"matched muon pt "<< matchedGENMuon->pt()<<" phi "<< matchedGENMuon->phi()<<" eta "<< matchedGENMuon->eta() <<" dR "<< match_gen.matchedGenMudR()<<" dxy "<< match_gen.matchedGenMudxy() <<std::endl;
+  }
+  */
+  std::cout <<"Sim trk_no " << trk_no <<" eta "<< t.momentum().eta() << " phi "<< t.momentum().phi() << " pt "<< t.momentum().pt()<<" pz "<<  t.momentum().pz()<<std::endl;
+
   for (auto s: stations_to_use_)
   {
 
@@ -983,17 +1296,53 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     etrk_[s].lumi = match.simhits().event().id().luminosityBlock();
     etrk_[s].event = match.simhits().event().id().event();
     etrk_[s].pt = t.momentum().pt();
+    etrk_[s].pz = t.momentum().pz();
     etrk_[s].phi = t.momentum().phi();
     etrk_[s].eta = t.momentum().eta();
     etrk_[s].charge = t.charge();
     etrk_[s].endcap = (etrk_[s].eta > 0.) ? 1 : -1;
+
+  if (match_gen.checkRunOK()){
+    // Dark photon  
+    etrk_[s].genGd_m = matchedDarkBoson->mass();
+    etrk_[s].genGd_E = matchedDarkBoson->energy();
+    etrk_[s].genGd_p = matchedDarkBoson->p();
+    etrk_[s].genGd_pt = matchedDarkBoson->pt();
+    etrk_[s].genGd_px = matchedDarkBoson->px();
+    etrk_[s].genGd_py = matchedDarkBoson->py();
+    etrk_[s].genGd_pz = matchedDarkBoson->pz();
+    etrk_[s].genGd_eta = matchedDarkBoson->eta();
+    etrk_[s].genGd_phi = matchedDarkBoson->phi();
+    etrk_[s].genGd_vx = matchedDarkBoson->vx();
+    etrk_[s].genGd_vy = matchedDarkBoson->vy();
+    etrk_[s].genGd_vz = matchedDarkBoson->vz();
+
+     etrk_[s].genGd_index = match_gen.darkBosonIndex();
+     etrk_[s].genGdMu_index = match_gen.genMuonIndex();
+     etrk_[s].genGdMu_p = matchedGENMuon->p();
+     etrk_[s].genGdMu_pt = matchedGENMuon->pt();
+     etrk_[s].genGdMu_px = matchedGENMuon->px();
+     etrk_[s].genGdMu_py = matchedGENMuon->py();
+     etrk_[s].genGdMu_pz = matchedGENMuon->pz();
+     etrk_[s].genGdMu_eta = matchedGENMuon->eta();
+     etrk_[s].genGdMu_phi = matchedGENMuon->phi();
+     etrk_[s].genGdMu_vx = matchedGENMuon->vx();
+     etrk_[s].genGdMu_vy = matchedGENMuon->vy();
+     etrk_[s].genGdMu_vz = matchedGENMuon->vz();
+     etrk_[s].genGdMu_dxy = match_gen.matchedGenMudxy();
+     etrk_[s].genGdMu_dR = match_gen.matchedGenMudR();
   }
+
+  }
+
   int chargesign = (t.charge()>0? 1:0);
   float pt = t.momentum().pt();
   // SimHits
   auto csc_simhits(match_sh.chamberIdsCSC(0));
   GlobalPoint gp_sh_odd[12];
   GlobalPoint gp_sh_even[12];
+  GlobalVector gv_sh_odd[12];
+  GlobalVector gv_sh_even[12];
   for(auto d: csc_simhits)
   {
 
@@ -1024,36 +1373,90 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     if (nlayers < minNHitsChamberCSCSimHit_) continue;
     GlobalVector ym = match_sh.simHitsMeanMomentum(match_sh.hitsInChamber(d));
     GlobalPoint gp = match_sh.simHitsMeanPosition(match_sh.hitsInChamber(d));
-    etrk_[st].pteta_sh = ym.eta();
-    etrk_[st].ptphi_sh = ym.phi();
-    etrk_[st].pt_sh = ym.perp();
     etrk_[st].bending_sh = match_sh.LocalBendingInChamber(d);
+    const CSCDetId id1(id.endcap(), id.station(), id.ring(), id.chamber(), 1);
+    const CSCDetId id6(id.endcap(), id.station(), id.ring(), id.chamber(), 6);
+    GlobalPoint gp1 = match_sh.simHitsMeanPosition(match_sh.hitsInDetId(id1.rawId()));
+    GlobalPoint gp6 = match_sh.simHitsMeanPosition(match_sh.hitsInDetId(id6.rawId()));
     const bool odd(id.chamber()%2==1);
     if (odd) etrk_[st].has_csc_sh |= 1;
     else etrk_[st].has_csc_sh |= 2;
+    if (odd){
+    	etrk_[st].pteta_sh_odd = ym.eta();
+    	etrk_[st].ptphi_sh_odd = ym.phi();
+    	etrk_[st].pt_sh_odd = ym.perp();
+    }else{
+    	etrk_[st].pteta_sh_even = ym.eta();
+    	etrk_[st].ptphi_sh_even = ym.phi();
+    	etrk_[st].pt_sh_even = ym.perp();
+    }
+    if (odd){
+    	if (match_sh.hitsInDetId(id1.rawId()).size()>0){
+		etrk_[st].eta_layer1_sh_odd = gp1.eta();
+		etrk_[st].phi_layer1_sh_odd = gp1.phi();
+		etrk_[st].perp_layer1_sh_odd = gp1.perp();
+		//std::cout <<"layer1 id "<< id1 <<" phi "<< gp1.phi() <<" eta "<< gp1.eta() <<" x "<< gp1.x()<<" y "<< gp1.y()<<" z "<< gp1.z() <<" perp "<< gp1.perp() << std::endl;
+		}
+    	if (match_sh.hitsInDetId(id6.rawId()).size()>0){
+		etrk_[st].eta_layer6_sh_odd = gp6.eta();
+		etrk_[st].phi_layer6_sh_odd = gp6.phi();
+		etrk_[st].perp_layer6_sh_odd = gp6.perp();
+		//std::cout <<"layer6 id "<< id6 <<" phi "<< gp6.phi() <<" eta "<< gp6.eta() <<" x "<< gp6.x()<<" y "<< gp6.y()<<" z "<< gp6.z() <<" perp "<< gp6.perp() << std::endl;
+		}
+    }else{
+    	if (match_sh.hitsInDetId(id1.rawId()).size()>0){
+		etrk_[st].eta_layer1_sh_even = gp1.eta();
+		etrk_[st].phi_layer1_sh_even = gp1.phi();
+		etrk_[st].perp_layer1_sh_even = gp1.perp();
+		//std::cout <<"layer1 id "<< id1 <<" phi "<< gp1.phi() <<" eta "<< gp1.eta() <<" x "<< gp1.x()<<" y "<< gp1.y()<<" z "<< gp1.z() <<" perp "<< gp1.perp() << std::endl;
+		}
+    	if (match_sh.hitsInDetId(id6.rawId()).size()>0){
+		etrk_[st].eta_layer6_sh_even = gp6.eta();
+		etrk_[st].phi_layer6_sh_even = gp6.phi();
+		etrk_[st].perp_layer6_sh_even = gp6.perp();
+		//std::cout <<"layer6 id "<< id6 <<" phi "<< gp6.phi() <<" eta "<< gp6.eta() <<" x "<< gp6.x()<<" y "<< gp6.y()<<" z "<< gp6.z() <<" perp "<< gp6.perp() << std::endl;
+		}
+    }
 
     if (odd) etrk_[st].nlayers_csc_sh_odd = nlayers;
     else etrk_[st].nlayers_csc_sh_even = nlayers;
     
     if (odd) gp_sh_odd[st] = gp;
     else gp_sh_even[st] = gp;
+    if (odd) gv_sh_odd[st] = ym;
+    else gv_sh_even[st] = ym;
     //std::cout <<" CSC id "<< id <<" gp.eta "<< gp.eta() <<" gp.phi "<< gp.phi() << std::endl;
-    for (int layer=3;layer<5; layer++){
+    //std::cout <<"csc id "<< id << " simhit direction eta "<< ym.eta()<< " phi "<< ym.phi() <<" perp "<< ym.perp()<<" x "<< ym.x() <<" y "<< ym.y() <<" z "<< ym.z() << std::endl; 
+    for (int layer=1; layer <= 6; layer++){
+	//should be just layer3 or layer 4
     	const CSCDetId csckeyid(id.endcap(), id.station(), id.ring(), id.chamber(), layer); 
         GlobalPoint keygp = match_sh.simHitsMeanPosition(match_sh.hitsInDetId(csckeyid.rawId()));	
 	if (match_sh.hitsInDetId(csckeyid.rawId()).size()>0){
+	    	//std::cout <<"simhit csc id "<< csckeyid << " eta "<< keygp.eta()<< " phi "<< keygp.phi() <<" perp "<< keygp.perp() <<" x "<< keygp.x() <<" y "<< keygp.y() <<" z "<< keygp.z()<< std::endl; 
     		if (odd) etrk_[st].eta_cscsh_odd = keygp.eta();
     		else     etrk_[st].eta_cscsh_even = keygp.eta();
     		if (odd) etrk_[st].phi_cscsh_odd = keygp.phi();
     		else     etrk_[st].phi_cscsh_even = keygp.phi();
+    		if (odd) etrk_[st].perp_cscsh_odd = keygp.perp();
+    		else     etrk_[st].perp_cscsh_even = keygp.perp();
+    		if (odd) etrk_[st].dphipositionpt_cscsh_odd = deltaPhi(keygp.phi(),etrk_[st].ptphi_sh_odd);
+    		else     etrk_[st].dphipositionpt_cscsh_even = deltaPhi(keygp.phi(),etrk_[st].ptphi_sh_even);
+
 		if (st==2 or st==3){
       			if (odd) etrk_[1].eta_cscsh_odd = keygp.eta();
       			else     etrk_[1].eta_cscsh_even = keygp.eta();
       			if (odd) etrk_[1].phi_cscsh_odd = keygp.phi();
       			else     etrk_[1].phi_cscsh_even = keygp.phi();
+      			if (odd) etrk_[1].perp_cscsh_odd = keygp.perp();
+      			else     etrk_[1].perp_cscsh_even = keygp.perp();
+    			if (odd) etrk_[1].dphipositionpt_cscsh_odd = deltaPhi(keygp.phi(),etrk_[st].ptphi_sh_odd);
+    			else     etrk_[1].dphipositionpt_cscsh_even = deltaPhi(keygp.phi(),etrk_[st].ptphi_sh_even);
 		}
 		//std::cout <<" csckeyid "<< csckeyid<<" simhits size "<< match_sh.hitsInDetId(csckeyid.rawId()).size() <<" keygp.eta "<< keygp.eta() << " keygp.phi "<< keygp.phi() << std::endl;
-		break;
+		if (layer >= 3){
+		    	//std::cout <<"break!!! layer "<< layer << std::endl;
+			break;
+		}
 	}
     } 
 
@@ -1067,11 +1470,42 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
       if (odd) gp_sh_odd[1] = gp;
       else gp_sh_even[1] = gp;
+      if (odd) gv_sh_odd[1] = ym;
+      else gv_sh_even[1] = ym;
 
 
-      etrk_[1].pt_sh = ym.perp();
-      etrk_[1].pteta_sh = ym.eta();
-      etrk_[1].ptphi_sh = ym.phi();
+      if (odd){
+      	etrk_[1].pt_sh_odd = ym.perp();
+      	etrk_[1].pteta_sh_odd = ym.eta();
+      	etrk_[1].ptphi_sh_odd = ym.phi();
+      }else {
+      	etrk_[1].pt_sh_even = ym.perp();
+      	etrk_[1].pteta_sh_even = ym.eta();
+      	etrk_[1].ptphi_sh_even = ym.phi();
+      }
+    if (odd){
+    	if (match_sh.hitsInDetId(id1.rawId()).size()>0){
+		etrk_[1].eta_layer1_sh_odd = gp1.eta();
+		etrk_[1].phi_layer1_sh_odd = gp1.phi();
+		etrk_[1].perp_layer1_sh_odd = gp1.perp();
+		}
+    	if (match_sh.hitsInDetId(id6.rawId()).size()>0){
+		etrk_[1].eta_layer6_sh_odd = gp6.eta();
+		etrk_[1].phi_layer6_sh_odd = gp6.phi();
+		etrk_[1].perp_layer6_sh_odd = gp6.perp();
+		}
+    }else{
+    	if (match_sh.hitsInDetId(id1.rawId()).size()>0){
+		etrk_[1].eta_layer1_sh_even = gp1.eta();
+		etrk_[1].phi_layer1_sh_even = gp1.phi();
+		etrk_[1].perp_layer1_sh_even = gp1.perp();
+		}
+    	if (match_sh.hitsInDetId(id6.rawId()).size()>0){
+		etrk_[1].eta_layer6_sh_even = gp6.eta();
+		etrk_[1].phi_layer6_sh_even = gp6.phi();
+		etrk_[1].perp_layer6_sh_even = gp6.perp();
+		}
+    }
       etrk_[1].bending_sh = match_sh.LocalBendingInChamber(d);
     }
 
@@ -1240,6 +1674,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       etrk_[st].bend_lct_odd = bend;
       etrk_[st].phi_lct_odd = gp.phi();
       etrk_[st].eta_lct_odd = gp.eta();
+      etrk_[st].perp_lct_odd = gp.perp();
       etrk_[st].dphi_lct_odd = digi_dphi(lct);
       etrk_[st].bx_lct_odd = digi_bx(lct);
       etrk_[st].hs_lct_odd = digi_channel(lct);
@@ -1255,6 +1690,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       etrk_[st].bend_lct_even = bend;
       etrk_[st].phi_lct_even = gp.phi();
       etrk_[st].eta_lct_even = gp.eta();
+      etrk_[st].perp_lct_even = gp.perp();
       etrk_[st].dphi_lct_even = digi_dphi(lct);
       etrk_[st].bx_lct_even = digi_bx(lct);
       etrk_[st].hs_lct_even = digi_channel(lct);
@@ -1273,6 +1709,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         etrk_[1].bend_lct_odd = bend;
         etrk_[1].phi_lct_odd = gp.phi();
         etrk_[1].eta_lct_odd = gp.eta();
+        etrk_[1].perp_lct_even = gp.perp();
         etrk_[1].dphi_lct_odd = digi_dphi(lct);
         etrk_[1].bx_lct_odd = digi_bx(lct);
         etrk_[1].hs_lct_odd = digi_channel(lct);
@@ -1288,6 +1725,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         etrk_[1].bend_lct_even = bend;
         etrk_[1].phi_lct_even = gp.phi();
         etrk_[1].eta_lct_even = gp.eta();
+        etrk_[1].perp_lct_even = gp.perp();
         etrk_[1].dphi_lct_even = digi_dphi(lct);
         etrk_[1].bx_lct_even = digi_bx(lct);
         etrk_[1].hs_lct_even = digi_channel(lct);
@@ -1298,66 +1736,106 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       }
 
     }
+    //find digis that are associatd to LCTs
+      std::vector<GlobalPoint> gps;
+      std::vector<float> phis;
+      std::vector<float> xs;
+      std::vector<float> ys;
+      std::vector<float> zs;
+      std::vector<float> ephis;
+      std::vector<float> exs;
+      std::vector<float> ezs;
+      std::vector<float> status;
+      
+      auto bestMatchingLCT = match_lct.bestCscLctInChamber(d);
+      match_lct.positionsOfComparatorInLCT(d, bestMatchingLCT, gps);
+      if (gps.size()>=3){
+	  for (auto gp: gps){
+	        if (gp.z() > 0)
+          		zs.push_back(gp.z());
+		else zs.push_back(-gp.z());
+		xs.push_back(gp.x());
+		ys.push_back(gp.y());
+          	ezs.push_back(0);
+          	phis.push_back(gp.phi());
+		ephis.push_back(gemvalidation::cscHalfStripWidth(id)/sqrt(12));
+		float R=0.0;
+		if (id.ring() == 1 or id.ring() == 4) R=200;//cm
+		if (id.ring() == 2) R=400;//cm
+		exs.push_back(gemvalidation::cscHalfStripWidth(id)/sqrt(12)*R);
+	  }
+      }else {
+      	if (verbose_) std::cout <<" the size of gloabl points in this chamber is less than 3 "<< std::endl;
+      }
+     
+
+      float alpha = 0., beta = 0.;
+      calculateAlphaBeta(zs, phis, ezs, ephis, status,
+                         alpha, beta);
+      float alphax = 0., betax = 0.;
+      calculateAlphaBeta(zs, xs, ezs, xs, status,
+                         alphax, betax);
+      float alphay = 0., betay = 0.;
+      calculateAlphaBeta(zs, ys, ezs, xs, status,
+                         alphay, betay);
+      //ME11. even layer1 581.98; odd layer1 611.38, d=2.2
+      //ME12. even layer1 678.706, layer6 691.406; odd layer1 706.106, layer6 718.806, d=2.54
+      //ME21. even layer1 809.506; odd layer1 834.306 , d=2.54
+      //ME22, even layer1 809.506, layer6 822.206; odd layer1 834.306, layer6 847.006, d=2.54
+      //Z(layern) = Z(layer1)+d*(n-1)
+      if(odd and gps.size()){
+      	if (id.station()==1 and (id.ring()==1 or id.ring()==4)){
+      		etrk_[st].phi_layer1_fit_odd = alpha+beta*611.38;
+      		etrk_[st].phi_layer3_fit_odd = alpha+beta*(611.38+2.2*2);
+		etrk_[st].phi_layer6_fit_odd = alpha+beta*(611.38+2.2*5);
+		etrk_[st].phiM_fitxyz_odd = atan(betay/betax);
+      		etrk_[1].phi_layer1_fit_odd = alpha+beta*611.38;
+      		etrk_[1].phi_layer3_fit_odd = alpha+beta*(611.38+2.2*2);
+		etrk_[1].phi_layer6_fit_odd = alpha+beta*(611.38+2.2*5);
+		etrk_[1].phiM_fitxyz_odd = atan(betay/betax);
+	}	
+      	if (id.station()==1 and id.ring()==2){
+      		etrk_[st].phi_layer1_fit_odd = alpha+beta*706.106;
+      		etrk_[st].phi_layer3_fit_odd = alpha+beta*(706.106+2.54*2);
+		etrk_[st].phi_layer6_fit_odd = alpha+beta*718.806;
+		etrk_[st].phiM_fitxyz_odd = atan(betay/betax);
+	}
+      	if (id.station()==2){
+      		etrk_[st].phi_layer1_fit_odd = alpha+beta*834.306;
+      		etrk_[st].phi_layer3_fit_odd = alpha+beta*(834.306+2.54*2);
+		etrk_[st].phi_layer6_fit_odd = alpha+beta*847.006;
+		etrk_[st].phiM_fitxyz_odd = atan(betay/betax);
+	}
+	//std::cout <<"cscid "<< id <<" alpha "<< alpha <<" beta "<< beta <<" phi layer1 "<< etrk_[st].phi_layer1_fit_odd<<" layer6 "<<etrk_[st].phi_layer6_fit_odd<< std::endl;
+      }else if (gps.size()){
+      	if (id.station()==1 and (id.ring()==1 or id.ring(4))){
+      		etrk_[st].phi_layer1_fit_even = alpha+beta*581.98;
+      		etrk_[st].phi_layer3_fit_even = alpha+beta*(581.98+2.2*2);
+		etrk_[st].phi_layer6_fit_even = alpha+beta*(581.98+2.2*5);
+		etrk_[st].phiM_fitxyz_even = atan(betay/betax);
+      		etrk_[1].phi_layer1_fit_even = alpha+beta*581.98;
+      		etrk_[1].phi_layer3_fit_even = alpha+beta*(581.98+2.2*2);
+		etrk_[1].phi_layer6_fit_even = alpha+beta*(581.98+2.2*5);
+		etrk_[1].phiM_fitxyz_even = atan(betay/betax);
+	}
+      	if (id.station()==1 and id.ring()==2){
+      		etrk_[st].phi_layer1_fit_even = alpha+beta*678.706;
+      		etrk_[st].phi_layer3_fit_even = alpha+beta*(678.706+2.54*2);
+		etrk_[st].phi_layer6_fit_even = alpha+beta*691.406;
+		etrk_[st].phiM_fitxyz_even = atan(betay/betax);
+	}
+      	if (id.station()==2){
+      		etrk_[st].phi_layer1_fit_even = alpha+beta*809.506;
+      		etrk_[st].phi_layer3_fit_even = alpha+beta*(809.506+2.54*2);
+		etrk_[st].phi_layer6_fit_even = alpha+beta*822.206;
+		etrk_[st].phiM_fitxyz_even = atan(betay/betax);
+	}
+	//std::cout <<"cscid "<< id <<" alpha "<< alpha <<" beta "<< beta <<" phi layer1 "<< etrk_[st].phi_layer1_fit_even<<" layer6 "<<etrk_[st].phi_layer6_fit_even<< std::endl;
+      }
+      
   }
    
-  if (etrk_[1].has_csc_sh>0 and etrk_[6].has_csc_sh>0 and etrk_[8].has_csc_sh>0){
-     int npar=-1;
-     GlobalPoint gp1,gp2, gp3;
-     if ((etrk_[1].has_csc_sh&1)>0 and (etrk_[6].has_csc_sh&2)>0 and (etrk_[8].has_csc_sh&2)>0){
-        gp1=gp_sh_odd[1];
-        gp2=gp_sh_even[6];
-        gp3=gp_sh_even[8];
-	npar=0;
-     }else if ((etrk_[1].has_csc_sh&1)>0 and (etrk_[6].has_csc_sh&1)>0 and (etrk_[8].has_csc_sh&1)>0){ 
-        gp1=gp_sh_odd[1];
-        gp2=gp_sh_odd[6];
-        gp3=gp_sh_odd[8];
-	npar=1;
-     }else if ((etrk_[1].has_csc_sh&2)>0 and (etrk_[6].has_csc_sh&2)>0 and (etrk_[8].has_csc_sh&2)>0){ 
-        gp1=gp_sh_even[1];
-        gp2=gp_sh_even[6];
-        gp3=gp_sh_even[8];
-	npar=2;
-     }else if ((etrk_[1].has_csc_sh&2)>0 and (etrk_[6].has_csc_sh&1)>0 and (etrk_[8].has_csc_sh&1)>0){ 
-        gp1=gp_sh_even[1];
-        gp2=gp_sh_odd[6];
-        gp3=gp_sh_odd[8];
-	npar=3;
-     }
-     etrk_[0].hasSt1St2St3_sh=true; 
 
-     etrk_[0].pt_position_sh=Ptassign_Position_gp(gp1, gp2, gp3, etrk_[0].eta, npar);  
-  
-  } 
-
-  if (etrk_[1].has_lct>0 and etrk_[6].has_lct>0 and etrk_[8].has_lct>0){
-     int npar=-1;
-     GlobalPoint gp1,gp2, gp3;
-     if ((etrk_[1].has_lct&1)>0 and (etrk_[6].has_lct&2)>0 and (etrk_[8].has_lct&2)>0){
-        gp1=gp_lct_odd[1];
-        gp2=gp_lct_even[6];
-        gp3=gp_lct_even[8];
-	npar=0;
-     }else if ((etrk_[1].has_lct&1)>0 and (etrk_[6].has_lct&1)>0 and (etrk_[8].has_lct&1)>0){ 
-        gp1=gp_lct_odd[1];
-        gp2=gp_lct_odd[6];
-        gp3=gp_lct_odd[8];
-	npar=1;
-     }else if ((etrk_[1].has_lct&2)>0 and (etrk_[6].has_lct&2)>0 and (etrk_[8].has_lct&2)>0){ 
-        gp1=gp_lct_even[1];
-        gp2=gp_lct_even[6];
-        gp3=gp_lct_even[8];
-	npar=2;
-     }else if ((etrk_[1].has_lct&2)>0 and (etrk_[6].has_lct&1)>0 and (etrk_[8].has_lct&1)>0){ 
-        gp1=gp_lct_even[1];
-        gp2=gp_lct_odd[6];
-        gp3=gp_lct_odd[8];
-	npar=3;
-     }
-     etrk_[0].hasSt1St2St3=true; 
-     etrk_[0].pt_position=Ptassign_Position_gp(gp1, gp2, gp3, etrk_[0].eta, npar);  
-  
-  } 
    //for GEMs in station1, it will be also filled in ME11
   // GEM simhits in superchamber
   for(auto d: match_sh.superChamberIdsGEM())
@@ -1380,23 +1858,63 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       for (int layer=1; layer<3; layer++){
 	GEMDetId id_tmp(id.region(), id.ring(), id.station(), layer, id.chamber(), 0);
 	GlobalPoint keygp = match_sh.simHitsMeanPosition(match_sh.hitsInChamber(id_tmp.rawId()));
+	GlobalVector keygv = match_sh.simHitsMeanMomentum(match_sh.hitsInChamber(id_tmp.rawId()));
+	float centralperp_gemsh = match_sh.simHitsGEMCentralPosition(match_sh.hitsInChamber(id_tmp.rawId()));match_sh.simHitsMeanPosition(match_sh.hitsInChamber(id_tmp.rawId()));
 	if(match_sh.hitsInChamber(id_tmp).size()==0) continue;
 	//std::cout <<" GEM Id "<< id <<" gp.eta "<< sh_gp.eta() <<" gp.phi "<< sh_gp.phi() << std::endl;
-        //std::cout <<" GEMlayer1 Id "<< id_tmp <<" keygp.eta "<< keygp.eta() <<" keygp.phi "<< keygp.phi() << std::endl;
+        //std::cout <<" GEM Id "<< id_tmp <<" eta "<< keygp.eta() <<" phi "<< keygp.phi()<<" perp "<< keygp.perp() <<" x " << keygp.x() <<" y "<< keygp.y() << " z "<< keygp.z()<< std::endl;
       	if (odd) etrk_[st].eta_gemsh_odd = keygp.eta();
      	else     etrk_[st].eta_gemsh_even = keygp.eta();
       	if (odd) etrk_[st].phi_gemsh_odd = keygp.phi();
       	else     etrk_[st].phi_gemsh_even = keygp.phi();
-      	if (odd and etrk_[st].phi_cscsh_odd>-9) etrk_[st].dphi_sh_odd = deltaPhi(etrk_[st].phi_cscsh_odd, keygp.phi());
-      	else if (etrk_[st].phi_cscsh_even>-9)    etrk_[st].dphi_sh_even = deltaPhi(etrk_[st].phi_cscsh_even, keygp.phi());
+      	if (odd) etrk_[st].ptphi_gemsh_odd = keygv.phi();
+      	else     etrk_[st].ptphi_gemsh_even = keygv.phi();
+      	if (odd) etrk_[st].perp_gemsh_odd = keygp.perp();
+      	else     etrk_[st].perp_gemsh_even = keygp.perp();
+	if (odd) etrk_[st].centralperp_gemsh_odd = centralperp_gemsh;
+	else     etrk_[st].centralperp_gemsh_even = centralperp_gemsh;
+	float phi_m = -9;
+	float phi_m2 = -9;
+	int st_csc = (st==3 and (etrk_[st].has_csc_sh&3)==0)? 1:st;
+      	if (odd and etrk_[st_csc].phi_cscsh_odd>-9){
+	    etrk_[st].dphi_sh_odd = deltaPhi(etrk_[st_csc].phi_cscsh_odd, keygp.phi());// here should we use st or st_csc?
+    	    etrk_[st].dphipositionpt_gemsh_odd = deltaPhi(keygp.phi(),etrk_[st_csc].ptphi_sh_odd);
+	    phi_m =  PhiMomentum_Radius(etrk_[st].dphi_sh_odd, etrk_[st].phi_gemsh_odd, etrk_[st_csc].perp_cscsh_odd, etrk_[st].perp_gemsh_odd);
+	    phi_m2 =  PhiMomentum_Radius(etrk_[st].dphi_sh_odd, etrk_[st].phi_gemsh_odd, etrk_[st_csc].perp_cscsh_odd, etrk_[st].centralperp_gemsh_odd);
+	    etrk_[st].phiM_gemcsc_odd = phi_m;
+	    etrk_[st].phiM_gemcsc_central_odd = phi_m2;
+	    //std::cout <<"dphi(M,P) "<< deltaPhi(etrk_[st].phi_gemsh_odd, gv_sh_odd[st_csc].phi())<<" momentum phi from simhits "<< gv_sh_odd[st_csc].phi() <<" phi from gem-csc "<< phi_m <<" central "<< phi_m2<< std::endl;
+	}
+      	else if (not(odd) and etrk_[st_csc].phi_cscsh_even>-9) {
+	    etrk_[st].dphi_sh_even = deltaPhi(etrk_[st_csc].phi_cscsh_even, keygp.phi());
+    	    etrk_[st].dphipositionpt_gemsh_even = deltaPhi(keygp.phi(),etrk_[st_csc].ptphi_sh_even);
+	    phi_m =  PhiMomentum_Radius(etrk_[st].dphi_sh_even, etrk_[st].phi_gemsh_even, etrk_[st_csc].perp_cscsh_even, etrk_[st].perp_gemsh_even);
+	    phi_m2 =  PhiMomentum_Radius(etrk_[st].dphi_sh_even, etrk_[st].phi_gemsh_even, etrk_[st_csc].perp_cscsh_even, etrk_[st].centralperp_gemsh_even);
+	    etrk_[st].phiM_gemcsc_even = phi_m;
+	    etrk_[st].phiM_gemcsc_central_even = phi_m2;
+	    //std::cout <<"dphi(M,P) "<< deltaPhi(etrk_[st].phi_gemsh_even, gv_sh_even[st_csc].phi())<<" momentum phi from simhits "<< gv_sh_even[st_csc].phi() <<" phi from gem-csc "<< phi_m <<" central "<< phi_m2<< std::endl;
+	}
 	if (st==2 or st==3){
       		if (odd) etrk_[1].eta_gemsh_odd = keygp.eta();
       		else     etrk_[1].eta_gemsh_even = keygp.eta();
       		if (odd) etrk_[1].phi_gemsh_odd = keygp.phi();
       		else     etrk_[1].phi_gemsh_even = keygp.phi();
+      		if (odd) etrk_[1].ptphi_gemsh_odd = keygv.phi();
+      		else     etrk_[1].ptphi_gemsh_even = keygv.phi();
+      		if (odd) etrk_[1].perp_gemsh_odd = keygp.perp();
+      		else     etrk_[1].perp_gemsh_even = keygp.perp();
+		if (odd) etrk_[1].centralperp_gemsh_odd = centralperp_gemsh;
+		else     etrk_[1].centralperp_gemsh_even = centralperp_gemsh;
       		if (odd and etrk_[1].phi_cscsh_odd>-9) etrk_[1].dphi_sh_odd = deltaPhi(etrk_[1].phi_cscsh_odd,keygp.phi());
       		else if (etrk_[1].phi_cscsh_even>-9)     etrk_[1].dphi_sh_even = deltaPhi(etrk_[1].phi_cscsh_even,keygp.phi());
+		if (odd) etrk_[1].phiM_gemcsc_odd = phi_m;
+		else etrk_[1].phiM_gemcsc_even = phi_m;
+		if (odd) etrk_[1].phiM_gemcsc_central_odd = phi_m2;
+		else etrk_[1].phiM_gemcsc_central_even = phi_m2;
+		if (odd) etrk_[1].dphipositionpt_gemsh_odd = deltaPhi(keygp.phi(),etrk_[1].ptphi_sh_odd);
+		else etrk_[1].dphipositionpt_gemsh_even = deltaPhi(keygp.phi(),etrk_[1].ptphi_sh_even);
 	}
+	//std::cout <<"dphi(GEM, CSC) at sim "<<(odd? etrk_[st].dphi_sh_odd:etrk_[st].dphi_sh_even) <<" phi_csc "<< (odd? etrk_[st_csc].phi_cscsh_odd:etrk_[st_csc].phi_cscsh_even) <<" phi_gp "<< keygp.phi()<< std::endl;
 	if (id_tmp.layer()==1) break;
   		
       }
@@ -1493,8 +2011,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         	etrk_[st].deta_pad_odd = etrk_[st].eta_lct_odd - etrk_[st].eta_pad_odd;
       	}
     	}
-       else
-       {
+      else
+      {
       	etrk_[st].has_gem_pad |= 2;
         etrk_[st].chamber_even |= 1;
         etrk_[st].pad_even = digi_channel(pads.at(0));
@@ -1694,6 +2212,446 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       }
     }
   }
+
+
+
+  GlobalPoint gp1,gp2, gp3;
+  GlobalVector gv1,gv2;
+  int npar=-1;
+  float csc_bending_angle_12=-9;
+  float csc_bending_angle12_gemcsc = -9;
+  float csc_bending_angle12_gemcsc_central = -9;
+  float csc_bending_angle12_xfactor = -9;
+  float csc_bending_angle12_xfactor_smear1 = -9;
+  float csc_bending_angle12_xfactor_smear2 = -9;
+  float csc_bending_angle12_xfactor_smear3 = -9;
+  float csc_bending_angle12_xfactor_smear0 = -9;
+  float csc_bending_angle12_xfactor_L1_1 = -9;
+  float csc_bending_angle12_xfactor_L1_2 = -9;
+  //float dphiME11 = -9;
+  //float dphiME21 = -9;
+  //float dphiME11_gauss = -9;
+  //float dphiME21_gauss = -9;
+  float gp1_phi_gauss = -9;
+  float gp2_phi_gauss = -9;
+  float	gem1_phi_gauss = -9;
+  float gem2_phi_gauss = -9;
+
+//x_factor = (R(ME21)/R(ME11)-1)/D(ME11, ME21)
+//X: st1, X=D(GEM,CSC)*x_factor, st2: D(GEM,CSC)*x_factor/(D(ME11,ME21)*x+1)
+  float xfactor = 0.0;
+  float xfactor_st1 = 0.0;
+  float xfactor_st2 = 0.0;
+  //float xfactor_smear = 0.0;
+  float phiM_st1_sh = 0.0;
+  float phiM_st2_sh = 0.0;
+  float phiM_st1_smear0 = 0.0;
+  float phiM_st2_smear0 = 0.0;
+  float phiM_st1_smear1 = 0.0;
+  float phiM_st2_smear1 = 0.0;
+  float phiM_st1_smear2 = 0.0;
+  float phiM_st2_smear2 = 0.0;
+  float phiM_st1_smear3 = 0.0;
+  float phiM_st2_smear3 = 0.0;
+  float phiM_st1_L1_1 = 0.0;
+  float phiM_st2_L1_1 = 0.0;
+  float phiM_st1_L1_2 = 0.0;
+  float phiM_st2_L1_2 = 0.0;
+
+
+   
+  if (etrk_[1].has_csc_sh>0 and etrk_[6].has_csc_sh>0){
+     if ((etrk_[1].has_csc_sh&1)>0 and (etrk_[6].has_csc_sh&2)>0){
+        gp1=gp_sh_odd[1];
+        gp2=gp_sh_even[6];
+        gv1=gv_sh_odd[1];
+        gv2=gv_sh_even[6];
+	csc_bending_angle_12=deltaPhi(gv1.phi(), gv2.phi());
+        gem1_phi_gauss = CLHEP::RandGauss::shoot(etrk_[1].phi_gemsh_odd, .00021);
+        gem2_phi_gauss = CLHEP::RandGauss::shoot(etrk_[6].phi_gemsh_even, .00014);
+        gp1_phi_gauss = CLHEP::RandGauss::shoot(etrk_[1].phi_cscsh_odd, .00026);
+        gp2_phi_gauss = CLHEP::RandGauss::shoot(etrk_[6].phi_cscsh_even, .00045);
+	xfactor = (gp2.perp()/gp1.perp()-1.0)/(814.586-615.33);
+	//xfactor_smear = CLHEP::RandGauss::shoot(xfactor,0.00005);
+	//std::cout <<"gp1 perp "<< gp1.perp() <<" gp2 perp "<< gp2.perp() <<"xfactor "<< xfactor <<" smear "<< xfactor_smear << std::endl;
+	xfactor_st1 = (615.33-567.82)*xfactor;
+	xfactor_st2 = (814.586-794.29)*xfactor/(xfactor*(814.586-615.33)+1);
+	npar=0;
+	if ((etrk_[8].has_csc_sh&2)>0)
+	    gp3=gp_sh_even[8];
+	if (etrk_[1].dphi_sh_odd>-9 and etrk_[6].dphi_sh_even>-9)
+	{
+	    //dphiME11 = etrk_[1].dphi_sh_odd;
+	    //dphiME21 = etrk_[6].dphi_sh_even;
+    	    //dphiME11_gauss = CLHEP::RandGauss::shoot(dphiME11, .0005);
+     	    //dphiME21_gauss = CLHEP::RandGauss::shoot(dphiME21, .0005);
+	    phiM_st1_sh = PhiMomentum_Xfactor_V2(etrk_[1].phi_cscsh_odd, etrk_[1].phi_gemsh_odd, xfactor_st1);
+	    phiM_st2_sh = PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_even, etrk_[6].phi_gemsh_even, xfactor_st2);
+	    phiM_st1_smear0 = PhiMomentum_Xfactor_V2(gp1_phi_gauss, etrk_[1].phi_gemsh_odd, xfactor_st1);
+	    phiM_st2_smear0 = PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_even, etrk_[6].phi_gemsh_even, xfactor_st2);
+	    phiM_st1_smear1 = PhiMomentum_Xfactor_V2(gp1_phi_gauss, gem1_phi_gauss, xfactor_st1);
+	    phiM_st2_smear1 = PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_even, etrk_[6].phi_gemsh_even, xfactor_st2);
+	    phiM_st1_smear2 = PhiMomentum_Xfactor_V2(gp1_phi_gauss, gem1_phi_gauss, xfactor_st1);
+	    phiM_st2_smear2 = PhiMomentum_Xfactor_V2(gp2_phi_gauss, etrk_[6].phi_gemsh_even, xfactor_st2);
+	    phiM_st1_smear3 = PhiMomentum_Xfactor_V2(gp1_phi_gauss, gem1_phi_gauss, xfactor_st1);
+	    phiM_st2_smear3 = PhiMomentum_Xfactor_V2(gp2_phi_gauss, gem2_phi_gauss, xfactor_st2);
+
+	    phiM_st1_L1_1 = PhiMomentum_Xfactor_V2(etrk_[1].phi_layer3_fit_odd, gem1_phi_gauss, xfactor_st1);
+	    phiM_st2_L1_1 = PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_even, gem2_phi_gauss, xfactor_st2);
+	    phiM_st1_L1_2 = PhiMomentum_Xfactor_V2(etrk_[1].phi_layer3_fit_odd, gem1_phi_gauss, xfactor_st1);
+	    phiM_st2_L1_2 = PhiMomentum_Xfactor_V2(etrk_[6].phi_layer3_fit_even, gem2_phi_gauss, xfactor_st2);
+	    if (phiM_st1_sh>-9 and phiM_st2_sh>-9){
+		csc_bending_angle12_xfactor = deltaPhi(phiM_st1_sh,phiM_st2_sh);
+		csc_bending_angle12_xfactor_smear0 = deltaPhi(phiM_st1_smear0,phiM_st2_smear0);
+		csc_bending_angle12_xfactor_smear1 = deltaPhi(phiM_st1_smear1,phiM_st2_smear1);
+		csc_bending_angle12_xfactor_smear2 = deltaPhi(phiM_st1_smear2,phiM_st2_smear2);
+		csc_bending_angle12_xfactor_smear3 = deltaPhi(phiM_st1_smear3,phiM_st2_smear3);
+	    }
+	    if (phiM_st1_L1_2>-9 and phiM_st2_L1_2>-9){
+		csc_bending_angle12_xfactor_L1_1 = deltaPhi(phiM_st1_L1_1,phiM_st2_L1_1);
+		csc_bending_angle12_xfactor_L1_2 = deltaPhi(phiM_st1_L1_2,phiM_st2_L1_2);
+	    }
+
+	    if (etrk_[1].phiM_gemcsc_odd>-9 and etrk_[6].phiM_gemcsc_even>-9)
+     	    	csc_bending_angle12_gemcsc = deltaPhi(etrk_[1].phiM_gemcsc_odd, etrk_[6].phiM_gemcsc_even);
+	    if (etrk_[1].phiM_gemcsc_central_odd>-9 and etrk_[6].phiM_gemcsc_central_even>-9)
+     	    	csc_bending_angle12_gemcsc_central = deltaPhi(etrk_[1].phiM_gemcsc_central_odd, etrk_[6].phiM_gemcsc_central_even);
+	}
+     }else if ((etrk_[1].has_csc_sh&1)>0 and (etrk_[6].has_csc_sh&1)>0 ){ 
+        gp1=gp_sh_odd[1];
+        gp2=gp_sh_odd[6];
+        gv1=gv_sh_odd[1];
+        gv2=gv_sh_odd[6];
+	csc_bending_angle_12=deltaPhi(gv1.phi(), gv2.phi());
+        gem1_phi_gauss = CLHEP::RandGauss::shoot(etrk_[1].phi_gemsh_odd, .00021);
+        gem2_phi_gauss = CLHEP::RandGauss::shoot(etrk_[6].phi_gemsh_odd, .00014);
+        gp1_phi_gauss = CLHEP::RandGauss::shoot(etrk_[1].phi_cscsh_odd, .00026);
+        gp2_phi_gauss = CLHEP::RandGauss::shoot(etrk_[6].phi_cscsh_odd, .00045);
+	xfactor = (gp2.perp()/gp1.perp()-1.0)/(839.386-615.33);
+        //xfactor_smear = CLHEP::RandGauss::shoot(xfactor,0.00005);
+	//std::cout <<"gp1 perp "<< gp1.perp() <<" gp2 perp "<< gp2.perp() <<"xfactor "<< xfactor <<" smear "<< xfactor_smear << std::endl;
+	xfactor_st1 = (615.33-567.82)*xfactor;
+	xfactor_st2 = (839.386-796.792)*xfactor/(xfactor*(839.386-615.33)+1);
+	npar=1;
+	if ((etrk_[8].has_csc_sh&1)>0)
+	    gp3=gp_sh_odd[8];
+	if (etrk_[1].dphi_sh_odd>-9 and etrk_[6].dphi_sh_odd>-9)
+	{
+	    //dphiME11 = etrk_[1].dphi_sh_odd;
+	    //dphiME21 = etrk_[6].dphi_sh_odd;
+    	    //dphiME11_gauss = CLHEP::RandGauss::shoot(dphiME11, .0005);
+     	    //dphiME21_gauss = CLHEP::RandGauss::shoot(dphiME21, .0005);
+	    phiM_st1_sh = PhiMomentum_Xfactor_V2(etrk_[1].phi_cscsh_odd, etrk_[1].phi_gemsh_odd, xfactor_st1);
+	    phiM_st2_sh = PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_odd, etrk_[6].phi_gemsh_odd, xfactor_st2);
+	    phiM_st1_smear0 = PhiMomentum_Xfactor_V2(gp1_phi_gauss, etrk_[1].phi_gemsh_odd, xfactor_st1);
+	    phiM_st2_smear0 = PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_odd, etrk_[6].phi_gemsh_odd, xfactor_st2);
+	    phiM_st1_smear1 = PhiMomentum_Xfactor_V2(gp1_phi_gauss, gem1_phi_gauss, xfactor_st1);
+	    phiM_st2_smear1 = PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_odd, etrk_[6].phi_gemsh_odd, xfactor_st2);
+	    phiM_st1_smear2 = PhiMomentum_Xfactor_V2(gp1_phi_gauss, gem1_phi_gauss, xfactor_st1);
+	    phiM_st2_smear2 = PhiMomentum_Xfactor_V2(gp2_phi_gauss, etrk_[6].phi_gemsh_odd, xfactor_st2);
+	    phiM_st1_smear3 = PhiMomentum_Xfactor_V2(gp1_phi_gauss, gem1_phi_gauss, xfactor_st1);
+	    phiM_st2_smear3 = PhiMomentum_Xfactor_V2(gp2_phi_gauss, gem2_phi_gauss, xfactor_st2);
+	    phiM_st1_L1_1 = PhiMomentum_Xfactor_V2(etrk_[1].phi_layer3_fit_odd, gem1_phi_gauss, xfactor_st1);
+	    phiM_st2_L1_1 = PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_odd, gem2_phi_gauss, xfactor_st2);
+	    phiM_st1_L1_2 = PhiMomentum_Xfactor_V2(etrk_[1].phi_layer3_fit_odd, gem1_phi_gauss, xfactor_st1);
+	    phiM_st2_L1_2 = PhiMomentum_Xfactor_V2(etrk_[6].phi_layer3_fit_odd, gem2_phi_gauss, xfactor_st2);
+	    if (phiM_st1_sh>-9 and phiM_st2_sh>-9){
+		csc_bending_angle12_xfactor = deltaPhi(phiM_st1_sh,phiM_st2_sh);
+		csc_bending_angle12_xfactor_smear0 = deltaPhi(phiM_st1_smear0,phiM_st2_smear0);
+		csc_bending_angle12_xfactor_smear1 = deltaPhi(phiM_st1_smear1,phiM_st2_smear1);
+		csc_bending_angle12_xfactor_smear2 = deltaPhi(phiM_st1_smear2,phiM_st2_smear2);
+		csc_bending_angle12_xfactor_smear3 = deltaPhi(phiM_st1_smear3,phiM_st2_smear3);
+	    }
+	    if (phiM_st1_L1_2>-9 and phiM_st2_L1_2>-9){
+		csc_bending_angle12_xfactor_L1_1 = deltaPhi(phiM_st1_L1_1,phiM_st2_L1_1);
+		csc_bending_angle12_xfactor_L1_2 = deltaPhi(phiM_st1_L1_2,phiM_st2_L1_2);
+	    }
+
+	    if (etrk_[1].phiM_gemcsc_odd>-9 and etrk_[6].phiM_gemcsc_odd>-9)
+     	    	csc_bending_angle12_gemcsc = deltaPhi(etrk_[1].phiM_gemcsc_odd, etrk_[6].phiM_gemcsc_odd);
+	    if (etrk_[1].phiM_gemcsc_central_odd>-9 and etrk_[6].phiM_gemcsc_central_odd>-9)
+     	    	csc_bending_angle12_gemcsc_central = deltaPhi(etrk_[1].phiM_gemcsc_central_odd, etrk_[6].phiM_gemcsc_central_odd);
+	}
+     }else if ((etrk_[1].has_csc_sh&2)>0 and (etrk_[6].has_csc_sh&2)>0 ){ 
+        gp1=gp_sh_even[1];
+        gp2=gp_sh_even[6];
+        gv1=gv_sh_even[1];
+        gv2=gv_sh_even[6];
+	csc_bending_angle_12=deltaPhi(gv1.phi(), gv2.phi());
+        gem1_phi_gauss = CLHEP::RandGauss::shoot(etrk_[1].phi_gemsh_even, .00021);
+        gem2_phi_gauss = CLHEP::RandGauss::shoot(etrk_[6].phi_gemsh_even, .00014);
+        gp1_phi_gauss = CLHEP::RandGauss::shoot(etrk_[1].phi_cscsh_even, .00026);
+        gp2_phi_gauss = CLHEP::RandGauss::shoot(etrk_[6].phi_cscsh_even, .00045);
+	xfactor = (gp2.perp()/gp1.perp()-1.0)/(814.586-586.03);
+        //xfactor_smear = CLHEP::RandGauss::shoot(xfactor,0.00005);
+	//std::cout <<"gp1 perp "<< gp1.perp() <<" gp2 perp "<< gp2.perp() <<"xfactor "<< xfactor <<" smear "<< xfactor_smear << std::endl;
+	xfactor_st1 = (586.03-565.32)*xfactor;
+	xfactor_st2 = (814.586-794.29)*xfactor/(xfactor*(814.586-586.03)+1);
+	npar=2;
+	if ((etrk_[8].has_csc_sh&2)>0)
+	    gp3=gp_sh_even[8];
+	if (etrk_[1].dphi_sh_even>-9 and etrk_[6].dphi_sh_even>-9)
+	{
+	    //dphiME11 = etrk_[1].dphi_sh_even;
+	    //dphiME21 = etrk_[6].dphi_sh_even;
+    	    //dphiME11_gauss = CLHEP::RandGauss::shoot(dphiME11, .0005);
+     	    //dphiME21_gauss = CLHEP::RandGauss::shoot(dphiME21, .0005);
+	    phiM_st1_sh = PhiMomentum_Xfactor_V2(etrk_[1].phi_cscsh_even, etrk_[1].phi_gemsh_even, xfactor_st1);
+	    phiM_st2_sh = PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_even, etrk_[6].phi_gemsh_even, xfactor_st2);
+	    phiM_st1_smear0 = PhiMomentum_Xfactor_V2(gp1_phi_gauss, etrk_[1].phi_gemsh_even, xfactor_st1);
+	    phiM_st2_smear0 = PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_even, etrk_[6].phi_gemsh_even, xfactor_st2);
+	    phiM_st1_smear1 = PhiMomentum_Xfactor_V2(gp1_phi_gauss, gem1_phi_gauss, xfactor_st1);
+	    phiM_st2_smear1 = PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_even, etrk_[6].phi_gemsh_even, xfactor_st2);
+	    phiM_st1_smear2 = PhiMomentum_Xfactor_V2(gp1_phi_gauss, gem1_phi_gauss, xfactor_st1);
+	    phiM_st2_smear2 = PhiMomentum_Xfactor_V2(gp2_phi_gauss, etrk_[6].phi_gemsh_even, xfactor_st2);
+	    phiM_st1_smear3 = PhiMomentum_Xfactor_V2(gp1_phi_gauss, gem1_phi_gauss, xfactor_st1);
+	    phiM_st2_smear3 = PhiMomentum_Xfactor_V2(gp2_phi_gauss, gem2_phi_gauss, xfactor_st2);
+	    phiM_st1_L1_1 = PhiMomentum_Xfactor_V2(etrk_[1].phi_layer3_fit_even, gem1_phi_gauss, xfactor_st1);
+	    phiM_st2_L1_1 = PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_even, gem2_phi_gauss, xfactor_st2);
+	    phiM_st1_L1_2 = PhiMomentum_Xfactor_V2(etrk_[1].phi_layer3_fit_even, gem1_phi_gauss, xfactor_st1);
+	    phiM_st2_L1_2 = PhiMomentum_Xfactor_V2(etrk_[6].phi_layer3_fit_even, gem2_phi_gauss, xfactor_st2);
+	    if (phiM_st1_sh>-9 and phiM_st2_sh>-9){
+		csc_bending_angle12_xfactor = deltaPhi(phiM_st1_sh,phiM_st2_sh);
+		csc_bending_angle12_xfactor_smear0 = deltaPhi(phiM_st1_smear0,phiM_st2_smear0);
+		csc_bending_angle12_xfactor_smear1 = deltaPhi(phiM_st1_smear1,phiM_st2_smear1);
+		csc_bending_angle12_xfactor_smear2 = deltaPhi(phiM_st1_smear2,phiM_st2_smear2);
+		csc_bending_angle12_xfactor_smear3 = deltaPhi(phiM_st1_smear3,phiM_st2_smear3);
+	    }
+	    if (phiM_st1_L1_2>-9 and phiM_st2_L1_2>-9){
+		csc_bending_angle12_xfactor_L1_1 = deltaPhi(phiM_st1_L1_1,phiM_st2_L1_1);
+		csc_bending_angle12_xfactor_L1_2 = deltaPhi(phiM_st1_L1_2,phiM_st2_L1_2);
+	    }
+
+	    if (etrk_[1].phiM_gemcsc_even>-9 and etrk_[6].phiM_gemcsc_even>-9)
+     	    	csc_bending_angle12_gemcsc = deltaPhi(etrk_[1].phiM_gemcsc_even, etrk_[6].phiM_gemcsc_even);
+	    if (etrk_[1].phiM_gemcsc_central_even>-9 and etrk_[6].phiM_gemcsc_central_even>-9)
+     	    	csc_bending_angle12_gemcsc_central = deltaPhi(etrk_[1].phiM_gemcsc_central_even, etrk_[6].phiM_gemcsc_central_even);
+	}
+     }else if ((etrk_[1].has_csc_sh&2)>0 and (etrk_[6].has_csc_sh&1)>0 ){ 
+        gp1=gp_sh_even[1];
+        gp2=gp_sh_odd[6];
+        gv1=gv_sh_even[1];
+        gv2=gv_sh_odd[6];
+	csc_bending_angle_12=deltaPhi(gv1.phi(), gv2.phi());
+        gem1_phi_gauss = CLHEP::RandGauss::shoot(etrk_[1].phi_gemsh_even, .00021);
+        gem2_phi_gauss = CLHEP::RandGauss::shoot(etrk_[6].phi_gemsh_odd, .00014);
+        gp1_phi_gauss = CLHEP::RandGauss::shoot(etrk_[1].phi_cscsh_even, .00026);
+        gp2_phi_gauss = CLHEP::RandGauss::shoot(etrk_[6].phi_cscsh_odd, .00045);
+	xfactor = (gp2.perp()/gp1.perp()-1.0)/(839.386-586.03);
+        //xfactor_smear = CLHEP::RandGauss::shoot(xfactor,0.00005);
+	xfactor_st1 = (586.03-565.32)*xfactor;
+	xfactor_st2 = (839.386-796.792)*xfactor/(xfactor*(839.386-586.03)+1);
+	//std::cout <<"gp1 perp "<< gp1.perp() <<" gp2 perp "<< gp2.perp() <<"xfactor "<< xfactor <<" smear "<< xfactor_smear <<" xfactor_st1 "<< xfactor_st1 <<" xfactor_st2 "<< xfactor_st2 << std::endl;
+	npar=3;
+	if ((etrk_[8].has_csc_sh&1)>0)
+	    gp3=gp_sh_odd[8];
+	if (etrk_[1].dphi_sh_even>-9 and etrk_[6].dphi_sh_odd>-9)
+	{
+	    //dphiME11 = etrk_[1].dphi_sh_even;
+	    //dphiME21 = etrk_[6].dphi_sh_odd;
+    	    //dphiME11_gauss = CLHEP::RandGauss::shoot(dphiME11, .0005);//0.00055
+     	    //dphiME21_gauss = CLHEP::RandGauss::shoot(dphiME21, .0005);//0.00095
+	    phiM_st1_sh = PhiMomentum_Xfactor_V2(etrk_[1].phi_cscsh_even, etrk_[1].phi_gemsh_even, xfactor_st1);
+	    phiM_st2_sh = PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_odd, etrk_[6].phi_gemsh_odd, xfactor_st2);
+	    phiM_st1_smear0 = PhiMomentum_Xfactor_V2(gp1_phi_gauss, etrk_[1].phi_gemsh_even, xfactor_st1);
+	    phiM_st2_smear0 = PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_odd, etrk_[6].phi_gemsh_odd, xfactor_st2);
+	    phiM_st1_smear1 = PhiMomentum_Xfactor_V2(gp1_phi_gauss, gem1_phi_gauss, xfactor_st1);
+	    phiM_st2_smear1 = PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_odd, etrk_[6].phi_gemsh_odd, xfactor_st2);
+	    phiM_st1_smear2 = PhiMomentum_Xfactor_V2(gp1_phi_gauss, gem1_phi_gauss, xfactor_st1);
+	    phiM_st2_smear2 = PhiMomentum_Xfactor_V2(gp2_phi_gauss, etrk_[6].phi_gemsh_odd, xfactor_st2);
+	    phiM_st1_smear3 = PhiMomentum_Xfactor_V2(gp1_phi_gauss, gem1_phi_gauss, xfactor_st1);
+	    phiM_st2_smear3 = PhiMomentum_Xfactor_V2(gp2_phi_gauss, gem2_phi_gauss, xfactor_st2);
+	    phiM_st1_L1_1 = PhiMomentum_Xfactor_V2(etrk_[1].phi_layer3_fit_even, gem1_phi_gauss, xfactor_st1);
+	    phiM_st2_L1_1 = PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_odd, gem2_phi_gauss, xfactor_st2);
+	    phiM_st1_L1_2 = PhiMomentum_Xfactor_V2(etrk_[1].phi_layer3_fit_even, gem1_phi_gauss, xfactor_st1);
+	    phiM_st2_L1_2 = PhiMomentum_Xfactor_V2(etrk_[6].phi_layer3_fit_odd, gem2_phi_gauss, xfactor_st2);
+	    if (phiM_st1_sh>-9 and phiM_st2_sh>-9){
+		csc_bending_angle12_xfactor = deltaPhi(phiM_st1_sh,phiM_st2_sh);
+		csc_bending_angle12_xfactor_smear0 = deltaPhi(phiM_st1_smear0,phiM_st2_smear0);
+		csc_bending_angle12_xfactor_smear1 = deltaPhi(phiM_st1_smear1,phiM_st2_smear1);
+		csc_bending_angle12_xfactor_smear2 = deltaPhi(phiM_st1_smear2,phiM_st2_smear2);
+		csc_bending_angle12_xfactor_smear3 = deltaPhi(phiM_st1_smear3,phiM_st2_smear3);
+	    }
+	    if (phiM_st1_L1_2>-9 and phiM_st2_L1_2>-9){
+		csc_bending_angle12_xfactor_L1_1 = deltaPhi(phiM_st1_L1_1,phiM_st2_L1_1);
+		csc_bending_angle12_xfactor_L1_2 = deltaPhi(phiM_st1_L1_2,phiM_st2_L1_2);
+	    }
+
+	    if (etrk_[1].phiM_gemcsc_even>-9 and etrk_[6].phiM_gemcsc_odd>-9)
+     	    	csc_bending_angle12_gemcsc = deltaPhi(etrk_[1].phiM_gemcsc_even, etrk_[6].phiM_gemcsc_odd);
+	    if (etrk_[1].phiM_gemcsc_central_even>-9 and etrk_[6].phiM_gemcsc_central_odd>-9)
+     	    	csc_bending_angle12_gemcsc_central = deltaPhi(etrk_[1].phiM_gemcsc_central_even, etrk_[6].phiM_gemcsc_central_odd);
+	}
+     }
+     //std::cout <<"high eta region npar "<< npar<<" eta_st2 "<< gp2.eta() <<" csc bending angle12 "<< csc_bending_angle_12<<" xfactor1 "<< xfactor_st1<<" xfactor2 "<< xfactor_st2 <<" csc_bending_angle12_xfactor "<< csc_bending_angle12_xfactor << std::endl;
+  } 
+
+     //low eta region , ME12, ME22
+  if (etrk_[4].has_csc_sh>0 and etrk_[7].has_csc_sh>0){
+     if ((etrk_[4].has_csc_sh&1)>0 and (etrk_[7].has_csc_sh&2)>0){
+        gp1=gp_sh_odd[4];
+        gp2=gp_sh_even[7];
+        gv1=gv_sh_odd[4];
+        gv2=gv_sh_even[7];
+	csc_bending_angle_12=deltaPhi(gv1.phi(), gv2.phi());
+	xfactor = (gp2.perp()/gp1.perp()-1.0)/(814.586-711.186);
+	xfactor_st1 = (12.7)*xfactor;
+	xfactor_st2 = (12.7)*xfactor/(xfactor*(814.586-711.186)+1);
+	npar=0;
+	if (etrk_[4].phi_layer1_sh_odd>-9  and etrk_[4].phi_layer6_sh_odd>-9 and etrk_[7].phi_layer1_sh_even>-9  and etrk_[7].phi_layer6_sh_even>-9){
+	    phiM_st1_sh = PhiMomentum_Xfactor_V2(etrk_[4].phi_layer6_sh_odd, etrk_[4].phi_layer1_sh_odd, xfactor_st1);
+	    phiM_st2_sh = PhiMomentum_Xfactor_V2(etrk_[7].phi_layer6_sh_even, etrk_[7].phi_layer1_sh_even, xfactor_st2);
+	    phiM_st1_smear3 = PhiMomentum_Xfactor_V2(etrk_[4].phi_layer6_fit_odd, etrk_[4].phi_layer1_fit_odd, xfactor_st1);
+	    phiM_st2_smear3 = PhiMomentum_Xfactor_V2(etrk_[7].phi_layer6_fit_even, etrk_[7].phi_layer1_fit_even, xfactor_st2);
+	    if (phiM_st1_sh>-9 and phiM_st2_sh>-9){
+		csc_bending_angle12_xfactor = deltaPhi(phiM_st1_sh,phiM_st2_sh);
+		csc_bending_angle12_xfactor_smear3 = deltaPhi(phiM_st1_smear3,phiM_st2_smear3);
+		csc_bending_angle12_xfactor_L1_1 = deltaPhi(etrk_[4].phiM_fitxyz_odd, etrk_[7].phiM_fitxyz_even);
+		}
+	}
+     }else if ((etrk_[4].has_csc_sh&1)>0 and (etrk_[7].has_csc_sh&1)>0){
+        gp1=gp_sh_odd[4];
+        gp2=gp_sh_odd[7];
+        gv1=gv_sh_odd[4];
+        gv2=gv_sh_odd[7];
+	csc_bending_angle_12=deltaPhi(gv1.phi(), gv2.phi());
+	xfactor = (gp2.perp()/gp1.perp()-1.0)/(839.386-711.186);
+	xfactor_st1 = (12.7)*xfactor;
+	xfactor_st2 = (12.7)*xfactor/(xfactor*(839.386-711.186)+1);
+	npar=1;
+	if (etrk_[4].phi_layer1_sh_odd>-9  and etrk_[4].phi_layer6_sh_odd>-9 and etrk_[7].phi_layer1_sh_odd>-9  and etrk_[7].phi_layer6_sh_odd>-9){
+	    phiM_st1_sh = PhiMomentum_Xfactor_V2(etrk_[4].phi_layer6_sh_odd, etrk_[4].phi_layer1_sh_odd, xfactor_st1);
+	    phiM_st2_sh = PhiMomentum_Xfactor_V2(etrk_[7].phi_layer6_sh_odd, etrk_[7].phi_layer1_sh_odd, xfactor_st2);
+	    phiM_st1_smear3 = PhiMomentum_Xfactor_V2(etrk_[4].phi_layer6_fit_odd, etrk_[4].phi_layer1_fit_odd, xfactor_st1);
+	    phiM_st2_smear3 = PhiMomentum_Xfactor_V2(etrk_[7].phi_layer6_fit_odd, etrk_[7].phi_layer1_fit_odd, xfactor_st2);
+	    if (phiM_st1_sh>-9 and phiM_st2_sh>-9){
+		csc_bending_angle12_xfactor = deltaPhi(phiM_st1_sh,phiM_st2_sh);
+		csc_bending_angle12_xfactor_smear3 = deltaPhi(phiM_st1_smear3,phiM_st2_smear3);
+		csc_bending_angle12_xfactor_L1_1 = deltaPhi(etrk_[4].phiM_fitxyz_odd, etrk_[7].phiM_fitxyz_odd);
+		}
+	}
+     }else if ((etrk_[4].has_csc_sh&2)>0 and (etrk_[7].has_csc_sh&2)>0){
+        gp1=gp_sh_even[4];
+        gp2=gp_sh_even[7];
+        gv1=gv_sh_even[4];
+        gv2=gv_sh_even[7];
+	csc_bending_angle_12=deltaPhi(gv1.phi(), gv2.phi());
+	xfactor = (gp2.perp()/gp1.perp()-1.0)/(814.586-683.786);
+	xfactor_st1 = (12.7)*xfactor;
+	xfactor_st2 = (12.7)*xfactor/(xfactor*(814.586-683.786)+1);
+	npar=2;
+	if (etrk_[4].phi_layer1_sh_even>-9  and etrk_[4].phi_layer6_sh_even>-9 and etrk_[7].phi_layer1_sh_even>-9  and etrk_[7].phi_layer6_sh_even>-9){
+	    phiM_st1_sh = PhiMomentum_Xfactor_V2(etrk_[4].phi_layer6_sh_even, etrk_[4].phi_layer1_sh_even, xfactor_st1);
+	    phiM_st2_sh = PhiMomentum_Xfactor_V2(etrk_[7].phi_layer6_sh_even, etrk_[7].phi_layer1_sh_even, xfactor_st2);
+	    phiM_st1_smear3 = PhiMomentum_Xfactor_V2(etrk_[4].phi_layer6_fit_even, etrk_[4].phi_layer1_fit_even, xfactor_st1);
+	    phiM_st2_smear3 = PhiMomentum_Xfactor_V2(etrk_[7].phi_layer6_fit_even, etrk_[7].phi_layer1_fit_even, xfactor_st2);
+	    if (phiM_st1_sh>-9 and phiM_st2_sh>-9){
+		csc_bending_angle12_xfactor = deltaPhi(phiM_st1_sh,phiM_st2_sh);
+		csc_bending_angle12_xfactor_smear3 = deltaPhi(phiM_st1_smear3,phiM_st2_smear3);
+		csc_bending_angle12_xfactor_L1_1 = deltaPhi(etrk_[4].phiM_fitxyz_even, etrk_[7].phiM_fitxyz_even);
+		}
+	}
+     }else if ((etrk_[4].has_csc_sh&2)>0 and (etrk_[7].has_csc_sh&1)>0){
+        gp1=gp_sh_even[4];
+        gp2=gp_sh_odd[7];
+        gv1=gv_sh_even[4];
+        gv2=gv_sh_odd[7];
+	csc_bending_angle_12=deltaPhi(gv1.phi(), gv2.phi());
+	xfactor = (gp2.perp()/gp1.perp()-1.0)/(839.386-683.786);
+	xfactor_st1 = (12.7)*xfactor;
+	xfactor_st2 = (12.7)*xfactor/(xfactor*(839.386-683.786)+1);
+	npar=3;
+	if (etrk_[4].phi_layer1_sh_even>-9  and etrk_[4].phi_layer6_sh_even>-9 and etrk_[7].phi_layer1_sh_odd>-9  and etrk_[7].phi_layer6_sh_odd>-9){
+	    phiM_st1_sh = PhiMomentum_Xfactor_V2(etrk_[4].phi_layer6_sh_even, etrk_[4].phi_layer1_sh_even, xfactor_st1);
+	    phiM_st2_sh = PhiMomentum_Xfactor_V2(etrk_[7].phi_layer6_sh_odd, etrk_[7].phi_layer1_sh_odd, xfactor_st2);
+	    phiM_st1_smear3 = PhiMomentum_Xfactor_V2(etrk_[4].phi_layer6_fit_even, etrk_[4].phi_layer1_fit_even, xfactor_st1);
+	    phiM_st2_smear3 = PhiMomentum_Xfactor_V2(etrk_[7].phi_layer6_fit_odd, etrk_[7].phi_layer1_fit_odd, xfactor_st2);
+	    if (phiM_st1_sh>-9 and phiM_st2_sh>-9){
+		csc_bending_angle12_xfactor = deltaPhi(phiM_st1_sh,phiM_st2_sh);
+		csc_bending_angle12_xfactor_smear3 = deltaPhi(phiM_st1_smear3,phiM_st2_smear3);
+		csc_bending_angle12_xfactor_L1_1 = deltaPhi(etrk_[4].phiM_fitxyz_even, etrk_[7].phiM_fitxyz_odd);
+		}
+	}
+     }
+     //std::cout <<"low eta region npar "<< npar <<" eta_st2 "<< gp2.eta() <<" csc bending angle12 "<< csc_bending_angle_12<<" xfactor1 "<< xfactor_st1<<" xfactor2 "<< xfactor_st2 <<" phiM_st1_sh "<< phiM_st1_sh <<" phiM_st2_sh "<< phiM_st1_sh <<" csc_bending_angle12_xfactor "<< csc_bending_angle12_xfactor <<" phiM_st1_smear3 "<< phiM_st1_smear3 <<" phiM_st2_smear3 "<< phiM_st2_smear3<<" csc_bending_angle12_xfactor_smear3 "<< csc_bending_angle12_xfactor_smear3 << std::endl;
+  }
+
+
+
+  if (fabs(csc_bending_angle12_xfactor)<4) {
+     if ((etrk_[8].has_csc_sh || etrk_[9].has_csc_sh) || (etrk_[10].has_csc_sh || etrk_[11].has_csc_sh))
+     	etrk_[0].hasSt3orSt4_sh=true; 
+     etrk_[0].npar = npar;
+     etrk_[0].npar_jose =((npar%2==0 and (etrk_[8].has_csc_sh&2)>0)or(npar%2==1 and (etrk_[8].has_csc_sh&1)>0))? npar:-1;
+     etrk_[0].pt_direction_sh=Ptassign_Direction(csc_bending_angle_12, gp2.eta(), npar);  
+     etrk_[0].ptphi_diff_sh = csc_bending_angle_12;
+     etrk_[0].csc_bending_angle12_gemcsc = csc_bending_angle12_gemcsc;
+     etrk_[0].csc_bending_angle12_xfactor = csc_bending_angle12_xfactor;
+     etrk_[0].csc_bending_angle12_xfactor_smear0 = csc_bending_angle12_xfactor_smear0;
+     etrk_[0].csc_bending_angle12_xfactor_smear1 = csc_bending_angle12_xfactor_smear1;
+     etrk_[0].csc_bending_angle12_xfactor_smear2 = csc_bending_angle12_xfactor_smear2;
+     etrk_[0].csc_bending_angle12_xfactor_smear3 = csc_bending_angle12_xfactor_smear3;
+     etrk_[0].csc_bending_angle12_xfactor_L1_1 = csc_bending_angle12_xfactor_L1_1;
+     etrk_[0].csc_bending_angle12_xfactor_L1_2 = csc_bending_angle12_xfactor_L1_2;
+     etrk_[0].eta_st1_sh = gp1.eta();
+     etrk_[0].eta_st2_sh = gp2.eta();
+     
+     //double gv1_phi_gauss = CLHEP::RandGauss::shoot(gv1.phi(), .00055);
+     //double gv2_phi_gauss = CLHEP::RandGauss::shoot(gv2.phi(), .00095);
+     GlobalPoint gp1_smeared( GlobalPoint::Cylindrical(gp1.perp(), gp1_phi_gauss, gp1.z()) );
+     GlobalPoint gp2_smeared( GlobalPoint::Cylindrical(gp2.perp(), gp2_phi_gauss, gp2.z()) );
+
+     etrk_[0].pt_direction_gemcsc=Ptassign_Direction(csc_bending_angle12_gemcsc, gp2.eta(), npar);  
+     etrk_[0].pt_direction_gemcsc_central=Ptassign_Direction(csc_bending_angle12_gemcsc_central, gp2.eta(), npar);  
+     etrk_[0].pt_direction_xfactor=Ptassign_Direction(csc_bending_angle12_xfactor, gp2.eta(), npar);  
+     etrk_[0].pt_direction_xfactor_smear0=Ptassign_Direction(csc_bending_angle12_xfactor_smear0, gp2.eta(), npar);  
+     etrk_[0].pt_direction_xfactor_smear1=Ptassign_Direction(csc_bending_angle12_xfactor_smear1, gp2.eta(), npar);  
+     etrk_[0].pt_direction_xfactor_smear2=Ptassign_Direction(csc_bending_angle12_xfactor_smear2, gp2.eta(), npar);  
+     etrk_[0].pt_direction_xfactor_smear3=Ptassign_Direction(csc_bending_angle12_xfactor_smear3, gp2.eta(), npar);  
+     etrk_[0].pt_direction_xfactor_L1_1=Ptassign_Direction(csc_bending_angle12_xfactor_L1_1, gp2.eta(), npar);  
+     etrk_[0].pt_direction_xfactor_L1_2=Ptassign_Direction(csc_bending_angle12_xfactor_L1_2, gp2.eta(), npar);  
+     if (verbose_)
+     	std::cout <<" pt direction sh "<< etrk_[0].pt_direction_sh <<" pt_direction_gemcsc "<<etrk_[0].pt_direction_gemcsc<<"  pt_direction_gemcsc_central "<<  etrk_[0].pt_direction_gemcsc_central <<" pt_direction_xfactor "<< etrk_[0].pt_direction_xfactor <<" xfactor smear0 "<< etrk_[0].pt_direction_xfactor_smear0<<" xfactor smear1 "<< etrk_[0].pt_direction_xfactor_smear1<<" xfactro smear2 "<< etrk_[0].pt_direction_xfactor_smear2<<" L1 1 "<< etrk_[0].pt_direction_xfactor_L1_1 <<" L1 2 "<< etrk_[0].pt_direction_xfactor_L1_2 << std::endl;
+
+     if (etrk_[8].has_csc_sh){
+        double gp3_phi_gauss = CLHEP::RandGauss::shoot(gp3.phi(), .00075);
+        GlobalPoint gp3_smeared( GlobalPoint::Cylindrical(gp3.perp(), gp3_phi_gauss, gp3.z()) );
+	etrk_[0].pt_position_sh=Ptassign_Position_gp(gp1, gp2, gp3, gp2.eta(), npar); //t.momentum().eta() 
+	etrk_[0].pt_position_smeared=Ptassign_Position_gp(gp1_smeared, gp2_smeared, gp3_smeared, gp2_smeared.eta(), npar); //t.momentum().eta() 
+	if (npar >= 2 and etrk_[0].pt_position_sh>15 and   etrk_[0].pt_position_smeared<10 and verbose_)
+	   std::cout <<" npar "<< npar <<" simpt "<< etrk_[0].pt <<" simeta "<< etrk_[0].eta <<" pt_position_sh "<< etrk_[0].pt_position_sh <<" pt_position_smeared "<< etrk_[0].pt_position_smeared <<" gp1 phi "<< gp1.phi() <<" after smearing "<< gp1_smeared.phi() <<" gp2 phi "<< gp2.phi() <<" eta "<< gp2.eta() <<" after smearing "<< gp2_smeared.phi() <<" eta "<< gp2_smeared.eta() <<" gp3 phi "<< gp3.phi() <<" after smearing "<< gp3_smeared.phi() << std::endl;
+     }
+  } 
+  
+
+  if (etrk_[1].has_lct>0 and etrk_[6].has_lct>0 and etrk_[8].has_lct>0){
+     int npar=-1;
+     GlobalPoint gp1,gp2, gp3;
+     if ((etrk_[1].has_lct&1)>0 and (etrk_[6].has_lct&2)>0 and (etrk_[8].has_lct&2)>0){
+        gp1=gp_lct_odd[1];
+        gp2=gp_lct_even[6];
+        gp3=gp_lct_even[8];
+	npar=0;
+     }else if ((etrk_[1].has_lct&1)>0 and (etrk_[6].has_lct&1)>0 and (etrk_[8].has_lct&1)>0){ 
+        gp1=gp_lct_odd[1];
+        gp2=gp_lct_odd[6];
+        gp3=gp_lct_odd[8];
+	npar=1;
+     }else if ((etrk_[1].has_lct&2)>0 and (etrk_[6].has_lct&2)>0 and (etrk_[8].has_lct&2)>0){ 
+        gp1=gp_lct_even[1];
+        gp2=gp_lct_even[6];
+        gp3=gp_lct_even[8];
+	npar=2;
+     }else if ((etrk_[1].has_lct&2)>0 and (etrk_[6].has_lct&1)>0 and (etrk_[8].has_lct&1)>0){ 
+        gp1=gp_lct_even[1];
+        gp2=gp_lct_odd[6];
+        gp3=gp_lct_odd[8];
+	npar=3;
+     }
+     etrk_[0].hasSt1St2St3=true; 
+     etrk_[0].pt_position=Ptassign_Position_gp(gp1, gp2, gp3, etrk_[0].eta, npar);  
+  
+  } 
   
  //general propagation 
   auto propagate_odd_gp(match_track.simTrackPropagateGPs_odd());
@@ -2370,7 +3328,7 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
     int cscchamber = CSCTriggerNumbering::chamberFromTriggerLabels(id.sector(), 0, id.station(), id.subsector());
     std::cout <<"rpc detid " << id << " csc chamebr:"<< cscchamber << std::endl;
   }     
-  
+
   for(auto d: match_sh.superChamberIdsGEM())
   {
     GEMDetId id(d);
@@ -2388,7 +3346,7 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
     std::cout << "GEM Chamber: "<<d<<" "<<id<<" layerswithhits:"<<nlayers<<" global eta:"<<gp.eta()<<" mean strip:"<<mean_strip<<endl;
 
   }
-
+  
   std::cout << "######matching Cathode Digi to simtrack " << std::endl;
   for (auto d: match_cd.chamberIdsStrip(0))
   {
@@ -2476,33 +3434,6 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
     for (auto p : rpcdigis)
     	std::cout << p << std::endl;
    
-  }
-
-  std::cout << "######matching CLCT to Simtrack " << std::endl;
-  for(auto d: match_lct.chamberIdsAllCLCT(0))
-  {
-    CSCDetId id(d);
-    const int st(detIdToMEStation(id.station(),id.ring()));
-    if (stations_to_use_.count(st) == 0) continue;
-    auto clcts = match_lct.allCLCTsInChamber(d);
-//    auto clct = match_lct.clctInChamber(d);
-//    if (std::find(clcts.begin(),clcts.end(),clct) != clcts.end())  std::cout<<"the matching clct ";
-//    else std::cout <<" another clct "; 
-    for (auto p : clcts)    
-       std::cout<<id<< p <<std::endl;
-    
-  }
-
-  std::cout << "######matching ALCT to Simtrack " << std::endl;
-  for(auto d: match_lct.chamberIdsAllALCT(0))
-  {
-    CSCDetId id(d);
-    const int st(detIdToMEStation(id.station(),id.ring()));
-    if (stations_to_use_.count(st) == 0) continue;
-    auto alcts = match_lct.allALCTsInChamber(d);
-    for (auto p : alcts)    
-       std::cout<<id<< p <<std::endl;
-    
   }
 
   std::cout << "######matching LCT to Simtrack " << std::endl;
