@@ -140,7 +140,7 @@ public:
   GlobalPoint simHitsMeanPosition(const edm::PSimHitContainer& sim_hits) const;
 
   /// calculated the fitted position in a given layer for CSC simhits in a chamber
-  float simHitPositionKeyLayer(unsigned int chamberid) const;
+  GlobalPoint simHitPositionKeyLayer(unsigned int chamberid) const;
    
   /// calculate Global average momentum for a provided collection of simhits in CSC
   GlobalVector simHitsMeanMomentum(const edm::PSimHitContainer& sim_hits) const;

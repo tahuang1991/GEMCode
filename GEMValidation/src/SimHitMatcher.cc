@@ -1049,7 +1049,7 @@ SimHitMatcher::simHitsMeanPosition(const edm::PSimHitContainer& sim_hits) const
   return GlobalPoint(sumx/n, sumy/n, sumz/n);
 }
 
-float 
+GlobalPoint
 SimHitMatcher::simHitPositionKeyLayer(unsigned int chid) const
 {
   /*
@@ -1060,16 +1060,19 @@ SimHitMatcher::simHitPositionKeyLayer(unsigned int chid) const
   const CSCDetId chamberId(chid);
   const CSCDetId keyLayerId(chamberId.endcap(), chamberId.station(),
                             chamberId.ring(), chamberId.chamber(), 3);
+  GlobalPoint returnValue;
   
   const edm::PSimHitContainer keyLayerIdHits(hitsInDetId(keyLayerId.rawId()));
-  if (keyLayerIdHits.size()!=0) return simHitsMeanPosition(keyLayerIdHits).phi();
+  if (keyLayerIdHits.size()!=0) returnValue = simHitsMeanPosition(keyLayerIdHits);
   else{
     // check if the chamber has hits at all
-    if (hitsInChamber(chid).size()==0) return -99;
-    else if (hitsInChamber(chid).size()==1) return simHitsMeanPosition(hitsInChamber(chid)).phi();
+    if (hitsInChamber(chid).size()==0) returnValue = GlobalPoint();
+    else if (hitsInChamber(chid).size()==1) returnValue = simHitsMeanPosition(hitsInChamber(chid));
     else {
-      std::vector<float> v; 
-      std::vector<float> w;
+      std::vector<float> zs; 
+      std::vector<float> xs;
+      std::vector<float> ys;
+
       // add the positions of all hits in a chamber
       for (int l=1; l<=6; l++){
         CSCDetId l_id(chamberId.endcap(), chamberId.station(), 
@@ -1077,28 +1080,41 @@ SimHitMatcher::simHitPositionKeyLayer(unsigned int chid) const
         for (auto p: hitsInDetId(l_id.rawId())) {
           LocalPoint lp = p.entryPoint();
           GlobalPoint gp = getCSCGeometry()->idToDet(p.detUnitId())->surface().toGlobal(lp);
-          v.push_back(gp.z());
-          w.push_back(gp.phi());
+          zs.push_back(gp.z());
+          xs.push_back(gp.x());
+          ys.push_back(gp.y());
         }
       }
       // fit a straight line through the hits (bending is negligible
       float zmin;
       float zmax;
-      if (v.front() < v.back())  { zmin = v.front(); zmax = v.back();  }
-      else                       { zmin = v.back();  zmax = v.front(); }
+      if (zs.front() < zs.back())  { zmin = zs.front(); zmax = zs.back();  }
+      else                         { zmin = zs.back();  zmax = zs.front(); }
       
       TF1* fit = new TF1("fit","pol1",zmin,zmax); 
-      TGraph* gr = new TGraph(v.size(),&(v[0]),&(w[0]));
+      TGraph* gr = new TGraph(zs.size(),&(zs[0]),&(xs[0]));
       TFitResultPtr r = gr->Fit(fit,"RQ"); 
-      if (r->Status()==0){    
+
+      TF1* fit2 = new TF1("fit2","pol1",zmin,zmax); 
+      TGraph* grr = new TGraph(zs.size(),&(zs[0]),&(ys[0]));
+      TFitResultPtr rr = grr->Fit(fit2,"RQ"); 
+
+      if (r->Status()==0 and rr->Status()==0){    
         float z_pos_L3 = getCSCGeometry()->layer(keyLayerId)->centerOfStrip(20).z();
-        return fit->GetParameter(0) + fit->GetParameter(1) * z_pos_L3;
+        float x_pos_L3 = fit->GetParameter(0) + fit->GetParameter(1) * z_pos_L3;
+        float y_pos_L3 = fit2->GetParameter(0) + fit2->GetParameter(1) * z_pos_L3;
+        returnValue =  GlobalPoint(x_pos_L3, y_pos_L3, z_pos_L3);
       }
       else{
-        return simHitsMeanPosition(hitsInChamber(chid)).phi();
+        returnValue = simHitsMeanPosition(hitsInChamber(chid));
       }
+      delete fit;
+      delete fit2;
+      delete gr;
+      delete grr;
     } 
   }
+  return returnValue;
 }
    
 
