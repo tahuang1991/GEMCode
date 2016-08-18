@@ -10,7 +10,9 @@ DisplacedGENMuonMatcher::DisplacedGENMuonMatcher(const SimTrack& t, const SimVer
   run_ = displacedGenMu_.getParameter<bool>("run");
 
   edm::Handle<reco::GenParticleCollection> genParticles;
-  if(gemvalidation::getByLabel(input_, genParticles, event())) if (run_) matchDisplacedGENMuonMatcherToSimTrack(*genParticles.product());
+  runOK_ = false;
+  if(gemvalidation::getByLabel(input_, genParticles, event()) and run_) matchDisplacedGENMuonMatcherToSimTrack(*genParticles.product());
+
 }
 
 DisplacedGENMuonMatcher::~DisplacedGENMuonMatcher()
@@ -192,7 +194,7 @@ DisplacedGENMuonMatcher::matchDisplacedGENMuonMatcherToSimTrack(const reco::GenP
     genMuonMothersTMP1 = genMuonMothersTMP2;
     nMuonGroup++;
   }
-  
+
   // Sort muon groups to match order of genGd vector
   std::vector< std::vector<const reco::GenParticle*> > genMuonGroups;
   std::vector<const reco::Candidate*> genMuonGroupsMothers;
@@ -214,9 +216,7 @@ DisplacedGENMuonMatcher::matchDisplacedGENMuonMatcherToSimTrack(const reco::GenP
     }
   }
   
-  genGd0Gd1_m = invariantMass(genGd[0],genGd[1]);
-  genGd0Gd1_dR = reco::deltaR(genGd_eta[0], genGd_phi[0], genGd_eta[1], genGd_phi[1]);
-  int minDeltaR(99);
+  float minDeltaR = 99.0;
   int index1=-99;
   int index2=-99;
   if ( genMuonGroups.size() == 2 and genMuonGroups[0].size() == 2 and genMuonGroups[1].size() == 2 ) {
@@ -250,9 +250,18 @@ DisplacedGENMuonMatcher::matchDisplacedGENMuonMatcherToSimTrack(const reco::GenP
     }
   }
 
+  if (index1 == -99 or index2 == -99 ){
+        if (verbose_) std::cout <<" failed to find matched dark boson or matched gen muon " << std::endl;
+      	runOK_ = false;
+  	return; 
+  }
+  if (verbose_) std::cout <<" Find matched dark boson and matched gen muon index1 "<< index1 << " index2 "<< index2 << std::endl;
+  runOK_ = true;
+
   if (verbose_){
     for (int i=0; i<2; ++i){ 
       for (int j=0; j<2; ++j){
+	if (i==index1 and j==index2) std::cout <<"=======  this is gen Mu matched to sim Mu ======= "<< std::endl;
 	std::cout << "genGdMu_pt_" << i << j << ": " << genGdMu_pt[i][j] << std::endl;
 	std::cout << "genGdMu_eta_" << i << j << ": " << genGdMu_eta[i][j] << std::endl;
 	std::cout << "genGdMu_phi_" << i << j << ": " << genGdMu_phi[i][j] << std::endl;
@@ -263,9 +272,17 @@ DisplacedGENMuonMatcher::matchDisplacedGENMuonMatcherToSimTrack(const reco::GenP
     std::cout << "genGd0Gd1_m " << genGd0Gd1_m << std::endl;
     std::cout << "genGd0Gd1_dR " << genGd0Gd1_dR << std::endl;
   }
+
+  genGd0Gd1_m = invariantMass(genGd[0],genGd[1]);
+  genGd0Gd1_dR = reco::deltaR(genGd_eta[0], genGd_phi[0], genGd_eta[1], genGd_phi[1]);
   darkBosonIndex_ = index1;
   genMuonIndex_ = index2;
   matchedGENMuon_ = genMuonGroups[index1][index2];
+  matchedGenMu_dR = reco::deltaR(genGdMu_eta[index1][index2], genGdMu_phi[index1][index2], trk().momentum().eta(), trk().momentum().phi());
+
+  matchedGenMu_dxy = dxy(genGdMu_px[index1][index2], genGdMu_py[index1][index2], genGdMu_vx[index1][index2], genGdMu_vy[index1][index2], genGdMu_pt[index1][index2]);
+  //matchedGenMu_dxy = dxy(matchedGENMuon_->px(), matchedGENMuon_->py(), matchedGENMuon_->vx(), matchedGENMuon_->vy(), matchedGENMuon_->pt());
+
   matchedGENMuons_.clear();
   matchedGENMuons_.push_back(genMuonGroups[index1][0]);
   matchedGENMuons_.push_back(genMuonGroups[index1][1]);
@@ -298,4 +315,11 @@ DisplacedGENMuonMatcher::invariantMass(const reco::Candidate* p1, const reco::Ca
                (p1->px() + p2->px())*(p1->px() + p2->px()) -
                (p1->py() + p2->py())*(p1->py() + p2->py()) -
                (p1->pz() + p2->pz())*(p1->pz() + p2->pz()) );
+}
+
+
+void DisplacedGENMuonMatcher::testprint() const {
+
+	std::cout <<"here is a test for displacedGenMuon matcher "<< std::endl;
+
 }

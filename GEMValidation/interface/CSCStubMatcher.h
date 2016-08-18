@@ -93,6 +93,9 @@ public:
     matchingComparatorDigisLCT(unsigned int, const CSCCorrelatedLCTDigi&) const;
   CSCWireDigiDetIdContainer 
     matchingWireDigisLCT(unsigned int, const CSCCorrelatedLCTDigi&) const;
+   
+  //get global position of matching comparator digi in each layer
+  void positionsOfComparatorInLCT(unsigned int, const CSCCorrelatedLCTDigi&, std::vector<GlobalPoint>&) const;
 
   // check if comp digis belongs to CLCT pattern
   bool comparatorInCLCTPattern(int keyStrip, int pattern, int layer, int halfstrip) const;

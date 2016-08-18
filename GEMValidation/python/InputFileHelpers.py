@@ -35,10 +35,6 @@ def useInputDir(process, inputDir, onEOS = True):
             continue
         print "Proceed to next directory"
         ls = os.listdir(my_dir)
-	print "mydir", my_dir
-        print "mydir [:]", my_dir[:]
-	print "mydir [16:]", my_dir[16:]
-	print "mydir [16:20]", my_dir[16:20]
         if onEOS:
             theInputFiles.extend(['file:' + my_dir[:] + x for x in ls if x.endswith('root')])
         else:
