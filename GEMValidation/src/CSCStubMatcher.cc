@@ -969,7 +969,8 @@ CSCStubMatcher::matchingComparatorDigisLCT(unsigned int detid, const CSCCorrelat
   int patternNumber = stub.getPattern();
   //2) loop on the layers
   auto chamberId = CSCDetId(detid);
-  //std::cout << chamberId << std::endl;
+  if (chamberId.ring()==4 and verboseLCT_)
+  	std::cout << chamberId << std::endl;
   for (int ilayer=1; ilayer<=6; ilayer++){
     auto layer(cscGeometry_->chamber(chamberId)->layer(ilayer));
     auto layerId(layer->id());
@@ -980,7 +981,8 @@ CSCStubMatcher::matchingComparatorDigisLCT(unsigned int detid, const CSCCorrelat
     for (auto comp: comps){
       //check if they match the LCT pattern
       int halfStrip = digi_matcher_->getHalfStrip(comp);
-      //std::cout << "\t"<<comp<<" "<<halfStrip<<endl;
+      if (chamberId.ring()==4 and verboseLCT_)
+      	std::cout <<"layerid "<< layerId << "\t"<<comp<<" "<<halfStrip<<endl;
       // auto pattern = CSCCathodeLCTProcessor::pattern2007[patternNumber];
       // int actualLayer = ilayer - 1;
       // auto subPatternL0 = 
@@ -1029,20 +1031,33 @@ CSCStubMatcher::positionsOfComparatorInLCT(unsigned int detid, const CSCCorrelat
 		    auto comp = p.second;
           	    float fractional_strip = digi_matcher_->getFractionalStrip(comp);
     		    auto layer_geo(cscGeometry_->chamber(id)->layer(l)->geometry());
-          	    LocalPoint csc_intersect = layer_geo->intersectionOfStripAndWire(fractional_strip, stub.getKeyWG() + 1);
+  		    float wire = layer_geo->middleWireOfGroup(stub.getKeyWG() + 1);
+          	    LocalPoint csc_intersect = layer_geo->intersectionOfStripAndWire(fractional_strip, wire);
           	    GlobalPoint csc_gp = cscGeometry_->idToDet(l_id)->surface().toGlobal(csc_intersect);
 		    //std::cout <<"In positionsOfComparatorInLCT local Point "<< csc_intersect <<" globalPoint "<< csc_gp << std::endl;
 		    sum_x += csc_gp.x();
 		    sum_y += csc_gp.y();
 		    sum_z += csc_gp.z();
 		    n++;
+		    //std::cout <<"layerid "<< l_id <<" comparadigi fractional strip "<< fractional_strip << " wg "<< wire << std::endl;
 		}
 	 }
-	 //if (n>0) std::cout <<"Digi cscid "<< l_id <<" n "<< n <<" x "<< sum_x/n <<" y "<< sum_y/n <<" z "<< sum_z/n <<" z from geo "<< z_pos<< std::endl;
+	 if (n>0 and verboseLCT_) std::cout <<"Digi cscid "<< l_id <<" n "<< n <<" x "<< sum_x/n <<" y "<< sum_y/n <<" z "<< sum_z/n << std::endl;
 	 if (n>0) gps.push_back(GlobalPoint(sum_x/n, sum_y/n, sum_z/n));
   }
   
 }
+
+//to do 
+float 
+CSCStubMatcher::zpositionOfLayer(unsigned int detid, int layer) const{
+
+  auto id = CSCDetId(detid);
+  auto cscChamber(cscGeometry_->chamber(id));
+  return cscChamber->layer(layer)->centerOfStrip(20).z();
+
+}
+
 int
 CSCStubMatcher::nChambersWithCLCT(int min_quality) const
 {

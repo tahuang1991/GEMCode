@@ -40,6 +40,13 @@ float Ptassign_Position(float deltay12, float deltay23, float eta, int par){
     return pt;
 }
 
+float deltaYcalculation(GlobalPoint gp1, GlobalPoint gp2){
+   float anglea = gp2.phi();
+   float newyst1 = -gp1.x()*sin(anglea) + gp1.y()*cos(anglea);
+   float newyst2 = -gp2.x()*sin(anglea) + gp2.y()*cos(anglea);
+   return (newyst2-newyst1);
+
+}
 
 float Ptassign_Position_gp(GlobalPoint gp1, GlobalPoint gp2, GlobalPoint gp3, float eta, int par){
 

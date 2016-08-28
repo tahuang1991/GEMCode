@@ -117,6 +117,8 @@ float Ptassign_Position(float deltay12, float deltay23, float eta, int par);
 
 float Ptassign_Position_gp(GlobalPoint gp1, GlobalPoint gp2, GlobalPoint gp3, float eta, int par);
 
+float deltaYcalculation(GlobalPoint gp1, GlobalPoint gp2);
+
 float Ptassign_Direction(float bending_12, float eta, int par);
 
 float PhiMomentum(float dphi, float phi_position, int st, bool evenodd);

@@ -292,6 +292,14 @@ SimHitMatcher::matchCSCSimHitsToSimTrack(std::vector<unsigned int> track_ids, co
       if (simMuOnlyCSC_ && std::abs(pdgid) != 13) continue;
       // discard electron hits in the CSC chambers
       if (discardEleHitsCSC_ && pdgid == 11) continue;
+      LocalPoint lp = h.entryPoint();
+      GlobalPoint gp;
+      if (gemvalidation::is_csc(h.detUnitId()))
+       {
+     	 gp = getCSCGeometry()->idToDet(h.detUnitId())->surface().toGlobal(lp);
+	 if (verboseCSC_) std::cout <<" csc id "<< CSCDetId(h.detUnitId()) <<" x "<< gp.x()<<" y "<< gp.y() <<" z "<< gp.z()<< std::endl;
+       }
+	
       csc_detid_to_hits_[ h.detUnitId() ].push_back(h);
       csc_hits_.push_back(h);
       CSCDetId layer_id( h.detUnitId() );
