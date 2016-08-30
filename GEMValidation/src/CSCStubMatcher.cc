@@ -1054,7 +1054,7 @@ CSCStubMatcher::zpositionOfLayer(unsigned int detid, int layer) const{
 
   auto id = CSCDetId(detid);
   auto cscChamber(cscGeometry_->chamber(id));
-  return cscChamber->layer(layer)->centerOfStrip(20).z();
+  return fabs(cscChamber->layer(layer)->centerOfStrip(20).z());
 
 }
 

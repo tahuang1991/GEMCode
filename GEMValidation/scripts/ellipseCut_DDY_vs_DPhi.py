@@ -175,7 +175,7 @@ def drawEllipse(hist, hist2, a, b, eff1, eff2, xtitle, ytitle,st_title, text, pi
     
     c.SaveAs(picname+ "_ellipse.png")
 
-def loopEllipse(filedir, treename,fraction, a_range, b_range, xaxis, yaxis,x_bins, y_bins,xtitle, ytitle,st_title, etamin, etamax, cuts,text,picname):
+def loopEllipse(filedir, treename,fraction, astart, bstart, xaxis, yaxis,x_bins, y_bins,xtitle, ytitle,st_title, etamin, etamax, cuts,text,picname):
 
     gStyle.SetOptFit(0111)
     gStyle.SetOptStat(0)
@@ -242,6 +242,11 @@ def loopEllipse(filedir, treename,fraction, a_range, b_range, xaxis, yaxis,x_bin
     yBins = int(y_bins[1:-1].split(',')[0])
     yminBin = float(y_bins[1:-1].split(',')[1])
     ymaxBin = float(y_bins[1:-1].split(',')[2])
+    xbinwidth = (xmaxBin-xminBin)/xBins
+    ybinwidth = (ymaxBin-yminBin)/yBins
+    a_range = frange(astart, xmaxBin, xbinwidth*2)
+    b_range = frange(bstart, ymaxBin, ybinwidth*2)
+    print "arange ",a_range, " brange ",b_range
 
     todrawb0 = "%s"%yaxis+":"+"%s>>b0"%xaxis
     todrawb1 = "%s"%yaxis+":"+"%s>>b1"%xaxis
@@ -267,33 +272,47 @@ def loopEllipse(filedir, treename,fraction, a_range, b_range, xaxis, yaxis,x_bin
     preselected_axes_signalAcc_backRej = []
     n=0
     fraction = fraction/100.0
-    maxRej = 0
-    max_a = 0
-    max_b = 0
     lena = len(a_range)
     lenb = len(b_range)
+    maxRej = 0
+    maxAccept = 0
+    max_a = xmaxBin
+    max_b = ymaxBin
+    max_b_lowedge = 0.0
+    max_b_highedge = ymaxBin
+    b_axis = max_b_highedge
     for a_axis in a_range:
-        for b_axis in b_range:
+        max_b_lowedge = 0.0	
+	signalAcceptanceFactor, backgroundRejectionFactor = getBackgroundRejectionEllipse(a_axis, b_axis, b1, b0)
+        #print " a ", a_axis, " b ", b_axis, " bhigh ",max_b_highedge, " blow ", max_b_lowedge, " signal ", signalAcceptanceFactor, " bg ",backgroundRejectionFactor
+    	if signalAcceptanceFactor < fraction:
+		continue
+	step = max_b_highedge - max_b_lowedge
+	while (step> ybinwidth):
+        #for b_axis in b_range:
+	    b_axis = (max_b_highedge+max_b_lowedge)/2.0
 	    n = n+1
             signalAcceptanceFactor, backgroundRejectionFactor = getBackgroundRejectionEllipse(a_axis, b_axis, b1, b0)
-            print "n ", n," a ", a_axis, " b ", b_axis, " signal ", signalAcceptanceFactor, " bg ",backgroundRejectionFactor
-	    
+            #print "n ", n," bstep ",step, " a ", a_axis, " b ", b_axis, " signal ", signalAcceptanceFactor, " bg ",backgroundRejectionFactor
             if signalAcceptanceFactor > fraction:
+	    	max_b_highedge = b_axis
 	    	if backgroundRejectionFactor > maxRej:
 			maxRej = backgroundRejectionFactor
+			maxAccept = signalAcceptanceFactor
 			max_a = a_axis
 			max_b = b_axis
-                preselected_axes_signalAcc_backRej.append([a_axis, b_axis, signalAcceptanceFactor, backgroundRejectionFactor])
-    	    	drawEllipse(b1, b0, a_axis, b_axis, signalAcceptanceFactor, backgroundRejectionFactor, xtitle, ytitle,st_title, text, picname+"_%d"%n)
-		continue
+    	    		drawEllipse(b1, b0, a_axis, b_axis, signalAcceptanceFactor, backgroundRejectionFactor, xtitle, ytitle,st_title, text, picname+"_%d"%n)
+                #preselected_axes_signalAcc_backRej.append([a_axis, b_axis, signalAcceptanceFactor, backgroundRejectionFactor])
+	    else:
+     		max_b_lowedge = b_axis	     
+	    step = max_b_highedge - max_b_lowedge	
+	max_b_highedge = b_axis
+	
     
     signalAcceptanceFactor, backgroundRejectionFactor = getBackgroundRejectionEllipse(a_axis, b_axis, b1, b0)
     drawEllipse(b1, b0, a_range[lena-1], b_range[lenb-1], signalAcceptanceFactor, backgroundRejectionFactor, xtitle, ytitle,st_title, text, picname+"_%d_last"%(lena*lenb))
-    if (n== lena*lenb-1):
-	max_a = a_range[lena-1]
-	max_b = b_range[lenb-1]
     #ellipes = "%s*%s/(%f*%f)+%s*%s/(%f*%f)<1.0"%(xaxis, xaxis, max_a, max_a, yaxis, yaxis, max_b, max_b)
-    print "max_a ",max_a," max_b ",max_b 
+    print "max_a ",max_a," max_b ",max_b ," signalAcceptanceFactor ",maxAccept," backgroundRejectionFactor ",maxRej
     return (max_a, max_b)
             
 
@@ -404,6 +423,7 @@ def makeEffplot_v2(filedirs,todraw, treename0, den, num, etamin, etamax, xtitle,
 	tex.SetNDC()
 	tex.Draw("same")
 	#c1.Update()
+	c1.SaveAs("%s.C"%(picname))
 	c1.SaveAs("%s.png"%(picname))
 	c1.SaveAs("%s.pdf"%(picname))
         return Teffs
@@ -449,16 +469,13 @@ def makeplots(Teffs, legs, text, picname):
 	tex.SetNDC()
 	tex.Draw("same")
 	#c1.Update()
+	c1.SaveAs("%s.C"%(picname))
 	c1.SaveAs("%s.png"%(picname))
 	c1.SaveAs("%s.pdf"%(picname))
 
 ##############################################################3
 
 
-## loop on a and b
-a_range = frange(.25, 8, 0.25)
-b_range = frange(0.02, 0.2, 0.02)
-print "arange ",a_range, " brange ",b_range
 treename = "GEMCSCAnalyzer/trk_eff_CSC_ALL"
 filedir16 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0826/160826_200750/0000/"
 filedir46 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0826/160826_215302/0000/"
@@ -466,10 +483,11 @@ filedir46 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau100
 binLow = [0.0,1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,12.0,14.0,16.0,18.0,20.0,24.0,28.0,32.0,36.0,42.0,50.0]
 ptbins = np.asarray(binLow)
 evenodds = ["odd,even","odd,odd","even,even","even,odd","all pairs"]
-netas = [1.2,1.4,1.6,1.8,2.0,2.2]
+netas = [1.2,1.4,-1,1.8,2.0,2.2]
+netas = [1.8,2.0,2.2]
 allnpar = [0,1,2,3]
-Pts = [10]
-Pts_1 = [7]
+Pts = [10, 20]
+Pts_1 = [7,11]
 filedirs_v6 = [filedir16, filedir46]
 for neta in range(len(netas)-1):
    for npt in range(len(Pts)):	
@@ -502,6 +520,7 @@ for neta in range(len(netas)-1):
 	st_title = ["Prompt muon, 2<p_{T}<%d"%pt1, "Displaced Muon, 5<|d_{xy}|<50, p_{T}>%d"%pt]
 	xaxis = "fabs(deltay23_fit-deltay12_fit*%f)"%(slope)#deltadeltay
 	yaxis = "fabs(csc_bending_angle12_xfactor_L1_2)"#deltaphi
+	yaxis = "fabs(csc_bending_angle12_xfactor_L1_1)"#deltaphi
     	checkvalue = " && %s<%f && %s<%f"%(xaxis, 20., yaxis, 1)
 	cuts =  ["hasSt1St2St3 && fabs(eta_st2_sh)>%f && fabs(eta_st2_sh)<%f"%(netas[neta],netas[neta+1])+hasfitcut+checkvalue, "hasSt1St2St3 && fabs(deltay12_fit)<50 &&  fabs(deltay23_fit)<50 && fabs(eta_st2_sh)>%f && fabs(eta_st2_sh)<%f && fabs(genGdMu_dxy)>5 && fabs(genGdMu_dxy)<50 && fabs(genGdMu_dR)<0.1"%(netas[neta],netas[neta+1])+hasfitcut+checkvalue]
 	dens_L1 = [cuts[0]+" && pt>2 && pt<%f"%(pt1), cuts[1]+"&& pt>%f"%(pt)]
@@ -510,23 +529,20 @@ for neta in range(len(netas)-1):
 	xtitle = "#Delta#Delta Y"
 	ytitle = "#Delta#phi_{dir}"
 	text = "#splitline{%s}{%.1f<|#eta|<%.1f, at Digi level}"%(chambers,netas[neta],netas[neta+1])
-	(maxa, maxb) = loopEllipse(filedirs_v6, treename, fraction, a_range, b_range, xaxis, yaxis,x_bins, y_bins,xtitle, ytitle,st_title, netas[neta], netas[neta+1], dens_L1,text,"Profile_Ellipse_PT_0826_v3/GEMCSC_ctau0andctau1000_profile_20160826_pt%d_fraction%d_St2eta%d_npar%d"%(pt, fraction, neta, npar))
+	astart = 1.0
+	bstart = .3
+	(maxa, maxb) = loopEllipse(filedirs_v6, treename, fraction, astart, bstart, xaxis, yaxis,x_bins, y_bins,xtitle, ytitle,st_title, netas[neta], netas[neta+1], dens_L1,text,"Profile_Ellipse_PT_0826_v4/GEMCSC_ctau0andctau1000_profile_20160826_CSConly_pt%d_ptbg%d_fraction%d_npar%d_st2eta%dto%d"%(pt, pt1, fraction, npar, int(netas[neta]*10),int(netas[neta+1]*10)))
 	ellipes = "%s*%s/(%f*%f)+%s*%s/(%f*%f)<1.0"%(xaxis, xaxis, maxa, maxa, yaxis, yaxis, maxb, maxb)
-	Teffs = makeEffplot_v2(filedirs_v6, "pt", treename, cuts, [ellipes, ellipes], netas[neta], netas[neta],"true muon p_{T}","Efficiency",legs ,text,"Hybrid_Ellipse_PT_0826_v3/GEMCSC_ctau0andctau1000_eff_20160826_pt%d_fraction%d_st2eta%d_npar%d"%(pt, fraction, neta, npar))
+	Teffs = makeEffplot_v2(filedirs_v6, "pt", treename, cuts, [ellipes, ellipes], netas[neta], netas[neta+1],"true muon p_{T} GeV","Efficiency",legs ,text,"Hybrid_Ellipse_PT_0826_v4/GEMCSC_ctau0andctau1000_eff_20160826_CSConly_pt%d_ptbg%d_fraction%d_npar%d_st2eta%dto%d"%(pt, pt1, fraction, npar, int(netas[neta]*10),int(netas[neta+1]*10)))
 	Tefftotal.append(Teffs)
        print "Tefftotal len ",len(Tefftotal),Tefftotal
-       c1 = ROOT.TCanvas()
-       c1.SetGridx()
-       c1.SetGridy()
-       c1.SetTickx()
-       c1.SetTicky()
        Teff0 = Tefftotal[0][0]
        Teff1 = Tefftotal[0][1]
-       text_h = "#splitline{Hybrid algorithm}{%.1f<|#eta|<%.1f, at Digi level}"%(netas[neta],netas[neta+1])
+       text_h = "#splitline{Hybrid algorithm}{%.1f<|#eta|<%.1f, p_{T}>%d GeV}"%(netas[neta],netas[neta+1], pt)
        for xpar in range(len(Tefftotal)-1):
    	Teff0.Add(Tefftotal[xpar+1][0])		   
    	Teff1.Add(Tefftotal[xpar+1][1])		   
-       makeplots([Teff0, Teff1], legs, text_h,"Hybrid_Ellipse_PT_0826_v3/GEMCSC_ctau0andctau1000_eff_20160826_pt%d_fraction%d_allnpar_St1eta%d"%(pt, fraction, neta))
+       makeplots([Teff0, Teff1], legs, text_h,"Hybrid_Ellipse_PT_0826_v4/GEMCSC_ctau0andctau1000_eff_20160826_CSConly_pt%d_ptbg%d_fraction%d_allnpar_St2eta%dto%d"%(pt, pt1, fraction,  int(netas[neta]*10),int(netas[neta+1]*10)))
        
 
 
