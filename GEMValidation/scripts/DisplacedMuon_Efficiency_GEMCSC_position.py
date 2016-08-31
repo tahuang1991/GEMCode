@@ -755,9 +755,9 @@ def makeEffplot_v2(filedirs,todraw, treename0, den, deltay12, deltay23, pt, alln
 	tex.Draw("same")
         #return Teffs
 	#c1.Update()
-	c1.SaveAs("%s_Plateau%d_binsimPt%d.C"%(picname, fractionToKeep,pt))
 	c1.SaveAs("%s_Plateau%d_binsimPt%d.png"%(picname, fractionToKeep,pt))
 	c1.SaveAs("%s_Plateau%d_binsimPt%d.pdf"%(picname, fractionToKeep,pt))
+	c1.SaveAs("%s_Plateau%d_binsimPt%d.C"%(picname, fractionToKeep,pt))
 	return Teffs
 
 
@@ -854,9 +854,9 @@ def makeplots(Teffs, legs, text, picname):
 	tex.SetNDC()
 	tex.Draw("same")
 	#c1.Update()
-	c1.SaveAs("%s.C"%(picname))
 	c1.SaveAs("%s.png"%(picname))
 	c1.SaveAs("%s.pdf"%(picname))
+	c1.SaveAs("%s.C"%(picname))
 
 
 
