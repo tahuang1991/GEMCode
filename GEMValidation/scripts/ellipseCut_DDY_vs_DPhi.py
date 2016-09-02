@@ -454,7 +454,7 @@ def makeplots(Teffs, legs, text, picname):
 
         color = [ROOT.kBlue, ROOT.kRed, ROOT.kMagenta+2, ROOT.kGreen+2,ROOT.kCyan+2]
         maker = [20,21,22,23,33]
-	legend = ROOT.TLegend(0.45,0.15,0.9,0.5)
+	legend = ROOT.TLegend(0.45,0.15,0.93,0.5)
 	legend.SetFillColor(ROOT.kWhite)
 	legend.SetTextFont(42)
 	#legend.SetHeader("%"%legheader)
@@ -491,10 +491,10 @@ binLow = [0.0,1.0,2.0,3.0,4.0,5.0,6.0,7.0,8.0,9.0,10.0,12.0,14.0,16.0,18.0,20.0,
 ptbins = np.asarray(binLow)
 evenodds = ["odd,even","odd,odd","even,even","even,odd","all pairs"]
 netas = [1.2,1.4,1.6,1.8,2.0,2.2]
-#netas = [1.8,2.0,2.2]
+netas = [1.6,1.8,2.0,2.2]
 allnpar = [0,1,2,3]
 Pts = [10, 20]
-Pts_1 = [10,20]
+Pts_1 = [5,7]
 filedirs_v6 = [filedir16, filedir46]
 for neta in range(len(netas)-1):
    for npt in range(len(Pts)):	
@@ -526,30 +526,31 @@ for neta in range(len(netas)-1):
 	deltay23 = ["deltay23_fit","deltay23_fit"]
 	st_title = ["Prompt muon, 2<p_{T}<%d"%pt1, "Displaced Muon, 10<|d_{xy}|<50, p_{T}>%d"%pt]
 	xaxis = "fabs(deltay23_fit-deltay12_fit*%f)"%(slope)#deltadeltay
-	yaxis = "fabs(csc_bending_angle12_xfactor_L1_2)"#deltaphi
-	#yaxis = "fabs(csc_bending_angle12_xfactor_L1_1)"#deltaphi, only in high eta region, CSC only
-    	checkvalue = " && fabs(deltay23_fit)>0 && fabs(deltay12_fit)>0 && %s<%f && %s<%f && %s>0 && %s>0"%(xaxis, 20., yaxis, .5, xaxis, yaxis)
+	#yaxis = "fabs(csc_bending_angle12_xfactor_L1_2)"#deltaphi
+	yaxis = "fabs(csc_bending_angle12_xfactor_L1_1)"#deltaphi, only in high eta region, CSC only
+    	#checkvalue = "  &&fabs(phiM_st1_L1_2)>0 && fabs(phiM_st2_L1_2)>0 && fabs(deltay23_fit)>0 && fabs(deltay12_fit)>0 && %s<%f && %s<%f && %s>0 && %s>0"%(xaxis, 20., yaxis, .5, xaxis, yaxis)
+    	checkvalue = " &&fabs(phiM_st1_L1_1)>0 && fabs(phiM_st2_L1_1)>0 && fabs(deltay23_fit)>0 && fabs(deltay12_fit)>0 && %s<%f && %s<%f && %s>0 && %s>0"%(xaxis, 20., yaxis, .5, xaxis, yaxis)
 	cuts =  ["hasSt1St2St3 && fabs(eta_st2_sh)>%f && fabs(eta_st2_sh)<%f"%(netas[neta],netas[neta+1])+hasfitcut+checkvalue, "hasSt1St2St3 && fabs(deltay12_fit)<50 &&  fabs(deltay23_fit)<50 && fabs(eta_st2_sh)>%f && fabs(eta_st2_sh)<%f && fabs(genGdMu_dxy)>10 && fabs(genGdMu_dxy)<50 && fabs(genGdMu_dR)<0.1"%(netas[neta],netas[neta+1])+hasfitcut+checkvalue]
 	dens_L1 = [cuts[0]+" && pt>2 && pt<%f"%(pt1), cuts[1]+"&& pt>%f"%(pt)]
 	x_bins = "(200, 0, 20.0)"
-	y_bins = "(100, 0,.5)"
+	y_bins = "(120, 0,.6)"
 	xtitle = "#Delta#Delta Y"
 	ytitle = "#Delta#phi_{dir}"
-	text = "#splitline{%s}{%.1f<|#eta|<%.1f, p_{T}>%d GeV}"%(chambers,netas[neta],netas[neta+1],pt)
+	text = "#splitline{%s, with CSC only}{%.1f<|#eta|<%.1f, p_{T}>%d GeV}"%(chambers,netas[neta],netas[neta+1],pt)
 	astart = .6
 	bstart = .0# not used 
-	(maxa, maxb) = loopEllipse(filedirs_v6, treename, fraction, astart, bstart, xaxis, yaxis,x_bins, y_bins,xtitle, ytitle,st_title, netas[neta], netas[neta+1], dens_L1,text,"Profile_Ellipse_PT_0828_v2/GEMCSC_ctau0andctau1000_profile_20160828_pt%d_ptbg%d_fraction%d_st2eta%dto%d_npar%d"%(pt, pt1, fraction, int(netas[neta]*10),int(netas[neta+1]*10), npar))
+	(maxa, maxb) = loopEllipse(filedirs_v6, treename, fraction, astart, bstart, xaxis, yaxis,x_bins, y_bins,xtitle, ytitle,st_title, netas[neta], netas[neta+1], dens_L1,text,"Profile_Ellipse_PT_0828_v2/GEMCSC_ctau0andctau1000_profile_20160828_pt%d_ptbg%d_fraction%d_st2eta%dto%d_npar%d_ME21CSConly"%(pt, pt1, fraction, int(netas[neta]*10),int(netas[neta+1]*10), npar))
 	ellipes = "%s*%s/(%f*%f)+%s*%s/(%f*%f)<1.0"%(xaxis, xaxis, maxa, maxa, yaxis, yaxis, maxb, maxb)
-	Teffs = makeEffplot_v2(filedirs_v6, "pt", treename, cuts, [ellipes, ellipes], netas[neta], netas[neta+1],"true muon p_{T} GeV","Efficiency",legs ,text,"Hybrid_Ellipse_PT_0828_v2/GEMCSC_ctau0andctau1000_eff_20160828_pt%d_ptbg%d_fraction%d_st2eta%dto%d_npar%d"%(pt, pt1, fraction, int(netas[neta]*10),int(netas[neta+1]*10), npar))
+	Teffs = makeEffplot_v2(filedirs_v6, "pt", treename, cuts, [ellipes, ellipes], netas[neta], netas[neta+1],"true muon p_{T} GeV","Efficiency",legs ,text,"Hybrid_Ellipse_PT_0828_v2/GEMCSC_ctau0andctau1000_eff_20160828_pt%d_ptbg%d_fraction%d_st2eta%dto%d_npar%d_ME21CSConly"%(pt, pt1, fraction, int(netas[neta]*10),int(netas[neta+1]*10), npar))
 	Tefftotal.append(Teffs)
        print "Tefftotal len ",len(Tefftotal),Tefftotal
        Teff0 = Tefftotal[0][0]
        Teff1 = Tefftotal[0][1]
-       text_h = "#splitline{Hybrid algorithm}{%.1f<|#eta|<%.1f, p_{T}>%d GeV}"%(netas[neta],netas[neta+1], pt)
+       text_h = "#splitline{Hybrid algorithm, with CSC only}{%.1f<|#eta|<%.1f, p_{T}>%d GeV}"%(netas[neta],netas[neta+1], pt)
        for xpar in range(len(Tefftotal)-1):
    	Teff0.Add(Tefftotal[xpar+1][0])		   
    	Teff1.Add(Tefftotal[xpar+1][1])		   
-       makeplots([Teff0, Teff1], legs, text_h,"Hybrid_Ellipse_PT_0828_v2/GEMCSC_ctau0andctau1000_eff_20160828_pt%d_ptbg%d_fraction%d_St2eta%dto%d_allnpar"%(pt, pt1, fraction,  int(netas[neta]*10),int(netas[neta+1]*10)))
+       makeplots([Teff0, Teff1], legs, text_h,"Hybrid_Ellipse_PT_0828_v2/GEMCSC_ctau0andctau1000_eff_20160828_pt%d_ptbg%d_fraction%d_St2eta%dto%d_allnpar_ME21CSConly"%(pt, pt1, fraction,  int(netas[neta]*10),int(netas[neta+1]*10)))
        
 
 
