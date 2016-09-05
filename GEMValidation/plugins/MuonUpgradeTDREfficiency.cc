@@ -1,3 +1,6 @@
+#ifndef GEMCode_GEMValidation_MuonUpgradeTDREfficiency
+#define GEMCode_GEMValidation_MuonUpgradeTDREfficiency
+
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
@@ -29,7 +32,7 @@ using namespace matching;
 const int LCT_BEND_PATTERN[11] = { -99,  -5,  4, -4,  3, -3,  2, -2,  1, -1,  0};
 
 
-struct MyTrackEff
+struct TrackEff
 {
   void init(); // initialize to default values
   TTree* book(TTree *t, const std::string & name = "trk_eff");
@@ -108,11 +111,6 @@ struct MyTrackEff
   Int_t strip_gemdg_odd; // median digis' strip
   Int_t strip_gemdg_even;
 
-  Char_t has_rpc_sh; // bit1: in odd, bit2: even
-  Char_t has_rpc_dg; // bit1: in odd, bit2: even
-  Int_t strip_rpcdg_odd; // median digis' strip
-  Int_t strip_rpcdg_even;
-
   Char_t bx_pad_odd;
   Char_t bx_pad_even;
   Float_t phi_pad_odd;
@@ -128,67 +126,9 @@ struct MyTrackEff
   Int_t quality_odd;
   Int_t quality_even;
 
-  Int_t hsfromrpc_odd; // extraplotate hs from rpc
-  Int_t hsfromrpc_even;
-
-  Char_t bx_rpcstrip_odd;
-  Char_t bx_rpcstrip_even;
-  Float_t phi_rpcstrip_odd;
-  Float_t phi_rpcstrip_even;
-  Float_t eta_rpcstrip_odd;
-  Float_t eta_rpcstrip_even;
-
-  Float_t dphi_rpcstrip_odd;
-  Float_t dphi_rpcstrip_even;
-  Float_t deta_rpcstrip_odd;
-  Float_t deta_rpcstrip_even;
-
-  // Track properties
-  Int_t has_tfTrack;
-  Int_t has_tfCand;
-  Int_t has_gmtRegCand;
-  Int_t has_gmtCand;
-  Int_t has_l1Extra;
-  //csctf
-  Float_t trackpt, tracketa, trackphi;
-  UInt_t quality_packed, pt_packed, eta_packed, phi_packed;
-  UInt_t rank;
-  UInt_t nstubs;
-  UInt_t deltaphi12, deltaphi23; 
-  Bool_t hasME1,hasME2;
-  Float_t dphiGE11,dphiGE21;
-  Bool_t passGE11,passGE21;
-  Float_t deltaR;
-  Float_t lctdphi12;
-  Float_t eta_propagated_ME1;
-  Float_t eta_propagated_ME2;
-  Float_t eta_propagated_ME3;
-  Float_t eta_propagated_ME4;
-  Float_t phi_propagated_ME1;
-  Float_t phi_propagated_ME2;
-  Float_t phi_propagated_ME3;
-  Float_t phi_propagated_ME4;
-  Float_t eta_ME1_TF;
-  Float_t eta_ME2_TF;
-  Float_t eta_ME3_TF;
-  Float_t eta_ME4_TF;
-  Float_t phi_ME1_TF;
-  Float_t phi_ME2_TF;
-  Float_t phi_ME3_TF;
-  Float_t phi_ME4_TF;
-
-  Float_t eta_interStat12;
-  Float_t phi_interStat12;
-  Float_t eta_interStat23;
-  Float_t phi_interStat23;
-  Float_t eta_interStat13;
-  Float_t phi_interStat13;
-
-  Bool_t allstubs_matched_TF;
-
 };
 
-void MyTrackEff::init()
+void TrackEff::init()
 {
   lumi = -99;
   run = -99;
@@ -261,14 +201,6 @@ void MyTrackEff::init()
   strip_gemdg_odd = -9;
   strip_gemdg_even = -9;
  
-  has_rpc_sh = 0;
-  has_rpc_dg = 0; // bit1: in odd, bit2: even
-  strip_rpcdg_odd = -1;
-  strip_rpcdg_even = -1;
-
-  hsfromrpc_odd = 0;
-  hsfromrpc_even = 0;
-
   bx_pad_odd = -9;
   bx_pad_even = -9;
   phi_pad_odd = -9.;
@@ -279,75 +211,10 @@ void MyTrackEff::init()
   dphi_pad_even = -9.;
   deta_pad_odd = -9.;
   deta_pad_even = -9.;
-
-  bx_rpcstrip_odd = -9;
-  bx_rpcstrip_even = -9;
-  phi_rpcstrip_odd = -9.;
-  phi_rpcstrip_even = -9.;
-  eta_rpcstrip_odd = -9.;
-  eta_rpcstrip_even = -9.;
-  dphi_rpcstrip_odd = -9.;
-  dphi_rpcstrip_even = -9.;
-  deta_rpcstrip_odd = -9.;
-  deta_rpcstrip_even = -9.;
-
-  // Track properties
-  has_tfTrack = -99;
-  has_tfCand = -99;
-  has_gmtRegCand = -99;
-  has_gmtCand = -99;
-  has_l1Extra = -99;
-
-  //csctf
-  trackpt = 0 ;
-  tracketa = 0;
-  trackphi = -9;
-  quality_packed = 0;
-  pt_packed = 0;
-  eta_packed = 0;
-  phi_packed = 0;
-  rank = 0;
-  deltaphi12 = 0;
-  deltaphi23 = 0;; 
-  hasME1 = false;
-  hasME2 = false;
-  dphiGE11 = -99.0;
-  dphiGE21 = -99.0;
-  passGE11 = false;
-  passGE21 = false;
-  nstubs = 0;
-  deltaR = 10;
-  lctdphi12 = -99;
-
-  eta_propagated_ME1 = -9;
-  eta_propagated_ME2 = -9;
-  eta_propagated_ME3 = -9;
-  eta_propagated_ME4 = -9;
-  phi_propagated_ME1 = -9;
-  phi_propagated_ME2 = -9;
-  phi_propagated_ME3 = -9;
-  phi_propagated_ME4 = -9;
-  eta_ME1_TF = -9;
-  eta_ME2_TF = -9;
-  eta_ME3_TF = -9;
-  eta_ME4_TF = -9;
-  phi_ME1_TF = -9;
-  phi_ME2_TF = -9;
-  phi_ME3_TF = -9;
-  phi_ME4_TF = -9;
- 
-  eta_interStat12 = -9;
-  phi_interStat12 = -9;
-  eta_interStat23 = -9;
-  phi_interStat23 = -9;
-  eta_interStat13 = -9;
-  phi_interStat13 = -9;
-  
-  allstubs_matched_TF = false; 
 }
 
 
-TTree* MyTrackEff::book(TTree *t, const std::string & name)
+TTree* TrackEff::book(TTree *t, const std::string & name)
 {
   edm::Service< TFileService > fs;
   t = fs->make<TTree>(name.c_str(), name.c_str());
@@ -423,13 +290,6 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("strip_gemdg_odd", &strip_gemdg_odd);
   t->Branch("strip_gemdg_even", &strip_gemdg_even);
 
-  t->Branch("has_rpc_sh", &has_rpc_sh);
-  t->Branch("has_rpc_dg", &has_rpc_dg);
-  t->Branch("strip_rpcdg_odd", &strip_rpcdg_odd);
-  t->Branch("strip_rpcdg_even", &strip_rpcdg_even);
-  t->Branch("hsfromrpc_odd", &hsfromrpc_odd);
-  t->Branch("hsfromrpc_even", &hsfromrpc_even);
-
   t->Branch("bx_pad_odd", &bx_pad_odd);
   t->Branch("bx_pad_even", &bx_pad_even);
   t->Branch("phi_pad_odd", &phi_pad_odd);
@@ -440,70 +300,6 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("dphi_pad_even", &dphi_pad_even);
   t->Branch("deta_pad_odd", &deta_pad_odd);
   t->Branch("deta_pad_even", &deta_pad_even);
-
-  t->Branch("bx_rpcstrip_odd", &bx_rpcstrip_odd);
-  t->Branch("bx_rpcstrip_even", &bx_rpcstrip_even);
-  t->Branch("phi_rpcstrip_odd", &phi_rpcstrip_odd);
-  t->Branch("phi_rpcstrip_even", &phi_rpcstrip_even);
-  t->Branch("eta_rpcstrip_odd", &eta_rpcstrip_odd);
-  t->Branch("eta_rpcstrip_even", &eta_rpcstrip_even);
-  t->Branch("dphi_rpcstrip_odd", &dphi_rpcstrip_odd);
-  t->Branch("dphi_rpcstrip_even", &dphi_rpcstrip_even);
-  t->Branch("deta_rpcstrip_odd", &deta_rpcstrip_odd);
-  t->Branch("deta_rpcstrip_even", &deta_rpcstrip_even);
-
-  //t->Branch("", &);
-  t->Branch("has_tfTrack", &has_tfTrack);
-  t->Branch("has_tfCand", &has_tfCand);
-  t->Branch("has_gmtRegCand", &has_gmtRegCand);
-  t->Branch("has_gmtCand", &has_gmtCand);
-  t->Branch("has_l1Extra", &has_l1Extra);
-  //csctftrack
-  t->Branch("trackpt", &trackpt);
-  t->Branch("tracketa", &tracketa);
-  t->Branch("trackphi", &trackphi);
-  t->Branch("quality_packed",&quality_packed);
-  t->Branch("rank",&rank);
-  t->Branch("pt_packed",&pt_packed);
-  t->Branch("eta_packed",&eta_packed);
-  t->Branch("phi_packed",&phi_packed);
-  t->Branch("deltaphi12",&deltaphi12);
-  t->Branch("deltaphi23",&deltaphi23);
-  t->Branch("hasME1",&hasME1);
-  t->Branch("hasME2",&hasME2);
-  t->Branch("dphiGE11",&dphiGE11);
-  t->Branch("dphiGE21",&dphiGE21);
-  t->Branch("passGE11",&passGE11);
-  t->Branch("passGE21",&passGE21);
-  t->Branch("nstubs",&nstubs);
-  t->Branch("deltaR",&deltaR);
-  t->Branch("lctdphi12",&lctdphi12);
-   
-  t->Branch("eta_propagated_ME1",&eta_propagated_ME1);
-  t->Branch("eta_propagated_ME2",&eta_propagated_ME2);
-  t->Branch("eta_propagated_ME3",&eta_propagated_ME3);
-  t->Branch("eta_propagated_ME4",&eta_propagated_ME4);
-  t->Branch("phi_propagated_ME1",&phi_propagated_ME1);
-  t->Branch("phi_propagated_ME2",&phi_propagated_ME2);
-  t->Branch("phi_propagated_ME3",&phi_propagated_ME3);
-  t->Branch("phi_propagated_ME4",&phi_propagated_ME4);
-  t->Branch("eta_ME1_TF",&eta_ME1_TF);
-  t->Branch("eta_ME2_TF",&eta_ME2_TF);
-  t->Branch("eta_ME3_TF",&eta_ME3_TF);
-  t->Branch("eta_ME4_TF",&eta_ME4_TF);
-  t->Branch("phi_ME1_TF",&phi_ME1_TF);
-  t->Branch("phi_ME2_TF",&phi_ME2_TF);
-  t->Branch("phi_ME3_TF",&phi_ME3_TF);
-  t->Branch("phi_ME4_TF",&phi_ME4_TF);
-
-  t->Branch("eta_interStat12",&eta_interStat12);
-  t->Branch("phi_interStat12",&phi_interStat12);
-  t->Branch("eta_interStat23",&eta_interStat23);
-  t->Branch("phi_interStat23",&phi_interStat23);
-  t->Branch("eta_interStat13",&eta_interStat13);
-  t->Branch("phi_interStat13",&phi_interStat13);
-  
-  t->Branch("allstubs_matched_TF",&allstubs_matched_TF);
 
   return t;
 }
@@ -548,7 +344,7 @@ private:
 
   TTree *tree_eff_[12]; // for up to 9 stations
   
-  MyTrackEff  etrk_[12];
+  TrackEff  etrk_[12];
 
   int minNHitsChamberCSCSimHit_;
   int minNHitsChamberCSCWireDigi_;
@@ -565,7 +361,6 @@ MuonUpgradeTDREfficiency::MuonUpgradeTDREfficiency(const edm::ParameterSet& ps)
 , verbose_(ps.getUntrackedParameter<int>("verbose", 0))
 {
   cscStations_ = cfg_.getParameter<std::vector<string> >("cscStations");
-  ntupleTrackChamberDelta_ = cfg_.getParameter<bool>("ntupleTrackChamberDelta");
   ntupleTrackEff_ = cfg_.getParameter<bool>("ntupleTrackEff");
   matchprint_ = false; //cfg_.getParameter<bool>("matchprint");
 
@@ -691,10 +486,8 @@ void MuonUpgradeTDREfficiency::analyzeTrackEff(SimTrackMatchManager& match, int 
 {
   const SimHitMatcher& match_sh = match.simhits();
   const GEMDigiMatcher& match_gd = match.gemDigis();
-  const RPCDigiMatcher& match_rd = match.rpcDigis();
   const CSCDigiMatcher& match_cd = match.cscDigis();
   const CSCStubMatcher& match_lct = match.cscStubs();
-  //  const L1TrackMatcher& match_track = match.l1Tracks();
   const SimTrack &t = match_sh.trk();
    
   for (auto s: stations_to_use_)
@@ -1226,77 +1019,10 @@ void MuonUpgradeTDREfficiency::analyzeTrackEff(SimTrackMatchManager& match, int 
     else etrk_[1].Copad_even = digi_channel(copads.at(0));
     }
   }
- 
-  // placeholders for best mtching rpcstrips
-  GlobalPoint best_rpcstrip_odd[12];
-  GlobalPoint best_rpcstrip_even[12];
 
-  for (auto d: match_sh.chamberIdsRPC())
-  {
-    RPCDetId id(d);
-    const int st(detIdToMEStation(id.station(), id.ring()));
-    if (stations_to_use_.count(st) == 0) continue;
-    int cscchamber = CSCTriggerNumbering::chamberFromTriggerLabels(id.sector(), 0, id.station(), id.subsector());
-    cscchamber = (cscchamber+16)%18+1; 
-    if ( (match_sh.hitsInChamber(d)).size() >0 )
-    {
-      bool odd(cscchamber%2 == 1);
-      if (odd)   etrk_[st].has_rpc_sh |= 1;
-      else etrk_[st].has_rpc_sh |=2;  
-    }	
-  }
-
-  for (auto d: match_rd.detIds())
-  {
-    RPCDetId id(d);
-    const int st(detIdToMEStation(id.station(), id.ring()));
-    if (stations_to_use_.count(st) == 0) continue;
-    //meanstrip in rpc 
-    auto rpcdigis = match_rd.digisInDetId(id); 
-    const int rpc_medianstrip(match_rd.median(rpcdigis));
-    const int cscchamber = CSCTriggerNumbering::chamberFromTriggerLabels(id.sector(), 0, id.station(), id.subsector());
-    //std::cout <<"rpc detid " << id << " csc chamebr:"<< cscchamber << std::endl;
-    const bool odd(cscchamber%2 == 1);
-    if (odd)
-    {
-      etrk_[st].has_rpc_dg |= 1;
-//       etrk_[st].chamber_odd |= 3;
-      etrk_[st].strip_rpcdg_odd = rpc_medianstrip;
-      etrk_[st].hsfromrpc_odd = match_rd.extrapolateHsfromRPC( d, rpc_medianstrip);
-      if (is_valid(lct_odd[st]))
-      {
-        auto rpc_dg_and_gp = match_gd.digiInRPCClosestToCSC(rpcdigis, gp_lct_odd[st]);
-        best_rpcstrip_odd[st] = rpc_dg_and_gp.second;
-        etrk_[st].bx_rpcstrip_odd = digi_bx(rpc_dg_and_gp.first);
-        etrk_[st].phi_rpcstrip_odd = best_rpcstrip_odd[st].phi();
-        etrk_[st].eta_rpcstrip_odd = best_rpcstrip_odd[st].eta();
-        etrk_[st].dphi_rpcstrip_odd = reco::deltaPhi((float)etrk_[st].phi_lct_odd, (float)etrk_[st].phi_rpcstrip_odd);
-        etrk_[st].deta_rpcstrip_odd = etrk_[st].eta_lct_odd - etrk_[st].eta_rpcstrip_odd;
-      }
-    }
-    else
-    {
-      etrk_[st].has_rpc_dg |= 2;
-//       etrk_[st].chamber_even |= 3;
-      etrk_[st].strip_rpcdg_even = rpc_medianstrip;
-      etrk_[st].hsfromrpc_even = match_rd.extrapolateHsfromRPC( d, rpc_medianstrip);
-      if (is_valid(lct_even[st]))
-      {
-        auto rpc_dg_and_gp = match_gd.digiInRPCClosestToCSC(rpcdigis, gp_lct_even[st]);
-        best_rpcstrip_even[st] = rpc_dg_and_gp.second;
-        etrk_[st].bx_rpcstrip_even = digi_bx(rpc_dg_and_gp.first);
-        etrk_[st].phi_rpcstrip_even = best_rpcstrip_even[st].phi();
-        etrk_[st].eta_rpcstrip_even = best_rpcstrip_even[st].eta();
-        etrk_[st].dphi_rpcstrip_even = reco::deltaPhi((float)etrk_[st].phi_lct_even, (float)etrk_[st].phi_rpcstrip_even);
-        etrk_[st].deta_rpcstrip_even = etrk_[st].eta_lct_even - etrk_[st].eta_rpcstrip_even;
-      }
-    }
-  }
   for (auto s: stations_to_use_)
   {
     tree_eff_[s]->Fill();
-
-
   }
 }
 
@@ -1305,7 +1031,6 @@ void MuonUpgradeTDREfficiency::analyzeTrackEff(SimTrackMatchManager& match, int 
 {
   const SimHitMatcher& match_sh = match.simhits();
   const GEMDigiMatcher& match_gd = match.gemDigis();
-  const RPCDigiMatcher& match_rd = match.rpcDigis();
   const CSCDigiMatcher& match_cd = match.cscDigis();
   const CSCStubMatcher& match_lct = match.cscStubs();
   //  const L1TrackMatcher& match_track = match.l1Tracks();
@@ -1329,20 +1054,6 @@ void MuonUpgradeTDREfficiency::analyzeTrackEff(SimTrackMatchManager& match, int 
     auto gp = match_sh.simHitsMeanPosition(hits);
     float mean_strip = match_sh.simHitsMeanStrip(hits);
     std::cout << "CSC Chamber: "<<d<<" "<<id<<" layerswithhits:"<<nlayers<<" global eta:"<<gp.eta()<<" mean strip:"<<mean_strip<<endl;
-  }     
-  
-  for (auto d: match_sh.chamberIdsRPC())
-  {
-    RPCDetId id(d);
-    const int st(detIdToMEStation(id.station(), id.ring()));
-    if (stations_to_use_.count(st) == 0) continue;
-    int nlayers = match_sh.nLayersWithHitsInSuperChamber(d);
-    const auto& hits = match_sh.hitsInChamber(d);
-    auto gp = match_sh.simHitsMeanPosition(hits);
-    float mean_strip = match_sh.simHitsMeanStrip(hits);
-    std::cout << "RPC Chamber: "<<d<<" "<<id<<" layerswithhits:"<<nlayers<<" global eta:"<<gp.eta()<<" mean strip:"<<mean_strip<<endl;
-    int cscchamber = CSCTriggerNumbering::chamberFromTriggerLabels(id.sector(), 0, id.station(), id.subsector());
-    std::cout <<"rpc detid " << id << " csc chamebr:"<< cscchamber << std::endl;
   }     
   
   for(auto d: match_sh.superChamberIdsGEM())
@@ -1435,23 +1146,6 @@ void MuonUpgradeTDREfficiency::analyzeTrackEff(SimTrackMatchManager& match, int 
     std::cout << std::endl;
   }
 
-  
-  std::cout << "######matching RPC Digi to simtrack " << std::endl;
-  for (auto d: match_rd.detIds())
-  {
-    RPCDetId id(d);
-    const int st(detIdToMEStation(id.station(), id.ring()));
-    if (stations_to_use_.count(st) == 0) continue;
-    
-    auto rpcdigis = match_rd.digisInDetId(d); 
-    int medianstrip(match_rd.median(rpcdigis));
-    int hs = match_rd.extrapolateHsfromRPC( d, medianstrip);
-    std::cout<< "RPC chamber: "<<d<<" "<<id<<" median strip:" << medianstrip <<" hs:" << hs<<std::endl; 
-    for (auto p : rpcdigis)
-    	std::cout << p << std::endl;
-   
-  }
-
   std::cout << "######matching CLCT to Simtrack " << std::endl;
   for(auto d: match_lct.chamberIdsAllCLCT(0))
   {
@@ -1517,3 +1211,4 @@ void MuonUpgradeTDREfficiency::fillDescriptions(edm::ConfigurationDescriptions& 
 
 DEFINE_FWK_MODULE(MuonUpgradeTDREfficiency);
 
+#endif
