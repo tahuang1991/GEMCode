@@ -333,7 +333,7 @@ phiL1DTTrack(const L1MuDTTrack& track)
 {
   int phi_local = track.phi_packed(); //range: 0 < phi_local < 31
   if ( phi_local > 15 ) phi_local -= 32; //range: -16 < phi_local < 15    
-  double dttrk_phi_global = normalizedPhi((phi_local*(M_PI/72.))+((M_PI/6.)*track.spid().sector()));// + 12*i->scNum(); //range: -16 < phi_global < 147 
+  double dttrk_phi_global = normalizedPhi((float) (phi_local*(M_PI/72.))+((M_PI/6.)*track.spid().sector()));// + 12*i->scNum(); //range: -16 < phi_global < 147 
   // if(dttrk_phi_global < 0) dttrk_phi_global+=2*M_PI; //range: 0 < phi_global < 147
   // if(dttrk_phi_global > 2*M_PI) dttrk_phi_global-=2*M_PI; //range: 0 < phi_global < 143
   return dttrk_phi_global;
@@ -587,11 +587,6 @@ private:
   edm::InputTag L1Mu_input;
   edm::InputTag L1TkMu_input;
   
-  edm::ESHandle<MagneticField> magfield_;
-  edm::ESHandle<Propagator> propagator_;
-  edm::ESHandle<Propagator> propagatorOpposite_;
-  edm::ESHandle<Propagator> propagatorAny_;
-  edm::ESHandle<MuonDetLayerGeometry> muonGeometry_;
   edm::ESHandle<RPCGeometry> rpc_geom_;
   edm::ESHandle<CSCGeometry> csc_geom_;
   edm::ESHandle<GEMGeometry> gem_geom_;
@@ -654,27 +649,6 @@ DisplacedL1MuFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   clearBranches();
   
-  // propagator
-  iSetup.get<IdealMagneticFieldRecord>().get(magfield_);
-  iSetup.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator_);
-  iSetup.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorOpposite", propagatorOpposite_);
-  iSetup.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny",      propagatorAny_);
-  iSetup.get<MuonRecoGeometryRecord>().get(muonGeometry_);
-
-  // Get the barrel cylinder
-  const DetLayer * dtLay = muonGeometry_->allDTLayers()[useMB2_ ? 1 : 0];
-  barrelCylinder_ = dynamic_cast<const BoundCylinder *>(&dtLay->surface());
-  barrelHalfLength_ = barrelCylinder_->bounds().length()/2;;
-  // std::cout << "L1MuonMatcher: barrel radius = " << barrelCylinder_->radius() << ", half length = " << barrelHalfLength_ << std::endl;
-
-  // Get the endcap disks. Note that ME1 has two disks (ME1/1 and ME2/1-ME3/2-ME4/1), so there's one more index
-  for (size_t i = 0; i <= (useMB2_ ? 2 : 1); ++i) {
-    endcapDiskPos_[i] = dynamic_cast<const BoundDisk *>(& muonGeometry_->forwardCSCLayers()[i]->surface());
-    endcapDiskNeg_[i] = dynamic_cast<const BoundDisk *>(& muonGeometry_->backwardCSCLayers()[i]->surface());
-    endcapRadii_[i] = std::make_pair(endcapDiskPos_[i]->innerRadius(), endcapDiskPos_[i]->outerRadius());
-    // std::cout << "L1MuonMatcher: endcap " << i << " Z = " << endcapDiskPos_[i]->position().z() << ", radii = " << endcapRadii_[i].first << "," << endcapRadii_[i].second << std::endl;
-  }
-
   iSetup.get<MuonGeometryRecord>().get(rpc_geom_);
   rpcGeometry_ = &*rpc_geom_;
 
@@ -895,7 +869,7 @@ DisplacedL1MuFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
     // calculate pt, eta and phi (don't forget to store the sign)                                                                                   
     event_.CSCTF_pt[j] = muPtScale->getPtScale()->getLowEdge(gpt & 0x1f) + 1.e-6;
     event_.CSCTF_eta[j] = muScales->getRegionalEtaScale(2)->getCenter(track.eta_packed()) * sign;
-    event_.CSCTF_phi[j] = normalizedPhi(muScales->getPhiScale()->getLowEdge(phiL1CSCTrack(track)));
+    event_.CSCTF_phi[j] = normalizedPhi((float)muScales->getPhiScale()->getLowEdge(phiL1CSCTrack(track)));
     event_.CSCTF_bx[j] = track.bx();
     event_.CSCTF_quality[j] = quality;
     
@@ -1047,8 +1021,8 @@ DisplacedL1MuFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
           if (bestMatchingStub.second != CSCCorrelatedLCTDigi()) {
             // stub position
             auto gp = getCSCSpecificPoint2(bestMatchingStub.first.rawId(), bestMatchingStub.second);
-            if (reco::deltaR(gp.eta(), normalizedPhi(gp.phi()), 
-                             (float)event_.CSCTF_eta[j] , normalizedPhi((float)event_.CSCTF_phi[j])) < 0.2){ 
+            if (reco::deltaR((float)gp.eta(), (float)normalizedPhi((float)gp.phi()), 
+                             (float)event_.CSCTF_eta[j] , (float)normalizedPhi((float)event_.CSCTF_phi[j])) < 0.2){ 
 
               if(verbose) {
                 std::cout << "\tChoice:" 
@@ -1304,7 +1278,7 @@ DisplacedL1MuFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
       
       event_.RPCb_pt[j] = muPtScale->getPtScale()->getLowEdge(track.pt_packed());
       event_.RPCb_eta[j] = muScales->getRegionalEtaScale(track.type_idx())->getCenter(track.eta_packed());
-      event_.RPCb_phi[j] = normalizedPhi(muScales->getPhiScale()->getLowEdge(track.phi_packed()));
+      event_.RPCb_phi[j] = normalizedPhi((float)muScales->getPhiScale()->getLowEdge(track.phi_packed()));
       event_.RPCb_bx[j] = track.bx();
       event_.RPCb_quality[j] = track.quality();
       
@@ -1420,7 +1394,7 @@ DisplacedL1MuFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
       
       event_.RPCf_pt[j] = muPtScale->getPtScale()->getLowEdge(track.pt_packed());
       event_.RPCf_eta[j] = muScales->getRegionalEtaScale(track.type_idx())->getCenter(track.eta_packed());
-      event_.RPCf_phi[j] = normalizedPhi(muScales->getPhiScale()->getLowEdge(track.phi_packed()));
+      event_.RPCf_phi[j] = normalizedPhi((float)muScales->getPhiScale()->getLowEdge(track.phi_packed()));
       event_.RPCf_bx[j] = track.bx();
       event_.RPCf_quality[j] = track.quality();
       
@@ -1535,7 +1509,7 @@ DisplacedL1MuFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
     auto l1Mu = l1GmtCands[i];
     event_.L1Mu_pt[i] = l1Mu.ptValue();
     event_.L1Mu_eta[i] = l1Mu.etaValue();
-    event_.L1Mu_phi[i] = normalizedPhi(l1Mu.phiValue());
+    event_.L1Mu_phi[i] = normalizedPhi((float)l1Mu.phiValue());
     event_.L1Mu_charge[i] = l1Mu.charge();
     event_.L1Mu_quality[i] = l1Mu.quality();
     event_.L1Mu_bx[i] = l1Mu.bx();
@@ -1554,12 +1528,12 @@ DisplacedL1MuFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
     double bestDrL1MuL1DTTrack = 99;
     for (unsigned int j=0; j<L1DTTrackPhis.size(); ++j) {   
       if ( ( event_.L1Mu_quality[i] > 0 ) &&
-           ( reco::deltaPhi( event_.L1Mu_phi[i], event_.DTTF_phi[j] ) < 0.001 ) &&             
+           ( reco::deltaPhi( (float)event_.L1Mu_phi[i], (float)event_.DTTF_phi[j] ) < 0.001 ) &&             
            ( event_.L1Mu_bx[i] == event_.DTTF_bx[j] ) ) {
-        double drL1MuL1DTTrack = reco::deltaR(l1Mu.etaValue(), 
-                                              normalizedPhi(l1Mu.phiValue()), 
-                                              event_.DTTF_eta[j], 
-                                              event_.DTTF_phi[j]);
+        double drL1MuL1DTTrack = reco::deltaR((float)l1Mu.etaValue(), 
+                                              (float)normalizedPhi((float)l1Mu.phiValue()), 
+                                              (float)event_.DTTF_eta[j], 
+                                              (float)event_.DTTF_phi[j]);
         if (drL1MuL1DTTrack < bestDrL1MuL1DTTrack and drL1MuL1DTTrack < 0.3) {
           bestDrL1MuL1DTTrack = drL1MuL1DTTrack;
           event_.L1Mu_DTTF_index[i] = j;
@@ -1594,12 +1568,12 @@ DisplacedL1MuFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
     double bestDrL1MuL1CSCTrack = 99;
     for (unsigned int j=0; j<l1Tracks.size(); ++j) {
       if ( ( event_.L1Mu_quality[i] > 0 ) &&
-           ( reco::deltaPhi( event_.L1Mu_phi[i], event_.CSCTF_phi[j] ) < 0.001 ) &&             
+           ( reco::deltaPhi( (float)event_.L1Mu_phi[i], (float)event_.CSCTF_phi[j] ) < 0.001 ) &&             
            ( event_.L1Mu_bx[i] == event_.CSCTF_bx[j] ) ) {
-        double drL1MuL1CSCTrack = reco::deltaR(l1Mu.etaValue(), 
-                                               normalizedPhi(l1Mu.phiValue()), 
-                                               event_.CSCTF_eta[j], 
-                                               event_.CSCTF_phi[j]);
+        double drL1MuL1CSCTrack = reco::deltaR((float)l1Mu.etaValue(), 
+                                               (float)normalizedPhi((float)l1Mu.phiValue()), 
+                                               (float)event_.CSCTF_eta[j], 
+                                               (float)event_.CSCTF_phi[j]);
         if (drL1MuL1CSCTrack < bestDrL1MuL1CSCTrack and drL1MuL1CSCTrack < 0.3) {
           bestDrL1MuL1CSCTrack = drL1MuL1CSCTrack;
           event_.L1Mu_CSCTF_index[i] = j;
@@ -1778,12 +1752,12 @@ DisplacedL1MuFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
       double bestDrL1MuL1RPCb = 99;
       for (unsigned int j=0; j<l1MuRPCbs.size(); ++j) { 
         if ( ( event_.L1Mu_quality[i] > 0 ) &&
-             ( reco::deltaPhi( event_.L1Mu_phi[i], event_.RPCb_phi[j] ) < 0.001 ) &&             
+             ( reco::deltaPhi( (float)event_.L1Mu_phi[i], (float)event_.RPCb_phi[j] ) < 0.001 ) &&             
              ( event_.L1Mu_bx[i] == event_.RPCb_bx[j] ) ) {
-          double drL1MuL1RPCb = reco::deltaR(l1Mu.etaValue(), 
-                                             normalizedPhi(l1Mu.phiValue()), 
-                                             event_.RPCb_eta[j], 
-                                             event_.RPCb_phi[j]);
+          double drL1MuL1RPCb = reco::deltaR((float)l1Mu.etaValue(), 
+                                             (float)normalizedPhi((float)l1Mu.phiValue()), 
+                                             (float)event_.RPCb_eta[j], 
+                                             (float)event_.RPCb_phi[j]);
           if (drL1MuL1RPCb < bestDrL1MuL1RPCb and drL1MuL1RPCb < 0.3) {
             bestDrL1MuL1RPCb = drL1MuL1RPCb;
             event_.L1Mu_RPCb_index[i] = j;
@@ -1815,12 +1789,12 @@ DisplacedL1MuFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
       double bestDrL1MuL1RPCf = 99;
       for (unsigned int j=0; j<l1MuRPCfs.size(); ++j) { 
         if ( ( event_.L1Mu_quality[i] > 0 ) &&
-             ( reco::deltaPhi( event_.L1Mu_phi[i], event_.RPCf_phi[j] ) < 0.001 ) &&             
+             ( reco::deltaPhi( (float)event_.L1Mu_phi[i], (float)event_.RPCf_phi[j] ) < 0.001 ) &&             
              ( event_.L1Mu_bx[i] == event_.RPCf_bx[j] ) ) {
-          double drL1MuL1RPCf = reco::deltaR(l1Mu.etaValue(), 
-                                             normalizedPhi(l1Mu.phiValue()), 
-                                             event_.RPCf_eta[j], 
-                                             event_.RPCf_phi[j]);
+          double drL1MuL1RPCf = reco::deltaR((float)l1Mu.etaValue(), 
+                                             (float)normalizedPhi((float)l1Mu.phiValue()), 
+                                             (float)event_.RPCf_eta[j], 
+                                             (float)event_.RPCf_phi[j]);
           if (drL1MuL1RPCf < bestDrL1MuL1RPCf and drL1MuL1RPCf < 0.3) {
             bestDrL1MuL1RPCf = drL1MuL1RPCf;
             event_.L1Mu_RPCf_index[i] = j;
