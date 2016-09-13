@@ -3,7 +3,18 @@
 Configurations for upgrade simulations with GEMs can be found here: 
 https://twiki.cern.ch/twiki/bin/viewauth/CMS/GemSimulationsInstructionsCMSSW#Recipe_for_GEMs_in_latest_8XY_re
 
-## Step 1: GEN-SIM ##
+## Step 1: Setup ##
+<PRE>
+cmsrel CMSSW_8_1_0_pre11
+cd CMSSW_8_1_0_pre11/src
+cmsenv
+git cms-init
+git cms-merge-topic dildick:https://github.com/dildick/cmssw/tree/from-CMSSW_8_1_0_pre11-gem-trigger-cleanup
+git clone git@github.com:gem-sw/GEMCode.git
+scram b -j 9
+</PRE>
+
+## Step 2: GEN-SIM ##
 <PRE>
 cmsDriver.py SingleMuPt100_cfi \
 --conditions auto:run2_mc -n 10 \
@@ -17,7 +28,7 @@ cmsDriver.py SingleMuPt100_cfi \
 --no_exec --fileout file:step1.root
 </PRE>
 
-## Step 2: DIGI-L1 ##
+## Step 3: DIGI-L1 ##
 <PRE>
 cmsDriver.py step2 \
 --conditions auto:run2_mc \
@@ -37,7 +48,7 @@ cmsDriver.py step2 \
 
 When running without pileup, remove the pileup related flags. 
 
-## Step 3: Analysis ##
+## Step 4: Analysis ##
 Efficiency:
 <PRE>
 cmsRun runMuonUpgradeTDREfficiency_cfg.py
