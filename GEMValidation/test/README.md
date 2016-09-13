@@ -10,7 +10,10 @@ cd CMSSW_8_1_0_pre11/src
 cmsenv
 git cms-init
 git cms-merge-topic dildick:https://github.com/dildick/cmssw/tree/from-CMSSW_8_1_0_pre11-gem-trigger-cleanup
+git cms-addpkg L1Trigger/CSCTriggerPrimitives
 git clone git@github.com:gem-sw/GEMCode.git
+cd GEMCode
+git checkout -b for-CMSSW-81X origin/for-CMSSW-81X
 scram b -j 9
 </PRE>
 
