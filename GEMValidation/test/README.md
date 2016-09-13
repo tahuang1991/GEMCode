@@ -32,6 +32,7 @@ cmsDriver.py SingleMuPt100_cfi \
 </PRE>
 
 ## Step 3: DIGI-L1 ##
+With pileup
 <PRE>
 cmsDriver.py step2 \
 --conditions auto:run2_mc \
@@ -50,6 +51,20 @@ cmsDriver.py step2 \
 </PRE>
 
 When running without pileup, remove the pileup related flags. 
+<PRE>
+cmsDriver.py step2 \
+--conditions auto:run2_mc \
+-n 1 --era Phase2C1 \
+--eventcontent FEVTDEBUGHLT \
+-s DIGI:pdigi_valid,L1 \
+--datatier GEN-SIM-DIGI \
+--customise SLHCUpgradeSimulations/Configuration/combinedCustoms.cust_2023tilted \
+--geometry Extended2023D1 \
+--python DigiFullPU_2023tiltedPU.py \
+--no_exec \
+--filein file:step1.root \
+--fileout file:step2.root
+</PRE>
 
 ## Step 4: Analysis Part 1 ##
 Efficiency:
