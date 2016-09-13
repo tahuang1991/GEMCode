@@ -51,7 +51,7 @@ cmsDriver.py step2 \
 
 When running without pileup, remove the pileup related flags. 
 
-## Step 4: Analysis ##
+## Step 4: Analysis Part 1 ##
 Efficiency:
 <PRE>
 cmsRun runMuonUpgradeTDREfficiency_cfg.py
@@ -60,3 +60,6 @@ Rate:
 <PRE>
 cmsRun runMuonUpgradeTDRRate_cfg.py
 </PRE>
+
+## Step 5: Analysis Part 2 ##
+Run the plotting scripts that produce trigger efficiency and rate plots
