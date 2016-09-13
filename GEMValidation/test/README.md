@@ -1,4 +1,4 @@
-# Instructions for GEM-CSC trigger development studies targeting Muon Upgrade TDR 2017 # 
+# Instructions for GEM-CSC trigger development studies targeting Muon Upgrade TDR 2017 
 
 Configurations for upgrade simulations with GEMs can be found here: 
 https://twiki.cern.ch/twiki/bin/viewauth/CMS/GemSimulationsInstructionsCMSSW#Recipe_for_GEMs_in_latest_8XY_re
