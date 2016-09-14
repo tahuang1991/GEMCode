@@ -5,11 +5,11 @@ using namespace std;
 
 #include "DataFormats/MuonDetId/interface/DTWireId.h"
 
-DTStubMatcher::DTStubMatcher(SimHitMatcher& sh)
+DTStubMatcher::DTStubMatcher(SimHitMatcher& sh, edm::ConsumesCollector && iC)
 : DigiMatcher(sh)
 {
   auto dtStub_= conf().getParameter<edm::ParameterSet>("dtLocalTrigger");
-  input_ = dtStub_.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  input_ = iC.consumes<DTLocalTriggerCollection>(dtStub_.getParameter<edm::InputTag>("validInputTags"));
   minBX_ = dtStub_.getParameter<int>("minBX");
   maxBX_ = dtStub_.getParameter<int>("maxBX");
   verbose_ = dtStub_.getParameter<int>("verbose");
@@ -17,7 +17,7 @@ DTStubMatcher::DTStubMatcher(SimHitMatcher& sh)
 
   if (hasDTGeometry_) {
     edm::Handle<DTLocalTriggerCollection> dt_stubs;
-    if(gemvalidation::getByLabel(input_, dt_stubs, event())) if (run_) matchDTLocalTriggersToSimTrack(*dt_stubs.product());
+    if(gemvalidation::getByToken(input_, dt_stubs, event())) if (run_) matchDTLocalTriggersToSimTrack(*dt_stubs.product());
   }
 }
 

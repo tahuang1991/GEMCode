@@ -15,12 +15,12 @@ L1GlobalMuonTriggerMatcher::L1GlobalMuonTriggerMatcher(SimHitMatcher& sh)
   auto gmtCand = conf().getParameter<edm::ParameterSet>("gmtCand");
   auto l1ExtraMuonParticle = conf().getParameter<edm::ParameterSet>("l1ExtraMuonParticle");
 
-  gmtRegCandCSCInputLabel_ = gmtRegCandCSC.getParameter<vector<edm::InputTag>>("validInputTags");
-  gmtRegCandDTInputLabel_ = gmtRegCandDT.getParameter<vector<edm::InputTag>>("validInputTags");
-  gmtRegCandRPCfInputLabel_ = gmtRegCandRPCf.getParameter<vector<edm::InputTag>>("validInputTags");
-  gmtRegCandRPCbInputLabel_ = gmtRegCandRPCb.getParameter<vector<edm::InputTag>>("validInputTags");
-  gmtCandInputLabel_ = gmtCand.getParameter<vector<edm::InputTag>>("validInputTags");
-  l1ExtraMuonInputLabel_ = l1ExtraMuonParticle.getParameter<vector<edm::InputTag>>("validInputTags");
+  gmtRegCandCSCInputLabel_ = gmtRegCandCSC.getParameter<edm::InputTag>("validInputTags");
+  gmtRegCandDTInputLabel_ = gmtRegCandDT.getParameter<edm::InputTag>("validInputTags");
+  gmtRegCandRPCfInputLabel_ = gmtRegCandRPCf.getParameter<edm::InputTag>("validInputTags");
+  gmtRegCandRPCbInputLabel_ = gmtRegCandRPCb.getParameter<edm::InputTag>("validInputTags");
+  gmtCandInputLabel_ = gmtCand.getParameter<edm::InputTag>("validInputTags");
+  l1ExtraMuonInputLabel_ = l1ExtraMuonParticle.getParameter<edm::InputTag>("validInputTags");
 
   verboseGmtRegCandCSC_ = gmtRegCandCSC.getParameter<int>("verbose");
   verboseGmtRegCandDT_ = gmtRegCandDT.getParameter<int>("verbose");
@@ -73,22 +73,22 @@ void
 L1GlobalMuonTriggerMatcher::init()
 {
   edm::Handle<L1MuRegionalCandCollection> hGmtRegCandCSC;
-  if (gemvalidation::getByLabel(gmtRegCandCSCInputLabel_, hGmtRegCandCSC, event())) if (runGmtRegCandCSC_) matchRegionalCandCSCToSimTrack(*hGmtRegCandCSC.product());
+  if (gemvalidation::getByToken(gmtRegCandCSCInputLabel_, hGmtRegCandCSC, event())) if (runGmtRegCandCSC_) matchRegionalCandCSCToSimTrack(*hGmtRegCandCSC.product());
 
   edm::Handle<L1MuRegionalCandCollection> hGmtRegCandRPCf;
-  if (gemvalidation::getByLabel(gmtRegCandRPCfInputLabel_, hGmtRegCandRPCf, event())) if (runGmtRegCandRPCf_) matchRegionalCandRPCfToSimTrack(*hGmtRegCandRPCf.product());
+  if (gemvalidation::getByToken(gmtRegCandRPCfInputLabel_, hGmtRegCandRPCf, event())) if (runGmtRegCandRPCf_) matchRegionalCandRPCfToSimTrack(*hGmtRegCandRPCf.product());
 
   edm::Handle<L1MuRegionalCandCollection> hGmtRegCandRPCb;
-  if (gemvalidation::getByLabel(gmtRegCandRPCbInputLabel_, hGmtRegCandRPCb, event())) if (runGmtRegCandRPCb_) matchRegionalCandRPCbToSimTrack(*hGmtRegCandRPCb.product());
+  if (gemvalidation::getByToken(gmtRegCandRPCbInputLabel_, hGmtRegCandRPCb, event())) if (runGmtRegCandRPCb_) matchRegionalCandRPCbToSimTrack(*hGmtRegCandRPCb.product());
 
   edm::Handle<L1MuRegionalCandCollection> hGmtRegCandDT;
-  if (gemvalidation::getByLabel(gmtRegCandDTInputLabel_, hGmtRegCandDT, event())) if (runGmtRegCandDT_) matchRegionalCandDTToSimTrack(*hGmtRegCandDT.product());
+  if (gemvalidation::getByToken(gmtRegCandDTInputLabel_, hGmtRegCandDT, event())) if (runGmtRegCandDT_) matchRegionalCandDTToSimTrack(*hGmtRegCandDT.product());
 
   edm::Handle<L1MuGMTCandCollection> hGmtCand;
-  if (gemvalidation::getByLabel(gmtCandInputLabel_, hGmtCand, event())) if (runGmtCand_) matchGMTCandToSimTrack(*hGmtCand.product());
+  if (gemvalidation::getByToken(gmtCandInputLabel_, hGmtCand, event())) if (runGmtCand_) matchGMTCandToSimTrack(*hGmtCand.product());
 
   edm::Handle<l1extra::L1MuonParticleCollection> hL1ExtraMuonParticle;
-  if (gemvalidation::getByLabel(l1ExtraMuonInputLabel_, hL1ExtraMuonParticle, event())) if (runL1ExtraMuon_) matchL1ExtraMuonParticleToSimTrack(*hL1ExtraMuonParticle.product());
+  if (gemvalidation::getByToken(l1ExtraMuonInputLabel_, hL1ExtraMuonParticle, event())) if (runL1ExtraMuon_) matchL1ExtraMuonParticleToSimTrack(*hL1ExtraMuonParticle.product());
 }
 
 void 

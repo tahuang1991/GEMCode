@@ -12,35 +12,35 @@ L1TrackMatcher::L1TrackMatcher(CSCStubMatcher& csc, DTDigiMatcher& dt, RPCDigiMa
 , rpc_digi_matcher_(&rpc)                 
 {
   auto tfTrack = conf().getParameter<edm::ParameterSet>("cscTfTrack");
-  cscTfTrackInputLabel_ = tfTrack.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  cscTfTrackInputLabel_ = tfTrack.getParameter<edm::InputTag>("validInputTags");
   minBXTFTrack_ = tfTrack.getParameter<int>("minBX");
   maxBXTFTrack_ = tfTrack.getParameter<int>("minBX");
   verboseTFTrack_ = tfTrack.getParameter<int>("verbose");
   deltaRTFTrack_ = tfTrack.getParameter<double>("deltaR");
   
   auto tfCand = conf().getParameter<edm::ParameterSet>("cscTfCand");
-  cscTfCandInputLabel_ = tfCand.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  cscTfCandInputLabel_ = tfCand.getParameter<edm::InputTag>("validInputTags");
   minBXTFCand_ = tfCand.getParameter<int>("minBX");
   maxBXTFCand_ = tfCand.getParameter<int>("minBX");
   verboseTFCand_ = tfCand.getParameter<int>("verbose");
   deltaRTFCand_ = tfCand.getParameter<double>("deltaR");
   
   auto gmtRegCand = conf().getParameter<edm::ParameterSet>("gmtRegCand");
-  gmtRegCandInputLabel_ = gmtRegCand.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  gmtRegCandInputLabel_ = gmtRegCand.getParameter<edm::InputTag>("validInputTags");
   minBXGMTRegCand_ = gmtRegCand.getParameter<int>("minBX");
   maxBXGMTRegCand_ = gmtRegCand.getParameter<int>("minBX");
   verboseGMTRegCand_ = gmtRegCand.getParameter<int>("verbose");
   deltaRGMTRegCand_ = gmtRegCand.getParameter<double>("deltaR");
   
   auto gmtCand = conf().getParameter<edm::ParameterSet>("gmtCand");
-  gmtCandInputLabel_ = gmtCand.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  gmtCandInputLabel_ = gmtCand.getParameter<edm::InputTag>("validInputTags");
   minBXGMTCand_ = gmtCand.getParameter<int>("minBX");
   maxBXGMTCand_ = gmtCand.getParameter<int>("minBX");
   verboseGMTCand_ = gmtCand.getParameter<int>("verbose");
   deltaRGMTCand_ = gmtCand.getParameter<double>("deltaR");
   
   auto l1Extra = conf().getParameter<edm::ParameterSet>("l1Extra");
-  l1ExtraInputLabel_ = l1Extra.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  l1ExtraInputLabel_ = l1Extra.getParameter<edm::InputTag>("validInputTags");
   minBXL1Extra_ = l1Extra.getParameter<int>("minBX");
   maxBXL1Extra_ = l1Extra.getParameter<int>("minBX");
   verboseL1Extra_ = l1Extra.getParameter<int>("verbose");
@@ -162,15 +162,15 @@ L1TrackMatcher::init()
 
   // tracks produced by TF
   edm::Handle<L1CSCTrackCollection> hl1Tracks;
-  if (gemvalidation::getByLabel(cscTfTrackInputLabel_,hl1Tracks, event())) matchTfTrackToSimTrack(*hl1Tracks.product());
+  if (gemvalidation::getByToken(cscTfTrackInputLabel_,hl1Tracks, event())) matchTfTrackToSimTrack(*hl1Tracks.product());
   
   // L1 muon candidates after CSC sorter
   edm::Handle<L1MuRegionalCandCollection> hl1TfCands;
-  if (gemvalidation::getByLabel(cscTfCandInputLabel_, hl1TfCands, event())) matchTfCandToSimTrack(*hl1TfCands.product());
+  if (gemvalidation::getByToken(cscTfCandInputLabel_, hl1TfCands, event())) matchTfCandToSimTrack(*hl1TfCands.product());
   
   // // L1 muon candidates
   // edm::Handle<l1extra::L1MuonParticleCollection> l1Particles;
-  // if (gemvalidation::getByLabel(l1ExtraInputLabel_, l1Particles, event())) matchL1MuonParticleToSimTrack(*l1Particles.product());
+  // if (gemvalidation::getByToken(l1ExtraInputLabel_, l1Particles, event())) matchL1MuonParticleToSimTrack(*l1Particles.product());
 }
 
 

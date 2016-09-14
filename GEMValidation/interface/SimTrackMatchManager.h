@@ -37,7 +37,8 @@ class SimTrackMatchManager
 public:
   
   SimTrackMatchManager(const SimTrack& t, const SimVertex& v,
-      const edm::ParameterSet& ps, const edm::Event& ev, const edm::EventSetup& es);
+                       const edm::ParameterSet& ps, const edm::Event& ev, const edm::EventSetup& es,
+                       edm::ConsumesCollector && iC);
   
   ~SimTrackMatchManager();
 

@@ -14,21 +14,21 @@ HLTTrackMatcher::HLTTrackMatcher(CSCRecHitMatcher& csc, DTRecHitMatcher& dt,
 , csc_rechit_matcher_(&csc)
 {
   auto recoTrackExtra = conf().getParameter<edm::ParameterSet>("recoTrackExtra");
-  recoTrackExtraInputLabel_ = recoTrackExtra.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  recoTrackExtraInputLabel_ = consumes<reco::TrackExtraCollection>(recoTrackExtra.getParameter<edm::InputTag>("validInputTags"));
   minBXRecoTrackExtra_ = recoTrackExtra.getParameter<int>("minBX");
   maxBXRecoTrackExtra_ = recoTrackExtra.getParameter<int>("minBX");
   verboseRecoTrackExtra_ = recoTrackExtra.getParameter<int>("verbose");
   runRecoTrackExtra_ = recoTrackExtra.getParameter<bool>("run");
 
   auto recoTrack = conf().getParameter<edm::ParameterSet>("recoTrack");
-  recoTrackInputLabel_ = recoTrack.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  recoTrackInputLabel_ = consumes<reco::TrackCollection>(recoTrack.getParameter<edm::InputTag>("validInputTags"));
   minBXRecoTrack_ = recoTrack.getParameter<int>("minBX");
   maxBXRecoTrack_ = recoTrack.getParameter<int>("minBX");
   verboseRecoTrack_ = recoTrack.getParameter<int>("verbose");
   runRecoTrack_ = recoTrack.getParameter<bool>("run");
 
   auto recoChargedCandidate = conf().getParameter<edm::ParameterSet>("recoChargedCandidate");
-  recoChargedCandidateInputLabel_ = recoChargedCandidate.getParameter<std::vector<edm::InputTag>>("validInputTags");
+recoChargedCandidateInputLabel_ = consumes<reco::RecoChargedCandidateCollection>(recoChargedCandidate.getParameter<edm::InputTag>("validInputTags"));
   minBXRecoChargedCandidate_ = recoChargedCandidate.getParameter<int>("minBX");
   maxBXRecoChargedCandidate_ = recoChargedCandidate.getParameter<int>("minBX");
   verboseRecoChargedCandidate_ = recoChargedCandidate.getParameter<int>("verbose");
@@ -52,15 +52,15 @@ HLTTrackMatcher::init()
 {  
   // RecoTrackExtra 
   edm::Handle<reco::TrackExtraCollection> recoTrackExtras;
-  if (gemvalidation::getByLabel(recoTrackExtraInputLabel_, recoTrackExtras, event())) if (runRecoTrackExtra_) matchRecoTrackExtraToSimTrack(*recoTrackExtras.product());
+  if (gemvalidation::getByToken(recoTrackExtraInputLabel_, recoTrackExtras, event())) if (runRecoTrackExtra_) matchRecoTrackExtraToSimTrack(*recoTrackExtras.product());
   
   // RecoTrack 
   edm::Handle<reco::TrackCollection> recoTracks;
-  if (gemvalidation::getByLabel(recoTrackInputLabel_, recoTracks, event())) if (runRecoTrack_) matchRecoTrackToSimTrack(*recoTracks.product());
+  if (gemvalidation::getByToken(recoTrackInputLabel_, recoTracks, event())) if (runRecoTrack_) matchRecoTrackToSimTrack(*recoTracks.product());
 
   // RecoChargedCandidate
   edm::Handle<reco::RecoChargedCandidateCollection> recoChargedCandidates;
-  if (gemvalidation::getByLabel(recoChargedCandidateInputLabel_, recoChargedCandidates, event())) if (runRecoChargedCandidate_) matchRecoChargedCandidateToSimTrack(*recoChargedCandidates.product());
+  if (gemvalidation::getByToken(recoChargedCandidateInputLabel_, recoChargedCandidates, event())) if (runRecoChargedCandidate_) matchRecoChargedCandidateToSimTrack(*recoChargedCandidates.product());
 }
 
 

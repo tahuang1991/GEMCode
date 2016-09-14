@@ -27,8 +27,12 @@ class SimHitMatcher : public BaseMatcher
 {
 public:
   
-  SimHitMatcher(const SimTrack& t, const SimVertex& v,
-      const edm::ParameterSet& ps, const edm::Event& ev, const edm::EventSetup& es);
+  SimHitMatcher(const SimTrack& t, 
+                const SimVertex& v,
+                const edm::ParameterSet& ps, 
+                const edm::Event& ev, 
+                const edm::EventSetup& es, 
+                edm::ConsumesCollector && iC);
   
   ~SimHitMatcher();
 
@@ -194,7 +198,8 @@ private:
   bool runME0SimHit_;
   bool runDTSimHit_;
 
-  std::string simInputLabel_;
+  edm::EDGetTokenT<edm::SimTrackContainer> simTrackInput_;
+  edm::EDGetTokenT<edm::SimVertexContainer> simVertexInput_;
   
   std::map<unsigned int, unsigned int> trkid_to_index_;
 
@@ -235,11 +240,11 @@ private:
   bool verboseME0_;
   bool verboseDT_;
 
-  std::vector<edm::InputTag> gemSimHitInput_;
-  std::vector<edm::InputTag> cscSimHitInput_;
-  std::vector<edm::InputTag> rpcSimHitInput_;
-  std::vector<edm::InputTag> me0SimHitInput_;
-  std::vector<edm::InputTag> dtSimHitInput_;
+  edm::EDGetTokenT<edm::PSimHitContainer> gemSimHitInput_;
+  edm::EDGetTokenT<edm::PSimHitContainer> cscSimHitInput_;
+  edm::EDGetTokenT<edm::PSimHitContainer> rpcSimHitInput_;
+  edm::EDGetTokenT<edm::PSimHitContainer> me0SimHitInput_;
+  edm::EDGetTokenT<edm::PSimHitContainer> dtSimHitInput_;
 
   edm::Handle<edm::SimTrackContainer> sim_tracks;
   edm::Handle<edm::SimVertexContainer> sim_vertices;

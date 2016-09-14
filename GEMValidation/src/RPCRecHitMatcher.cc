@@ -4,12 +4,12 @@
 using namespace std;
 using namespace matching;
 
-RPCRecHitMatcher::RPCRecHitMatcher(SimHitMatcher& sh)
+RPCRecHitMatcher::RPCRecHitMatcher(SimHitMatcher& sh, edm::ConsumesCollector && iC)
   : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
   , simhit_matcher_(&sh)
 {
   auto rpcRecHit_= conf().getParameter<edm::ParameterSet>("rpcRecHit");
-  rpcRecHitInput_ = rpcRecHit_.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  rpcRecHitInput_ = iC.consumes<RPCRecHitCollection>(rpcRecHit_.getParameter<edm::InputTag>("validInputTags"));
   minBXRPC_ = rpcRecHit_.getParameter<int>("minBX");
   maxBXRPC_ = rpcRecHit_.getParameter<int>("maxBX");
   matchDeltaStrip_ = rpcRecHit_.getParameter<int>("matchDeltaStrip");
@@ -19,7 +19,7 @@ RPCRecHitMatcher::RPCRecHitMatcher(SimHitMatcher& sh)
   if (hasRPCGeometry_) {
     
     edm::Handle<RPCRecHitCollection> rpc_rechits;
-    if (gemvalidation::getByLabel(rpcRecHitInput_, rpc_rechits, event())) if (runRPCRecHit_) matchRecHitsToSimTrack(*rpc_rechits.product());
+    if (gemvalidation::getByToken(rpcRecHitInput_, rpc_rechits, event())) if (runRPCRecHit_) matchRecHitsToSimTrack(*rpc_rechits.product());
   }
 }
 

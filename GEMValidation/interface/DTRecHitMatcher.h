@@ -28,7 +28,7 @@ public:
   typedef std::vector<DTRecSegment2D> DTRecSegment2DContainer;
   typedef std::vector<DTRecSegment4D> DTRecSegment4DContainer;
   
-  DTRecHitMatcher(SimHitMatcher& sh);
+  DTRecHitMatcher(SimHitMatcher& sh, edm::ConsumesCollector && iC);
   
   ~DTRecHitMatcher() {}
 
@@ -86,9 +86,9 @@ private:
   void matchDTRecSegment2DsToSimTrack(const DTRecSegment2DCollection&);
   void matchDTRecSegment4DsToSimTrack(const DTRecSegment4DCollection&);
 
-  std::vector<edm::InputTag> dtRecHit1DPairInput_;
-  std::vector<edm::InputTag> dtRecSegment2DInput_;
-  std::vector<edm::InputTag> dtRecSegment4DInput_;
+  edm::EDGetTokenT<DTRecHitCollection> dtRecHit1DPairInput_;
+  edm::EDGetTokenT<DTRecSegment2DCollection> dtRecSegment2DInput_;
+  edm::EDGetTokenT<DTRecSegment4DCollection> dtRecSegment4DInput_;
 
   bool verboseDTRecHit1DPair_;
   bool runDTRecHit1DPair_;

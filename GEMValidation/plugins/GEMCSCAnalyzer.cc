@@ -729,7 +729,7 @@ void GEMCSCAnalyzer::analyze(const edm::Event& ev, const edm::EventSetup& es)
     
 //    std::cout<< " initialize SimTrackMatcherManager "<< std::endl;  
     // match hits and digis to this SimTrack
-    SimTrackMatchManager match(t, sim_vert[t.vertIndex()], cfg_, ev, es);
+    SimTrackMatchManager match(t, sim_vert[t.vertIndex()], cfg_, ev, es, consumesCollector());
 
     if (ntupleTrackChamberDelta_) analyzeTrackChamberDeltas(match, trk_no);
     if (ntupleTrackEff_) analyzeTrackEff(match, trk_no);

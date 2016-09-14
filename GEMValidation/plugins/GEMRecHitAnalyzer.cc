@@ -617,7 +617,7 @@ void GEMRecHitAnalyzer::analyzeTracks(edm::ParameterSet cfg_, const edm::Event& 
     if (!isSimTrackGood(t)) continue;
     
     // match hits and digis to this SimTrack
-    SimTrackMatchManager match(t, sim_vert[t.vertIndex()], cfg_, iEvent, iSetup);
+    SimTrackMatchManager match(t, sim_vert[t.vertIndex()], cfg_, iEvent, iSetup, consumesCollector());
     
     const SimHitMatcher& match_sh = match.simhits();
     const GEMRecHitMatcher& match_rh = match.gemRecHits();

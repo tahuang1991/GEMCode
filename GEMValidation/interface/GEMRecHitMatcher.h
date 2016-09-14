@@ -31,7 +31,7 @@ public:
 
   typedef std::vector<GEMRecHit> GEMRecHitContainer;
 
-  GEMRecHitMatcher(SimHitMatcher& sh);
+  GEMRecHitMatcher(SimHitMatcher& sh, edm::ConsumesCollector && iC);
   
   ~GEMRecHitMatcher();
 
@@ -77,7 +77,7 @@ private:
 
   void matchRecHitsToSimTrack(const GEMRecHitCollection& recHits);
 
-  std::vector<edm::InputTag> gemRecHitInput_;
+  edm::EDGetTokenT<GEMRecHitCollection> gemRecHitInput_;
 
   const SimHitMatcher* simhit_matcher_;
 

@@ -28,7 +28,7 @@ class GEMDigiMatcher : public DigiMatcher
 {
 public:
 
-  GEMDigiMatcher(SimHitMatcher& sh);
+  GEMDigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector && iC);
   
   ~GEMDigiMatcher();
 
@@ -98,9 +98,9 @@ private:
 
   std::set<unsigned int> selectDetIds(const Id2DigiContainer &, int) const;
   
-  std::vector<edm::InputTag> gemDigiInput_;
-  std::vector<edm::InputTag> gemPadDigiInput_;
-  std::vector<edm::InputTag> gemCoPadDigiInput_;
+  edm::EDGetTokenT<GEMDigiCollection> gemDigiInput_;
+  edm::EDGetTokenT<GEMPadDigiCollection> gemPadDigiInput_;
+  edm::EDGetTokenT<GEMCoPadDigiCollection> gemCoPadDigiInput_;
 
   int minBXGEMDigi_, maxBXGEMDigi_;
   int minBXGEMPad_, maxBXGEMPad_;

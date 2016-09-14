@@ -25,7 +25,7 @@ class ME0DigiMatcher : public DigiMatcher
 {
 public:
 
-  ME0DigiMatcher(SimHitMatcher& sh);
+  ME0DigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector && iC);
   
   ~ME0DigiMatcher();
 
@@ -55,7 +55,7 @@ private:
 
   void matchPreRecoDigisToSimTrack(const ME0DigiPreRecoCollection& digis);
 
-  std::vector<edm::InputTag> me0DigiInput_;
+  edm::EDGetTokenT<ME0DigiPreRecoCollection> me0DigiInput_;
 
   bool verboseDigi_;
   bool runME0Digi_;

@@ -5,9 +5,9 @@ DisplacedGENMuonMatcher::DisplacedGENMuonMatcher(const SimTrack& t, const SimVer
 : BaseMatcher(t, v, ps, ev, es)
 {
   edm::Handle<reco::GenParticleCollection> genParticles;
-  ev.getByLabel("genParticles", genParticles);
+  ev.getByToken("genParticles", genParticles);
   matchDisplacedGENMuonMatcherToSimTrack(*genParticles.product());
-  //  if(gemvalidation::getByLabel("genParticles", genParticles, event())) return;//
+  //  if(gemvalidation::getByToken("genParticles", genParticles, event())) return;//
 }
 
 DisplacedGENMuonMatcher::~DisplacedGENMuonMatcher()
@@ -23,7 +23,7 @@ DisplacedGENMuonMatcher::matchDisplacedGENMuonMatcherToSimTrack(const reco::GenP
   bool verbose = false;
 
   // edm::Handle<reco::BeamSpot> beamSpot;
-  // match_sh.event().getByLabel("offlineBeamSpot",beamSpot);
+  // match_sh.event().getByToken("offlineBeamSpot",beamSpot);
   beamSpot_x = 0;//beamSpot->position().x();
   beamSpot_y = 0;//beamSpot->position().y();
   beamSpot_z = 0;//beamSpot->position().z();

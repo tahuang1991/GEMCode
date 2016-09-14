@@ -648,7 +648,7 @@ void MuonSimHitAnalyzer::analyzeTracks(const edm::Event& iEvent, const edm::Even
     if (!isSimTrackGood(t)) continue;
     
     // match hits and digis to this SimTrack
-    const SimTrackMatchManager match(t, sim_vert[t.vertIndex()], cfg_, iEvent, iSetup);
+    const SimTrackMatchManager match(t, sim_vert[t.vertIndex()], cfg_, iEvent, iSetup, consumesCollector());
     const SimHitMatcher& match_sh = match.simhits();
 
     track.pt = t.momentum().pt();

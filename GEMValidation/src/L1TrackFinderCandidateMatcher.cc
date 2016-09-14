@@ -8,10 +8,10 @@ L1TrackFinderCandidateMatcher::L1TrackFinderCandidateMatcher(SimHitMatcher& sh)
   auto rpcfTfCand = conf().getParameter<edm::ParameterSet>("rpcfTfCand");
   auto rpcbTfCand = conf().getParameter<edm::ParameterSet>("rpcbTfCand");
 
-  cscTfCandInputLabel_ = cscTfCand.getParameter<std::vector<edm::InputTag>>("validInputTags");
-  dtTfCandInputLabel_ = dtTfCand.getParameter<std::vector<edm::InputTag>>("validInputTags");
-  rpcfTfCandInputLabel_ = rpcfTfCand.getParameter<std::vector<edm::InputTag>>("validInputTags");
-  rpcbTfCandInputLabel_ = rpcbTfCand.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  cscTfCandInputLabel_ = cscTfCand.getParameter<edm::InputTag>("validInputTags");
+  dtTfCandInputLabel_ = dtTfCand.getParameter<edm::InputTag>("validInputTags");
+  rpcfTfCandInputLabel_ = rpcfTfCand.getParameter<edm::InputTag>("validInputTags");
+  rpcbTfCandInputLabel_ = rpcbTfCand.getParameter<edm::InputTag>("validInputTags");
   
   verboseCscTfCand_ = cscTfCand.getParameter<int>("verbose");
   verboseDtTfCand_ = dtTfCand.getParameter<int>("verbose");
@@ -44,16 +44,16 @@ void
 L1TrackFinderCandidateMatcher::init()
 {
   edm::Handle<L1MuRegionalCandCollection> hCscTfCand;
-  if (gemvalidation::getByLabel(cscTfCandInputLabel_, hCscTfCand, event())) if (runCscTfCand_) matchCSCTfCandToSimTrack(*hCscTfCand.product());
+  if (gemvalidation::getByToken(cscTfCandInputLabel_, hCscTfCand, event())) if (runCscTfCand_) matchCSCTfCandToSimTrack(*hCscTfCand.product());
 
   edm::Handle<L1MuRegionalCandCollection> hDtTfCand;
-  if (gemvalidation::getByLabel(dtTfCandInputLabel_, hDtTfCand, event())) if (runDtTfCand_) matchDTTfCandToSimTrack(*hDtTfCand.product());
+  if (gemvalidation::getByToken(dtTfCandInputLabel_, hDtTfCand, event())) if (runDtTfCand_) matchDTTfCandToSimTrack(*hDtTfCand.product());
 
   edm::Handle<L1MuRegionalCandCollection> hRpcfTfCand;
-  if (gemvalidation::getByLabel(rpcfTfCandInputLabel_, hRpcfTfCand, event())) if (runRpcfTfCand_) matchRPCfTfCandToSimTrack(*hRpcfTfCand.product());
+  if (gemvalidation::getByToken(rpcfTfCandInputLabel_, hRpcfTfCand, event())) if (runRpcfTfCand_) matchRPCfTfCandToSimTrack(*hRpcfTfCand.product());
 
   edm::Handle<L1MuRegionalCandCollection> hRpcbTfCand;
-  if (gemvalidation::getByLabel(rpcbTfCandInputLabel_, hRpcbTfCand, event())) if (runRpcbTfCand_) matchRPCbTfCandToSimTrack(*hRpcbTfCand.product());
+  if (gemvalidation::getByToken(rpcbTfCandInputLabel_, hRpcbTfCand, event())) if (runRpcbTfCand_) matchRPCbTfCandToSimTrack(*hRpcbTfCand.product());
 }
 
 void 

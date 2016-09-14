@@ -4,11 +4,11 @@
 using namespace std;
 using namespace matching;
 
-ME0DigiMatcher::ME0DigiMatcher(SimHitMatcher& sh)
+ME0DigiMatcher::ME0DigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector && iC)
 : DigiMatcher(sh)
 {
   auto me0Digi_= conf().getParameter<edm::ParameterSet>("me0DigiPreReco");
-  me0DigiInput_ = me0Digi_.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  me0DigiInput_ = iC.consumes<ME0DigiPreRecoCollection>(me0Digi_.getParameter<edm::InputTag>("validInputTags"));
   minBXME0_ = me0Digi_.getParameter<int>("minBX");
   maxBXME0_ = me0Digi_.getParameter<int>("maxBX");
   matchDeltaStrip_ = me0Digi_.getParameter<int>("matchDeltaStrip");
@@ -17,7 +17,7 @@ ME0DigiMatcher::ME0DigiMatcher(SimHitMatcher& sh)
 
   if (hasME0Geometry_) {
     edm::Handle<ME0DigiPreRecoCollection> me0_digis;
-    if (gemvalidation::getByLabel(me0DigiInput_, me0_digis, event())) if (runME0Digi_) matchPreRecoDigisToSimTrack(*me0_digis.product());    
+    if (gemvalidation::getByToken(me0DigiInput_, me0_digis, event())) if (runME0Digi_) matchPreRecoDigisToSimTrack(*me0_digis.product());    
   }
 }
 

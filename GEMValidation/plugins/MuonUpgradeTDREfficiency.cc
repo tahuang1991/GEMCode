@@ -10,6 +10,7 @@
 #include "FWCore/ServiceRegistry/interface/Service.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
+
 #include "DataFormats/Math/interface/deltaPhi.h"
 #include "DataFormats/MuonDetId/interface/CSCTriggerNumbering.h"
 
@@ -329,7 +330,7 @@ private:
   int detIdToMEStation(int st, int ri);
   
   edm::ParameterSet cfg_;
-  edm::InputTag simInputLabel_;
+  edm::EDGetTokenT<edm::SimTrackContainer> simInputLabel_;
   int verboseSimTrack_;
   double simTrackMinPt_;
   double simTrackMinEta_;
@@ -366,7 +367,7 @@ MuonUpgradeTDREfficiency::MuonUpgradeTDREfficiency(const edm::ParameterSet& ps)
 
   auto simTrack = cfg_.getParameter<edm::ParameterSet>("simTrack");
   verboseSimTrack_ = simTrack.getParameter<int>("verbose");
-  simInputLabel_ = simTrack.getParameter<edm::InputTag>("validInputTags");
+  simInputLabel_ = consumes<edm::SimTrackContainer>(simTrack.getParameter<edm::InputTag>("validInputTags"));
   simTrackMinPt_ = simTrack.getParameter<double>("minPt");
   simTrackMinEta_ = simTrack.getParameter<double>("minEta");
   simTrackMaxEta_ = simTrack.getParameter<double>("maxEta");
@@ -452,11 +453,11 @@ bool MuonUpgradeTDREfficiency::isSimTrackGood(const SimTrack &t)
 void MuonUpgradeTDREfficiency::analyze(const edm::Event& ev, const edm::EventSetup& es)
 {
   edm::Handle<edm::SimTrackContainer> sim_tracks;
-  ev.getByLabel(simInputLabel_, sim_tracks);
+  ev.getByToken(simInputLabel_, sim_tracks);
   const edm::SimTrackContainer & sim_track = *sim_tracks.product();
 
   edm::Handle<edm::SimVertexContainer> sim_vertices;
-  ev.getByLabel(simInputLabel_, sim_vertices);
+  ev.getByToken(simInputLabel_, sim_vertices);
   const edm::SimVertexContainer & sim_vert = *sim_vertices.product();
 
   if (verboseSimTrack_){
@@ -473,7 +474,7 @@ void MuonUpgradeTDREfficiency::analyze(const edm::Event& ev, const edm::EventSet
                 << ", phi = " << t.momentum().phi() << ", Q = " << t.charge() << std::endl;
     }
 
-    SimTrackMatchManager match(t, sim_vert[t.vertIndex()], cfg_, ev, es);
+    SimTrackMatchManager match(t, sim_vert[t.vertIndex()], cfg_, ev, es, consumesCollector());
 
     if (ntupleTrackEff_) analyzeTrackEff(match, trk_no);
     ++trk_no;
