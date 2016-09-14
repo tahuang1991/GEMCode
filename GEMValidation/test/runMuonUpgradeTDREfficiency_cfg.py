@@ -17,11 +17,11 @@ process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorOp
 process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAlong_cfi')
 
 process.source = cms.Source("PoolSource",
-	fileNames = cms.untracked.vstring('file:out_L1.root'),
+	fileNames = cms.untracked.vstring('file:step2.root'),
 )
 
 process.TFileService = cms.Service("TFileService",
-    fileName = cms.string("out_ana.root")
+    fileName = cms.string("out_ana_efficiency.root")
 )
 
 ## global tag for upgrade studies
@@ -37,14 +37,24 @@ Stations = enum('ALL','ME11','ME1a','ME1b','ME12','ME13','ME21','ME22','ME31','M
 from GEMCode.GEMValidation.simTrackMatching_cfi import SimTrackMatching
 process.MuonUpgradeTDREfficiency = cms.EDAnalyzer("MuonUpgradeTDREfficiency",
     verbose = cms.untracked.int32(0),
-    stationsToUse = cms.vint32(Stations.ALL,Stations.ME11,Stations.ME1a,Stations.ME1b,
-                              Stations.ME21,Stations.ME31,Stations.ME41),
+    stationsToUse = cms.vint32(Stations.ALL,
+                               Stations.ME11,
+                               Stations.ME1a,
+                               Stations.ME1b,
+                               Stations.ME12,
+                               Stations.ME13,
+                               Stations.ME21,
+                               Stations.ME22,
+                               Stations.ME31,
+                               Stations.ME32,
+                               Stations.ME41,
+                               Stations.ME42),
     simTrackMatching = SimTrackMatching
 )
 matching = process.MuonUpgradeTDREfficiency.simTrackMatching
 matching.simTrack.minPt = 1.5
 matching.matchprint = cms.bool(False)
-matching.gemRecHit.input = ""
+matching.gemRecHit.run = False
 
 
 doGem = True
