@@ -5,51 +5,38 @@
 #include "TLorentzVector.h"
 #include <map>
 
-HLTTrackMatcher::HLTTrackMatcher(CSCRecHitMatcher& csc, DTRecHitMatcher& dt, 
-                                 RPCRecHitMatcher& rpc, GEMRecHitMatcher& gem,  edm::ConsumesCollector & iC)
-  : BaseMatcher(csc.trk(), csc.vtx(), csc.conf(), csc.event(), csc.eventSetup(), iC)
+HLTTrackMatcher::HLTTrackMatcher(CSCRecHitMatcher& csc, 
+                                 DTRecHitMatcher& dt, 
+                                 RPCRecHitMatcher& rpc, 
+                                 GEMRecHitMatcher& gem,  
+                                 edm::EDGetTokenT<reco::TrackExtraCollection> recoTrackExtraInputLabel_,
+                                 edm::EDGetTokenT<reco::TrackCollection> recoTrackInputLabel_,
+                                 edm::EDGetTokenT<reco::RecoChargedCandidateCollection> recoChargedCandidateInputLabel_
+                                 )
+  : BaseMatcher(csc.trk(), csc.vtx(), csc.conf(), csc.event(), csc.eventSetup())
 , gem_rechit_matcher_(&gem)
 , dt_rechit_matcher_(&dt)
 , rpc_rechit_matcher_(&rpc)
 , csc_rechit_matcher_(&csc)
 {
   auto recoTrackExtra = conf().getParameter<edm::ParameterSet>("recoTrackExtra");
-  recoTrackExtraInputLabel_ = iC.consumes<reco::TrackExtraCollection>(recoTrackExtra.getParameter<edm::InputTag>("validInputTags"));
   minBXRecoTrackExtra_ = recoTrackExtra.getParameter<int>("minBX");
   maxBXRecoTrackExtra_ = recoTrackExtra.getParameter<int>("minBX");
   verboseRecoTrackExtra_ = recoTrackExtra.getParameter<int>("verbose");
   runRecoTrackExtra_ = recoTrackExtra.getParameter<bool>("run");
 
   auto recoTrack = conf().getParameter<edm::ParameterSet>("recoTrack");
-  recoTrackInputLabel_ = iC.consumes<reco::TrackCollection>(recoTrack.getParameter<edm::InputTag>("validInputTags"));
   minBXRecoTrack_ = recoTrack.getParameter<int>("minBX");
   maxBXRecoTrack_ = recoTrack.getParameter<int>("minBX");
   verboseRecoTrack_ = recoTrack.getParameter<int>("verbose");
   runRecoTrack_ = recoTrack.getParameter<bool>("run");
 
   auto recoChargedCandidate = conf().getParameter<edm::ParameterSet>("recoChargedCandidate");
-  recoChargedCandidateInputLabel_ = iC.consumes<reco::RecoChargedCandidateCollection>(recoChargedCandidate.getParameter<edm::InputTag>("validInputTags"));
   minBXRecoChargedCandidate_ = recoChargedCandidate.getParameter<int>("minBX");
   maxBXRecoChargedCandidate_ = recoChargedCandidate.getParameter<int>("minBX");
   verboseRecoChargedCandidate_ = recoChargedCandidate.getParameter<int>("verbose");
   runRecoChargedCandidate_ = recoChargedCandidate.getParameter<bool>("run");
 
-  clear();
-  init();
-}
-
-HLTTrackMatcher::~HLTTrackMatcher() 
-{
-}
-
-void 
-HLTTrackMatcher::clear()
-{
-}
-
-void 
-HLTTrackMatcher::init()
-{  
   // RecoTrackExtra 
   edm::Handle<reco::TrackExtraCollection> recoTrackExtras;
   if (gemvalidation::getByToken(recoTrackExtraInputLabel_, recoTrackExtras, event())) if (runRecoTrackExtra_) matchRecoTrackExtraToSimTrack(*recoTrackExtras.product());
@@ -63,6 +50,15 @@ HLTTrackMatcher::init()
   if (gemvalidation::getByToken(recoChargedCandidateInputLabel_, recoChargedCandidates, event())) if (runRecoChargedCandidate_) matchRecoChargedCandidateToSimTrack(*recoChargedCandidates.product());
 }
 
+
+HLTTrackMatcher::~HLTTrackMatcher() 
+{
+}
+
+void 
+HLTTrackMatcher::clear()
+{
+}
 
 void 
 HLTTrackMatcher::matchRecoTrackExtraToSimTrack(const reco::TrackExtraCollection& tracks)

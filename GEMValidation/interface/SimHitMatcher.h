@@ -176,8 +176,6 @@ public:
 
 private:
 
-  void init();
-
   std::vector<unsigned int> getIdsOfSimTrackShower(unsigned  trk_id,
       const edm::SimTrackContainer& simTracks, const edm::SimVertexContainer& simVertices);
 

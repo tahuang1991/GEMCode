@@ -4,8 +4,15 @@
 
 using namespace std;
 
-L1GlobalMuonTriggerMatcher::L1GlobalMuonTriggerMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
-  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup(), iC)
+L1GlobalMuonTriggerMatcher::L1GlobalMuonTriggerMatcher(SimHitMatcher& sh,
+                                                       edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandCSCInputLabel_,
+                                                       edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandDTInputLabel_,
+                                                       edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandRPCfInputLabel_,
+                                                       edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandRPCbInputLabel_,
+                                                       edm::EDGetTokenT<L1MuGMTCandCollection> gmtCandInputLabel_,
+                                                       edm::EDGetTokenT<l1extra::L1MuonParticleCollection> l1ExtraMuonInputLabel_
+                                                       )
+  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
 , simhit_matcher_(&sh)
 {
   auto gmtRegCandCSC = conf().getParameter<edm::ParameterSet>("gmtRegCandCSC");
@@ -15,13 +22,6 @@ L1GlobalMuonTriggerMatcher::L1GlobalMuonTriggerMatcher(SimHitMatcher& sh, edm::C
   auto gmtCand = conf().getParameter<edm::ParameterSet>("gmtCand");
   auto l1ExtraMuonParticle = conf().getParameter<edm::ParameterSet>("l1ExtraMuonParticle");
 
-  gmtRegCandCSCInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(gmtRegCandCSC.getParameter<edm::InputTag>("validInputTags"));
-  gmtRegCandDTInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(gmtRegCandDT.getParameter<edm::InputTag>("validInputTags"));
-  gmtRegCandRPCfInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(gmtRegCandRPCf.getParameter<edm::InputTag>("validInputTags"));
-  gmtRegCandRPCbInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(gmtRegCandRPCb.getParameter<edm::InputTag>("validInputTags"));
-  gmtCandInputLabel_ = iC.consumes<L1MuGMTCandCollection>(gmtCand.getParameter<edm::InputTag>("validInputTags"));
-  l1ExtraMuonInputLabel_ = iC.consumes<l1extra::L1MuonParticleCollection>(l1ExtraMuonParticle.getParameter<edm::InputTag>("validInputTags"));
-  
   verboseGmtRegCandCSC_ = gmtRegCandCSC.getParameter<int>("verbose");
   verboseGmtRegCandDT_ = gmtRegCandDT.getParameter<int>("verbose");
   verboseGmtRegCandRPCf_ = gmtRegCandRPCf.getParameter<int>("verbose");
@@ -57,21 +57,6 @@ L1GlobalMuonTriggerMatcher::L1GlobalMuonTriggerMatcher(SimHitMatcher& sh, edm::C
   deltaRGmtCand_ = gmtCand.getParameter<double>("deltaR");
   deltaRL1ExtraMuon_ = l1ExtraMuonParticle.getParameter<double>("deltaR");
 
-  init();
-}
-
-L1GlobalMuonTriggerMatcher::~L1GlobalMuonTriggerMatcher()
-{}
-
-
-void 
-L1GlobalMuonTriggerMatcher::clear()
-{}
-
-
-void 
-L1GlobalMuonTriggerMatcher::init()
-{
   edm::Handle<L1MuRegionalCandCollection> hGmtRegCandCSC;
   if (gemvalidation::getByToken(gmtRegCandCSCInputLabel_, hGmtRegCandCSC, event())) if (runGmtRegCandCSC_) matchRegionalCandCSCToSimTrack(*hGmtRegCandCSC.product());
 
@@ -90,6 +75,9 @@ L1GlobalMuonTriggerMatcher::init()
   edm::Handle<l1extra::L1MuonParticleCollection> hL1ExtraMuonParticle;
   if (gemvalidation::getByToken(l1ExtraMuonInputLabel_, hL1ExtraMuonParticle, event())) if (runL1ExtraMuon_) matchL1ExtraMuonParticleToSimTrack(*hL1ExtraMuonParticle.product());
 }
+
+L1GlobalMuonTriggerMatcher::~L1GlobalMuonTriggerMatcher()
+{}
 
 void 
 L1GlobalMuonTriggerMatcher::matchRegionalCandCSCToSimTrack(const L1MuRegionalCandCollection& cands)

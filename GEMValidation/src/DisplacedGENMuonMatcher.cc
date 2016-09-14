@@ -5,10 +5,9 @@ DisplacedGENMuonMatcher::DisplacedGENMuonMatcher(const SimTrack& t,
                                                  const edm::ParameterSet& ps, 
                                                  const edm::Event& ev, 
                                                  const edm::EventSetup& es,
-                                                 edm::ConsumesCollector & iC)
-  : BaseMatcher(t, v, ps, ev, es, iC)
+                                                 edm::EDGetTokenT<reco::GenParticleCollection> inputToken_)
+  : BaseMatcher(t, v, ps, ev, es)
 {
-  inputToken_ = iC.consumes<reco::GenParticleCollection>(edm::InputTag("genParticles"));
   ev.getByToken(inputToken_, genParticles);
   matchDisplacedGENMuonMatcherToSimTrack(*genParticles.product());
   //  if(gemvalidation::getByToken("genParticles", genParticles, event())) return;//

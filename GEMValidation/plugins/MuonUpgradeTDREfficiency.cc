@@ -327,6 +327,7 @@ private:
   int detIdToMEStation(int st, int ri);
   
   edm::ParameterSet cfg_;
+  edm::EDGetTokenT<reco::GenParticleCollection> inputToken_;                                         
   edm::EDGetTokenT<edm::SimVertexContainer> simVertexInput_;
   edm::EDGetTokenT<edm::SimTrackContainer> simTrackInput_;
 
@@ -353,7 +354,7 @@ private:
   edm::EDGetTokenT<CSCSegmentCollection> cscSegmentInput_;
 
   edm::EDGetTokenT<DTDigiCollection> dtDigiInput_;
-  edm::EDGetTokenT<DTLocalTriggerCollection> input_;
+  edm::EDGetTokenT<DTLocalTriggerCollection> dtStubInput_;
   edm::EDGetTokenT<DTRecHitCollection> dtRecHit1DPairInput_;
   edm::EDGetTokenT<DTRecSegment2DCollection> dtRecSegment2DInput_;
   edm::EDGetTokenT<DTRecSegment4DCollection> dtRecSegment4DInput_;
@@ -440,6 +441,8 @@ MuonUpgradeTDREfficiency::MuonUpgradeTDREfficiency(const edm::ParameterSet& ps)
   cscStationsCo_.push_back(std::make_pair(4,1));
   cscStationsCo_.push_back(std::make_pair(4,2));
 
+  inputToken_ = consumes<reco::GenParticleCollection>(edm::InputTag("genParticles"));
+
   auto simVertex = cfg_.getParameter<edm::ParameterSet>("simVertex");
   simVertexInput_ = consumes<edm::SimVertexContainer>(simVertex.getParameter<edm::InputTag>("validInputTags"));
 
@@ -451,134 +454,125 @@ MuonUpgradeTDREfficiency::MuonUpgradeTDREfficiency(const edm::ParameterSet& ps)
   simTrackMaxEta_ = simTrack.getParameter<double>("maxEta");
   simTrackOnlyMuon_ = simTrack.getParameter<bool>("onlyMuon");
     
-  auto gemSimHit_ = conf().getParameter<edm::ParameterSet>("gemSimHit");
-  gemSimHitInput_ = iC.consumes<edm::PSimHitContainer>(gemSimHit_.getParameter<edm::InputTag>("validInputTags"));
+  auto gemSimHit_ = cfg_.getParameter<edm::ParameterSet>("gemSimHit");
+  gemSimHitInput_ = consumes<edm::PSimHitContainer>(gemSimHit_.getParameter<edm::InputTag>("validInputTags"));
 
-  auto cscSimHit_= conf().getParameter<edm::ParameterSet>("cscSimHit");
-  cscSimHitInput_ = iC.consumes<edm::PSimHitContainer>(cscSimHit_.getParameter<edm::InputTag>("validInputTags"));
-  minNHitsChamberCSCSimHit_ = cscSimHit.getParameter<int>("minNHitsChamber");
+  auto cscSimHit_= cfg_.getParameter<edm::ParameterSet>("cscSimHit");
+  cscSimHitInput_ = consumes<edm::PSimHitContainer>(cscSimHit_.getParameter<edm::InputTag>("validInputTags"));
+  minNHitsChamberCSCSimHit_ = cscSimHit_.getParameter<int>("minNHitsChamber");
 
-  auto me0SimHit_ = conf().getParameter<edm::ParameterSet>("me0SimHit");
-  me0SimHitInput_ = iC.consumes<edm::PSimHitContainer>(me0SimHit_.getParameter<edm::InputTag>("validInputTags"));
+  auto me0SimHit_ = cfg_.getParameter<edm::ParameterSet>("me0SimHit");
+  me0SimHitInput_ = consumes<edm::PSimHitContainer>(me0SimHit_.getParameter<edm::InputTag>("validInputTags"));
 
-  auto rpcSimHit_ = conf().getParameter<edm::ParameterSet>("rpcSimHit");
-  rpcSimHitInput_ = iC.consumes<edm::PSimHitContainer>(rpcSimHit_.getParameter<edm::InputTag>("validInputTags"));
+  auto rpcSimHit_ = cfg_.getParameter<edm::ParameterSet>("rpcSimHit");
+  rpcSimHitInput_ = consumes<edm::PSimHitContainer>(rpcSimHit_.getParameter<edm::InputTag>("validInputTags"));
 
-  auto dtSimHit_ = conf().getParameter<edm::ParameterSet>("dtSimHit");
-  dtSimHitInput_ = iC.consumes<edm::PSimHitContainer>(dtSimHit_.getParameter<edm::InputTag>("validInputTags"));
+  auto dtSimHit_ = cfg_.getParameter<edm::ParameterSet>("dtSimHit");
+  dtSimHitInput_ = consumes<edm::PSimHitContainer>(dtSimHit_.getParameter<edm::InputTag>("validInputTags"));
 
-  auto cscWireDigi = cfg_.getParameter<edm::ParameterSet>("cscWireDigi");
-  minNHitsChamberCSCWireDigi_ = cscWireDigi.getParameter<int>("minNHitsChamber");
+  auto gemDigi_= cfg_.getParameter<edm::ParameterSet>("gemStripDigi");
+  gemDigiInput_ = consumes<GEMDigiCollection>(gemDigi_.getParameter<edm::InputTag>("validInputTags"));
+
+  auto gemPad_= cfg_.getParameter<edm::ParameterSet>("gemPadDigi");
+  gemPadDigiInput_ = consumes<GEMPadDigiCollection>(gemPad_.getParameter<edm::InputTag>("validInputTags"));
+
+  auto gemCoPad_= cfg_.getParameter<edm::ParameterSet>("gemCoPadDigi");
+  gemCoPadDigiInput_ = consumes<GEMCoPadDigiCollection>(gemCoPad_.getParameter<edm::InputTag>("validInputTags"));
+
+  auto gemRecHit_= cfg_.getParameter<edm::ParameterSet>("gemRecHit");
+  gemRecHitInput_ = consumes<GEMRecHitCollection>(gemRecHit_.getParameter<edm::InputTag>("validInputTags"));
+
+  auto me0Digi_= cfg_.getParameter<edm::ParameterSet>("me0DigiPreReco");
+  me0DigiInput_ = consumes<ME0DigiPreRecoCollection>(me0Digi_.getParameter<edm::InputTag>("validInputTags"));
 
   auto cscComparatorDigi = cfg_.getParameter<edm::ParameterSet>("cscStripDigi");
   minNHitsChamberCSCStripDigi_ = cscComparatorDigi.getParameter<int>("minNHitsChamber");
+  cscComparatorDigiInput_ = consumes<CSCComparatorDigiCollection>(cscComparatorDigi.getParameter<edm::InputTag>("validInputTags"));
+
+  auto cscWireDigi = cfg_.getParameter<edm::ParameterSet>("cscWireDigi");
+  minNHitsChamberCSCWireDigi_ = cscWireDigi.getParameter<int>("minNHitsChamber");
+  cscWireDigiInput_ = consumes<CSCWireDigiCollection>(cscWireDigi.getParameter<edm::InputTag>("validInputTags"));
 
   auto cscCLCT = cfg_.getParameter<edm::ParameterSet>("cscCLCT");
   minNHitsChamberCLCT_ = cscCLCT.getParameter<int>("minNHitsChamber");
+  clctInputs_ = consumes<CSCCLCTDigiCollection>(cscCLCT.getParameter<edm::InputTag>("validInputTags"));
 
   auto cscALCT = cfg_.getParameter<edm::ParameterSet>("cscALCT");
   minNHitsChamberALCT_ = cscALCT.getParameter<int>("minNHitsChamber");
+  alctInputs_ = consumes<CSCALCTDigiCollection>(cscALCT.getParameter<edm::InputTag>("validInputTags"));
 
   auto cscLCT = cfg_.getParameter<edm::ParameterSet>("cscLCT");
   minNHitsChamberLCT_ = cscLCT.getParameter<int>("minNHitsChamber");
+  lctInputs_ = consumes<CSCCorrelatedLCTDigiCollection>(cscLCT.getParameter<edm::InputTag>("validInputTags"));
 
   auto cscMPLCT = cfg_.getParameter<edm::ParameterSet>("cscMPLCT");
   minNHitsChamberMPLCT_ = cscMPLCT.getParameter<int>("minNHitsChamber");
+  mplctInputs_ = consumes<CSCCorrelatedLCTDigiCollection>(cscMPLCT.getParameter<edm::InputTag>("validInputTags"));
 
-  auto gemDigi_= conf().getParameter<edm::ParameterSet>("gemStripDigi");
-  gemDigiInput_ = iC.consumes<GEMDigiCollection>(gemDigi_.getParameter<edm::InputTag>("validInputTags"));
+  auto cscRecHit2D = cfg_.getParameter<edm::ParameterSet>("cscRecHit");
+  cscRecHit2DInput_ = consumes<CSCRecHit2DCollection>(cscRecHit2D.getParameter<edm::InputTag>("validInputTags"));
 
-  auto gemPad_= conf().getParameter<edm::ParameterSet>("gemPadDigi");
-  gemPadDigiInput_ = iC.consumes<GEMPadDigiCollection>(gemPad_.getParameter<edm::InputTag>("validInputTags"));
+  auto cscSegment2D = cfg_.getParameter<edm::ParameterSet>("cscSegment");
+  cscSegmentInput_ = consumes<CSCSegmentCollection>(cscSegment2D.getParameter<edm::InputTag>("validInputTags"));
 
-  auto gemCoPad_= conf().getParameter<edm::ParameterSet>("gemCoPadDigi");
-gemCoPadDigiInput_ = iC.consumes<GEMCoPadDigiCollection>(gemCoPad_.getParameter<edm::InputTag>("validInputTags"));
+  auto dtDigi_= cfg_.getParameter<edm::ParameterSet>("dtDigi");
+  dtDigiInput_ = consumes<DTDigiCollection>(dtDigi_.getParameter<edm::InputTag>("validInputTags"));
 
-  auto gemRecHit_= conf().getParameter<edm::ParameterSet>("gemRecHit");
-  gemRecHitInput_ = iC.consumes<GEMRecHitCollection>(gemRecHit_.getParameter<edm::InputTag>("validInputTags"));
+  auto dtStub_= cfg_.getParameter<edm::ParameterSet>("dtLocalTrigger");
+  dtStubInput_ = consumes<DTLocalTriggerCollection>(dtStub_.getParameter<edm::InputTag>("validInputTags"));
 
-  auto cscWireDigi_ = conf().getParameter<edm::ParameterSet>("cscWireDigi");
-  cscWireDigiInput_ = iC.consumes<CSCWireDigiCollection>(cscWireDigi_.getParameter<edm::InputTag>("validInputTags"));
+  auto dtRecHit1DPair = cfg_.getParameter<edm::ParameterSet>("dtRecHit");
+  dtRecHit1DPairInput_ = consumes<DTRecHitCollection>(dtRecHit1DPair.getParameter<edm::InputTag>("validInputTags"));
 
-  auto cscComparatorDigi_ = conf().getParameter<edm::ParameterSet>("cscStripDigi");
-  cscComparatorDigiInput_ = iC.consumes<CSCComparatorDigiCollection>(cscComparatorDigi_.getParameter<edm::InputTag>("validInputTags"));
+  auto dtSegment2D = cfg_.getParameter<edm::ParameterSet>("dtRecSegment2D");
+  dtRecSegment2DInput_ = consumes<DTRecSegment2DCollection>(dtSegment2D.getParameter<edm::InputTag>("validInputTags"));
 
-  auto cscCLCT_ = conf().getParameter<edm::ParameterSet>("cscCLCT");
-  clctInputs_ = iC.consumes<CSCCLCTDigiCollection>(cscCLCT_.getParameter<edm::InputTag>("validInputTags"));
+  auto dtSegment4D = cfg_.getParameter<edm::ParameterSet>("dtRecSegment4D");
+  dtRecSegment4DInput_ = consumes<DTRecSegment4DCollection>(dtSegment4D.getParameter<edm::InputTag>("validInputTags"));
 
-  auto cscALCT_ = conf().getParameter<edm::ParameterSet>("cscALCT");
-  alctInputs_ = iC.consumes<CSCALCTDigiCollection>(cscALCT_.getParameter<edm::InputTag>("validInputTags"));
+  auto rpcDigi_= cfg_.getParameter<edm::ParameterSet>("rpcStripDigi");
+  rpcDigiInput_ = consumes<RPCDigiCollection>(rpcDigi_.getParameter<edm::InputTag>("validInputTags"));
 
-  auto cscLCT_ = conf().getParameter<edm::ParameterSet>("cscLCT");
-  lctInputs_ = iC.consumes<CSCCorrelatedLCTDigiCollection>(cscLCT_.getParameter<edm::InputTag>("validInputTags"));
+  auto rpcRecHit_= cfg_.getParameter<edm::ParameterSet>("rpcRecHit");
+  rpcRecHitInput_ = consumes<RPCRecHitCollection>(rpcRecHit_.getParameter<edm::InputTag>("validInputTags"));
 
-  auto cscMPLCT_ = conf().getParameter<edm::ParameterSet>("cscMPLCT");
-  mplctInputs_ = iC.consumes<CSCCorrelatedLCTDigiCollection>(cscMPLCT_.getParameter<edm::InputTag>("validInputTags"));
+  auto tfTrack = cfg_.getParameter<edm::ParameterSet>("cscTfTrack");
+  cscTfTrackInputLabel_ = consumes<L1CSCTrackCollection>(tfTrack.getParameter<edm::InputTag>("validInputTags"));
 
-  auto cscRecHit2D = conf().getParameter<edm::ParameterSet>("cscRecHit");
-  cscRecHit2DInput_ = iC.consumes<CSCRecHit2DCollection>(cscRecHit2D.getParameter<edm::InputTag>("validInputTags"));
+  auto tfCand = cfg_.getParameter<edm::ParameterSet>("cscTfCand");
+  cscTfCandInputLabel_ = consumes<L1MuRegionalCandCollection>(tfCand.getParameter<edm::InputTag>("validInputTags"));
 
-  auto cscSegment2D = conf().getParameter<edm::ParameterSet>("cscSegment");
-  cscSegmentInput_ = iC.consumes<CSCSegmentCollection>(cscSegment2D.getParameter<edm::InputTag>("validInputTags"));
+  auto dtTfCand = cfg_.getParameter<edm::ParameterSet>("dtTfCand");
+  dtTfCandInputLabel_ = consumes<L1MuRegionalCandCollection>(dtTfCand.getParameter<edm::InputTag>("validInputTags"));
 
-  auto dtDigi_= conf().getParameter<edm::ParameterSet>("dtDigi");
-  dtDigiInput_ = iC.consumes<DTDigiCollection>(dtDigi_.getParameter<edm::InputTag>("validInputTags"));
+  auto rpcfTfCand = cfg_.getParameter<edm::ParameterSet>("rpcfTfCand");
+  rpcfTfCandInputLabel_ = consumes<L1MuRegionalCandCollection>(rpcfTfCand.getParameter<edm::InputTag>("validInputTags"));
 
-  auto dtStub_= conf().getParameter<edm::ParameterSet>("dtLocalTrigger");
-  dtStubInput_ = iC.consumes<DTLocalTriggerCollection>(dtStub_.getParameter<edm::InputTag>("validInputTags"));
+  auto rpcbTfCand = cfg_.getParameter<edm::ParameterSet>("rpcbTfCand");
+  rpcbTfCandInputLabel_ = consumes<L1MuRegionalCandCollection>(rpcbTfCand.getParameter<edm::InputTag>("validInputTags"));
 
-  auto dtRecHit1DPair = conf().getParameter<edm::ParameterSet>("dtRecHit");
-  dtRecHit1DPairInput_ = iC.consumes<DTRecHitCollection>(dtRecHit1DPair.getParameter<edm::InputTag>("validInputTags"));
+  auto gmtRegCandCSC = cfg_.getParameter<edm::ParameterSet>("gmtRegCandCSC");
+  auto gmtRegCandDT = cfg_.getParameter<edm::ParameterSet>("gmtRegCandDT");
+  auto gmtRegCandRPCf = cfg_.getParameter<edm::ParameterSet>("gmtRegCandRPCf");
+  auto gmtRegCandRPCb = cfg_.getParameter<edm::ParameterSet>("gmtRegCandRPCb");
+  auto gmtCand = cfg_.getParameter<edm::ParameterSet>("gmtCand");
+  auto l1ExtraMuonParticle = cfg_.getParameter<edm::ParameterSet>("l1ExtraMuonParticle");
 
-  auto dtSegment2D = conf().getParameter<edm::ParameterSet>("dtRecSegment2D");
-  dtRecSegment2DInput_ = iC.consumes<DTRecSegment2DCollection>(dtSegment2D.getParameter<edm::InputTag>("validInputTags"));
+  gmtRegCandCSCInputLabel_ = consumes<L1MuRegionalCandCollection>(gmtRegCandCSC.getParameter<edm::InputTag>("validInputTags"));
+  gmtRegCandDTInputLabel_ = consumes<L1MuRegionalCandCollection>(gmtRegCandDT.getParameter<edm::InputTag>("validInputTags"));
+  gmtRegCandRPCfInputLabel_ = consumes<L1MuRegionalCandCollection>(gmtRegCandRPCf.getParameter<edm::InputTag>("validInputTags"));
+  gmtRegCandRPCbInputLabel_ = consumes<L1MuRegionalCandCollection>(gmtRegCandRPCb.getParameter<edm::InputTag>("validInputTags"));
+  gmtCandInputLabel_ = consumes<L1MuGMTCandCollection>(gmtCand.getParameter<edm::InputTag>("validInputTags"));
+  l1ExtraMuonInputLabel_ = consumes<l1extra::L1MuonParticleCollection>(l1ExtraMuonParticle.getParameter<edm::InputTag>("validInputTags"));
 
-  auto dtSegment4D = conf().getParameter<edm::ParameterSet>("dtRecSegment4D");
-  dtRecSegment4DInput_ = iC.consumes<DTRecSegment4DCollection>(dtSegment4D.getParameter<edm::InputTag>("validInputTags"));
+  auto recoTrackExtra = cfg_.getParameter<edm::ParameterSet>("recoTrackExtra");
+  recoTrackExtraInputLabel_ = consumes<reco::TrackExtraCollection>(recoTrackExtra.getParameter<edm::InputTag>("validInputTags"));
 
-  auto rpcDigi_= conf().getParameter<edm::ParameterSet>("rpcStripDigi");
-  rpcDigiInput_ = iC.consumes<RPCDigiCollection>(rpcDigi_.getParameter<edm::InputTag>("validInputTags"));
+  auto recoTrack = cfg_.getParameter<edm::ParameterSet>("recoTrack");
+  recoTrackInputLabel_ = consumes<reco::TrackCollection>(recoTrack.getParameter<edm::InputTag>("validInputTags"));
 
-  auto rpcRecHit_= conf().getParameter<edm::ParameterSet>("rpcRecHit");
-  rpcRecHitInput_ = iC.consumes<RPCRecHitCollection>(rpcRecHit_.getParameter<edm::InputTag>("validInputTags"));
-
-  auto tfTrack = conf().getParameter<edm::ParameterSet>("cscTfTrack");
-  cscTfTrackInputLabel_ = iC.consumes<L1CSCTrackCollection>(tfTrack.getParameter<edm::InputTag>("validInputTags"));
-
-  auto tfCand = conf().getParameter<edm::ParameterSet>("cscTfCand");
-  cscTfCandInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(tfCand.getParameter<edm::InputTag>("validInputTags"));
-
-  auto dtTfCand = conf().getParameter<edm::ParameterSet>("dtTfCand");
-  dtTfCandInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(dtTfCand.getParameter<edm::InputTag>("validInputTags"));
-
-  auto rpcfTfCand = conf().getParameter<edm::ParameterSet>("rpcfTfCand");
-  rpcfTfCandInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(rpcfTfCand.getParameter<edm::InputTag>("validInputTags"));
-
-  auto rpcbTfCand = conf().getParameter<edm::ParameterSet>("rpcbTfCand");
-  rpcbTfCandInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(rpcbTfCand.getParameter<edm::InputTag>("validInputTags"));
-
-  auto gmtRegCandCSC = conf().getParameter<edm::ParameterSet>("gmtRegCandCSC");
-  auto gmtRegCandDT = conf().getParameter<edm::ParameterSet>("gmtRegCandDT");
-  auto gmtRegCandRPCf = conf().getParameter<edm::ParameterSet>("gmtRegCandRPCf");
-  auto gmtRegCandRPCb = conf().getParameter<edm::ParameterSet>("gmtRegCandRPCb");
-  auto gmtCand = conf().getParameter<edm::ParameterSet>("gmtCand");
-  auto l1ExtraMuonParticle = conf().getParameter<edm::ParameterSet>("l1ExtraMuonParticle");
-
-  gmtRegCandCSCInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(gmtRegCandCSC.getParameter<edm::InputTag>("validInputTags"));
-  gmtRegCandDTInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(gmtRegCandDT.getParameter<edm::InputTag>("validInputTags"));
-  gmtRegCandRPCfInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(gmtRegCandRPCf.getParameter<edm::InputTag>("validInputTags"));
-  gmtRegCandRPCbInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(gmtRegCandRPCb.getParameter<edm::InputTag>("validInputTags"));
-  gmtCandInputLabel_ = iC.consumes<L1MuGMTCandCollection>(gmtCand.getParameter<edm::InputTag>("validInputTags"));
-  l1ExtraMuonInputLabel_ = iC.consumes<l1extra::L1MuonParticleCollection>(l1ExtraMuonParticle.getParameter<edm::InputTag>("validInputTags"));
-
-  auto recoTrackExtra = conf().getParameter<edm::ParameterSet>("recoTrackExtra");
-  recoTrackExtraInputLabel_ = iC.consumes<reco::TrackExtraCollection>(recoTrackExtra.getParameter<edm::InputTag>("validInputTags"));
-
-  auto recoTrack = conf().getParameter<edm::ParameterSet>("recoTrack");
-  recoTrackInputLabel_ = iC.consumes<reco::TrackCollection>(recoTrack.getParameter<edm::InputTag>("validInputTags"));
-
-  auto recoChargedCandidate = conf().getParameter<edm::ParameterSet>("recoChargedCandidate");
-  recoChargedCandidateInputLabel_ = iC.consumes<reco::RecoChargedCandidateCollection>(recoChargedCandidate.getParameter<edm::InputTag>("validInputTags"));
+  auto recoChargedCandidate = cfg_.getParameter<edm::ParameterSet>("recoChargedCandidate");
+  recoChargedCandidateInputLabel_ = consumes<reco::RecoChargedCandidateCollection>(recoChargedCandidate.getParameter<edm::InputTag>("validInputTags"));
 
 }
 
@@ -635,7 +629,49 @@ void MuonUpgradeTDREfficiency::analyze(const edm::Event& ev, const edm::EventSet
                 << ", phi = " << t.momentum().phi() << ", Q = " << t.charge() << std::endl;
     }
 
-    SimTrackMatchManager match(t, sim_vert[t.vertIndex()], cfg_, ev, es, consumesCollector());
+    SimTrackMatchManager match(t, sim_vert[t.vertIndex()], cfg_, ev, es,
+                               inputToken_,
+                               simVertexInput_,
+                               simTrackInput_,
+                               gemSimHitInput_,
+                               cscSimHitInput_,
+                               rpcSimHitInput_,
+                               me0SimHitInput_,
+                               dtSimHitInput_,
+                               gemDigiInput_,
+                               gemPadDigiInput_,
+                               gemCoPadDigiInput_,
+                               gemRecHitInput_,
+                               me0DigiInput_,
+                               cscComparatorDigiInput_,
+                               cscWireDigiInput_,
+                               clctInputs_,
+                               alctInputs_,
+                               lctInputs_,
+                               mplctInputs_,
+                               cscRecHit2DInput_,
+                               cscSegmentInput_,
+                               dtDigiInput_,
+                               dtStubInput_,
+                               dtRecHit1DPairInput_,
+                               dtRecSegment2DInput_,
+                               dtRecSegment4DInput_,
+                               rpcDigiInput_,
+                               rpcRecHitInput_,
+                               cscTfTrackInputLabel_, 
+                               cscTfCandInputLabel_, 
+                               dtTfCandInputLabel_, 
+                               rpcfTfCandInputLabel_, 
+                               rpcbTfCandInputLabel_, 
+                               gmtRegCandCSCInputLabel_,
+                               gmtRegCandDTInputLabel_,
+                               gmtRegCandRPCfInputLabel_,
+                               gmtRegCandRPCbInputLabel_,
+                               gmtCandInputLabel_,
+                               l1ExtraMuonInputLabel_,
+                               recoTrackExtraInputLabel_,
+                               recoTrackInputLabel_,
+                               recoChargedCandidateInputLabel_);
 
     if (ntupleTrackEff_) analyzeTrackEff(match, trk_no);
     ++trk_no;

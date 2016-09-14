@@ -8,7 +8,7 @@ GEMDigiMatcher::GEMDigiMatcher(SimHitMatcher& sh,
                                edm::EDGetTokenT<GEMDigiCollection> gemDigiInput_, 
                                edm::EDGetTokenT<GEMPadDigiCollection> gemPadDigiInput_, 
                                edm::EDGetTokenT<GEMCoPadDigiCollection> gemCoPadDigiInput_)
-  : DigiMatcher(sh, iC)
+  : DigiMatcher(sh)
 {
   auto gemDigi_= conf().getParameter<edm::ParameterSet>("gemStripDigi");
   minBXGEMDigi_ = gemDigi_.getParameter<int>("minBX");

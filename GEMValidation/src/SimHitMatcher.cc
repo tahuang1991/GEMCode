@@ -1,5 +1,4 @@
 #include "GEMCode/GEMValidation/interface/SimHitMatcher.h"
-
 #include <algorithm>
 #include <iomanip>
 
@@ -52,16 +51,6 @@ SimHitMatcher::SimHitMatcher(const SimTrack& t,
   discardEleHitsDT_ = dtSimHit_.getParameter<bool>("discardEleHits");
   runDTSimHit_ = dtSimHit_.getParameter<bool>("run");
 
-  init();
-}
-
-
-SimHitMatcher::~SimHitMatcher() {}
-
-
-void 
-SimHitMatcher::init()
-{
   event().getByToken(simTrackInput_, sim_tracks);
   event().getByToken(simVertexInput_, sim_vertices);
 
@@ -238,6 +227,9 @@ SimHitMatcher::init()
     }
   }
 }
+
+
+SimHitMatcher::~SimHitMatcher() {}
 
 
 std::vector<unsigned int>

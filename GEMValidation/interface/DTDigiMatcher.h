@@ -25,7 +25,7 @@ public:
 
   typedef std::vector<DTDigi> DTDigiContainer;
 
-  DTDigiMatcher(SimHitMatcher& sh);
+  DTDigiMatcher(SimHitMatcher& sh, edm::EDGetTokenT<DTDigiCollection> dtDigiInput_);
   
   ~DTDigiMatcher();
 

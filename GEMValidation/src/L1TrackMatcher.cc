@@ -5,42 +5,41 @@
 #include "TLorentzVector.h"
 #include <map>
 
-L1TrackMatcher::L1TrackMatcher(CSCStubMatcher& csc, DTDigiMatcher& dt, RPCDigiMatcher& rpc, edm::ConsumesCollector & iC)
-  : BaseMatcher(csc.trk(), csc.vtx(), csc.conf(), csc.event(), csc.eventSetup(), iC)
+L1TrackMatcher::L1TrackMatcher(CSCStubMatcher& csc, 
+                               DTDigiMatcher& dt, 
+                               RPCDigiMatcher& rpc,
+                               edm::EDGetTokenT<L1CSCTrackCollection> cscTfTrackInputLabel_, 
+                               edm::EDGetTokenT<L1MuRegionalCandCollection> cscTfCandInputLabel_)
+  : BaseMatcher(csc.trk(), csc.vtx(), csc.conf(), csc.event(), csc.eventSetup())
 , csc_stub_matcher_(&csc)
 , dt_digi_matcher_(&dt)
 , rpc_digi_matcher_(&rpc)                 
 {
   auto tfTrack = conf().getParameter<edm::ParameterSet>("cscTfTrack");
-  cscTfTrackInputLabel_ = iC.consumes<L1CSCTrackCollection>(tfTrack.getParameter<edm::InputTag>("validInputTags"));
   minBXTFTrack_ = tfTrack.getParameter<int>("minBX");
   maxBXTFTrack_ = tfTrack.getParameter<int>("minBX");
   verboseTFTrack_ = tfTrack.getParameter<int>("verbose");
   deltaRTFTrack_ = tfTrack.getParameter<double>("deltaR");
   
   auto tfCand = conf().getParameter<edm::ParameterSet>("cscTfCand");
-  cscTfCandInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(tfCand.getParameter<edm::InputTag>("validInputTags"));
   minBXTFCand_ = tfCand.getParameter<int>("minBX");
   maxBXTFCand_ = tfCand.getParameter<int>("minBX");
   verboseTFCand_ = tfCand.getParameter<int>("verbose");
   deltaRTFCand_ = tfCand.getParameter<double>("deltaR");
   
   // auto gmtRegCand = conf().getParameter<edm::ParameterSet>("gmtRegCand");
-  // gmtRegCandInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(gmtRegCand.getParameter<edm::InputTag>("validInputTags"));
   // minBXGMTRegCand_ = gmtRegCand.getParameter<int>("minBX");
   // maxBXGMTRegCand_ = gmtRegCand.getParameter<int>("minBX");
   // verboseGMTRegCand_ = gmtRegCand.getParameter<int>("verbose");
   // deltaRGMTRegCand_ = gmtRegCand.getParameter<double>("deltaR");
   
   // auto gmtCand = conf().getParameter<edm::ParameterSet>("gmtCand");
-  // gmtCandInputLabel_ = iC.consumes<L1MuGMTCandCollection>(gmtCand.getParameter<edm::InputTag>("validInputTags"));
   // minBXGMTCand_ = gmtCand.getParameter<int>("minBX");
   // maxBXGMTCand_ = gmtCand.getParameter<int>("minBX");
   // verboseGMTCand_ = gmtCand.getParameter<int>("verbose");
   // deltaRGMTCand_ = gmtCand.getParameter<double>("deltaR");
   
   // auto l1Extra = conf().getParameter<edm::ParameterSet>("l1Extra");
-  // l1ExtraInputLabel_ = iC.consumes<l1extra::L1MuonParticleCollection>(l1Extra.getParameter<edm::InputTag>("validInputTags"));
   // minBXL1Extra_ = l1Extra.getParameter<int>("minBX");
   // maxBXL1Extra_ = l1Extra.getParameter<int>("minBX");
   // verboseL1Extra_ = l1Extra.getParameter<int>("verbose");
@@ -61,61 +60,7 @@ L1TrackMatcher::L1TrackMatcher(CSCStubMatcher& csc, DTDigiMatcher& dt, RPCDigiMa
   //std::cout<<" L1TrackMatcher constructor" <<std::endl;
   clear();
   init();
-}
 
-L1TrackMatcher::~L1TrackMatcher() 
-{
- // if(ptLUT_) delete ptLUT_;
- // ptLUT_ = nullptr;
-    //std::cout<<" L1TrackMatcher destructor" <<std::endl;
-  delete ptLUT_;
-  ptLUT_ = nullptr;
-
-  for(int e=0; e<2; e++) for (int s=0; s<6; s++){
-   // if  (my_SPs_[e][s])
-       	delete my_SPs_[e][s];
-        my_SPs_[e][s] = NULL;
-    
-  }
-  for(int endcap = 1; endcap<=2; endcap++) {
-    for(int sector=1; sector<=6; sector++) {
-      for(int station=1,fpga=0; station<=4 && fpga<5; station++) {
-        if(station==1) for(int subSector=0; subSector<2; subSector++)
-          delete srLUTs_[fpga++][sector-1][endcap-1];
-        else
-          delete srLUTs_[fpga++][sector-1][endcap-1];
-      }
-    }
-  }
-
-
-  for (auto trk:tfTracks_)  delete trk;
-  
-  if(dtrc_) 
-    delete dtrc_;
-  dtrc_ = nullptr;
-  clear();
-  
-//  delete sh_matcher_;
-//  delete gem_digi_matcher_;
-//  delete csc_digi_matcher_;
-//  delete rpc_digi_matcher_;
-//  delete csc_stub_matcher_;
-}
-
-void 
-L1TrackMatcher::clear()
-{
-  tfTracks_.clear();
-  tfCands_.clear();
-  // gmtRegCands_.clear();
-  // gmtCands_.clear();
-  // l1Extras_.clear();
-}
-
-void 
-L1TrackMatcher::init()
-{  
   try {
     eventSetup().get<L1MuTriggerScalesRcd>().get(muScalesHd_);
     muScales_ = &*muScalesHd_;
@@ -171,6 +116,61 @@ L1TrackMatcher::init()
   // // L1 muon candidates
   // edm::Handle<l1extra::L1MuonParticleCollection> l1Particles;
   // if (gemvalidation::getByToken(l1ExtraInputLabel_, l1Particles, event())) matchL1MuonParticleToSimTrack(*l1Particles.product());
+}
+
+L1TrackMatcher::~L1TrackMatcher() 
+{
+ // if(ptLUT_) delete ptLUT_;
+ // ptLUT_ = nullptr;
+    //std::cout<<" L1TrackMatcher destructor" <<std::endl;
+  delete ptLUT_;
+  ptLUT_ = nullptr;
+
+  for(int e=0; e<2; e++) for (int s=0; s<6; s++){
+   // if  (my_SPs_[e][s])
+       	delete my_SPs_[e][s];
+        my_SPs_[e][s] = NULL;
+    
+  }
+  for(int endcap = 1; endcap<=2; endcap++) {
+    for(int sector=1; sector<=6; sector++) {
+      for(int station=1,fpga=0; station<=4 && fpga<5; station++) {
+        if(station==1) for(int subSector=0; subSector<2; subSector++)
+          delete srLUTs_[fpga++][sector-1][endcap-1];
+        else
+          delete srLUTs_[fpga++][sector-1][endcap-1];
+      }
+    }
+  }
+
+
+  for (auto trk:tfTracks_)  delete trk;
+  
+  if(dtrc_) 
+    delete dtrc_;
+  dtrc_ = nullptr;
+  clear();
+  
+//  delete sh_matcher_;
+//  delete gem_digi_matcher_;
+//  delete csc_digi_matcher_;
+//  delete rpc_digi_matcher_;
+//  delete csc_stub_matcher_;
+}
+
+void 
+L1TrackMatcher::clear()
+{
+  tfTracks_.clear();
+  tfCands_.clear();
+  // gmtRegCands_.clear();
+  // gmtCands_.clear();
+  // l1Extras_.clear();
+}
+
+void 
+L1TrackMatcher::init()
+{  
 }
 
 

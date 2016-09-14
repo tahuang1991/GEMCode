@@ -28,7 +28,7 @@ public:
                           const edm::ParameterSet& ps, 
                           const edm::Event& ev, 
                           const edm::EventSetup& es,
-                          edm::ConsumesCollector & iC);
+                          edm::EDGetTokenT<reco::GenParticleCollection> inputToken_);
   
   ~DisplacedGENMuonMatcher();
 
@@ -131,7 +131,6 @@ private:
   int darkBosonIndex_;
   int genMuonIndex_;
 
-  edm::EDGetTokenT<reco::GenParticleCollection> inputToken_;
   edm::Handle<reco::GenParticleCollection> genParticles;
 };
 

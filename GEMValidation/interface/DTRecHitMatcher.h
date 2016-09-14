@@ -28,7 +28,10 @@ public:
   typedef std::vector<DTRecSegment2D> DTRecSegment2DContainer;
   typedef std::vector<DTRecSegment4D> DTRecSegment4DContainer;
   
-  DTRecHitMatcher(SimHitMatcher& sh);
+  DTRecHitMatcher(SimHitMatcher& sh, 
+                  edm::EDGetTokenT<DTRecHitCollection> dtRecHit1DPairInput_,
+                  edm::EDGetTokenT<DTRecSegment2DCollection> dtRecSegment2DInput_,
+                  edm::EDGetTokenT<DTRecSegment4DCollection> dtRecSegment4DInput_);
   
   ~DTRecHitMatcher() {}
 

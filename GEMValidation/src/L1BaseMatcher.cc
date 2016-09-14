@@ -1,7 +1,7 @@
 #include "GEMCode/GEMValidation/interface/L1BaseMatcher.h"
 
-L1BaseMatcher::L1BaseMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
-  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup(), iC)
+L1BaseMatcher::L1BaseMatcher(SimHitMatcher& sh)
+  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
 {
   CSCTFSPset_ = conf().getParameter<edm::ParameterSet>("sectorProcessor");
   ptLUTset_ = CSCTFSPset_.getParameter<edm::ParameterSet>("PTLUT");

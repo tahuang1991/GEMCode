@@ -27,7 +27,8 @@ class CSCDigiMatcher : public DigiMatcher
 {
 public:
 
-  CSCDigiMatcher(SimHitMatcher& sh);
+  CSCDigiMatcher(SimHitMatcher& sh, edm::EDGetTokenT<CSCComparatorDigiCollection> cscComparatorDigiInput_, 
+                 edm::EDGetTokenT<CSCWireDigiCollection> cscWireDigiInput_);
   
   ~CSCDigiMatcher();
 
