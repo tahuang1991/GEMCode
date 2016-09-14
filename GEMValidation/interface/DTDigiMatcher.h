@@ -25,7 +25,7 @@ public:
 
   typedef std::vector<DTDigi> DTDigiContainer;
 
-  DTDigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC);
+  DTDigiMatcher(SimHitMatcher& sh);
   
   ~DTDigiMatcher();
 
@@ -59,8 +59,6 @@ private:
   void matchDigisToSimTrack(const DTDigiCollection&);
 
   std::set<unsigned int> selectDetIds(const std::map<unsigned int, DTDigiContainer>&, int) const;
-
-  edm::EDGetTokenT<DTDigiCollection> dtDigiInput_;
 
   bool verboseDigi_;
   bool runDTDigi_;

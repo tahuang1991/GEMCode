@@ -43,8 +43,7 @@ public:
               const SimVertex& v,
               const edm::ParameterSet& ps, 
               const edm::Event& ev, 
-              const edm::EventSetup& es,
-              edm::ConsumesCollector & iC);
+              const edm::EventSetup& es);
 
   ~BaseMatcher();
 

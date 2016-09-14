@@ -4,26 +4,27 @@
 using namespace std;
 
 
-DTRecHitMatcher::DTRecHitMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
-  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup(), iC)
+DTRecHitMatcher::DTRecHitMatcher(SimHitMatcher& sh, 
+                                 edm::EDGetTokenT<DTRecHitCollection> dtRecHit1DPairInput_,
+                                 edm::EDGetTokenT<DTRecSegment2DCollection> dtRecSegment2DInput_,
+                                 edm::EDGetTokenT<DTRecSegment4DCollection> dtRecSegment4DInput_
+                                 )
+  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
   , simhit_matcher_(&sh)
 {
   auto dtRecHit1DPair = conf().getParameter<edm::ParameterSet>("dtRecHit");
-  dtRecHit1DPairInput_ = iC.consumes<DTRecHitCollection>(dtRecHit1DPair.getParameter<edm::InputTag>("validInputTags"));
   maxBXDTRecHit1DPair_ = dtRecHit1DPair.getParameter<int>("maxBX");
   minBXDTRecHit1DPair_ = dtRecHit1DPair.getParameter<int>("minBX");
   verboseDTRecHit1DPair_ = dtRecHit1DPair.getParameter<int>("verbose");
   runDTRecHit1DPair_ = dtRecHit1DPair.getParameter<bool>("run");
 
   auto dtSegment2D = conf().getParameter<edm::ParameterSet>("dtRecSegment2D");
-  dtRecSegment2DInput_ = iC.consumes<DTRecSegment2DCollection>(dtSegment2D.getParameter<edm::InputTag>("validInputTags"));
   maxBXDTRecSegment2D_ = dtSegment2D.getParameter<int>("maxBX");
   minBXDTRecSegment2D_ = dtSegment2D.getParameter<int>("minBX");
   verboseDTRecSegment2D_ = dtSegment2D.getParameter<int>("verbose");
   runDTRecSegment2D_ = dtSegment2D.getParameter<bool>("run");
 
   auto dtSegment4D = conf().getParameter<edm::ParameterSet>("dtRecSegment4D");
-  dtRecSegment4DInput_ = iC.consumes<DTRecSegment4DCollection>(dtSegment4D.getParameter<edm::InputTag>("validInputTags"));
   maxBXDTRecSegment4D_ = dtSegment4D.getParameter<int>("maxBX");
   minBXDTRecSegment4D_ = dtSegment4D.getParameter<int>("minBX");
   verboseDTRecSegment4D_ = dtSegment4D.getParameter<int>("verbose");

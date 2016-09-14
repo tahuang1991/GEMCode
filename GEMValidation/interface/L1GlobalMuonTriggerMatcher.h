@@ -19,7 +19,7 @@ class L1GlobalMuonTriggerMatcher : public BaseMatcher
 {
  public:
   /// constructor
-  L1GlobalMuonTriggerMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC);
+  L1GlobalMuonTriggerMatcher(SimHitMatcher& sh);
   /// destructor
   ~L1GlobalMuonTriggerMatcher();
   

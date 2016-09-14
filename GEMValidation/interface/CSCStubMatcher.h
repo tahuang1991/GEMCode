@@ -35,7 +35,7 @@ public:
   typedef std::pair<unsigned int, const GEMPadDigi*> GEMPadBX;
   typedef std::vector<GEMPadBX> GEMPadsBX;
 
-  CSCStubMatcher(SimHitMatcher& sh, CSCDigiMatcher& dg, GEMDigiMatcher& gem_dg, RPCDigiMatcher& rpc_dg, edm::ConsumesCollector & iC);
+  CSCStubMatcher(SimHitMatcher& sh, CSCDigiMatcher& dg, GEMDigiMatcher& gem_dg, RPCDigiMatcher& rpc_dg);
   
   ~CSCStubMatcher();
 
@@ -164,11 +164,6 @@ private:
   int minBXALCT_, maxBXALCT_;
   int minBXLCT_, maxBXLCT_;
   int minBXMPLCT_, maxBXMPLCT_;
-
-  edm::EDGetTokenT<CSCCLCTDigiCollection> clctInputs_;
-  edm::EDGetTokenT<CSCALCTDigiCollection> alctInputs_;
-  edm::EDGetTokenT<CSCCorrelatedLCTDigiCollection> lctInputs_;
-  edm::EDGetTokenT<CSCCorrelatedLCTDigiCollection> mplctInputs_;
 
   CSCCLCTDigiContainer no_csc_clcts_;
   CSCALCTDigiContainer no_csc_alcts_;

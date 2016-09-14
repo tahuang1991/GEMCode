@@ -5,11 +5,12 @@ using namespace std;
 using namespace matching;
 
 
-CSCDigiMatcher::CSCDigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
-  : DigiMatcher(sh, iC)
+CSCDigiMatcher::CSCDigiMatcher(SimHitMatcher& sh, 
+                               edm::EDGetTokenT<CSCComparatorDigiCollection> cscComparatorDigiInput_, 
+                               edm::EDGetTokenT<CSCWireDigiCollection> cscWireDigiInput_)
+  : DigiMatcher(sh)
 {
   auto cscWireDigi_ = conf().getParameter<edm::ParameterSet>("cscWireDigi");
-  cscWireDigiInput_ = iC.consumes<CSCWireDigiCollection>(cscWireDigi_.getParameter<edm::InputTag>("validInputTags"));
   verboseWG_ = cscWireDigi_.getParameter<int>("verbose");
   minBXCSCWire_ = cscWireDigi_.getParameter<int>("minBX");
   maxBXCSCWire_ = cscWireDigi_.getParameter<int>("maxBX");
@@ -17,7 +18,6 @@ CSCDigiMatcher::CSCDigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
   runWG_ = cscWireDigi_.getParameter<bool>("run");
 
   auto cscComparatorDigi_ = conf().getParameter<edm::ParameterSet>("cscStripDigi");
-  cscComparatorDigiInput_ = iC.consumes<CSCComparatorDigiCollection>(cscComparatorDigi_.getParameter<edm::InputTag>("validInputTags"));
   verboseStrip_ = cscComparatorDigi_.getParameter<int>("verbose");
   minBXCSCComp_ = cscComparatorDigi_.getParameter<int>("minBX");
   maxBXCSCComp_ = cscComparatorDigi_.getParameter<int>("maxBX");

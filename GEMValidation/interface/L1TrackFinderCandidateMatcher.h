@@ -11,7 +11,7 @@ class L1TrackFinderCandidateMatcher : public BaseMatcher
 {
  public:
   /// constructor
-  L1TrackFinderCandidateMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC);
+  L1TrackFinderCandidateMatcher(SimHitMatcher& sh);
   /// destructor
   ~L1TrackFinderCandidateMatcher();
   

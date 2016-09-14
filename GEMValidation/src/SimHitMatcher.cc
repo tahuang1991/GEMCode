@@ -11,53 +11,48 @@ SimHitMatcher::SimHitMatcher(const SimTrack& t,
                              const edm::ParameterSet& ps, 
                              const edm::Event& ev, 
                              const edm::EventSetup& es,
-                             edm::ConsumesCollector & iC)
-  : BaseMatcher(t, v, ps, ev, es, iC)
+                             edm::EDGetTokenT<edm::SimVertexContainer> simVertexInput_,
+                             edm::EDGetTokenT<edm::SimTrackContainer> simTrackInput_,
+                             edm::EDGetTokenT<edm::PSimHitContainer> gemSimHitInput_,
+                             edm::EDGetTokenT<edm::PSimHitContainer> cscSimHitInput_,
+                             edm::EDGetTokenT<edm::PSimHitContainer> rpcSimHitInput_,
+                             edm::EDGetTokenT<edm::PSimHitContainer> me0SimHitInput_,
+                             edm::EDGetTokenT<edm::PSimHitContainer> dtSimHitInput_
+                             
+                             )
+  : BaseMatcher(t, v, ps, ev, es)
 {
   auto gemSimHit_ = conf().getParameter<edm::ParameterSet>("gemSimHit");
   verboseGEM_ = gemSimHit_.getParameter<int>("verbose");
-  gemSimHitInput_ = iC.consumes<edm::PSimHitContainer>(gemSimHit_.getParameter<edm::InputTag>("validInputTags"));
   simMuOnlyGEM_ = gemSimHit_.getParameter<bool>("simMuOnly");
   discardEleHitsGEM_ = gemSimHit_.getParameter<bool>("discardEleHits");
   runGEMSimHit_ = gemSimHit_.getParameter<bool>("run");
 
   auto cscSimHit_= conf().getParameter<edm::ParameterSet>("cscSimHit");
   verboseCSC_ = cscSimHit_.getParameter<int>("verbose");
-  cscSimHitInput_ = iC.consumes<edm::PSimHitContainer>(cscSimHit_.getParameter<edm::InputTag>("validInputTags"));
   simMuOnlyCSC_ = cscSimHit_.getParameter<bool>("simMuOnly");
   discardEleHitsCSC_ = cscSimHit_.getParameter<bool>("discardEleHits");
   runCSCSimHit_ = cscSimHit_.getParameter<bool>("run");
 
   auto me0SimHit_ = conf().getParameter<edm::ParameterSet>("me0SimHit");
   verboseME0_ = me0SimHit_.getParameter<int>("verbose");
-  me0SimHitInput_ = iC.consumes<edm::PSimHitContainer>(me0SimHit_.getParameter<edm::InputTag>("validInputTags"));
   simMuOnlyME0_ = me0SimHit_.getParameter<bool>("simMuOnly");
   discardEleHitsME0_ = me0SimHit_.getParameter<bool>("discardEleHits");
   runME0SimHit_ = me0SimHit_.getParameter<bool>("run");
 
   auto rpcSimHit_ = conf().getParameter<edm::ParameterSet>("rpcSimHit");
   verboseRPC_ = rpcSimHit_.getParameter<int>("verbose");
-  rpcSimHitInput_ = iC.consumes<edm::PSimHitContainer>(rpcSimHit_.getParameter<edm::InputTag>("validInputTags"));
   simMuOnlyRPC_ = rpcSimHit_.getParameter<bool>("simMuOnly");
   discardEleHitsRPC_ = rpcSimHit_.getParameter<bool>("discardEleHits");
   runRPCSimHit_ = rpcSimHit_.getParameter<bool>("run");
 
   auto dtSimHit_ = conf().getParameter<edm::ParameterSet>("dtSimHit");
   verboseDT_ = dtSimHit_.getParameter<int>("verbose");
-  dtSimHitInput_ = iC.consumes<edm::PSimHitContainer>(dtSimHit_.getParameter<edm::InputTag>("validInputTags"));
   simMuOnlyDT_ = dtSimHit_.getParameter<bool>("simMuOnly");
   discardEleHitsDT_ = dtSimHit_.getParameter<bool>("discardEleHits");
   runDTSimHit_ = dtSimHit_.getParameter<bool>("run");
 
-  auto simTrack = conf().getParameter<edm::ParameterSet>("simTrack");
-  simTrackInput_ = iC.consumes<edm::SimTrackContainer>(simTrack.getParameter<edm::InputTag>("validInputTags"));
-
-  auto simVertex = conf().getParameter<edm::ParameterSet>("simVertex");
-  simVertexInput_ = iC.consumes<edm::SimVertexContainer>(simVertex.getParameter<edm::InputTag>("validInputTags"));
-
   init();
-
-
 }
 
 

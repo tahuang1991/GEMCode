@@ -45,7 +45,7 @@ class L1TrackMatcher : public BaseMatcher
 {
  public:
   /// constructor
-  L1TrackMatcher(CSCStubMatcher&, DTDigiMatcher&, RPCDigiMatcher&,  edm::ConsumesCollector & iC);
+  L1TrackMatcher(CSCStubMatcher&, DTDigiMatcher&, RPCDigiMatcher&);
   /// destructor
   ~L1TrackMatcher();
   

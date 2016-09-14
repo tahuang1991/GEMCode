@@ -25,7 +25,7 @@ public:
 
   typedef std::vector<RPCDigi> RPCDigiContainer;
 
-  RPCDigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC);
+  RPCDigiMatcher(SimHitMatcher& sh, edm::EDGetTokenT<RPCDigiCollection> rpcDigiInput_);
   
   ~RPCDigiMatcher();
 
@@ -59,8 +59,6 @@ private:
   void matchDigisToSimTrack(const RPCDigiCollection&);
 
   std::set<unsigned int> selectDetIds(const Id2DigiContainer &, int) const;
-
-  edm::EDGetTokenT<RPCDigiCollection> rpcDigiInput_;
 
   int minBXRPC_, maxBXRPC_;
 

@@ -6,11 +6,10 @@ using namespace matching;
 
 #include "DataFormats/MuonDetId/interface/DTWireId.h"
 
-DTDigiMatcher::DTDigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
-  : DigiMatcher(sh, iC)
+DTDigiMatcher::DTDigiMatcher(SimHitMatcher& sh, edm::EDGetTokenT<DTDigiCollection> dtDigiInput_)
+  : DigiMatcher(sh)
 {
   auto dtDigi_= conf().getParameter<edm::ParameterSet>("dtDigi");
-  dtDigiInput_ = iC.consumes<DTDigiCollection>(dtDigi_.getParameter<edm::InputTag>("validInputTags"));
   minBXDT_ = dtDigi_.getParameter<int>("minBX");
   maxBXDT_ = dtDigi_.getParameter<int>("maxBX");
   matchDeltaWire_ = dtDigi_.getParameter<int>("matchDeltaWire");
