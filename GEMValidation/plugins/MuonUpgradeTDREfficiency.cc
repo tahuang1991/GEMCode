@@ -330,7 +330,9 @@ private:
   int detIdToMEStation(int st, int ri);
   
   edm::ParameterSet cfg_;
-  edm::EDGetTokenT<edm::SimTrackContainer> simInputLabel_;
+  edm::EDGetTokenT<edm::SimVertexContainer> simVertexInput_;
+  edm::EDGetTokenT<edm::SimTrackContainer> simTrackInput_;
+
   int verboseSimTrack_;
   double simTrackMinPt_;
   double simTrackMinEta_;
@@ -365,9 +367,12 @@ MuonUpgradeTDREfficiency::MuonUpgradeTDREfficiency(const edm::ParameterSet& ps)
   ntupleTrackEff_ = cfg_.getParameter<bool>("ntupleTrackEff");
   matchprint_ = false; //cfg_.getParameter<bool>("matchprint");
 
+  auto simVertex = cfg_.getParameter<edm::ParameterSet>("simVertex");
+  simVertexInput_ = consumes<edm::SimVertexContainer>(simVertex.getParameter<edm::InputTag>("validInputTags"));
+
   auto simTrack = cfg_.getParameter<edm::ParameterSet>("simTrack");
   verboseSimTrack_ = simTrack.getParameter<int>("verbose");
-  simInputLabel_ = consumes<edm::SimTrackContainer>(simTrack.getParameter<edm::InputTag>("validInputTags"));
+  simTrackInput_ = consumes<edm::SimTrackContainer>(simTrack.getParameter<edm::InputTag>("validInputTags"));
   simTrackMinPt_ = simTrack.getParameter<double>("minPt");
   simTrackMinEta_ = simTrack.getParameter<double>("minEta");
   simTrackMaxEta_ = simTrack.getParameter<double>("maxEta");
@@ -453,11 +458,11 @@ bool MuonUpgradeTDREfficiency::isSimTrackGood(const SimTrack &t)
 void MuonUpgradeTDREfficiency::analyze(const edm::Event& ev, const edm::EventSetup& es)
 {
   edm::Handle<edm::SimTrackContainer> sim_tracks;
-  ev.getByToken(simInputLabel_, sim_tracks);
+  ev.getByToken(simTrackInput_, sim_tracks);
   const edm::SimTrackContainer & sim_track = *sim_tracks.product();
 
   edm::Handle<edm::SimVertexContainer> sim_vertices;
-  ev.getByToken(simInputLabel_, sim_vertices);
+  ev.getByToken(simVertexInput_, sim_vertices);
   const edm::SimVertexContainer & sim_vert = *sim_vertices.product();
 
   if (verboseSimTrack_){
