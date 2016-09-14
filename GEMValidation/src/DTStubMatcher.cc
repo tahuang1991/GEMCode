@@ -5,11 +5,10 @@ using namespace std;
 
 #include "DataFormats/MuonDetId/interface/DTWireId.h"
 
-DTStubMatcher::DTStubMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
-  : DigiMatcher(sh, iC)
+DTStubMatcher::DTStubMatcher(SimHitMatcher& sh, edm::EDGetTokenT<DTLocalTriggerCollection> input_)
+  : DigiMatcher(sh)
 {
   auto dtStub_= conf().getParameter<edm::ParameterSet>("dtLocalTrigger");
-  input_ = iC.consumes<DTLocalTriggerCollection>(dtStub_.getParameter<edm::InputTag>("validInputTags"));
   minBX_ = dtStub_.getParameter<int>("minBX");
   maxBX_ = dtStub_.getParameter<int>("maxBX");
   verbose_ = dtStub_.getParameter<int>("verbose");

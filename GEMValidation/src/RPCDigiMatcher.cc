@@ -5,11 +5,10 @@ using namespace std;
 using namespace matching;
 
 
-RPCDigiMatcher::RPCDigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
-  : DigiMatcher(sh, iC)
+RPCDigiMatcher::RPCDigiMatcher(SimHitMatcher& sh, edm::EDGetTokenT<RPCDigiCollection> rpcDigiInput_)
+  : DigiMatcher(sh)
 {
   auto rpcDigi_= conf().getParameter<edm::ParameterSet>("rpcStripDigi");
-  rpcDigiInput_ = iC.consumes<RPCDigiCollection>(rpcDigi_.getParameter<edm::InputTag>("validInputTags"));
   minBXRPC_ = rpcDigi_.getParameter<int>("minBX");
   maxBXRPC_ = rpcDigi_.getParameter<int>("maxBX");
   matchDeltaStrip_ = rpcDigi_.getParameter<int>("matchDeltaStrip");

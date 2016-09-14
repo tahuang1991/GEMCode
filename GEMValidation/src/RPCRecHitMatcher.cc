@@ -4,12 +4,11 @@
 using namespace std;
 using namespace matching;
 
-RPCRecHitMatcher::RPCRecHitMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
-  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup(), iC)
+RPCRecHitMatcher::RPCRecHitMatcher(SimHitMatcher& sh, edm::EDGetTokenT<RPCRecHitCollection> rpcRecHitInput_)
+  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
   , simhit_matcher_(&sh)
 {
   auto rpcRecHit_= conf().getParameter<edm::ParameterSet>("rpcRecHit");
-  rpcRecHitInput_ = iC.consumes<RPCRecHitCollection>(rpcRecHit_.getParameter<edm::InputTag>("validInputTags"));
   minBXRPC_ = rpcRecHit_.getParameter<int>("minBX");
   maxBXRPC_ = rpcRecHit_.getParameter<int>("maxBX");
   matchDeltaStrip_ = rpcRecHit_.getParameter<int>("matchDeltaStrip");

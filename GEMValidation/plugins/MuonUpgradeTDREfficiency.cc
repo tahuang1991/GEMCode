@@ -14,9 +14,6 @@
 #include "DataFormats/Math/interface/deltaPhi.h"
 #include "DataFormats/MuonDetId/interface/CSCTriggerNumbering.h"
 
-#include "SimDataFormats/TrackingHit/interface/PSimHitContainer.h"
-#include "SimDataFormats/Track/interface/SimTrackContainer.h"
-
 #include "GEMCode/GEMValidation/interface/SimTrackMatchManager.h"
 
 #include "TTree.h"
@@ -330,8 +327,57 @@ private:
   int detIdToMEStation(int st, int ri);
   
   edm::ParameterSet cfg_;
+  edm::EDGetTokenT<reco::GenParticleCollection> inputToken_;                                         
   edm::EDGetTokenT<edm::SimVertexContainer> simVertexInput_;
   edm::EDGetTokenT<edm::SimTrackContainer> simTrackInput_;
+
+  edm::EDGetTokenT<edm::PSimHitContainer> gemSimHitInput_;
+  edm::EDGetTokenT<edm::PSimHitContainer> cscSimHitInput_;
+  edm::EDGetTokenT<edm::PSimHitContainer> rpcSimHitInput_;
+  edm::EDGetTokenT<edm::PSimHitContainer> me0SimHitInput_;
+  edm::EDGetTokenT<edm::PSimHitContainer> dtSimHitInput_;
+
+  edm::EDGetTokenT<GEMDigiCollection> gemDigiInput_;
+  edm::EDGetTokenT<GEMPadDigiCollection> gemPadDigiInput_;
+  edm::EDGetTokenT<GEMCoPadDigiCollection> gemCoPadDigiInput_;
+  edm::EDGetTokenT<GEMRecHitCollection> gemRecHitInput_;
+
+  edm::EDGetTokenT<ME0DigiPreRecoCollection> me0DigiInput_;
+
+  edm::EDGetTokenT<CSCComparatorDigiCollection> cscComparatorDigiInput_;
+  edm::EDGetTokenT<CSCWireDigiCollection> cscWireDigiInput_;
+  edm::EDGetTokenT<CSCCLCTDigiCollection> clctInputs_;
+  edm::EDGetTokenT<CSCALCTDigiCollection> alctInputs_;
+  edm::EDGetTokenT<CSCCorrelatedLCTDigiCollection> lctInputs_;
+  edm::EDGetTokenT<CSCCorrelatedLCTDigiCollection> mplctInputs_;
+  edm::EDGetTokenT<CSCRecHit2DCollection> cscRecHit2DInput_;
+  edm::EDGetTokenT<CSCSegmentCollection> cscSegmentInput_;
+
+  edm::EDGetTokenT<DTDigiCollection> dtDigiInput_;
+  edm::EDGetTokenT<DTLocalTriggerCollection> dtStubInput_;
+  edm::EDGetTokenT<DTRecHitCollection> dtRecHit1DPairInput_;
+  edm::EDGetTokenT<DTRecSegment2DCollection> dtRecSegment2DInput_;
+  edm::EDGetTokenT<DTRecSegment4DCollection> dtRecSegment4DInput_;
+
+  edm::EDGetTokenT<RPCDigiCollection> rpcDigiInput_;
+  edm::EDGetTokenT<RPCRecHitCollection> rpcRecHitInput_;
+
+  edm::EDGetTokenT<L1CSCTrackCollection> cscTfTrackInputLabel_; 
+  edm::EDGetTokenT<L1MuRegionalCandCollection> cscTfCandInputLabel_; 
+  edm::EDGetTokenT<L1MuRegionalCandCollection> dtTfCandInputLabel_; 
+  edm::EDGetTokenT<L1MuRegionalCandCollection> rpcfTfCandInputLabel_; 
+  edm::EDGetTokenT<L1MuRegionalCandCollection> rpcbTfCandInputLabel_; 
+
+  edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandCSCInputLabel_;
+  edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandDTInputLabel_;
+  edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandRPCfInputLabel_;
+  edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandRPCbInputLabel_;
+  edm::EDGetTokenT<L1MuGMTCandCollection> gmtCandInputLabel_;
+  edm::EDGetTokenT<l1extra::L1MuonParticleCollection> l1ExtraMuonInputLabel_;
+
+  edm::EDGetTokenT<reco::TrackExtraCollection> recoTrackExtraInputLabel_;
+  edm::EDGetTokenT<reco::TrackCollection> recoTrackInputLabel_;
+  edm::EDGetTokenT<reco::RecoChargedCandidateCollection> recoChargedCandidateInputLabel_;
 
   int verboseSimTrack_;
   double simTrackMinPt_;
@@ -356,6 +402,8 @@ private:
   int minNHitsChamberALCT_;
   int minNHitsChamberLCT_;
   int minNHitsChamberMPLCT_;
+
+  
 };
 
 
@@ -366,38 +414,6 @@ MuonUpgradeTDREfficiency::MuonUpgradeTDREfficiency(const edm::ParameterSet& ps)
   cscStations_ = cfg_.getParameter<std::vector<string> >("cscStations");
   ntupleTrackEff_ = cfg_.getParameter<bool>("ntupleTrackEff");
   matchprint_ = false; //cfg_.getParameter<bool>("matchprint");
-
-  auto simVertex = cfg_.getParameter<edm::ParameterSet>("simVertex");
-  simVertexInput_ = consumes<edm::SimVertexContainer>(simVertex.getParameter<edm::InputTag>("validInputTags"));
-
-  auto simTrack = cfg_.getParameter<edm::ParameterSet>("simTrack");
-  verboseSimTrack_ = simTrack.getParameter<int>("verbose");
-  simTrackInput_ = consumes<edm::SimTrackContainer>(simTrack.getParameter<edm::InputTag>("validInputTags"));
-  simTrackMinPt_ = simTrack.getParameter<double>("minPt");
-  simTrackMinEta_ = simTrack.getParameter<double>("minEta");
-  simTrackMaxEta_ = simTrack.getParameter<double>("maxEta");
-  simTrackOnlyMuon_ = simTrack.getParameter<bool>("onlyMuon");
-    
-  auto cscSimHit = cfg_.getParameter<edm::ParameterSet>("cscSimHit");
-  minNHitsChamberCSCSimHit_ = cscSimHit.getParameter<int>("minNHitsChamber");
-
-  auto cscWireDigi = cfg_.getParameter<edm::ParameterSet>("cscWireDigi");
-  minNHitsChamberCSCWireDigi_ = cscWireDigi.getParameter<int>("minNHitsChamber");
-
-  auto cscComparatorDigi = cfg_.getParameter<edm::ParameterSet>("cscStripDigi");
-  minNHitsChamberCSCStripDigi_ = cscComparatorDigi.getParameter<int>("minNHitsChamber");
-
-  auto cscCLCT = cfg_.getParameter<edm::ParameterSet>("cscCLCT");
-  minNHitsChamberCLCT_ = cscCLCT.getParameter<int>("minNHitsChamber");
-
-  auto cscALCT = cfg_.getParameter<edm::ParameterSet>("cscALCT");
-  minNHitsChamberALCT_ = cscALCT.getParameter<int>("minNHitsChamber");
-
-  auto cscLCT = cfg_.getParameter<edm::ParameterSet>("cscLCT");
-  minNHitsChamberLCT_ = cscLCT.getParameter<int>("minNHitsChamber");
-
-  auto cscMPLCT = cfg_.getParameter<edm::ParameterSet>("cscMPLCT");
-  minNHitsChamberMPLCT_ = cscMPLCT.getParameter<int>("minNHitsChamber");
 
   if (ntupleTrackEff_)
   {
@@ -424,6 +440,140 @@ MuonUpgradeTDREfficiency::MuonUpgradeTDREfficiency(const edm::ParameterSet& ps)
   cscStationsCo_.push_back(std::make_pair(3,2));
   cscStationsCo_.push_back(std::make_pair(4,1));
   cscStationsCo_.push_back(std::make_pair(4,2));
+
+  inputToken_ = consumes<reco::GenParticleCollection>(edm::InputTag("genParticles"));
+
+  auto simVertex = cfg_.getParameter<edm::ParameterSet>("simVertex");
+  simVertexInput_ = consumes<edm::SimVertexContainer>(simVertex.getParameter<edm::InputTag>("validInputTags"));
+
+  auto simTrack = cfg_.getParameter<edm::ParameterSet>("simTrack");
+  verboseSimTrack_ = simTrack.getParameter<int>("verbose");
+  simTrackInput_ = consumes<edm::SimTrackContainer>(simTrack.getParameter<edm::InputTag>("validInputTags"));
+  simTrackMinPt_ = simTrack.getParameter<double>("minPt");
+  simTrackMinEta_ = simTrack.getParameter<double>("minEta");
+  simTrackMaxEta_ = simTrack.getParameter<double>("maxEta");
+  simTrackOnlyMuon_ = simTrack.getParameter<bool>("onlyMuon");
+    
+  auto gemSimHit_ = cfg_.getParameter<edm::ParameterSet>("gemSimHit");
+  gemSimHitInput_ = consumes<edm::PSimHitContainer>(gemSimHit_.getParameter<edm::InputTag>("validInputTags"));
+
+  auto cscSimHit_= cfg_.getParameter<edm::ParameterSet>("cscSimHit");
+  cscSimHitInput_ = consumes<edm::PSimHitContainer>(cscSimHit_.getParameter<edm::InputTag>("validInputTags"));
+  minNHitsChamberCSCSimHit_ = cscSimHit_.getParameter<int>("minNHitsChamber");
+
+  auto me0SimHit_ = cfg_.getParameter<edm::ParameterSet>("me0SimHit");
+  me0SimHitInput_ = consumes<edm::PSimHitContainer>(me0SimHit_.getParameter<edm::InputTag>("validInputTags"));
+
+  auto rpcSimHit_ = cfg_.getParameter<edm::ParameterSet>("rpcSimHit");
+  rpcSimHitInput_ = consumes<edm::PSimHitContainer>(rpcSimHit_.getParameter<edm::InputTag>("validInputTags"));
+
+  auto dtSimHit_ = cfg_.getParameter<edm::ParameterSet>("dtSimHit");
+  dtSimHitInput_ = consumes<edm::PSimHitContainer>(dtSimHit_.getParameter<edm::InputTag>("validInputTags"));
+
+  auto gemDigi_= cfg_.getParameter<edm::ParameterSet>("gemStripDigi");
+  gemDigiInput_ = consumes<GEMDigiCollection>(gemDigi_.getParameter<edm::InputTag>("validInputTags"));
+
+  auto gemPad_= cfg_.getParameter<edm::ParameterSet>("gemPadDigi");
+  gemPadDigiInput_ = consumes<GEMPadDigiCollection>(gemPad_.getParameter<edm::InputTag>("validInputTags"));
+
+  auto gemCoPad_= cfg_.getParameter<edm::ParameterSet>("gemCoPadDigi");
+  gemCoPadDigiInput_ = consumes<GEMCoPadDigiCollection>(gemCoPad_.getParameter<edm::InputTag>("validInputTags"));
+
+  auto gemRecHit_= cfg_.getParameter<edm::ParameterSet>("gemRecHit");
+  gemRecHitInput_ = consumes<GEMRecHitCollection>(gemRecHit_.getParameter<edm::InputTag>("validInputTags"));
+
+  auto me0Digi_= cfg_.getParameter<edm::ParameterSet>("me0DigiPreReco");
+  me0DigiInput_ = consumes<ME0DigiPreRecoCollection>(me0Digi_.getParameter<edm::InputTag>("validInputTags"));
+
+  auto cscComparatorDigi = cfg_.getParameter<edm::ParameterSet>("cscStripDigi");
+  minNHitsChamberCSCStripDigi_ = cscComparatorDigi.getParameter<int>("minNHitsChamber");
+  cscComparatorDigiInput_ = consumes<CSCComparatorDigiCollection>(cscComparatorDigi.getParameter<edm::InputTag>("validInputTags"));
+
+  auto cscWireDigi = cfg_.getParameter<edm::ParameterSet>("cscWireDigi");
+  minNHitsChamberCSCWireDigi_ = cscWireDigi.getParameter<int>("minNHitsChamber");
+  cscWireDigiInput_ = consumes<CSCWireDigiCollection>(cscWireDigi.getParameter<edm::InputTag>("validInputTags"));
+
+  auto cscCLCT = cfg_.getParameter<edm::ParameterSet>("cscCLCT");
+  minNHitsChamberCLCT_ = cscCLCT.getParameter<int>("minNHitsChamber");
+  clctInputs_ = consumes<CSCCLCTDigiCollection>(cscCLCT.getParameter<edm::InputTag>("validInputTags"));
+
+  auto cscALCT = cfg_.getParameter<edm::ParameterSet>("cscALCT");
+  minNHitsChamberALCT_ = cscALCT.getParameter<int>("minNHitsChamber");
+  alctInputs_ = consumes<CSCALCTDigiCollection>(cscALCT.getParameter<edm::InputTag>("validInputTags"));
+
+  auto cscLCT = cfg_.getParameter<edm::ParameterSet>("cscLCT");
+  minNHitsChamberLCT_ = cscLCT.getParameter<int>("minNHitsChamber");
+  lctInputs_ = consumes<CSCCorrelatedLCTDigiCollection>(cscLCT.getParameter<edm::InputTag>("validInputTags"));
+
+  auto cscMPLCT = cfg_.getParameter<edm::ParameterSet>("cscMPLCT");
+  minNHitsChamberMPLCT_ = cscMPLCT.getParameter<int>("minNHitsChamber");
+  mplctInputs_ = consumes<CSCCorrelatedLCTDigiCollection>(cscMPLCT.getParameter<edm::InputTag>("validInputTags"));
+
+  auto cscRecHit2D = cfg_.getParameter<edm::ParameterSet>("cscRecHit");
+  cscRecHit2DInput_ = consumes<CSCRecHit2DCollection>(cscRecHit2D.getParameter<edm::InputTag>("validInputTags"));
+
+  auto cscSegment2D = cfg_.getParameter<edm::ParameterSet>("cscSegment");
+  cscSegmentInput_ = consumes<CSCSegmentCollection>(cscSegment2D.getParameter<edm::InputTag>("validInputTags"));
+
+  auto dtDigi_= cfg_.getParameter<edm::ParameterSet>("dtDigi");
+  dtDigiInput_ = consumes<DTDigiCollection>(dtDigi_.getParameter<edm::InputTag>("validInputTags"));
+
+  auto dtStub_= cfg_.getParameter<edm::ParameterSet>("dtLocalTrigger");
+  dtStubInput_ = consumes<DTLocalTriggerCollection>(dtStub_.getParameter<edm::InputTag>("validInputTags"));
+
+  auto dtRecHit1DPair = cfg_.getParameter<edm::ParameterSet>("dtRecHit");
+  dtRecHit1DPairInput_ = consumes<DTRecHitCollection>(dtRecHit1DPair.getParameter<edm::InputTag>("validInputTags"));
+
+  auto dtSegment2D = cfg_.getParameter<edm::ParameterSet>("dtRecSegment2D");
+  dtRecSegment2DInput_ = consumes<DTRecSegment2DCollection>(dtSegment2D.getParameter<edm::InputTag>("validInputTags"));
+
+  auto dtSegment4D = cfg_.getParameter<edm::ParameterSet>("dtRecSegment4D");
+  dtRecSegment4DInput_ = consumes<DTRecSegment4DCollection>(dtSegment4D.getParameter<edm::InputTag>("validInputTags"));
+
+  auto rpcDigi_= cfg_.getParameter<edm::ParameterSet>("rpcStripDigi");
+  rpcDigiInput_ = consumes<RPCDigiCollection>(rpcDigi_.getParameter<edm::InputTag>("validInputTags"));
+
+  auto rpcRecHit_= cfg_.getParameter<edm::ParameterSet>("rpcRecHit");
+  rpcRecHitInput_ = consumes<RPCRecHitCollection>(rpcRecHit_.getParameter<edm::InputTag>("validInputTags"));
+
+  auto tfTrack = cfg_.getParameter<edm::ParameterSet>("cscTfTrack");
+  cscTfTrackInputLabel_ = consumes<L1CSCTrackCollection>(tfTrack.getParameter<edm::InputTag>("validInputTags"));
+
+  auto tfCand = cfg_.getParameter<edm::ParameterSet>("cscTfCand");
+  cscTfCandInputLabel_ = consumes<L1MuRegionalCandCollection>(tfCand.getParameter<edm::InputTag>("validInputTags"));
+
+  auto dtTfCand = cfg_.getParameter<edm::ParameterSet>("dtTfCand");
+  dtTfCandInputLabel_ = consumes<L1MuRegionalCandCollection>(dtTfCand.getParameter<edm::InputTag>("validInputTags"));
+
+  auto rpcfTfCand = cfg_.getParameter<edm::ParameterSet>("rpcfTfCand");
+  rpcfTfCandInputLabel_ = consumes<L1MuRegionalCandCollection>(rpcfTfCand.getParameter<edm::InputTag>("validInputTags"));
+
+  auto rpcbTfCand = cfg_.getParameter<edm::ParameterSet>("rpcbTfCand");
+  rpcbTfCandInputLabel_ = consumes<L1MuRegionalCandCollection>(rpcbTfCand.getParameter<edm::InputTag>("validInputTags"));
+
+  auto gmtRegCandCSC = cfg_.getParameter<edm::ParameterSet>("gmtRegCandCSC");
+  auto gmtRegCandDT = cfg_.getParameter<edm::ParameterSet>("gmtRegCandDT");
+  auto gmtRegCandRPCf = cfg_.getParameter<edm::ParameterSet>("gmtRegCandRPCf");
+  auto gmtRegCandRPCb = cfg_.getParameter<edm::ParameterSet>("gmtRegCandRPCb");
+  auto gmtCand = cfg_.getParameter<edm::ParameterSet>("gmtCand");
+  auto l1ExtraMuonParticle = cfg_.getParameter<edm::ParameterSet>("l1ExtraMuonParticle");
+
+  gmtRegCandCSCInputLabel_ = consumes<L1MuRegionalCandCollection>(gmtRegCandCSC.getParameter<edm::InputTag>("validInputTags"));
+  gmtRegCandDTInputLabel_ = consumes<L1MuRegionalCandCollection>(gmtRegCandDT.getParameter<edm::InputTag>("validInputTags"));
+  gmtRegCandRPCfInputLabel_ = consumes<L1MuRegionalCandCollection>(gmtRegCandRPCf.getParameter<edm::InputTag>("validInputTags"));
+  gmtRegCandRPCbInputLabel_ = consumes<L1MuRegionalCandCollection>(gmtRegCandRPCb.getParameter<edm::InputTag>("validInputTags"));
+  gmtCandInputLabel_ = consumes<L1MuGMTCandCollection>(gmtCand.getParameter<edm::InputTag>("validInputTags"));
+  l1ExtraMuonInputLabel_ = consumes<l1extra::L1MuonParticleCollection>(l1ExtraMuonParticle.getParameter<edm::InputTag>("validInputTags"));
+
+  auto recoTrackExtra = cfg_.getParameter<edm::ParameterSet>("recoTrackExtra");
+  recoTrackExtraInputLabel_ = consumes<reco::TrackExtraCollection>(recoTrackExtra.getParameter<edm::InputTag>("validInputTags"));
+
+  auto recoTrack = cfg_.getParameter<edm::ParameterSet>("recoTrack");
+  recoTrackInputLabel_ = consumes<reco::TrackCollection>(recoTrack.getParameter<edm::InputTag>("validInputTags"));
+
+  auto recoChargedCandidate = cfg_.getParameter<edm::ParameterSet>("recoChargedCandidate");
+  recoChargedCandidateInputLabel_ = consumes<reco::RecoChargedCandidateCollection>(recoChargedCandidate.getParameter<edm::InputTag>("validInputTags"));
+
 }
 
 
@@ -479,7 +629,49 @@ void MuonUpgradeTDREfficiency::analyze(const edm::Event& ev, const edm::EventSet
                 << ", phi = " << t.momentum().phi() << ", Q = " << t.charge() << std::endl;
     }
 
-    SimTrackMatchManager match(t, sim_vert[t.vertIndex()], cfg_, ev, es, consumesCollector());
+    SimTrackMatchManager match(t, sim_vert[t.vertIndex()], cfg_, ev, es,
+                               inputToken_,
+                               simVertexInput_,
+                               simTrackInput_,
+                               gemSimHitInput_,
+                               cscSimHitInput_,
+                               rpcSimHitInput_,
+                               me0SimHitInput_,
+                               dtSimHitInput_,
+                               gemDigiInput_,
+                               gemPadDigiInput_,
+                               gemCoPadDigiInput_,
+                               gemRecHitInput_,
+                               me0DigiInput_,
+                               cscComparatorDigiInput_,
+                               cscWireDigiInput_,
+                               clctInputs_,
+                               alctInputs_,
+                               lctInputs_,
+                               mplctInputs_,
+                               cscRecHit2DInput_,
+                               cscSegmentInput_,
+                               dtDigiInput_,
+                               dtStubInput_,
+                               dtRecHit1DPairInput_,
+                               dtRecSegment2DInput_,
+                               dtRecSegment4DInput_,
+                               rpcDigiInput_,
+                               rpcRecHitInput_,
+                               cscTfTrackInputLabel_, 
+                               cscTfCandInputLabel_, 
+                               dtTfCandInputLabel_, 
+                               rpcfTfCandInputLabel_, 
+                               rpcbTfCandInputLabel_, 
+                               gmtRegCandCSCInputLabel_,
+                               gmtRegCandDTInputLabel_,
+                               gmtRegCandRPCfInputLabel_,
+                               gmtRegCandRPCbInputLabel_,
+                               gmtCandInputLabel_,
+                               l1ExtraMuonInputLabel_,
+                               recoTrackExtraInputLabel_,
+                               recoTrackInputLabel_,
+                               recoChargedCandidateInputLabel_);
 
     if (ntupleTrackEff_) analyzeTrackEff(match, trk_no);
     ++trk_no;

@@ -1,18 +1,17 @@
 #include "GEMCode/GEMValidation/interface/L1TrackFinderCandidateMatcher.h"
 
-L1TrackFinderCandidateMatcher::L1TrackFinderCandidateMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
-  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup(), iC)
+L1TrackFinderCandidateMatcher::L1TrackFinderCandidateMatcher(SimHitMatcher& sh,                        
+                                                             edm::EDGetTokenT<L1MuRegionalCandCollection> cscTfCandInputLabel_, 
+                                                             edm::EDGetTokenT<L1MuRegionalCandCollection> dtTfCandInputLabel_, 
+                                                             edm::EDGetTokenT<L1MuRegionalCandCollection> rpcfTfCandInputLabel_, 
+                                                             edm::EDGetTokenT<L1MuRegionalCandCollection> rpcbTfCandInputLabel_)
+  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
 {
   auto cscTfCand = conf().getParameter<edm::ParameterSet>("cscTfCand");
   auto dtTfCand = conf().getParameter<edm::ParameterSet>("dtTfCand");
   auto rpcfTfCand = conf().getParameter<edm::ParameterSet>("rpcfTfCand");
   auto rpcbTfCand = conf().getParameter<edm::ParameterSet>("rpcbTfCand");
 
-  cscTfCandInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(cscTfCand.getParameter<edm::InputTag>("validInputTags"));
-  dtTfCandInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(dtTfCand.getParameter<edm::InputTag>("validInputTags"));
-  rpcfTfCandInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(rpcfTfCand.getParameter<edm::InputTag>("validInputTags"));
-  rpcbTfCandInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(rpcbTfCand.getParameter<edm::InputTag>("validInputTags"));
-  
   verboseCscTfCand_ = cscTfCand.getParameter<int>("verbose");
   verboseDtTfCand_ = dtTfCand.getParameter<int>("verbose");
   verboseRpcfTfCand_ = rpcfTfCand.getParameter<int>("verbose");
@@ -33,16 +32,6 @@ L1TrackFinderCandidateMatcher::L1TrackFinderCandidateMatcher(SimHitMatcher& sh, 
   maxBXRpcfTfCand_ = rpcfTfCand.getParameter<int>("maxBX");
   maxBXRpcbTfCand_ = rpcbTfCand.getParameter<int>("maxBX");
 
-  init();
-}
-
-L1TrackFinderCandidateMatcher::~L1TrackFinderCandidateMatcher()
-{}
-
-
-void 
-L1TrackFinderCandidateMatcher::init()
-{
   edm::Handle<L1MuRegionalCandCollection> hCscTfCand;
   if (gemvalidation::getByToken(cscTfCandInputLabel_, hCscTfCand, event())) if (runCscTfCand_) matchCSCTfCandToSimTrack(*hCscTfCand.product());
 
@@ -59,24 +48,24 @@ L1TrackFinderCandidateMatcher::init()
 void 
 L1TrackFinderCandidateMatcher::matchCSCTfCandToSimTrack(const L1MuRegionalCandCollection& cands)
 {
-  std::cout << "Match SimTrack to CSC TFCands" << std::endl;
+  if (verboseCscTfCand_) std::cout << "Match SimTrack to CSC TFCands" << std::endl;
 }
 
 void 
 L1TrackFinderCandidateMatcher::matchDTTfCandToSimTrack(const L1MuRegionalCandCollection& cands)
 {
-  std::cout << "Match SimTrack to DT TFCands" << std::endl;
+  if (verboseDtTfCand_) std::cout << "Match SimTrack to DT TFCands" << std::endl;
 }
 
 void 
 L1TrackFinderCandidateMatcher::matchRPCfTfCandToSimTrack(const L1MuRegionalCandCollection& cands)
 {
-  std::cout << "Match SimTrack to RPCf TFCands" << std::endl;
+  if (verboseRpcfTfCand_) std::cout << "Match SimTrack to RPCf TFCands" << std::endl;
 }
 
 void 
 L1TrackFinderCandidateMatcher::matchRPCbTfCandToSimTrack(const L1MuRegionalCandCollection& cands)
 {
-  std::cout << "Match SimTrack to RPCb TFCands" << std::endl;
+  if (verboseRpcbTfCand_) std::cout << "Match SimTrack to RPCb TFCands" << std::endl;
 }
 

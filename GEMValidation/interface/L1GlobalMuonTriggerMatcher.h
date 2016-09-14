@@ -19,7 +19,14 @@ class L1GlobalMuonTriggerMatcher : public BaseMatcher
 {
  public:
   /// constructor
-  L1GlobalMuonTriggerMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC);
+  L1GlobalMuonTriggerMatcher(SimHitMatcher& sh,
+                             edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandCSCInputLabel_,
+                             edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandDTInputLabel_,
+                             edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandRPCfInputLabel_,
+                             edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandRPCbInputLabel_,
+                             edm::EDGetTokenT<L1MuGMTCandCollection> gmtCandInputLabel_,
+                             edm::EDGetTokenT<l1extra::L1MuonParticleCollection> l1ExtraMuonInputLabel_
+                             );
   /// destructor
   ~L1GlobalMuonTriggerMatcher();
   
@@ -39,13 +46,6 @@ class L1GlobalMuonTriggerMatcher : public BaseMatcher
   void matchRegionalCandRPCfToSimTrack(const L1MuRegionalCandCollection&); 
   void matchGMTCandToSimTrack(const L1MuGMTCandCollection&); 
   void matchL1ExtraMuonParticleToSimTrack(const l1extra::L1MuonParticleCollection&); 
-
-  edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandCSCInputLabel_;
-  edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandDTInputLabel_;
-  edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandRPCfInputLabel_;
-  edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandRPCbInputLabel_;
-  edm::EDGetTokenT<L1MuGMTCandCollection> gmtCandInputLabel_;
-  edm::EDGetTokenT<l1extra::L1MuonParticleCollection> l1ExtraMuonInputLabel_;
 
   int verboseGmtRegCandCSC_;
   int verboseGmtRegCandDT_;

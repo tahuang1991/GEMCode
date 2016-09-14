@@ -27,7 +27,8 @@ class CSCDigiMatcher : public DigiMatcher
 {
 public:
 
-  CSCDigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC);
+  CSCDigiMatcher(SimHitMatcher& sh, edm::EDGetTokenT<CSCComparatorDigiCollection> cscComparatorDigiInput_, 
+                 edm::EDGetTokenT<CSCWireDigiCollection> cscWireDigiInput_);
   
   ~CSCDigiMatcher();
 
@@ -81,9 +82,6 @@ private:
 
   std::set<unsigned int> selectDetIds(const Id2DigiContainer &digis, int csc_type) const;
   
-  edm::EDGetTokenT<CSCComparatorDigiCollection> cscComparatorDigiInput_;
-  edm::EDGetTokenT<CSCWireDigiCollection> cscWireDigiInput_;
-
   int minBXCSCComp_, maxBXCSCComp_;
   int minBXCSCWire_, maxBXCSCWire_;
 

@@ -25,7 +25,7 @@ public:
 
   typedef std::vector<DTLocalTrigger> DTLocalTriggerContainer;
 
-  DTStubMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC);
+  DTStubMatcher(SimHitMatcher& sh, edm::EDGetTokenT<DTLocalTriggerCollection> input_);
   
   ~DTStubMatcher();
 
@@ -42,8 +42,6 @@ private:
   void matchDTLocalTriggersToSimTrack(const DTLocalTriggerCollection&);
 
   std::set<unsigned int> selectDetIds(const std::map<unsigned int, DTLocalTriggerContainer>&, int) const;
-
-  edm::EDGetTokenT<DTLocalTriggerCollection> input_;
 
   bool verbose_;
   bool run_;

@@ -2,7 +2,7 @@
 # using: 
 # Revision: 1.19 
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v 
-# with command line options: step2 --conditions auto:run2_mc -n 1 --era Phase2C1 --eventcontent FEVTDEBUGHLT -s DIGI:pdigi_valid,L1 --datatier GEN-SIM-DIGI-RAW --customise SLHCUpgradeSimulations/Configuration/combinedCustoms.cust_2023tilted --geometry Extended2023D1 --python DigiFullPU_2023tiltedPU.py --no_exec --filein file:step1.root --fileout file:step2.root
+# with command line options: step2 --conditions auto:run2_mc -n -1 --era Phase2C1 --eventcontent FEVTDEBUGHLT -s DIGI:pdigi_valid,L1 --datatier GEN-SIM-DIGI --customise SLHCUpgradeSimulations/Configuration/combinedCustoms.cust_2023tilted --geometry Extended2023D1 --python DigiFullPU_2023tiltedPU.py --no_exec --filein file:step1.root --fileout file:step2.root
 import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
@@ -56,7 +56,7 @@ process.options = cms.untracked.PSet(
 
 # Production Info
 process.configurationMetadata = cms.untracked.PSet(
-    annotation = cms.untracked.string('step2 nevts:1'),
+    annotation = cms.untracked.string('step2 nevts:-1'),
     name = cms.untracked.string('Applications'),
     version = cms.untracked.string('$Revision: 1.19 $')
 )
@@ -65,7 +65,7 @@ process.configurationMetadata = cms.untracked.PSet(
 
 process.FEVTDEBUGHLToutput = cms.OutputModule("PoolOutputModule",
     dataset = cms.untracked.PSet(
-        dataTier = cms.untracked.string('GEN-SIM-DIGI-RAW'),
+        dataTier = cms.untracked.string('GEN-SIM-DIGI'),
         filterName = cms.untracked.string('')
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(10485760),

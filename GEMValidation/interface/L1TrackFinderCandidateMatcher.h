@@ -11,9 +11,13 @@ class L1TrackFinderCandidateMatcher : public BaseMatcher
 {
  public:
   /// constructor
-  L1TrackFinderCandidateMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC);
+  L1TrackFinderCandidateMatcher(SimHitMatcher& sh,
+                                edm::EDGetTokenT<L1MuRegionalCandCollection> cscTfCandInputLabel_, 
+                                edm::EDGetTokenT<L1MuRegionalCandCollection> dtTfCandInputLabel_, 
+                                edm::EDGetTokenT<L1MuRegionalCandCollection> rpcfTfCandInputLabel_, 
+                                edm::EDGetTokenT<L1MuRegionalCandCollection> rpcbTfCandInputLabel_);
   /// destructor
-  ~L1TrackFinderCandidateMatcher();
+  ~L1TrackFinderCandidateMatcher() {}
   
  private:
   

@@ -4,12 +4,11 @@
 using namespace std;
 using namespace matching;
 
-GEMRecHitMatcher::GEMRecHitMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
-  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup(), iC)
+GEMRecHitMatcher::GEMRecHitMatcher(SimHitMatcher& sh, edm::EDGetTokenT<GEMRecHitCollection> gemRecHitInput_)
+  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
   , simhit_matcher_(&sh)
 {
   auto gemRecHit_= conf().getParameter<edm::ParameterSet>("gemRecHit");
-  gemRecHitInput_ = iC.consumes<GEMRecHitCollection>(gemRecHit_.getParameter<edm::InputTag>("validInputTags"));
   minBXGEM_ = gemRecHit_.getParameter<int>("minBX");
   maxBXGEM_ = gemRecHit_.getParameter<int>("maxBX");
   matchDeltaStrip_ = gemRecHit_.getParameter<int>("matchDeltaStrip");

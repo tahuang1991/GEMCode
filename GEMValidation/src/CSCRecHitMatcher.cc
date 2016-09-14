@@ -4,19 +4,19 @@
 using namespace std;
 
 
-CSCRecHitMatcher::CSCRecHitMatcher(SimHitMatcher& sh, edm::ConsumesCollector &iC)
-  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup(), iC)
+CSCRecHitMatcher::CSCRecHitMatcher(SimHitMatcher& sh, 
+                                   edm::EDGetTokenT<CSCRecHit2DCollection> cscRecHit2DInput_, 
+                                   edm::EDGetTokenT<CSCSegmentCollection> cscSegmentInput_)
+  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
   , simhit_matcher_(&sh)
 {
   auto cscRecHit2D = conf().getParameter<edm::ParameterSet>("cscRecHit");
-  cscRecHit2DInput_ = iC.consumes<CSCRecHit2DCollection>(cscRecHit2D.getParameter<edm::InputTag>("validInputTags"));
   maxBXCSCRecHit2D_ = cscRecHit2D.getParameter<int>("maxBX");
   minBXCSCRecHit2D_ = cscRecHit2D.getParameter<int>("minBX");
   verboseCSCRecHit2D_ = cscRecHit2D.getParameter<int>("verbose");
   runCSCRecHit2D_ = cscRecHit2D.getParameter<bool>("run");
 
   auto cscSegment2D = conf().getParameter<edm::ParameterSet>("cscSegment");
-  cscSegmentInput_ = iC.consumes<CSCSegmentCollection>(cscSegment2D.getParameter<edm::InputTag>("validInputTags"));
   maxBXCSCSegment_ = cscSegment2D.getParameter<int>("maxBX");
   minBXCSCSegment_ = cscSegment2D.getParameter<int>("minBX");
   verboseCSCSegment_ = cscSegment2D.getParameter<int>("verbose");
