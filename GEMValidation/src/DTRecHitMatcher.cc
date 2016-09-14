@@ -4,8 +4,8 @@
 using namespace std;
 
 
-DTRecHitMatcher::DTRecHitMatcher(SimHitMatcher& sh, edm::ConsumesCollector && iC)
-  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
+DTRecHitMatcher::DTRecHitMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
+  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup(), iC)
   , simhit_matcher_(&sh)
 {
   auto dtRecHit1DPair = conf().getParameter<edm::ParameterSet>("dtRecHit");

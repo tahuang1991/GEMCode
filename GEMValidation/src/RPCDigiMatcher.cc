@@ -5,8 +5,8 @@ using namespace std;
 using namespace matching;
 
 
-RPCDigiMatcher::RPCDigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector && iC)
-: DigiMatcher(sh)
+RPCDigiMatcher::RPCDigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
+  : DigiMatcher(sh, iC)
 {
   auto rpcDigi_= conf().getParameter<edm::ParameterSet>("rpcStripDigi");
   rpcDigiInput_ = iC.consumes<RPCDigiCollection>(rpcDigi_.getParameter<edm::InputTag>("validInputTags"));

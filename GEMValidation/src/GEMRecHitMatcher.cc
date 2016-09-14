@@ -4,8 +4,8 @@
 using namespace std;
 using namespace matching;
 
-GEMRecHitMatcher::GEMRecHitMatcher(SimHitMatcher& sh, edm::ConsumesCollector && iC)
-  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
+GEMRecHitMatcher::GEMRecHitMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
+  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup(), iC)
   , simhit_matcher_(&sh)
 {
   auto gemRecHit_= conf().getParameter<edm::ParameterSet>("gemRecHit");

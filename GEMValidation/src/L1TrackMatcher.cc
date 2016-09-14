@@ -5,46 +5,46 @@
 #include "TLorentzVector.h"
 #include <map>
 
-L1TrackMatcher::L1TrackMatcher(CSCStubMatcher& csc, DTDigiMatcher& dt, RPCDigiMatcher& rpc)
-: BaseMatcher(csc.trk(), csc.vtx(), csc.conf(), csc.event(), csc.eventSetup())
+L1TrackMatcher::L1TrackMatcher(CSCStubMatcher& csc, DTDigiMatcher& dt, RPCDigiMatcher& rpc, edm::ConsumesCollector & iC)
+  : BaseMatcher(csc.trk(), csc.vtx(), csc.conf(), csc.event(), csc.eventSetup(), iC)
 , csc_stub_matcher_(&csc)
 , dt_digi_matcher_(&dt)
 , rpc_digi_matcher_(&rpc)                 
 {
   auto tfTrack = conf().getParameter<edm::ParameterSet>("cscTfTrack");
-  cscTfTrackInputLabel_ = tfTrack.getParameter<edm::InputTag>("validInputTags");
+  cscTfTrackInputLabel_ = iC.consumes<L1CSCTrackCollection>(tfTrack.getParameter<edm::InputTag>("validInputTags"));
   minBXTFTrack_ = tfTrack.getParameter<int>("minBX");
   maxBXTFTrack_ = tfTrack.getParameter<int>("minBX");
   verboseTFTrack_ = tfTrack.getParameter<int>("verbose");
   deltaRTFTrack_ = tfTrack.getParameter<double>("deltaR");
   
   auto tfCand = conf().getParameter<edm::ParameterSet>("cscTfCand");
-  cscTfCandInputLabel_ = tfCand.getParameter<edm::InputTag>("validInputTags");
+  cscTfCandInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(tfCand.getParameter<edm::InputTag>("validInputTags"));
   minBXTFCand_ = tfCand.getParameter<int>("minBX");
   maxBXTFCand_ = tfCand.getParameter<int>("minBX");
   verboseTFCand_ = tfCand.getParameter<int>("verbose");
   deltaRTFCand_ = tfCand.getParameter<double>("deltaR");
   
-  auto gmtRegCand = conf().getParameter<edm::ParameterSet>("gmtRegCand");
-  gmtRegCandInputLabel_ = gmtRegCand.getParameter<edm::InputTag>("validInputTags");
-  minBXGMTRegCand_ = gmtRegCand.getParameter<int>("minBX");
-  maxBXGMTRegCand_ = gmtRegCand.getParameter<int>("minBX");
-  verboseGMTRegCand_ = gmtRegCand.getParameter<int>("verbose");
-  deltaRGMTRegCand_ = gmtRegCand.getParameter<double>("deltaR");
+  // auto gmtRegCand = conf().getParameter<edm::ParameterSet>("gmtRegCand");
+  // gmtRegCandInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(gmtRegCand.getParameter<edm::InputTag>("validInputTags"));
+  // minBXGMTRegCand_ = gmtRegCand.getParameter<int>("minBX");
+  // maxBXGMTRegCand_ = gmtRegCand.getParameter<int>("minBX");
+  // verboseGMTRegCand_ = gmtRegCand.getParameter<int>("verbose");
+  // deltaRGMTRegCand_ = gmtRegCand.getParameter<double>("deltaR");
   
-  auto gmtCand = conf().getParameter<edm::ParameterSet>("gmtCand");
-  gmtCandInputLabel_ = gmtCand.getParameter<edm::InputTag>("validInputTags");
-  minBXGMTCand_ = gmtCand.getParameter<int>("minBX");
-  maxBXGMTCand_ = gmtCand.getParameter<int>("minBX");
-  verboseGMTCand_ = gmtCand.getParameter<int>("verbose");
-  deltaRGMTCand_ = gmtCand.getParameter<double>("deltaR");
+  // auto gmtCand = conf().getParameter<edm::ParameterSet>("gmtCand");
+  // gmtCandInputLabel_ = iC.consumes<L1MuGMTCandCollection>(gmtCand.getParameter<edm::InputTag>("validInputTags"));
+  // minBXGMTCand_ = gmtCand.getParameter<int>("minBX");
+  // maxBXGMTCand_ = gmtCand.getParameter<int>("minBX");
+  // verboseGMTCand_ = gmtCand.getParameter<int>("verbose");
+  // deltaRGMTCand_ = gmtCand.getParameter<double>("deltaR");
   
-  auto l1Extra = conf().getParameter<edm::ParameterSet>("l1Extra");
-  l1ExtraInputLabel_ = l1Extra.getParameter<edm::InputTag>("validInputTags");
-  minBXL1Extra_ = l1Extra.getParameter<int>("minBX");
-  maxBXL1Extra_ = l1Extra.getParameter<int>("minBX");
-  verboseL1Extra_ = l1Extra.getParameter<int>("verbose");
-  deltaRL1Extra_ = l1Extra.getParameter<double>("deltaR");
+  // auto l1Extra = conf().getParameter<edm::ParameterSet>("l1Extra");
+  // l1ExtraInputLabel_ = iC.consumes<l1extra::L1MuonParticleCollection>(l1Extra.getParameter<edm::InputTag>("validInputTags"));
+  // minBXL1Extra_ = l1Extra.getParameter<int>("minBX");
+  // maxBXL1Extra_ = l1Extra.getParameter<int>("minBX");
+  // verboseL1Extra_ = l1Extra.getParameter<int>("verbose");
+  // deltaRL1Extra_ = l1Extra.getParameter<double>("deltaR");
 
   CSCTFSPset_ = conf().getParameter<edm::ParameterSet>("sectorProcessor");
   ptLUTset_ = CSCTFSPset_.getParameter<edm::ParameterSet>("PTLUT");

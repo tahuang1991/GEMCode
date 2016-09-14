@@ -20,7 +20,7 @@ class L1BaseMatcher : public BaseMatcher
 {
  public:
   /// constructor
-  L1BaseMatcher(SimHitMatcher& sh);
+  L1BaseMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC);
   /// destructor
   ~L1BaseMatcher();
 

@@ -25,7 +25,7 @@ public:
 
   typedef std::vector<DTLocalTrigger> DTLocalTriggerContainer;
 
-  DTStubMatcher(SimHitMatcher& sh, edm::ConsumesCollector && iC);
+  DTStubMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC);
   
   ~DTStubMatcher();
 

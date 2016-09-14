@@ -28,7 +28,7 @@ class GEMDigiMatcher : public DigiMatcher
 {
 public:
 
-  GEMDigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector && iC);
+  GEMDigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC);
   
   ~GEMDigiMatcher();
 

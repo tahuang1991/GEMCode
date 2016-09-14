@@ -32,7 +32,7 @@ public:
                 const edm::ParameterSet& ps, 
                 const edm::Event& ev, 
                 const edm::EventSetup& es, 
-                edm::ConsumesCollector && iC);
+                edm::ConsumesCollector& iC);
   
   ~SimHitMatcher();
 

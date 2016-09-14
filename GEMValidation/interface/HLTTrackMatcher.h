@@ -26,7 +26,7 @@ class HLTTrackMatcher : public BaseMatcher
  public:
   /// constructor
   HLTTrackMatcher(CSCRecHitMatcher&, DTRecHitMatcher&, 
-		  RPCRecHitMatcher&, GEMRecHitMatcher&);
+                  RPCRecHitMatcher&, GEMRecHitMatcher&,  edm::ConsumesCollector & iC);
   /// destructor
   ~HLTTrackMatcher();
 
@@ -51,9 +51,9 @@ class HLTTrackMatcher : public BaseMatcher
   const RPCRecHitMatcher* rpc_rechit_matcher_;
   const CSCRecHitMatcher* csc_rechit_matcher_;
 
-  std::vector<edm::InputTag> recoTrackExtraInputLabel_;
-  std::vector<edm::InputTag> recoTrackInputLabel_;
-  std::vector<edm::InputTag> recoChargedCandidateInputLabel_;
+  edm::EDGetTokenT<reco::TrackExtraCollection> recoTrackExtraInputLabel_;
+  edm::EDGetTokenT<reco::TrackCollection> recoTrackInputLabel_;
+  edm::EDGetTokenT<reco::RecoChargedCandidateCollection> recoChargedCandidateInputLabel_;
 
   int minBXRecoTrackExtra_, maxBXRecoTrackExtra_;
   int verboseRecoTrackExtra_;

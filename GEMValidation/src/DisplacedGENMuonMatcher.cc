@@ -1,11 +1,15 @@
 #include "GEMCode/GEMValidation/interface/DisplacedGENMuonMatcher.h"
 
-DisplacedGENMuonMatcher::DisplacedGENMuonMatcher(const SimTrack& t, const SimVertex& v,
-      const edm::ParameterSet& ps, const edm::Event& ev, const edm::EventSetup& es)
-: BaseMatcher(t, v, ps, ev, es)
+DisplacedGENMuonMatcher::DisplacedGENMuonMatcher(const SimTrack& t, 
+                                                 const SimVertex& v,
+                                                 const edm::ParameterSet& ps, 
+                                                 const edm::Event& ev, 
+                                                 const edm::EventSetup& es,
+                                                 edm::ConsumesCollector & iC)
+  : BaseMatcher(t, v, ps, ev, es, iC)
 {
-  edm::Handle<reco::GenParticleCollection> genParticles;
-  ev.getByToken("genParticles", genParticles);
+  inputToken_ = iC.consumes<reco::GenParticleCollection>(edm::InputTag("genParticles"));
+  ev.getByToken(inputToken_, genParticles);
   matchDisplacedGENMuonMatcherToSimTrack(*genParticles.product());
   //  if(gemvalidation::getByToken("genParticles", genParticles, event())) return;//
 }

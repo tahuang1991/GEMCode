@@ -24,7 +24,7 @@ public:
 
   typedef std::map<unsigned int, DigiContainer> Id2DigiContainer;
 
-  DigiMatcher(SimHitMatcher& sh);
+  DigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC);
   
   ~DigiMatcher();
 

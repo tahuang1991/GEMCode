@@ -32,7 +32,7 @@ public:
   typedef std::vector<RPCRecHit> RPCRecHitContainer;
 
 
-  RPCRecHitMatcher(SimHitMatcher& sh, edm::ConsumesCollector && iC);
+  RPCRecHitMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC);
   
   ~RPCRecHitMatcher();
 

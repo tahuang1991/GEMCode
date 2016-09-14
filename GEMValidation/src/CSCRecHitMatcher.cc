@@ -4,8 +4,8 @@
 using namespace std;
 
 
-CSCRecHitMatcher::CSCRecHitMatcher(SimHitMatcher& sh, edm::ConsumesCollector && iC)
-  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
+CSCRecHitMatcher::CSCRecHitMatcher(SimHitMatcher& sh, edm::ConsumesCollector &iC)
+  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup(), iC)
   , simhit_matcher_(&sh)
 {
   auto cscRecHit2D = conf().getParameter<edm::ParameterSet>("cscRecHit");

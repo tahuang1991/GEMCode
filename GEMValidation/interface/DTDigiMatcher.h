@@ -25,7 +25,7 @@ public:
 
   typedef std::vector<DTDigi> DTDigiContainer;
 
-  DTDigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector && iC);
+  DTDigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC);
   
   ~DTDigiMatcher();
 

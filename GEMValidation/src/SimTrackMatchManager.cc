@@ -22,10 +22,10 @@ SimTrackMatchManager::SimTrackMatchManager(const SimTrack& t,
 , dt_stubs_(simhits_, iC)
 , dt_rechits_(simhits_, iC)
   //, l1_tracks_(csc_stubs_, dt_digis_, rpc_digis_)
-, l1_tf_tracks_(simhits_)
-, l1_tf_cands_(simhits_)
-, l1_gmt_cands_(simhits_)
-, hlt_tracks_(csc_rechits_, dt_rechits_, rpc_rechits_, gem_rechits_)
+, l1_tf_tracks_(simhits_, iC)
+, l1_tf_cands_(simhits_, iC)
+, l1_gmt_cands_(simhits_, iC)
+, hlt_tracks_(csc_rechits_, dt_rechits_, rpc_rechits_, gem_rechits_, iC)
 {
   //  std::cout <<"Constructing new SimTrackMatchManager" << std::endl;
 }

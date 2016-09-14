@@ -10,7 +10,7 @@ class L1TrackFinderTrackMatcher : public BaseMatcher
 {
  public:
   /// constructor
-  L1TrackFinderTrackMatcher(SimHitMatcher& sh);
+  L1TrackFinderTrackMatcher(SimHitMatcher& sh,edm::ConsumesCollector & iC);
   /// destructor
   ~L1TrackFinderTrackMatcher();
   
@@ -23,9 +23,9 @@ class L1TrackFinderTrackMatcher : public BaseMatcher
   void matchDTTfTrackToSimTrack(const L1CSCTrackCollection&);
   void matchRPCTfTrackToSimTrack(const L1CSCTrackCollection&);
 
-  std::vector<edm::InputTag> cscTfTrackInputLabel_;
-  std::vector<edm::InputTag> dtTfTrackInputLabel_;
-  std::vector<edm::InputTag> rpcTfTrackInputLabel_;
+  edm::EDGetTokenT<L1CSCTrackCollection> cscTfTrackInputLabel_;
+  edm::EDGetTokenT<L1CSCTrackCollection> dtTfTrackInputLabel_;
+  edm::EDGetTokenT<L1CSCTrackCollection> rpcTfTrackInputLabel_;
 
   int verboseCscTfTrack_;
   int verboseDtTfTrack_;

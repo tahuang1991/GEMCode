@@ -7,8 +7,8 @@ using namespace std;
 using namespace matching;
 
 
-CSCStubMatcher::CSCStubMatcher(SimHitMatcher& sh, CSCDigiMatcher& dg, GEMDigiMatcher& gem_dg, RPCDigiMatcher& rpc_dg, edm::ConsumesCollector && iC)
-: DigiMatcher(sh)
+CSCStubMatcher::CSCStubMatcher(SimHitMatcher& sh, CSCDigiMatcher& dg, GEMDigiMatcher& gem_dg, RPCDigiMatcher& rpc_dg, edm::ConsumesCollector & iC)
+  : DigiMatcher(sh, iC)
 , digi_matcher_(&dg)
 , gem_digi_matcher_(&gem_dg)
 , rpc_digi_matcher_(&rpc_dg)

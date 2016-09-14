@@ -1,17 +1,17 @@
 #include "GEMCode/GEMValidation/interface/L1TrackFinderCandidateMatcher.h"
 
-L1TrackFinderCandidateMatcher::L1TrackFinderCandidateMatcher(SimHitMatcher& sh)
-: BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
+L1TrackFinderCandidateMatcher::L1TrackFinderCandidateMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
+  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup(), iC)
 {
   auto cscTfCand = conf().getParameter<edm::ParameterSet>("cscTfCand");
   auto dtTfCand = conf().getParameter<edm::ParameterSet>("dtTfCand");
   auto rpcfTfCand = conf().getParameter<edm::ParameterSet>("rpcfTfCand");
   auto rpcbTfCand = conf().getParameter<edm::ParameterSet>("rpcbTfCand");
 
-  cscTfCandInputLabel_ = cscTfCand.getParameter<edm::InputTag>("validInputTags");
-  dtTfCandInputLabel_ = dtTfCand.getParameter<edm::InputTag>("validInputTags");
-  rpcfTfCandInputLabel_ = rpcfTfCand.getParameter<edm::InputTag>("validInputTags");
-  rpcbTfCandInputLabel_ = rpcbTfCand.getParameter<edm::InputTag>("validInputTags");
+  cscTfCandInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(cscTfCand.getParameter<edm::InputTag>("validInputTags"));
+  dtTfCandInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(dtTfCand.getParameter<edm::InputTag>("validInputTags"));
+  rpcfTfCandInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(rpcfTfCand.getParameter<edm::InputTag>("validInputTags"));
+  rpcbTfCandInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(rpcbTfCand.getParameter<edm::InputTag>("validInputTags"));
   
   verboseCscTfCand_ = cscTfCand.getParameter<int>("verbose");
   verboseDtTfCand_ = dtTfCand.getParameter<int>("verbose");

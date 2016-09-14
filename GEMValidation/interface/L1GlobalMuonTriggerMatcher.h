@@ -19,7 +19,7 @@ class L1GlobalMuonTriggerMatcher : public BaseMatcher
 {
  public:
   /// constructor
-  L1GlobalMuonTriggerMatcher(SimHitMatcher& sh);
+  L1GlobalMuonTriggerMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC);
   /// destructor
   ~L1GlobalMuonTriggerMatcher();
   
@@ -40,12 +40,12 @@ class L1GlobalMuonTriggerMatcher : public BaseMatcher
   void matchGMTCandToSimTrack(const L1MuGMTCandCollection&); 
   void matchL1ExtraMuonParticleToSimTrack(const l1extra::L1MuonParticleCollection&); 
 
-  std::vector<edm::InputTag> gmtRegCandCSCInputLabel_;
-  std::vector<edm::InputTag> gmtRegCandDTInputLabel_;
-  std::vector<edm::InputTag> gmtRegCandRPCfInputLabel_;
-  std::vector<edm::InputTag> gmtRegCandRPCbInputLabel_;
-  std::vector<edm::InputTag> gmtCandInputLabel_;
-  std::vector<edm::InputTag> l1ExtraMuonInputLabel_;
+  edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandCSCInputLabel_;
+  edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandDTInputLabel_;
+  edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandRPCfInputLabel_;
+  edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandRPCbInputLabel_;
+  edm::EDGetTokenT<L1MuGMTCandCollection> gmtCandInputLabel_;
+  edm::EDGetTokenT<l1extra::L1MuonParticleCollection> l1ExtraMuonInputLabel_;
 
   int verboseGmtRegCandCSC_;
   int verboseGmtRegCandDT_;

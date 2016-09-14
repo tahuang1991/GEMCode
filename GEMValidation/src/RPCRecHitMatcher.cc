@@ -4,8 +4,8 @@
 using namespace std;
 using namespace matching;
 
-RPCRecHitMatcher::RPCRecHitMatcher(SimHitMatcher& sh, edm::ConsumesCollector && iC)
-  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
+RPCRecHitMatcher::RPCRecHitMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
+  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup(), iC)
   , simhit_matcher_(&sh)
 {
   auto rpcRecHit_= conf().getParameter<edm::ParameterSet>("rpcRecHit");

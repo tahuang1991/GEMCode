@@ -4,8 +4,8 @@
 using namespace std;
 using namespace matching;
 
-GEMDigiMatcher::GEMDigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector && iC)
-: DigiMatcher(sh)
+GEMDigiMatcher::GEMDigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
+  : DigiMatcher(sh, iC)
 {
   auto gemDigi_= conf().getParameter<edm::ParameterSet>("gemStripDigi");
   gemDigiInput_ = iC.consumes<GEMDigiCollection>(gemDigi_.getParameter<edm::InputTag>("validInputTags"));

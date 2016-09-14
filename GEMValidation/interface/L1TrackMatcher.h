@@ -45,7 +45,7 @@ class L1TrackMatcher : public BaseMatcher
 {
  public:
   /// constructor
-  L1TrackMatcher(CSCStubMatcher&, DTDigiMatcher&, RPCDigiMatcher&);
+  L1TrackMatcher(CSCStubMatcher&, DTDigiMatcher&, RPCDigiMatcher&,  edm::ConsumesCollector & iC);
   /// destructor
   ~L1TrackMatcher();
   
@@ -93,11 +93,11 @@ class L1TrackMatcher : public BaseMatcher
   const DTDigiMatcher* dt_digi_matcher_; 
   const RPCDigiMatcher* rpc_digi_matcher_; 
 
-  std::vector<edm::InputTag> cscTfTrackInputLabel_; 
-  std::vector<edm::InputTag> cscTfCandInputLabel_; 
-  std::vector<edm::InputTag> gmtRegCandInputLabel_; 
-  std::vector<edm::InputTag> gmtCandInputLabel_; 
-  std::vector<edm::InputTag> l1ExtraInputLabel_; 
+  edm::EDGetTokenT<L1CSCTrackCollection> cscTfTrackInputLabel_; 
+  edm::EDGetTokenT<L1MuRegionalCandCollection> cscTfCandInputLabel_; 
+  /* edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandInputLabel_;  */
+  /* edm::EDGetTokenT<L1MuGMTCandCollection> gmtCandInputLabel_;  */
+  /* edm::EDGetTokenT<l1extra::L1MuonParticleCollection> l1ExtraInputLabel_;  */
   
   int minBXTFTrack_, maxBXTFTrack_; 
   int minBXTFCand_, maxBXTFCand_; 

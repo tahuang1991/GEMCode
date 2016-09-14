@@ -5,8 +5,8 @@ using namespace std;
 using namespace matching;
 
 
-CSCDigiMatcher::CSCDigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector && iC)
-: DigiMatcher(sh)
+CSCDigiMatcher::CSCDigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
+  : DigiMatcher(sh, iC)
 {
   auto cscWireDigi_ = conf().getParameter<edm::ParameterSet>("cscWireDigi");
   cscWireDigiInput_ = iC.consumes<CSCWireDigiCollection>(cscWireDigi_.getParameter<edm::InputTag>("validInputTags"));

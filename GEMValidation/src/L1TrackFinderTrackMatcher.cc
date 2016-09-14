@@ -1,15 +1,15 @@
 #include "GEMCode/GEMValidation/interface/L1TrackFinderTrackMatcher.h"
 
-L1TrackFinderTrackMatcher::L1TrackFinderTrackMatcher(SimHitMatcher& sh)
-: BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
+L1TrackFinderTrackMatcher::L1TrackFinderTrackMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
+  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup(), iC)
 {
   auto cscTfTrack = conf().getParameter<edm::ParameterSet>("cscTfTrack");
   auto dtTfTrack = conf().getParameter<edm::ParameterSet>("dtTfTrack");
   auto rpcTfTrack = conf().getParameter<edm::ParameterSet>("rpcTfTrack");
 
-  cscTfTrackInputLabel_ = cscTfTrack.getParameter<edm::InputTag>("validInputTags");
-  dtTfTrackInputLabel_ = dtTfTrack.getParameter<edm::InputTag>("validInputTags");
-  rpcTfTrackInputLabel_ = rpcTfTrack.getParameter<edm::InputTag>("validInputTags");
+  cscTfTrackInputLabel_ = iC.consumes<L1CSCTrackCollection>(cscTfTrack.getParameter<edm::InputTag>("validInputTags"));
+  dtTfTrackInputLabel_ = iC.consumes<L1CSCTrackCollection>(dtTfTrack.getParameter<edm::InputTag>("validInputTags"));
+  rpcTfTrackInputLabel_ = iC.consumes<L1CSCTrackCollection>(rpcTfTrack.getParameter<edm::InputTag>("validInputTags"));
   
   verboseCscTfTrack_ = cscTfTrack.getParameter<int>("verbose");
   verboseDtTfTrack_ = dtTfTrack.getParameter<int>("verbose");

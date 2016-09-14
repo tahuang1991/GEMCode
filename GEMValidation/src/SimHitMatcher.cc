@@ -11,8 +11,8 @@ SimHitMatcher::SimHitMatcher(const SimTrack& t,
                              const edm::ParameterSet& ps, 
                              const edm::Event& ev, 
                              const edm::EventSetup& es,
-                             edm::ConsumesCollector && iC)
-: BaseMatcher(t, v, ps, ev, es)
+                             edm::ConsumesCollector & iC)
+  : BaseMatcher(t, v, ps, ev, es, iC)
 {
   auto gemSimHit_ = conf().getParameter<edm::ParameterSet>("gemSimHit");
   verboseGEM_ = gemSimHit_.getParameter<int>("verbose");

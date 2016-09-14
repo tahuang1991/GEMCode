@@ -25,7 +25,7 @@ class ME0DigiMatcher : public DigiMatcher
 {
 public:
 
-  ME0DigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector && iC);
+  ME0DigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC);
   
   ~ME0DigiMatcher();
 

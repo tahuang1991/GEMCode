@@ -4,8 +4,8 @@
 
 using namespace std;
 
-L1GlobalMuonTriggerMatcher::L1GlobalMuonTriggerMatcher(SimHitMatcher& sh)
-: BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
+L1GlobalMuonTriggerMatcher::L1GlobalMuonTriggerMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
+  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup(), iC)
 , simhit_matcher_(&sh)
 {
   auto gmtRegCandCSC = conf().getParameter<edm::ParameterSet>("gmtRegCandCSC");
@@ -15,13 +15,13 @@ L1GlobalMuonTriggerMatcher::L1GlobalMuonTriggerMatcher(SimHitMatcher& sh)
   auto gmtCand = conf().getParameter<edm::ParameterSet>("gmtCand");
   auto l1ExtraMuonParticle = conf().getParameter<edm::ParameterSet>("l1ExtraMuonParticle");
 
-  gmtRegCandCSCInputLabel_ = gmtRegCandCSC.getParameter<edm::InputTag>("validInputTags");
-  gmtRegCandDTInputLabel_ = gmtRegCandDT.getParameter<edm::InputTag>("validInputTags");
-  gmtRegCandRPCfInputLabel_ = gmtRegCandRPCf.getParameter<edm::InputTag>("validInputTags");
-  gmtRegCandRPCbInputLabel_ = gmtRegCandRPCb.getParameter<edm::InputTag>("validInputTags");
-  gmtCandInputLabel_ = gmtCand.getParameter<edm::InputTag>("validInputTags");
-  l1ExtraMuonInputLabel_ = l1ExtraMuonParticle.getParameter<edm::InputTag>("validInputTags");
-
+  gmtRegCandCSCInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(gmtRegCandCSC.getParameter<edm::InputTag>("validInputTags"));
+  gmtRegCandDTInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(gmtRegCandDT.getParameter<edm::InputTag>("validInputTags"));
+  gmtRegCandRPCfInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(gmtRegCandRPCf.getParameter<edm::InputTag>("validInputTags"));
+  gmtRegCandRPCbInputLabel_ = iC.consumes<L1MuRegionalCandCollection>(gmtRegCandRPCb.getParameter<edm::InputTag>("validInputTags"));
+  gmtCandInputLabel_ = iC.consumes<L1MuGMTCandCollection>(gmtCand.getParameter<edm::InputTag>("validInputTags"));
+  l1ExtraMuonInputLabel_ = iC.consumes<l1extra::L1MuonParticleCollection>(l1ExtraMuonParticle.getParameter<edm::InputTag>("validInputTags"));
+  
   verboseGmtRegCandCSC_ = gmtRegCandCSC.getParameter<int>("verbose");
   verboseGmtRegCandDT_ = gmtRegCandDT.getParameter<int>("verbose");
   verboseGmtRegCandRPCf_ = gmtRegCandRPCf.getParameter<int>("verbose");

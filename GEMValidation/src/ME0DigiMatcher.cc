@@ -4,8 +4,8 @@
 using namespace std;
 using namespace matching;
 
-ME0DigiMatcher::ME0DigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector && iC)
-: DigiMatcher(sh)
+ME0DigiMatcher::ME0DigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
+  : DigiMatcher(sh, iC)
 {
   auto me0Digi_= conf().getParameter<edm::ParameterSet>("me0DigiPreReco");
   me0DigiInput_ = iC.consumes<ME0DigiPreRecoCollection>(me0Digi_.getParameter<edm::InputTag>("validInputTags"));

@@ -27,7 +27,7 @@ class CSCDigiMatcher : public DigiMatcher
 {
 public:
 
-  CSCDigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector && iC);
+  CSCDigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC);
   
   ~CSCDigiMatcher();
 
