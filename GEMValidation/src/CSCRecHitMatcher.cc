@@ -5,8 +5,8 @@ using namespace std;
 
 
 CSCRecHitMatcher::CSCRecHitMatcher(SimHitMatcher& sh, 
-                                   edm::EDGetTokenT<CSCRecHit2DCollection> cscRecHit2DInput_, 
-                                   edm::EDGetTokenT<CSCSegmentCollection> cscSegmentInput_)
+                                   edm::EDGetTokenT<CSCRecHit2DCollection>& cscRecHit2DInput_, 
+                                   edm::EDGetTokenT<CSCSegmentCollection>& cscSegmentInput_)
   : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
   , simhit_matcher_(&sh)
 {

@@ -25,7 +25,7 @@ public:
 
   typedef std::vector<RPCDigi> RPCDigiContainer;
 
-  RPCDigiMatcher(SimHitMatcher& sh, edm::EDGetTokenT<RPCDigiCollection> rpcDigiInput_);
+  RPCDigiMatcher(SimHitMatcher& sh, edm::EDGetTokenT<RPCDigiCollection>& rpcDigiInput_);
   
   ~RPCDigiMatcher();
 

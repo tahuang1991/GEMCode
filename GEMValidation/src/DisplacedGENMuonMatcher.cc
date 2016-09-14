@@ -5,7 +5,7 @@ DisplacedGENMuonMatcher::DisplacedGENMuonMatcher(const SimTrack& t,
                                                  const edm::ParameterSet& ps, 
                                                  const edm::Event& ev, 
                                                  const edm::EventSetup& es,
-                                                 edm::EDGetTokenT<reco::GenParticleCollection> inputToken_)
+                                                 edm::EDGetTokenT<reco::GenParticleCollection>& inputToken_)
   : BaseMatcher(t, v, ps, ev, es)
 {
   ev.getByToken(inputToken_, genParticles);

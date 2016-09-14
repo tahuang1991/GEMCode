@@ -6,8 +6,8 @@ using namespace matching;
 
 
 CSCDigiMatcher::CSCDigiMatcher(SimHitMatcher& sh, 
-                               edm::EDGetTokenT<CSCComparatorDigiCollection> cscComparatorDigiInput_, 
-                               edm::EDGetTokenT<CSCWireDigiCollection> cscWireDigiInput_)
+                               edm::EDGetTokenT<CSCComparatorDigiCollection>& cscComparatorDigiInput_, 
+                               edm::EDGetTokenT<CSCWireDigiCollection>& cscWireDigiInput_)
   : DigiMatcher(sh)
 {
   auto cscWireDigi_ = conf().getParameter<edm::ParameterSet>("cscWireDigi");

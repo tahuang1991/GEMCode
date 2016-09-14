@@ -28,7 +28,7 @@ public:
                           const edm::ParameterSet& ps, 
                           const edm::Event& ev, 
                           const edm::EventSetup& es,
-                          edm::EDGetTokenT<reco::GenParticleCollection> inputToken_);
+                          edm::EDGetTokenT<reco::GenParticleCollection>& inputToken_);
   
   ~DisplacedGENMuonMatcher();
 

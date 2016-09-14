@@ -4,7 +4,7 @@
 using namespace std;
 using namespace matching;
 
-GEMRecHitMatcher::GEMRecHitMatcher(SimHitMatcher& sh, edm::EDGetTokenT<GEMRecHitCollection> gemRecHitInput_)
+GEMRecHitMatcher::GEMRecHitMatcher(SimHitMatcher& sh, edm::EDGetTokenT<GEMRecHitCollection> &gemRecHitInput_)
   : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
   , simhit_matcher_(&sh)
 {

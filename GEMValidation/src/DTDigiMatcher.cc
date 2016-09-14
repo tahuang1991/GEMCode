@@ -6,7 +6,7 @@ using namespace matching;
 
 #include "DataFormats/MuonDetId/interface/DTWireId.h"
 
-DTDigiMatcher::DTDigiMatcher(SimHitMatcher& sh, edm::EDGetTokenT<DTDigiCollection> dtDigiInput_)
+DTDigiMatcher::DTDigiMatcher(SimHitMatcher& sh, edm::EDGetTokenT<DTDigiCollection>& dtDigiInput_)
   : DigiMatcher(sh)
 {
   auto dtDigi_= conf().getParameter<edm::ParameterSet>("dtDigi");

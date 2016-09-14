@@ -29,9 +29,9 @@ class GEMDigiMatcher : public DigiMatcher
 public:
 
   GEMDigiMatcher(SimHitMatcher& sh, 
-                 edm::EDGetTokenT<GEMDigiCollection> gemDigiInput_, 
-                 edm::EDGetTokenT<GEMPadDigiCollection> gemPadDigiInput_, 
-                 edm::EDGetTokenT<GEMCoPadDigiCollection> gemCoPadDigiInput_);
+                 edm::EDGetTokenT<GEMDigiCollection>& gemDigiInput_, 
+                 edm::EDGetTokenT<GEMPadDigiCollection>& gemPadDigiInput_, 
+                 edm::EDGetTokenT<GEMCoPadDigiCollection>& gemCoPadDigiInput_);
   
   ~GEMDigiMatcher();
 

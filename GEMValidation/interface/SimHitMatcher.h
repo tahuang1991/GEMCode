@@ -32,13 +32,13 @@ public:
                 const edm::ParameterSet& ps, 
                 const edm::Event& ev, 
                 const edm::EventSetup& es, 
-                edm::EDGetTokenT<edm::SimVertexContainer> simVertexInput_,
-                edm::EDGetTokenT<edm::SimTrackContainer> simTrackInput_,
-                edm::EDGetTokenT<edm::PSimHitContainer> gemSimHitInput_,
-                edm::EDGetTokenT<edm::PSimHitContainer> cscSimHitInput_,
-                edm::EDGetTokenT<edm::PSimHitContainer> rpcSimHitInput_,
-                edm::EDGetTokenT<edm::PSimHitContainer> me0SimHitInput_,
-                edm::EDGetTokenT<edm::PSimHitContainer> dtSimHitInput_
+                edm::EDGetTokenT<edm::SimVertexContainer>& simVertexInput_,
+                edm::EDGetTokenT<edm::SimTrackContainer>& simTrackInput_,
+                edm::EDGetTokenT<edm::PSimHitContainer>& gemSimHitInput_,
+                edm::EDGetTokenT<edm::PSimHitContainer>& cscSimHitInput_,
+                edm::EDGetTokenT<edm::PSimHitContainer>& rpcSimHitInput_,
+                edm::EDGetTokenT<edm::PSimHitContainer>& me0SimHitInput_,
+                edm::EDGetTokenT<edm::PSimHitContainer>& dtSimHitInput_
                 );
   
   ~SimHitMatcher();

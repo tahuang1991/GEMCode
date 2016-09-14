@@ -9,9 +9,9 @@ HLTTrackMatcher::HLTTrackMatcher(CSCRecHitMatcher& csc,
                                  DTRecHitMatcher& dt, 
                                  RPCRecHitMatcher& rpc, 
                                  GEMRecHitMatcher& gem,  
-                                 edm::EDGetTokenT<reco::TrackExtraCollection> recoTrackExtraInputLabel_,
-                                 edm::EDGetTokenT<reco::TrackCollection> recoTrackInputLabel_,
-                                 edm::EDGetTokenT<reco::RecoChargedCandidateCollection> recoChargedCandidateInputLabel_
+                                 edm::EDGetTokenT<reco::TrackExtraCollection> &recoTrackExtraInputLabel_,
+                                 edm::EDGetTokenT<reco::TrackCollection> &recoTrackInputLabel_,
+                                 edm::EDGetTokenT<reco::RecoChargedCandidateCollection> &recoChargedCandidateInputLabel_
                                  )
   : BaseMatcher(csc.trk(), csc.vtx(), csc.conf(), csc.event(), csc.eventSetup())
 , gem_rechit_matcher_(&gem)
