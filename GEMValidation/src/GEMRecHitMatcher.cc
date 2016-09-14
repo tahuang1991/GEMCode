@@ -4,12 +4,12 @@
 using namespace std;
 using namespace matching;
 
-GEMRecHitMatcher::GEMRecHitMatcher(SimHitMatcher& sh)
-  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
+GEMRecHitMatcher::GEMRecHitMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
+  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup(), iC)
   , simhit_matcher_(&sh)
 {
   auto gemRecHit_= conf().getParameter<edm::ParameterSet>("gemRecHit");
-  gemRecHitInput_ = gemRecHit_.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  gemRecHitInput_ = iC.consumes<GEMRecHitCollection>(gemRecHit_.getParameter<edm::InputTag>("validInputTags"));
   minBXGEM_ = gemRecHit_.getParameter<int>("minBX");
   maxBXGEM_ = gemRecHit_.getParameter<int>("maxBX");
   matchDeltaStrip_ = gemRecHit_.getParameter<int>("matchDeltaStrip");
@@ -18,7 +18,7 @@ GEMRecHitMatcher::GEMRecHitMatcher(SimHitMatcher& sh)
 
   if (hasGEMGeometry_) {
     edm::Handle<GEMRecHitCollection> gem_rechits;
-    if (gemvalidation::getByLabel(gemRecHitInput_, gem_rechits, event())) if (runGEMRecHit_) matchRecHitsToSimTrack(*gem_rechits.product());
+    if (gemvalidation::getByToken(gemRecHitInput_, gem_rechits, event())) if (runGEMRecHit_) matchRecHitsToSimTrack(*gem_rechits.product());
   }
 }
 

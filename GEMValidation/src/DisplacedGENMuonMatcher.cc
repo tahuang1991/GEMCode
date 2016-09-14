@@ -1,13 +1,17 @@
 #include "GEMCode/GEMValidation/interface/DisplacedGENMuonMatcher.h"
 
-DisplacedGENMuonMatcher::DisplacedGENMuonMatcher(const SimTrack& t, const SimVertex& v,
-      const edm::ParameterSet& ps, const edm::Event& ev, const edm::EventSetup& es)
-: BaseMatcher(t, v, ps, ev, es)
+DisplacedGENMuonMatcher::DisplacedGENMuonMatcher(const SimTrack& t, 
+                                                 const SimVertex& v,
+                                                 const edm::ParameterSet& ps, 
+                                                 const edm::Event& ev, 
+                                                 const edm::EventSetup& es,
+                                                 edm::ConsumesCollector & iC)
+  : BaseMatcher(t, v, ps, ev, es, iC)
 {
-  edm::Handle<reco::GenParticleCollection> genParticles;
-  ev.getByLabel("genParticles", genParticles);
+  inputToken_ = iC.consumes<reco::GenParticleCollection>(edm::InputTag("genParticles"));
+  ev.getByToken(inputToken_, genParticles);
   matchDisplacedGENMuonMatcherToSimTrack(*genParticles.product());
-  //  if(gemvalidation::getByLabel("genParticles", genParticles, event())) return;//
+  //  if(gemvalidation::getByToken("genParticles", genParticles, event())) return;//
 }
 
 DisplacedGENMuonMatcher::~DisplacedGENMuonMatcher()
@@ -23,7 +27,7 @@ DisplacedGENMuonMatcher::matchDisplacedGENMuonMatcherToSimTrack(const reco::GenP
   bool verbose = false;
 
   // edm::Handle<reco::BeamSpot> beamSpot;
-  // match_sh.event().getByLabel("offlineBeamSpot",beamSpot);
+  // match_sh.event().getByToken("offlineBeamSpot",beamSpot);
   beamSpot_x = 0;//beamSpot->position().x();
   beamSpot_y = 0;//beamSpot->position().y();
   beamSpot_z = 0;//beamSpot->position().z();

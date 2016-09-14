@@ -159,6 +159,23 @@ getByLabel(std::vector<edm::InputTag> const& tags, edm::Handle<PROD>& result, co
   }
   return (!inputTagIsNotValid);
 }
+
+template<typename PROD>
+bool
+getByToken(const edm::EDGetTokenT<PROD>& tag, edm::Handle<PROD>& result, const edm::Event& iEvent)
+{
+  //  const bool verbose(false);
+  bool inputTagIsNotValid(true);
+  iEvent.getByToken(tag, result);
+  if (result.isValid()) {
+    //    if (verbose) std::cout << tag << " is a valid inputTag " << std::endl;
+    inputTagIsNotValid = false;
+  } else {
+    //if (verbose) std::cout << tag << " is an invalid inputTag " << std::endl;
+  }
+  return (!inputTagIsNotValid);
+}
+
 }
 
 #endif

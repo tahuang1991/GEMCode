@@ -4,26 +4,26 @@
 using namespace std;
 
 
-DTRecHitMatcher::DTRecHitMatcher(SimHitMatcher& sh)
-  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
+DTRecHitMatcher::DTRecHitMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
+  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup(), iC)
   , simhit_matcher_(&sh)
 {
   auto dtRecHit1DPair = conf().getParameter<edm::ParameterSet>("dtRecHit");
-  dtRecHit1DPairInput_ = dtRecHit1DPair.getParameter<vector<edm::InputTag>>("validInputTags");
+  dtRecHit1DPairInput_ = iC.consumes<DTRecHitCollection>(dtRecHit1DPair.getParameter<edm::InputTag>("validInputTags"));
   maxBXDTRecHit1DPair_ = dtRecHit1DPair.getParameter<int>("maxBX");
   minBXDTRecHit1DPair_ = dtRecHit1DPair.getParameter<int>("minBX");
   verboseDTRecHit1DPair_ = dtRecHit1DPair.getParameter<int>("verbose");
   runDTRecHit1DPair_ = dtRecHit1DPair.getParameter<bool>("run");
 
   auto dtSegment2D = conf().getParameter<edm::ParameterSet>("dtRecSegment2D");
-  dtRecSegment2DInput_ = dtSegment2D.getParameter<vector<edm::InputTag>>("validInputTags");
+  dtRecSegment2DInput_ = iC.consumes<DTRecSegment2DCollection>(dtSegment2D.getParameter<edm::InputTag>("validInputTags"));
   maxBXDTRecSegment2D_ = dtSegment2D.getParameter<int>("maxBX");
   minBXDTRecSegment2D_ = dtSegment2D.getParameter<int>("minBX");
   verboseDTRecSegment2D_ = dtSegment2D.getParameter<int>("verbose");
   runDTRecSegment2D_ = dtSegment2D.getParameter<bool>("run");
 
   auto dtSegment4D = conf().getParameter<edm::ParameterSet>("dtRecSegment4D");
-  dtRecSegment4DInput_ = dtSegment4D.getParameter<vector<edm::InputTag>>("validInputTags");
+  dtRecSegment4DInput_ = iC.consumes<DTRecSegment4DCollection>(dtSegment4D.getParameter<edm::InputTag>("validInputTags"));
   maxBXDTRecSegment4D_ = dtSegment4D.getParameter<int>("maxBX");
   minBXDTRecSegment4D_ = dtSegment4D.getParameter<int>("minBX");
   verboseDTRecSegment4D_ = dtSegment4D.getParameter<int>("verbose");
@@ -31,13 +31,13 @@ DTRecHitMatcher::DTRecHitMatcher(SimHitMatcher& sh)
 
   if (hasDTGeometry_) {
     edm::Handle<DTRecHitCollection> dt_rechits;
-    if (gemvalidation::getByLabel(dtRecHit1DPairInput_, dt_rechits, event())) if (runDTRecHit1DPair_) matchDTRecHit1DPairsToSimTrack(*dt_rechits.product());
+    if (gemvalidation::getByToken(dtRecHit1DPairInput_, dt_rechits, event())) if (runDTRecHit1DPair_) matchDTRecHit1DPairsToSimTrack(*dt_rechits.product());
 
     edm::Handle<DTRecSegment2DCollection> dt_2DSegments;
-    if (gemvalidation::getByLabel(dtRecSegment2DInput_, dt_2DSegments, event())) if (runDTRecSegment2D_) matchDTRecSegment2DsToSimTrack(*dt_2DSegments.product());
+    if (gemvalidation::getByToken(dtRecSegment2DInput_, dt_2DSegments, event())) if (runDTRecSegment2D_) matchDTRecSegment2DsToSimTrack(*dt_2DSegments.product());
 
     edm::Handle<DTRecSegment4DCollection> dt_4DSegments;
-    if (gemvalidation::getByLabel(dtRecSegment4DInput_, dt_4DSegments, event())) if (runDTRecSegment4D_) matchDTRecSegment4DsToSimTrack(*dt_4DSegments.product());
+    if (gemvalidation::getByToken(dtRecSegment4DInput_, dt_4DSegments, event())) if (runDTRecSegment4D_) matchDTRecSegment4DsToSimTrack(*dt_4DSegments.product());
   }
 }
 

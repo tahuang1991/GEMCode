@@ -1,15 +1,15 @@
 #include "GEMCode/GEMValidation/interface/L1TrackFinderTrackMatcher.h"
 
-L1TrackFinderTrackMatcher::L1TrackFinderTrackMatcher(SimHitMatcher& sh)
-: BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
+L1TrackFinderTrackMatcher::L1TrackFinderTrackMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
+  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup(), iC)
 {
   auto cscTfTrack = conf().getParameter<edm::ParameterSet>("cscTfTrack");
   auto dtTfTrack = conf().getParameter<edm::ParameterSet>("dtTfTrack");
   auto rpcTfTrack = conf().getParameter<edm::ParameterSet>("rpcTfTrack");
 
-  cscTfTrackInputLabel_ = cscTfTrack.getParameter<std::vector<edm::InputTag>>("validInputTags");
-  dtTfTrackInputLabel_ = dtTfTrack.getParameter<std::vector<edm::InputTag>>("validInputTags");
-  rpcTfTrackInputLabel_ = rpcTfTrack.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  cscTfTrackInputLabel_ = iC.consumes<L1CSCTrackCollection>(cscTfTrack.getParameter<edm::InputTag>("validInputTags"));
+  dtTfTrackInputLabel_ = iC.consumes<L1CSCTrackCollection>(dtTfTrack.getParameter<edm::InputTag>("validInputTags"));
+  rpcTfTrackInputLabel_ = iC.consumes<L1CSCTrackCollection>(rpcTfTrack.getParameter<edm::InputTag>("validInputTags"));
   
   verboseCscTfTrack_ = cscTfTrack.getParameter<int>("verbose");
   verboseDtTfTrack_ = dtTfTrack.getParameter<int>("verbose");
@@ -37,13 +37,13 @@ void
 L1TrackFinderTrackMatcher::init()
 {
   edm::Handle<L1CSCTrackCollection> hCscTfTrack;
-  if (gemvalidation::getByLabel(cscTfTrackInputLabel_, hCscTfTrack, event())) if (runCscTfTrack_) matchCSCTfTrackToSimTrack(*hCscTfTrack.product());
+  if (gemvalidation::getByToken(cscTfTrackInputLabel_, hCscTfTrack, event())) if (runCscTfTrack_) matchCSCTfTrackToSimTrack(*hCscTfTrack.product());
 
   edm::Handle<L1CSCTrackCollection> hDtTfTrack;
-  if (gemvalidation::getByLabel(dtTfTrackInputLabel_, hDtTfTrack, event())) if (runDtTfTrack_) matchDTTfTrackToSimTrack(*hDtTfTrack.product());
+  if (gemvalidation::getByToken(dtTfTrackInputLabel_, hDtTfTrack, event())) if (runDtTfTrack_) matchDTTfTrackToSimTrack(*hDtTfTrack.product());
 
   edm::Handle<L1CSCTrackCollection> hRpcTfTrack;
-  if (gemvalidation::getByLabel(rpcTfTrackInputLabel_, hRpcTfTrack, event())) if (runRpcTfTrack_) matchRPCTfTrackToSimTrack(*hRpcTfTrack.product());
+  if (gemvalidation::getByToken(rpcTfTrackInputLabel_, hRpcTfTrack, event())) if (runRpcTfTrack_) matchRPCTfTrackToSimTrack(*hRpcTfTrack.product());
 }
 
 void 

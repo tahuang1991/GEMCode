@@ -4,11 +4,11 @@
 using namespace std;
 using namespace matching;
 
-GEMDigiMatcher::GEMDigiMatcher(SimHitMatcher& sh)
-: DigiMatcher(sh)
+GEMDigiMatcher::GEMDigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
+  : DigiMatcher(sh, iC)
 {
   auto gemDigi_= conf().getParameter<edm::ParameterSet>("gemStripDigi");
-  gemDigiInput_ = gemDigi_.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  gemDigiInput_ = iC.consumes<GEMDigiCollection>(gemDigi_.getParameter<edm::InputTag>("validInputTags"));
   minBXGEMDigi_ = gemDigi_.getParameter<int>("minBX");
   maxBXGEMDigi_ = gemDigi_.getParameter<int>("maxBX");
   matchDeltaStrip_ = gemDigi_.getParameter<int>("matchDeltaStrip");
@@ -16,14 +16,14 @@ GEMDigiMatcher::GEMDigiMatcher(SimHitMatcher& sh)
   runGEMDigi_ = gemDigi_.getParameter<bool>("run");
 
   auto gemPad_= conf().getParameter<edm::ParameterSet>("gemPadDigi");
-  gemPadDigiInput_ = gemPad_.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  gemPadDigiInput_ = iC.consumes<GEMPadDigiCollection>(gemPad_.getParameter<edm::InputTag>("validInputTags"));
   minBXGEMPad_ = gemPad_.getParameter<int>("minBX");
   maxBXGEMPad_ = gemPad_.getParameter<int>("maxBX");
   verbosePad_ = gemPad_.getParameter<int>("verbose");
   runGEMPad_ = gemPad_.getParameter<bool>("run");
 
   auto gemCoPad_= conf().getParameter<edm::ParameterSet>("gemCoPadDigi");
-  gemCoPadDigiInput_ = gemCoPad_.getParameter<std::vector<edm::InputTag>>("validInputTags");
+gemCoPadDigiInput_ = iC.consumes<GEMCoPadDigiCollection>(gemCoPad_.getParameter<edm::InputTag>("validInputTags"));
   minBXGEMCoPad_ = gemCoPad_.getParameter<int>("minBX");
   maxBXGEMCoPad_ = gemCoPad_.getParameter<int>("maxBX");
   verboseCoPad_ = gemCoPad_.getParameter<int>("verbose");
@@ -31,13 +31,13 @@ GEMDigiMatcher::GEMDigiMatcher(SimHitMatcher& sh)
 
   if (hasGEMGeometry_) {
     edm::Handle<GEMDigiCollection> gem_digis;
-    if (gemvalidation::getByLabel(gemDigiInput_, gem_digis, event())) if (runGEMDigi_) matchDigisToSimTrack(*gem_digis.product());
+    if (gemvalidation::getByToken(gemDigiInput_, gem_digis, event())) if (runGEMDigi_) matchDigisToSimTrack(*gem_digis.product());
     
     edm::Handle<GEMPadDigiCollection> gem_pads;
-    if (gemvalidation::getByLabel(gemPadDigiInput_, gem_pads, event())) if (runGEMPad_) matchPadsToSimTrack(*gem_pads.product());
+    if (gemvalidation::getByToken(gemPadDigiInput_, gem_pads, event())) if (runGEMPad_) matchPadsToSimTrack(*gem_pads.product());
     
     edm::Handle<GEMCoPadDigiCollection> gem_co_pads;
-    if (gemvalidation::getByLabel(gemCoPadDigiInput_, gem_co_pads, event())) if (runGEMCoPad_) matchCoPadsToSimTrack(*gem_co_pads.product());
+    if (gemvalidation::getByToken(gemCoPadDigiInput_, gem_co_pads, event())) if (runGEMCoPad_) matchCoPadsToSimTrack(*gem_co_pads.product());
   }
 }
 

@@ -5,11 +5,11 @@ using namespace std;
 using namespace matching;
 
 
-RPCDigiMatcher::RPCDigiMatcher(SimHitMatcher& sh)
-: DigiMatcher(sh)
+RPCDigiMatcher::RPCDigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
+  : DigiMatcher(sh, iC)
 {
   auto rpcDigi_= conf().getParameter<edm::ParameterSet>("rpcStripDigi");
-  rpcDigiInput_ = rpcDigi_.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  rpcDigiInput_ = iC.consumes<RPCDigiCollection>(rpcDigi_.getParameter<edm::InputTag>("validInputTags"));
   minBXRPC_ = rpcDigi_.getParameter<int>("minBX");
   maxBXRPC_ = rpcDigi_.getParameter<int>("maxBX");
   matchDeltaStrip_ = rpcDigi_.getParameter<int>("matchDeltaStrip");
@@ -20,7 +20,7 @@ RPCDigiMatcher::RPCDigiMatcher(SimHitMatcher& sh)
 
   if (hasRPCGeometry_) {
     edm::Handle<RPCDigiCollection> rpc_digis;
-    if (gemvalidation::getByLabel(rpcDigiInput_, rpc_digis, event())) if (runRPCDigi_) matchDigisToSimTrack(*rpc_digis.product());
+    if (gemvalidation::getByToken(rpcDigiInput_, rpc_digis, event())) if (runRPCDigi_) matchDigisToSimTrack(*rpc_digis.product());
   }
 }
 

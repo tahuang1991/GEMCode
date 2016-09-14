@@ -12,6 +12,8 @@
 
 #include "DataFormats/CSCRecHit/interface/CSCRecHit2DCollection.h"
 #include "DataFormats/CSCRecHit/interface/CSCSegmentCollection.h"
+#include "GEMCode/GEMValidation/interface/GenericDigi.h"
+#include "GEMCode/GEMValidation/interface/DigiMatcher.h"
 
 #include <vector>
 #include <map>
@@ -26,7 +28,7 @@ public:
   typedef std::vector<CSCRecHit2D> CSCRecHit2DContainer;
   typedef std::vector<CSCSegment> CSCSegmentContainer;
   
-  CSCRecHitMatcher(SimHitMatcher& sh);
+  CSCRecHitMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC);
   
   ~CSCRecHitMatcher() {}
 
@@ -69,8 +71,8 @@ private:
   void matchCSCRecHit2DsToSimTrack(const CSCRecHit2DCollection&);
   void matchCSCSegmentsToSimTrack(const CSCSegmentCollection&);
 
-  std::vector<edm::InputTag> cscRecHit2DInput_;
-  std::vector<edm::InputTag> cscSegmentInput_;
+  edm::EDGetTokenT<CSCRecHit2DCollection> cscRecHit2DInput_;
+  edm::EDGetTokenT<CSCSegmentCollection> cscSegmentInput_;
 
   int verboseCSCRecHit2D_;
   bool runCSCRecHit2D_;

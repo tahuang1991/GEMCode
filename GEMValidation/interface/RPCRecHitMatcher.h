@@ -32,7 +32,7 @@ public:
   typedef std::vector<RPCRecHit> RPCRecHitContainer;
 
 
-  RPCRecHitMatcher(SimHitMatcher& sh);
+  RPCRecHitMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC);
   
   ~RPCRecHitMatcher();
 
@@ -70,7 +70,7 @@ private:
 
   void matchRecHitsToSimTrack(const RPCRecHitCollection& recHits);
 
-  std::vector<edm::InputTag> rpcRecHitInput_;
+  edm::EDGetTokenT<RPCRecHitCollection> rpcRecHitInput_;
 
   const SimHitMatcher* simhit_matcher_;
 

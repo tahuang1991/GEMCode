@@ -7,15 +7,15 @@ using namespace std;
 using namespace matching;
 
 
-CSCStubMatcher::CSCStubMatcher(SimHitMatcher& sh, CSCDigiMatcher& dg, GEMDigiMatcher& gem_dg, RPCDigiMatcher& rpc_dg)
-: DigiMatcher(sh)
+CSCStubMatcher::CSCStubMatcher(SimHitMatcher& sh, CSCDigiMatcher& dg, GEMDigiMatcher& gem_dg, RPCDigiMatcher& rpc_dg, edm::ConsumesCollector & iC)
+  : DigiMatcher(sh, iC)
 , digi_matcher_(&dg)
 , gem_digi_matcher_(&gem_dg)
 , rpc_digi_matcher_(&rpc_dg)
 , sh_matcher_(&sh)
 {
   auto cscCLCT_ = conf().getParameter<edm::ParameterSet>("cscCLCT");
-  clctInputs_ = cscCLCT_.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  clctInputs_ = iC.consumes<CSCCLCTDigiCollection>(cscCLCT_.getParameter<edm::InputTag>("validInputTags"));
   minBXCLCT_ = cscCLCT_.getParameter<int>("minBX");
   maxBXCLCT_ = cscCLCT_.getParameter<int>("maxBX");
   verboseCLCT_ = cscCLCT_.getParameter<int>("verbose");
@@ -23,7 +23,7 @@ CSCStubMatcher::CSCStubMatcher(SimHitMatcher& sh, CSCDigiMatcher& dg, GEMDigiMat
   runCLCT_ = cscCLCT_.getParameter<bool>("run");
 
   auto cscALCT_ = conf().getParameter<edm::ParameterSet>("cscALCT");
-  alctInputs_ = cscALCT_.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  alctInputs_ = iC.consumes<CSCALCTDigiCollection>(cscALCT_.getParameter<edm::InputTag>("validInputTags"));
   minBXALCT_ = cscALCT_.getParameter<int>("minBX");
   maxBXALCT_ = cscALCT_.getParameter<int>("maxBX");
   verboseALCT_ = cscALCT_.getParameter<int>("verbose");
@@ -31,7 +31,7 @@ CSCStubMatcher::CSCStubMatcher(SimHitMatcher& sh, CSCDigiMatcher& dg, GEMDigiMat
   runALCT_ = cscCLCT_.getParameter<bool>("run");
 
   auto cscLCT_ = conf().getParameter<edm::ParameterSet>("cscLCT");
-  lctInputs_ = cscLCT_.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  lctInputs_ = iC.consumes<CSCCorrelatedLCTDigiCollection>(cscLCT_.getParameter<edm::InputTag>("validInputTags"));
   minBXLCT_ = cscLCT_.getParameter<int>("minBX");
   maxBXLCT_ = cscLCT_.getParameter<int>("maxBX");
   verboseLCT_ = cscLCT_.getParameter<int>("verbose");
@@ -45,7 +45,7 @@ CSCStubMatcher::CSCStubMatcher(SimHitMatcher& sh, CSCDigiMatcher& dg, GEMDigiMat
   runLCT_ = cscLCT_.getParameter<bool>("run");
 
   auto cscMPLCT_ = conf().getParameter<edm::ParameterSet>("cscMPLCT");
-  mplctInputs_ = cscMPLCT_.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  mplctInputs_ = iC.consumes<CSCCorrelatedLCTDigiCollection>(cscMPLCT_.getParameter<edm::InputTag>("validInputTags"));
   minBXMPLCT_ = cscMPLCT_.getParameter<int>("minBX");
   maxBXMPLCT_ = cscMPLCT_.getParameter<int>("maxBX");
   verboseMPLCT_ = cscMPLCT_.getParameter<int>("verbose");
@@ -57,16 +57,16 @@ CSCStubMatcher::CSCStubMatcher(SimHitMatcher& sh, CSCDigiMatcher& dg, GEMDigiMat
 
   if (hasCSCGeometry_) {
     edm::Handle<CSCCLCTDigiCollection> clcts;
-    if (gemvalidation::getByLabel(clctInputs_, clcts, event())) if (runCLCT_) matchCLCTsToSimTrack(*clcts.product());    
+    if (gemvalidation::getByToken(clctInputs_, clcts, event())) if (runCLCT_) matchCLCTsToSimTrack(*clcts.product());    
     
     edm::Handle<CSCALCTDigiCollection> alcts;
-    if (gemvalidation::getByLabel(alctInputs_, alcts, event())) if (runALCT_) matchALCTsToSimTrack(*alcts.product());    
+    if (gemvalidation::getByToken(alctInputs_, alcts, event())) if (runALCT_) matchALCTsToSimTrack(*alcts.product());    
     
     edm::Handle<CSCCorrelatedLCTDigiCollection> lcts;
-    if (gemvalidation::getByLabel(lctInputs_, lcts, event())) if (runLCT_) matchLCTsToSimTrack(*lcts.product());    
+    if (gemvalidation::getByToken(lctInputs_, lcts, event())) if (runLCT_) matchLCTsToSimTrack(*lcts.product());    
     
     edm::Handle<CSCCorrelatedLCTDigiCollection> mplcts;
-    if (gemvalidation::getByLabel(mplctInputs_, mplcts, event())) if (runMPLCT_) matchMPLCTsToSimTrack(*mplcts.product());    
+    if (gemvalidation::getByToken(mplctInputs_, mplcts, event())) if (runMPLCT_) matchMPLCTsToSimTrack(*mplcts.product());    
   }
 }
 

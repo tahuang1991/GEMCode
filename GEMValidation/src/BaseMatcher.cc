@@ -6,8 +6,12 @@
 #include "GEMCode/GEMValidation/interface/Helpers.h"
 
 
-BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
-      const edm::ParameterSet& ps, const edm::Event& ev, const edm::EventSetup& es)
+BaseMatcher::BaseMatcher(const SimTrack& t, 
+                         const SimVertex& v,
+                         const edm::ParameterSet& ps, 
+                         const edm::Event& ev, 
+                         const edm::EventSetup& es,
+                         edm::ConsumesCollector & iC)
 : trk_(t), vtx_(v), conf_(ps), ev_(ev), es_(es), verbose_(0)
 {
   // list of CSC chamber type numbers to use

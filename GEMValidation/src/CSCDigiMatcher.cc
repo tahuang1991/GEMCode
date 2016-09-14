@@ -5,11 +5,11 @@ using namespace std;
 using namespace matching;
 
 
-CSCDigiMatcher::CSCDigiMatcher(SimHitMatcher& sh)
-: DigiMatcher(sh)
+CSCDigiMatcher::CSCDigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
+  : DigiMatcher(sh, iC)
 {
   auto cscWireDigi_ = conf().getParameter<edm::ParameterSet>("cscWireDigi");
-  cscWireDigiInput_ = cscWireDigi_.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  cscWireDigiInput_ = iC.consumes<CSCWireDigiCollection>(cscWireDigi_.getParameter<edm::InputTag>("validInputTags"));
   verboseWG_ = cscWireDigi_.getParameter<int>("verbose");
   minBXCSCWire_ = cscWireDigi_.getParameter<int>("minBX");
   maxBXCSCWire_ = cscWireDigi_.getParameter<int>("maxBX");
@@ -17,7 +17,7 @@ CSCDigiMatcher::CSCDigiMatcher(SimHitMatcher& sh)
   runWG_ = cscWireDigi_.getParameter<bool>("run");
 
   auto cscComparatorDigi_ = conf().getParameter<edm::ParameterSet>("cscStripDigi");
-  cscComparatorDigiInput_ = cscComparatorDigi_.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  cscComparatorDigiInput_ = iC.consumes<CSCComparatorDigiCollection>(cscComparatorDigi_.getParameter<edm::InputTag>("validInputTags"));
   verboseStrip_ = cscComparatorDigi_.getParameter<int>("verbose");
   minBXCSCComp_ = cscComparatorDigi_.getParameter<int>("minBX");
   maxBXCSCComp_ = cscComparatorDigi_.getParameter<int>("maxBX");
@@ -26,10 +26,10 @@ CSCDigiMatcher::CSCDigiMatcher(SimHitMatcher& sh)
 
   if (hasCSCGeometry_) {
     edm::Handle<CSCComparatorDigiCollection> comp_digis;
-    if(gemvalidation::getByLabel(cscComparatorDigiInput_, comp_digis, event())) if (runWG_) matchStripsToSimTrack(*comp_digis.product());
+    if(gemvalidation::getByToken(cscComparatorDigiInput_, comp_digis, event())) if (runWG_) matchStripsToSimTrack(*comp_digis.product());
     
     edm::Handle<CSCWireDigiCollection> wire_digis;
-    if (gemvalidation::getByLabel(cscWireDigiInput_, wire_digis, event())) if (runStrip_) matchWiresToSimTrack(*wire_digis.product());
+    if (gemvalidation::getByToken(cscWireDigiInput_, wire_digis, event())) if (runStrip_) matchWiresToSimTrack(*wire_digis.product());
   }
 }
 

@@ -6,48 +6,58 @@
 using namespace std;
 
 
-SimHitMatcher::SimHitMatcher(const SimTrack& t, const SimVertex& v,
-      const edm::ParameterSet& ps, const edm::Event& ev, const edm::EventSetup& es)
-: BaseMatcher(t, v, ps, ev, es)
+SimHitMatcher::SimHitMatcher(const SimTrack& t, 
+                             const SimVertex& v,
+                             const edm::ParameterSet& ps, 
+                             const edm::Event& ev, 
+                             const edm::EventSetup& es,
+                             edm::ConsumesCollector & iC)
+  : BaseMatcher(t, v, ps, ev, es, iC)
 {
   auto gemSimHit_ = conf().getParameter<edm::ParameterSet>("gemSimHit");
   verboseGEM_ = gemSimHit_.getParameter<int>("verbose");
-  gemSimHitInput_ = gemSimHit_.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  gemSimHitInput_ = iC.consumes<edm::PSimHitContainer>(gemSimHit_.getParameter<edm::InputTag>("validInputTags"));
   simMuOnlyGEM_ = gemSimHit_.getParameter<bool>("simMuOnly");
   discardEleHitsGEM_ = gemSimHit_.getParameter<bool>("discardEleHits");
   runGEMSimHit_ = gemSimHit_.getParameter<bool>("run");
 
   auto cscSimHit_= conf().getParameter<edm::ParameterSet>("cscSimHit");
   verboseCSC_ = cscSimHit_.getParameter<int>("verbose");
-  cscSimHitInput_ = cscSimHit_.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  cscSimHitInput_ = iC.consumes<edm::PSimHitContainer>(cscSimHit_.getParameter<edm::InputTag>("validInputTags"));
   simMuOnlyCSC_ = cscSimHit_.getParameter<bool>("simMuOnly");
   discardEleHitsCSC_ = cscSimHit_.getParameter<bool>("discardEleHits");
   runCSCSimHit_ = cscSimHit_.getParameter<bool>("run");
 
   auto me0SimHit_ = conf().getParameter<edm::ParameterSet>("me0SimHit");
   verboseME0_ = me0SimHit_.getParameter<int>("verbose");
-  me0SimHitInput_ = me0SimHit_.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  me0SimHitInput_ = iC.consumes<edm::PSimHitContainer>(me0SimHit_.getParameter<edm::InputTag>("validInputTags"));
   simMuOnlyME0_ = me0SimHit_.getParameter<bool>("simMuOnly");
   discardEleHitsME0_ = me0SimHit_.getParameter<bool>("discardEleHits");
   runME0SimHit_ = me0SimHit_.getParameter<bool>("run");
 
   auto rpcSimHit_ = conf().getParameter<edm::ParameterSet>("rpcSimHit");
   verboseRPC_ = rpcSimHit_.getParameter<int>("verbose");
-  rpcSimHitInput_ = rpcSimHit_.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  rpcSimHitInput_ = iC.consumes<edm::PSimHitContainer>(rpcSimHit_.getParameter<edm::InputTag>("validInputTags"));
   simMuOnlyRPC_ = rpcSimHit_.getParameter<bool>("simMuOnly");
   discardEleHitsRPC_ = rpcSimHit_.getParameter<bool>("discardEleHits");
   runRPCSimHit_ = rpcSimHit_.getParameter<bool>("run");
 
   auto dtSimHit_ = conf().getParameter<edm::ParameterSet>("dtSimHit");
   verboseDT_ = dtSimHit_.getParameter<int>("verbose");
-  dtSimHitInput_ = dtSimHit_.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  dtSimHitInput_ = iC.consumes<edm::PSimHitContainer>(dtSimHit_.getParameter<edm::InputTag>("validInputTags"));
   simMuOnlyDT_ = dtSimHit_.getParameter<bool>("simMuOnly");
   discardEleHitsDT_ = dtSimHit_.getParameter<bool>("discardEleHits");
   runDTSimHit_ = dtSimHit_.getParameter<bool>("run");
 
-  simInputLabel_ = conf().getUntrackedParameter<std::string>("simInputLabel", "g4SimHits");
+  auto simTrack = conf().getParameter<edm::ParameterSet>("simTrack");
+  simTrackInput_ = iC.consumes<edm::SimTrackContainer>(simTrack.getParameter<edm::InputTag>("validInputTags"));
+
+  auto simVertex = conf().getParameter<edm::ParameterSet>("simVertex");
+  simVertexInput_ = iC.consumes<edm::SimVertexContainer>(simVertex.getParameter<edm::InputTag>("validInputTags"));
 
   init();
+
+
 }
 
 
@@ -57,8 +67,8 @@ SimHitMatcher::~SimHitMatcher() {}
 void 
 SimHitMatcher::init()
 {
-  event().getByLabel(simInputLabel_, sim_tracks);
-  event().getByLabel(simInputLabel_, sim_vertices);
+  event().getByToken(simTrackInput_, sim_tracks);
+  event().getByToken(simVertexInput_, sim_vertices);
 
   // fill trkId2Index associoation:
   int no = 0;
@@ -76,7 +86,7 @@ SimHitMatcher::init()
   
   if (hasCSCGeometry_) {
     edm::Handle<edm::PSimHitContainer> csc_hits;  
-    if (gemvalidation::getByLabel(cscSimHitInput_, csc_hits, event())) {
+    if (gemvalidation::getByToken(cscSimHitInput_, csc_hits, event())) {
       
       // select CSC simhits
       edm::PSimHitContainer csc_hits_select;
@@ -107,7 +117,7 @@ SimHitMatcher::init()
   
   if (hasGEMGeometry_) {
     edm::Handle<edm::PSimHitContainer> gem_hits;
-    if (gemvalidation::getByLabel(gemSimHitInput_, gem_hits, event())) {      
+    if (gemvalidation::getByToken(gemSimHitInput_, gem_hits, event())) {      
 
       // select GEM simhits
       edm::PSimHitContainer gem_hits_select;
@@ -145,7 +155,7 @@ SimHitMatcher::init()
   
   if (hasME0Geometry_) {
     edm::Handle<edm::PSimHitContainer> me0_hits;
-    if (gemvalidation::getByLabel(me0SimHitInput_, me0_hits, event())) {
+    if (gemvalidation::getByToken(me0SimHitInput_, me0_hits, event())) {
 
       if (runME0SimHit_) {
         matchME0SimHitsToSimTrack(track_ids, *me0_hits.product());
@@ -170,7 +180,7 @@ SimHitMatcher::init()
 
   if (hasRPCGeometry_) {
     edm::Handle<edm::PSimHitContainer> rpc_hits;
-    if (gemvalidation::getByLabel(rpcSimHitInput_, rpc_hits, event())) {
+    if (gemvalidation::getByToken(rpcSimHitInput_, rpc_hits, event())) {
 
       // select RPC simhits
       edm::PSimHitContainer rpc_hits_select;
@@ -202,7 +212,7 @@ SimHitMatcher::init()
   
   if (hasDTGeometry_) {
     edm::Handle<edm::PSimHitContainer> dt_hits;
-    if (gemvalidation::getByLabel(dtSimHitInput_, dt_hits, event())) {
+    if (gemvalidation::getByToken(dtSimHitInput_, dt_hits, event())) {
 
       // select DT simhits
       edm::PSimHitContainer dt_hits_select;

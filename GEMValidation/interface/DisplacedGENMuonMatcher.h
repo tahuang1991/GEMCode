@@ -23,8 +23,12 @@ class DisplacedGENMuonMatcher : public BaseMatcher
 {
 public:
   
-  DisplacedGENMuonMatcher(const SimTrack& t, const SimVertex& v,
-      const edm::ParameterSet& ps, const edm::Event& ev, const edm::EventSetup& es);
+  DisplacedGENMuonMatcher(const SimTrack& t, 
+                          const SimVertex& v,
+                          const edm::ParameterSet& ps, 
+                          const edm::Event& ev, 
+                          const edm::EventSetup& es,
+                          edm::ConsumesCollector & iC);
   
   ~DisplacedGENMuonMatcher();
 
@@ -126,6 +130,9 @@ private:
 
   int darkBosonIndex_;
   int genMuonIndex_;
+
+  edm::EDGetTokenT<reco::GenParticleCollection> inputToken_;
+  edm::Handle<reco::GenParticleCollection> genParticles;
 };
 
 #endif

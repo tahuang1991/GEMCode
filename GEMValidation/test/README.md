@@ -37,7 +37,7 @@ With pileup
 cmsDriver.py step2 \
 --conditions auto:run2_mc \
 --pileup_input das:/RelValMinBias_TuneZ2star_14TeV/1/GEN-SIM \
--n 1 --era Phase2C1 \
+-n -1 --era Phase2C1 \
 --eventcontent FEVTDEBUGHLT \
 -s DIGI:pdigi_valid,L1 \
 --datatier GEN-SIM-DIGI \
@@ -54,7 +54,7 @@ When running without pileup, remove the pileup related flags.
 <PRE>
 cmsDriver.py step2 \
 --conditions auto:run2_mc \
--n 1 --era Phase2C1 \
+-n -1 --era Phase2C1 \
 --eventcontent FEVTDEBUGHLT \
 -s DIGI:pdigi_valid,L1 \
 --datatier GEN-SIM-DIGI \

@@ -6,11 +6,11 @@ using namespace matching;
 
 #include "DataFormats/MuonDetId/interface/DTWireId.h"
 
-DTDigiMatcher::DTDigiMatcher(SimHitMatcher& sh)
-: DigiMatcher(sh)
+DTDigiMatcher::DTDigiMatcher(SimHitMatcher& sh, edm::ConsumesCollector & iC)
+  : DigiMatcher(sh, iC)
 {
   auto dtDigi_= conf().getParameter<edm::ParameterSet>("dtDigi");
-  dtDigiInput_ = dtDigi_.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  dtDigiInput_ = iC.consumes<DTDigiCollection>(dtDigi_.getParameter<edm::InputTag>("validInputTags"));
   minBXDT_ = dtDigi_.getParameter<int>("minBX");
   maxBXDT_ = dtDigi_.getParameter<int>("maxBX");
   matchDeltaWire_ = dtDigi_.getParameter<int>("matchDeltaWire");
@@ -19,7 +19,7 @@ DTDigiMatcher::DTDigiMatcher(SimHitMatcher& sh)
 
   if (hasDTGeometry_) {
     edm::Handle<DTDigiCollection> dt_digis;
-    if(gemvalidation::getByLabel(dtDigiInput_, dt_digis, event())) if (runDTDigi_) matchDigisToSimTrack(*dt_digis.product());
+    if(gemvalidation::getByToken(dtDigiInput_, dt_digis, event())) if (runDTDigi_) matchDigisToSimTrack(*dt_digis.product());
   }
 }
 

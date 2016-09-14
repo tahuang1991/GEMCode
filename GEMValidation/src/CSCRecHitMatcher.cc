@@ -4,19 +4,19 @@
 using namespace std;
 
 
-CSCRecHitMatcher::CSCRecHitMatcher(SimHitMatcher& sh)
-  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
+CSCRecHitMatcher::CSCRecHitMatcher(SimHitMatcher& sh, edm::ConsumesCollector &iC)
+  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup(), iC)
   , simhit_matcher_(&sh)
 {
   auto cscRecHit2D = conf().getParameter<edm::ParameterSet>("cscRecHit");
-  cscRecHit2DInput_ = cscRecHit2D.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  cscRecHit2DInput_ = iC.consumes<CSCRecHit2DCollection>(cscRecHit2D.getParameter<edm::InputTag>("validInputTags"));
   maxBXCSCRecHit2D_ = cscRecHit2D.getParameter<int>("maxBX");
   minBXCSCRecHit2D_ = cscRecHit2D.getParameter<int>("minBX");
   verboseCSCRecHit2D_ = cscRecHit2D.getParameter<int>("verbose");
   runCSCRecHit2D_ = cscRecHit2D.getParameter<bool>("run");
 
   auto cscSegment2D = conf().getParameter<edm::ParameterSet>("cscSegment");
-  cscSegmentInput_ = cscSegment2D.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  cscSegmentInput_ = iC.consumes<CSCSegmentCollection>(cscSegment2D.getParameter<edm::InputTag>("validInputTags"));
   maxBXCSCSegment_ = cscSegment2D.getParameter<int>("maxBX");
   minBXCSCSegment_ = cscSegment2D.getParameter<int>("minBX");
   verboseCSCSegment_ = cscSegment2D.getParameter<int>("verbose");
@@ -24,10 +24,10 @@ CSCRecHitMatcher::CSCRecHitMatcher(SimHitMatcher& sh)
 
   if (hasCSCGeometry_) {
     edm::Handle<CSCRecHit2DCollection> csc_rechits;
-    if (gemvalidation::getByLabel(cscRecHit2DInput_, csc_rechits, event())) if (runCSCRecHit2D_) matchCSCRecHit2DsToSimTrack(*csc_rechits.product());
+    if (gemvalidation::getByToken(cscRecHit2DInput_, csc_rechits, event())) if (runCSCRecHit2D_) matchCSCRecHit2DsToSimTrack(*csc_rechits.product());
 
     edm::Handle<CSCSegmentCollection> csc_2DSegments;
-    if (gemvalidation::getByLabel(cscSegmentInput_, csc_2DSegments, event())) if (runCSCSegment_) matchCSCSegmentsToSimTrack(*csc_2DSegments.product());
+    if (gemvalidation::getByToken(cscSegmentInput_, csc_2DSegments, event())) if (runCSCSegment_) matchCSCSegmentsToSimTrack(*csc_2DSegments.product());
   }
 }
 
