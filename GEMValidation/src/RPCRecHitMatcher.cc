@@ -4,7 +4,7 @@
 using namespace std;
 using namespace matching;
 
-RPCRecHitMatcher::RPCRecHitMatcher(SimHitMatcher& sh, edm::EDGetTokenT<RPCRecHitCollection> rpcRecHitInput_)
+RPCRecHitMatcher::RPCRecHitMatcher(SimHitMatcher& sh, edm::EDGetTokenT<RPCRecHitCollection>& rpcRecHitInput_)
   : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
   , simhit_matcher_(&sh)
 {

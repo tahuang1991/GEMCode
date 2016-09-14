@@ -8,8 +8,8 @@
 L1TrackMatcher::L1TrackMatcher(CSCStubMatcher& csc, 
                                DTDigiMatcher& dt, 
                                RPCDigiMatcher& rpc,
-                               edm::EDGetTokenT<L1CSCTrackCollection> cscTfTrackInputLabel_, 
-                               edm::EDGetTokenT<L1MuRegionalCandCollection> cscTfCandInputLabel_)
+                               edm::EDGetTokenT<L1CSCTrackCollection> &cscTfTrackInputLabel_, 
+                               edm::EDGetTokenT<L1MuRegionalCandCollection> &cscTfCandInputLabel_)
   : BaseMatcher(csc.trk(), csc.vtx(), csc.conf(), csc.event(), csc.eventSetup())
 , csc_stub_matcher_(&csc)
 , dt_digi_matcher_(&dt)

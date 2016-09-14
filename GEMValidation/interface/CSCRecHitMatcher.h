@@ -29,8 +29,8 @@ public:
   typedef std::vector<CSCSegment> CSCSegmentContainer;
   
   CSCRecHitMatcher(SimHitMatcher& sh, 
-                   edm::EDGetTokenT<CSCRecHit2DCollection> cscRecHit2DInput_, 
-                   edm::EDGetTokenT<CSCSegmentCollection> cscSegmentInput_);
+                   edm::EDGetTokenT<CSCRecHit2DCollection>& cscRecHit2DInput_, 
+                   edm::EDGetTokenT<CSCSegmentCollection>& cscSegmentInput_);
   
   ~CSCRecHitMatcher() {}
 

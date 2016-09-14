@@ -48,8 +48,8 @@ class L1TrackMatcher : public BaseMatcher
   L1TrackMatcher(CSCStubMatcher&, 
                  DTDigiMatcher&, 
                  RPCDigiMatcher&,
-                 edm::EDGetTokenT<L1CSCTrackCollection> cscTfTrackInputLabel_, 
-                 edm::EDGetTokenT<L1MuRegionalCandCollection> cscTfCandInputLabel_);
+                 edm::EDGetTokenT<L1CSCTrackCollection>& cscTfTrackInputLabel_, 
+                 edm::EDGetTokenT<L1MuRegionalCandCollection>& cscTfCandInputLabel_);
   /// destructor
   ~L1TrackMatcher();
   

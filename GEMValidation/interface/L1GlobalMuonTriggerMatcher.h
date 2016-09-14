@@ -20,12 +20,12 @@ class L1GlobalMuonTriggerMatcher : public BaseMatcher
  public:
   /// constructor
   L1GlobalMuonTriggerMatcher(SimHitMatcher& sh,
-                             edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandCSCInputLabel_,
-                             edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandDTInputLabel_,
-                             edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandRPCfInputLabel_,
-                             edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandRPCbInputLabel_,
-                             edm::EDGetTokenT<L1MuGMTCandCollection> gmtCandInputLabel_,
-                             edm::EDGetTokenT<l1extra::L1MuonParticleCollection> l1ExtraMuonInputLabel_
+                             edm::EDGetTokenT<L1MuRegionalCandCollection>& gmtRegCandCSCInputLabel_,
+                             edm::EDGetTokenT<L1MuRegionalCandCollection>& gmtRegCandDTInputLabel_,
+                             edm::EDGetTokenT<L1MuRegionalCandCollection>& gmtRegCandRPCfInputLabel_,
+                             edm::EDGetTokenT<L1MuRegionalCandCollection>& gmtRegCandRPCbInputLabel_,
+                             edm::EDGetTokenT<L1MuGMTCandCollection>& gmtCandInputLabel_,
+                             edm::EDGetTokenT<l1extra::L1MuonParticleCollection>& l1ExtraMuonInputLabel_
                              );
   /// destructor
   ~L1GlobalMuonTriggerMatcher();

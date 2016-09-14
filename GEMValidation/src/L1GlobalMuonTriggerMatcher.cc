@@ -5,12 +5,12 @@
 using namespace std;
 
 L1GlobalMuonTriggerMatcher::L1GlobalMuonTriggerMatcher(SimHitMatcher& sh,
-                                                       edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandCSCInputLabel_,
-                                                       edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandDTInputLabel_,
-                                                       edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandRPCfInputLabel_,
-                                                       edm::EDGetTokenT<L1MuRegionalCandCollection> gmtRegCandRPCbInputLabel_,
-                                                       edm::EDGetTokenT<L1MuGMTCandCollection> gmtCandInputLabel_,
-                                                       edm::EDGetTokenT<l1extra::L1MuonParticleCollection> l1ExtraMuonInputLabel_
+                                                       edm::EDGetTokenT<L1MuRegionalCandCollection> &gmtRegCandCSCInputLabel_,
+                                                       edm::EDGetTokenT<L1MuRegionalCandCollection> &gmtRegCandDTInputLabel_,
+                                                       edm::EDGetTokenT<L1MuRegionalCandCollection> &gmtRegCandRPCfInputLabel_,
+                                                       edm::EDGetTokenT<L1MuRegionalCandCollection> &gmtRegCandRPCbInputLabel_,
+                                                       edm::EDGetTokenT<L1MuGMTCandCollection> &gmtCandInputLabel_,
+                                                       edm::EDGetTokenT<l1extra::L1MuonParticleCollection> &l1ExtraMuonInputLabel_
                                                        )
   : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
 , simhit_matcher_(&sh)

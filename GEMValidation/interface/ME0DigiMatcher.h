@@ -25,7 +25,7 @@ class ME0DigiMatcher : public DigiMatcher
 {
 public:
 
-  ME0DigiMatcher(SimHitMatcher& sh, edm::EDGetTokenT<ME0DigiPreRecoCollection> me0DigiInput_);
+  ME0DigiMatcher(SimHitMatcher& sh, edm::EDGetTokenT<ME0DigiPreRecoCollection>& me0DigiInput_);
   
   ~ME0DigiMatcher();
 

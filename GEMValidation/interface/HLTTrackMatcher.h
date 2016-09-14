@@ -27,9 +27,9 @@ class HLTTrackMatcher : public BaseMatcher
   /// constructor
   HLTTrackMatcher(CSCRecHitMatcher&, DTRecHitMatcher&, 
                   RPCRecHitMatcher&, GEMRecHitMatcher&,
-                  edm::EDGetTokenT<reco::TrackExtraCollection>,
-                  edm::EDGetTokenT<reco::TrackCollection>,
-                  edm::EDGetTokenT<reco::RecoChargedCandidateCollection>);
+                  edm::EDGetTokenT<reco::TrackExtraCollection>&,
+                  edm::EDGetTokenT<reco::TrackCollection>&,
+                  edm::EDGetTokenT<reco::RecoChargedCandidateCollection>&);
   /// destructor
   ~HLTTrackMatcher();
 

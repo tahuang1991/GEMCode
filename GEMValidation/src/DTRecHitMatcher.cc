@@ -5,9 +5,9 @@ using namespace std;
 
 
 DTRecHitMatcher::DTRecHitMatcher(SimHitMatcher& sh, 
-                                 edm::EDGetTokenT<DTRecHitCollection> dtRecHit1DPairInput_,
-                                 edm::EDGetTokenT<DTRecSegment2DCollection> dtRecSegment2DInput_,
-                                 edm::EDGetTokenT<DTRecSegment4DCollection> dtRecSegment4DInput_
+                                 edm::EDGetTokenT<DTRecHitCollection>& dtRecHit1DPairInput_,
+                                 edm::EDGetTokenT<DTRecSegment2DCollection>& dtRecSegment2DInput_,
+                                 edm::EDGetTokenT<DTRecSegment4DCollection>& dtRecSegment4DInput_
                                  )
   : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
   , simhit_matcher_(&sh)

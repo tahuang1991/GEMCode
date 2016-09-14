@@ -1,10 +1,10 @@
 #include "GEMCode/GEMValidation/interface/L1TrackFinderCandidateMatcher.h"
 
 L1TrackFinderCandidateMatcher::L1TrackFinderCandidateMatcher(SimHitMatcher& sh,                        
-                                                             edm::EDGetTokenT<L1MuRegionalCandCollection> cscTfCandInputLabel_, 
-                                                             edm::EDGetTokenT<L1MuRegionalCandCollection> dtTfCandInputLabel_, 
-                                                             edm::EDGetTokenT<L1MuRegionalCandCollection> rpcfTfCandInputLabel_, 
-                                                             edm::EDGetTokenT<L1MuRegionalCandCollection> rpcbTfCandInputLabel_)
+                                                             edm::EDGetTokenT<L1MuRegionalCandCollection> &cscTfCandInputLabel_, 
+                                                             edm::EDGetTokenT<L1MuRegionalCandCollection> &dtTfCandInputLabel_, 
+                                                             edm::EDGetTokenT<L1MuRegionalCandCollection> &rpcfTfCandInputLabel_, 
+                                                             edm::EDGetTokenT<L1MuRegionalCandCollection> &rpcbTfCandInputLabel_)
   : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
 {
   auto cscTfCand = conf().getParameter<edm::ParameterSet>("cscTfCand");

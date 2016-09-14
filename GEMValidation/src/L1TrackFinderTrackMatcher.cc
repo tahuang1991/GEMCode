@@ -1,7 +1,7 @@
 #include "GEMCode/GEMValidation/interface/L1TrackFinderTrackMatcher.h"
 
 L1TrackFinderTrackMatcher::L1TrackFinderTrackMatcher(SimHitMatcher& sh,
-                                                     edm::EDGetTokenT<L1CSCTrackCollection> cscTfTrackInputLabel_ 
+                                                     edm::EDGetTokenT<L1CSCTrackCollection> &cscTfTrackInputLabel_ 
                                                      )
   : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
 {

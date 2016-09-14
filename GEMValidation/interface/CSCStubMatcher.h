@@ -39,10 +39,10 @@ public:
                  CSCDigiMatcher& dg, 
                  GEMDigiMatcher& gem_dg, 
                  RPCDigiMatcher& rpc_dg,
-                 edm::EDGetTokenT<CSCCLCTDigiCollection> clctInputs_, 
-                 edm::EDGetTokenT<CSCALCTDigiCollection> alctInputs_, 
-                 edm::EDGetTokenT<CSCCorrelatedLCTDigiCollection> lctInputs_, 
-                 edm::EDGetTokenT<CSCCorrelatedLCTDigiCollection> mplctInputs_);
+                 edm::EDGetTokenT<CSCCLCTDigiCollection>& clctInputs_, 
+                 edm::EDGetTokenT<CSCALCTDigiCollection>& alctInputs_, 
+                 edm::EDGetTokenT<CSCCorrelatedLCTDigiCollection>& lctInputs_, 
+                 edm::EDGetTokenT<CSCCorrelatedLCTDigiCollection>& mplctInputs_);
   
   ~CSCStubMatcher();
 
