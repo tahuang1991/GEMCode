@@ -4,6 +4,7 @@ from Helpers import drawCscLabel
 from Helpers import drawEtaLabel
 from Helpers import drawPuLabel
 from Helpers import draw_geff
+from Helpers import setTDRStyle
 
 #_______________________________________________________________________________
 def simTrackToCscSimHitMatching(plotter,st=1):
@@ -26,8 +27,8 @@ def simTrackToCscSimHitMatching(plotter,st=1):
     ok_eta = TCut("TMath::Abs(eta)>%f && TMath::Abs(eta)<%f"%(plotter.etaMin,plotter.etaMax))
 
     ## variables for the plo
-    topTitle = " " * 11 + "CSC SimHit matching" + " " * 35 + "CMS Simulation Preliminary"
-    xTitle = "Generated muon #eta"
+    topTitle = " " * 11 + "CMS Simulation Preliminary" + " " * 35 + "14 TeV, PU0"
+    xTitle = "True muon #eta"
     yTitle = "Efficiency"
     title = "%s;%s;%s"%(topTitle,xTitle,yTitle)
     toPlot = "TMath::Abs(eta)"
@@ -36,7 +37,7 @@ def simTrackToCscSimHitMatching(plotter,st=1):
     minBin = float(h_bins[1:-1].split(',')[1])
     maxBin = float(h_bins[1:-1].split(',')[2])
 
-    c = TCanvas("c","c",700,450)
+    c = TCanvas("c","c",800,600)
     c.Clear()
     base = TH1F("base",title,nBins,minBin,maxBin)
     base.SetMinimum(plotter.yMin)
@@ -57,8 +58,8 @@ def simTrackToCscSimHitMatching(plotter,st=1):
     leg.AddEntry(h1, "SimHits","l")
     leg.Draw("same")
 
-    csc = drawCscLabel(plotter.stations.reverse_mapping[st], 0.87,0.87,0.05)
-    pul = drawPuLabel(plotter.pu,0.17,0.17,0.05)
+    csc = drawCscLabel(plotter.stations.reverse_mapping[st], 0.17,0.17,0.05)
+    #pul = drawPuLabel(plotter.pu,0.17,0.17,0.05)
 #    tex = drawEtaLabel(plotter.etaMin,plotter.etaMax,0.2,0.8,0.05)
 
     c.SaveAs("%scsc_simhit_matching_efficiency_%s%s"%(plotter.targetDir, plotter.stations.reverse_mapping[st], plotter.ext))
@@ -84,8 +85,8 @@ def simTrackToCscStripsWiresMatching(plotter,st=1):
     ok_eta = TCut("TMath::Abs(eta)>%f && TMath::Abs(eta)<%f"%(plotter.etaMin,plotter.etaMax))
 
     ## variables for the plot
-    topTitle = " " * 11 + "CSC Digi matching" + " " * 35 + "CMS Simulation Preliminary"
-    xTitle = "Generated muon #eta"
+    topTitle = " " * 11 + "CMS Simulation Preliminary" + " " * 35 + "14 TeV, PU0"
+    xTitle = "True muon #eta"
     yTitle = "Efficiency"
     title = "%s;%s;%s"%(topTitle,xTitle,yTitle)
     toPlot = "TMath::Abs(eta)"
@@ -94,7 +95,7 @@ def simTrackToCscStripsWiresMatching(plotter,st=1):
     minBin = float(h_bins[1:-1].split(',')[1])
     maxBin = float(h_bins[1:-1].split(',')[2])
 
-    c = TCanvas("c","c",700,450)
+    c = TCanvas("c","c",800,600)
     c.Clear()
     base  = TH1F("base",title,nBins,minBin,maxBin)
     base.SetMinimum(plotter.yMin)
@@ -118,8 +119,8 @@ def simTrackToCscStripsWiresMatching(plotter,st=1):
     leg.AddEntry(h2, "Strips","l")
     leg.Draw("same")
     
-    csc = drawCscLabel(plotter.stations.reverse_mapping[st], 0.87,0.87,0.05)
-    pul = drawPuLabel(plotter.pu,0.17,0.17,0.05)
+    csc = drawCscLabel(plotter.stations.reverse_mapping[st], 0.17,0.17,0.05)
+    #pul = drawPuLabel(plotter.pu,0.17,0.17,0.05)
     #tex = drawEtaLabel(plotter.etaMin,plotter.etaMax,0.2,0.8,0.05)
 
     c.SaveAs("%scsc_digi_matching_efficiency_%s%s"%(plotter.targetDir,plotter.stations.reverse_mapping[st],plotter.ext))
@@ -128,6 +129,7 @@ def simTrackToCscStripsWiresMatching(plotter,st=1):
 #_______________________________________________________________________________
 def simTrackToCscStripsWiresMatching_2(plotter,st=1):
 
+    """
     gStyle.SetTitleStyle(0)
     gStyle.SetTitleAlign(13) ##coord in top left
     gStyle.SetTitleX(0.)
@@ -142,12 +144,14 @@ def simTrackToCscStripsWiresMatching_2(plotter,st=1):
     gStyle.SetPadBottomMargin(0.13)
     gStyle.SetOptStat(0)
     gStyle.SetMarkerStyle(1)
+    """
+    setTDRStyle()
     
     ok_eta = TCut("TMath::Abs(eta)>%f && TMath::Abs(eta)<%f"%(plotter.etaMin,plotter.etaMax))
 
     ## variables for the plot
-    topTitle = " " * 11 + "CSC Digi matching" + " " * 35 + "CMS Simulation Preliminary"
-    xTitle = "Generated muon #eta"
+    topTitle = " " * 11 + "CMS Simulation Preliminary" + " " * 35 + "14 TeV, PU0"
+    xTitle = "True muon #eta"
     yTitle = "Efficiency"
     title = "%s;%s;%s"%(topTitle,xTitle,yTitle)
     toPlot = "TMath::Abs(eta)"
@@ -156,7 +160,7 @@ def simTrackToCscStripsWiresMatching_2(plotter,st=1):
     minBin = float(h_bins[1:-1].split(',')[1])
     maxBin = float(h_bins[1:-1].split(',')[2])
 
-    c = TCanvas("c","c",700,450)
+    c = TCanvas("c","c",800,600)
     c.Clear()
     base  = TH1F("base",title,nBins,minBin,maxBin)
     base.SetMinimum(plotter.yMin)
@@ -180,8 +184,8 @@ def simTrackToCscStripsWiresMatching_2(plotter,st=1):
     leg.AddEntry(h2, "Wires AND strips","l")
     leg.Draw("same");
     
-    csc = drawCscLabel(plotter.stations.reverse_mapping[st], 0.87,0.87,0.05)
-    pul = drawPuLabel(plotter.pu,0.17,0.17,0.05)
+    csc = drawCscLabel(plotter.stations.reverse_mapping[st], 0.17,0.17,0.05)
+    #pul = drawPuLabel(plotter.pu,0.17,0.17,0.05)
     #tex = drawEtaLabel(plotter.etaMin,plotter.etaMax,0.2,0.8,0.05)
 
     c.SaveAs("%scsc_combined_digi_matching_efficiency_%s%s"%(plotter.targetDir,plotter.stations.reverse_mapping[st],plotter.ext))
@@ -208,8 +212,8 @@ def simTrackToCscAlctClctMatching(plotter,st=1):
     ok_eta = TCut("TMath::Abs(eta)>%f && TMath::Abs(eta)<%f"%(plotter.etaMin,plotter.etaMax))
 
     ## variables for the plot
-    topTitle = " " * 11 + "CSC Stub matching" + " " * 35 + "CMS Simulation Preliminary"
-    xTitle = "Generated muon #eta"
+    topTitle = " " * 11 + "CMS Simulation Preliminary" + " " * 35 + "14 TeV, PU0"
+    xTitle = "True muon #eta"
     yTitle = "Efficiency"
     title = "%s;%s;%s"%(topTitle,xTitle,yTitle)
     toPlot = "TMath::Abs(eta)"
@@ -218,7 +222,7 @@ def simTrackToCscAlctClctMatching(plotter,st=1):
     minBin = float(h_bins[1:-1].split(',')[1])
     maxBin = float(h_bins[1:-1].split(',')[2])
 
-    c = TCanvas("c","c",700,450)
+    c = TCanvas("c","c",800,600)
     c.Clear()
     base  = TH1F("base",title,nBins,minBin,maxBin)
     base.SetMinimum(plotter.yMin)
@@ -246,8 +250,8 @@ def simTrackToCscAlctClctMatching(plotter,st=1):
     leg.AddEntry(h21, "CLCT provided strips","l")
     leg.Draw("same");
     
-    csc = drawCscLabel(plotter.stations.reverse_mapping[st], 0.87,0.87,0.05)
-    pul = drawPuLabel(plotter.pu,0.17,0.17,0.05)
+    csc = drawCscLabel(plotter.stations.reverse_mapping[st], 0.17,0.17,0.05)
+    #pul = drawPuLabel(plotter.pu,0.17,0.17,0.05)
     #tex = drawEtaLabel(plotter.etaMin,plotter.etaMax,0.2,0.8,0.05)
 
     c.SaveAs("%scsc_stub_matching_efficiency_%s%s"%(plotter.targetDir,plotter.stations.reverse_mapping[st],plotter.ext))
@@ -274,8 +278,8 @@ def simTrackToCscAlctClctMatching_2(plotter,st=1):
     ok_eta = TCut("TMath::Abs(eta)>%f && TMath::Abs(eta)<%f"%(plotter.etaMin,plotter.etaMax))
 
     ## variables for the plot
-    topTitle = " " * 11 + "CSC Stub matching" + " " * 35 + "CMS Simulation Preliminary"
-    xTitle = "Generated muon #eta"
+    topTitle = " " * 11 + "CMS Simulation Preliminary" + " " * 35 + "14 TeV, PU0"
+    xTitle = "True muon #eta"
     yTitle = "Efficiency"
     title = "%s;%s;%s"%(topTitle,xTitle,yTitle)
     toPlot = "TMath::Abs(eta)"
@@ -284,7 +288,7 @@ def simTrackToCscAlctClctMatching_2(plotter,st=1):
     minBin = float(h_bins[1:-1].split(',')[1])
     maxBin = float(h_bins[1:-1].split(',')[2])
 
-    c = TCanvas("c","c",700,450)
+    c = TCanvas("c","c",800,600)
     c.Clear()
     base  = TH1F("base",title,nBins,minBin,maxBin)
     base.SetMinimum(plotter.yMin)
@@ -312,8 +316,8 @@ def simTrackToCscAlctClctMatching_2(plotter,st=1):
     leg.AddEntry(h21, "ALCT AND CLCT provided wires and strips","l")
     leg.Draw("same");
     
-    csc = drawCscLabel(plotter.stations.reverse_mapping[st], 0.87,0.87,0.05)
-    pul = drawPuLabel(plotter.pu,0.17,0.17,0.05)
+    csc = drawCscLabel(plotter.stations.reverse_mapping[st], 0.17,0.17,0.05)
+    #pul = drawPuLabel(plotter.pu,0.17,0.17,0.05)
     #tex = drawEtaLabel(plotter.etaMin,plotter.etaMax,0.2,0.8,0.05)
 
     c.SaveAs("%scsc_combined_stub_matching_efficiency_%s%s"%(plotter.targetDir,plotter.stations.reverse_mapping[st],plotter.ext))
@@ -340,8 +344,8 @@ def simTrackToCscLctMatching(plotter,st=1):
     ok_eta = TCut("TMath::Abs(eta)>%f && TMath::Abs(eta)<%f"%(plotter.etaMin,plotter.etaMax))
 
     ## variables for the plot
-    topTitle = " " * 11 + "CSC Stub matching" + " " * 35 + "CMS Simulation Preliminary"
-    xTitle = "Generated muon #eta"
+    topTitle = " " * 11 + "CMS Simulation Preliminary" + " " * 35 + "14 TeV, PU0"
+    xTitle = "True muon #eta"
     yTitle = "Efficiency"
     title = "%s;%s;%s"%(topTitle,xTitle,yTitle)
     toPlot = "TMath::Abs(eta)"
@@ -350,7 +354,7 @@ def simTrackToCscLctMatching(plotter,st=1):
     minBin = float(h_bins[1:-1].split(',')[1])
     maxBin = float(h_bins[1:-1].split(',')[2])
 
-    c = TCanvas("c","c",700,450)
+    c = TCanvas("c","c",800,600)
     c.Clear()
     base  = TH1F("base",title,nBins,minBin,maxBin)
     base.SetMinimum(plotter.yMin)
@@ -382,8 +386,8 @@ def simTrackToCscLctMatching(plotter,st=1):
         leg.AddEntry(h2, "LCT","l")
     leg.Draw("same");
     
-    csc = drawCscLabel(plotter.stations.reverse_mapping[st], 0.87,0.87,0.05)
-    pul = drawPuLabel(plotter.pu,0.17,0.17,0.05)
+    csc = drawCscLabel(plotter.stations.reverse_mapping[st], 0.17,0.17,0.05)
+    #pul = drawPuLabel(plotter.pu,0.17,0.17,0.05)
     #tex = drawEtaLabel(plotter.etaMin,plotter.etaMax,0.2,0.8,0.05)
 
     c.SaveAs("%scsc_lct_matching_efficiency_%s%s"%(plotter.targetDir,plotter.stations.reverse_mapping[st],plotter.ext))
@@ -409,8 +413,8 @@ def simTrackToCscMpLctMatching(plotter,st=1):
     ok_eta = TCut("TMath::Abs(eta)>%f && TMath::Abs(eta)<%f"%(plotter.etaMin,plotter.etaMax))
 
     ## variables for the plot
-    topTitle = " " * 11 + "CSC Stub matching" + " " * 35 + "CMS Simulation Preliminary"
-    xTitle = "Generated muon #eta"
+    topTitle = " " * 11 + "CMS Simulation Preliminary" + " " * 35 + "14 TeV, PU0"
+    xTitle = "True muon #eta"
     yTitle = "Efficiency"
     title = "%s;%s;%s"%(topTitle,xTitle,yTitle)
     toPlot = "TMath::Abs(eta)"
@@ -419,7 +423,7 @@ def simTrackToCscMpLctMatching(plotter,st=1):
     minBin = float(h_bins[1:-1].split(',')[1])
     maxBin = float(h_bins[1:-1].split(',')[2])
 
-    c = TCanvas("c","c",700,450)
+    c = TCanvas("c","c",800,600)
     c.Clear()
     base  = TH1F("base",title,nBins,minBin,maxBin)
     base.SetMinimum(plotter.yMin)
@@ -443,8 +447,8 @@ def simTrackToCscMpLctMatching(plotter,st=1):
     leg.AddEntry(h2, "MPLCT","l")
     leg.Draw("same");
     
-    csc = drawCscLabel(plotter.stations.reverse_mapping[st], 0.87,0.87,0.05)
-    pul = drawPuLabel(plotter.pu,0.17,0.17,0.05)
+    csc = drawCscLabel(plotter.stations.reverse_mapping[st], 0.17,0.17,0.05)
+    #pul = drawPuLabel(plotter.pu,0.17,0.17,0.05)
     #tex = drawEtaLabel(plotter.etaMin,plotter.etaMax,0.2,0.8,0.05)
 
     c.SaveAs("%scsc_mplct_matching_efficiency_%s%s"%(plotter.targetDir,plotter.stations.reverse_mapping[st],plotter.ext))

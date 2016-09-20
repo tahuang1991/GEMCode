@@ -64,8 +64,8 @@ for i in range(len(plotter.stationsToUse)):
   st = plotter.stationsToUse[i]
   print "Processing station ", plotter.stations.reverse_mapping[st]
   print plotter.stationsToUse.index(st), plotter.treeEffSt[plotter.stationsToUse.index(st)]
-  simTrackToCscSimHitMatching(plotter,st)
-  simTrackToCscStripsWiresMatching(plotter,st)
+  #simTrackToCscSimHitMatching(plotter,st)
+  #simTrackToCscStripsWiresMatching(plotter,st)
   simTrackToCscStripsWiresMatching_2(plotter,st)
   simTrackToCscAlctClctMatching(plotter,st)
   simTrackToCscAlctClctMatching_2(plotter,st)

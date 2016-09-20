@@ -5,6 +5,9 @@
   * Available plots:
     * ALCT/CLCT/LCT signal trigger efficiency for ME1/1, ME2/1
   * Write here instructions to produce efficiency plots
+  <PRE>
+  python produceGEMCSCMatchingPlots.py
+  </PRE>
 
 2. Rate
 
