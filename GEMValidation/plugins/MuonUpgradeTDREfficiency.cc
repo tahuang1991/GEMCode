@@ -89,8 +89,10 @@ struct TrackEff
   Int_t nlayers_st_dg_even;
   Int_t pad_odd;
   Int_t pad_even;
-  Int_t Copad_odd;
-  Int_t Copad_even;
+  Int_t Copad_L1_odd;
+  Int_t Copad_L1_even;
+  Int_t Copad_L2_odd;
+  Int_t Copad_L2_even;
   Int_t hsfromgem_odd;
   Int_t hsfromgem_even;
 
@@ -179,8 +181,10 @@ void TrackEff::init()
   nlayers_st_dg_even = -1;
   pad_odd = -1;
   pad_even = -1;
-  Copad_odd = -1;
-  Copad_even = -1;
+  Copad_L1_odd = -1;
+  Copad_L1_even = -1;
+  Copad_L2_odd = -1;
+  Copad_L2_even = -1;
 
   hsfromgem_odd = -1;
   hsfromgem_even = -1;
@@ -268,8 +272,10 @@ TTree* TrackEff::book(TTree *t, const std::string & name)
 
   t->Branch("pad_odd", &pad_odd);
   t->Branch("pad_even", &pad_even);
-  t->Branch("Copad_odd", &Copad_odd);
-  t->Branch("copad_even", &Copad_even);
+  t->Branch("Copad_L1_odd", &Copad_L1_odd);
+  t->Branch("copad_L1_even", &Copad_L1_even);
+  t->Branch("Copad_L2_odd", &Copad_L2_odd);
+  t->Branch("copad_L2_even", &Copad_L2_even);
 
   t->Branch("hsfromgem_odd", &hsfromgem_odd);
   t->Branch("hsfromgem_even", &hsfromgem_even);
@@ -673,7 +679,10 @@ void MuonUpgradeTDREfficiency::analyze(const edm::Event& ev, const edm::EventSet
                                recoTrackInputLabel_,
                                recoChargedCandidateInputLabel_);
 
-    if (ntupleTrackEff_) analyzeTrackEff(match, trk_no);
+    if (ntupleTrackEff_) {
+      cout << "Analyzing track efficiency " << std::endl;
+      analyzeTrackEff(match, trk_no);
+    }
     ++trk_no;
   }
 }
@@ -730,7 +739,7 @@ void MuonUpgradeTDREfficiency::analyzeTrackEff(SimTrackMatchManager& match, int 
     
     if (nlayers < minNHitsChamberCSCSimHit_) continue;
     
-
+    
     const bool odd(id.chamber()%2==1);
     if (odd) etrk_[st].has_csc_sh |= 1;
     else etrk_[st].has_csc_sh |= 2;
@@ -1186,36 +1195,41 @@ void MuonUpgradeTDREfficiency::analyzeTrackEff(SimTrackMatchManager& match, int 
     }
    }
 
-  for(auto d: match_gd.superChamberIdsCoPad())
+  cout << "Number of matching chambers with pads: " << match_gd.superChamberIdsPad().size() << endl; 
+  for(auto d: match_gd.superChamberIdsPad())
   {
     GEMDetId id(d);
-    int MEStation;
-    if (id.station() == 3) MEStation = 2;
-    else if (id.station() == 2) continue;
-    else MEStation = id.station();
+    //int MEStation;
+    std::cout << "GEM id " << id << std::endl;
+    // if (id.station() == 3) MEStation = 2;
+    // else if (id.station() == 2) continue;
+    // else MEStation = id.station();
 
-    const int st(detIdToMEStation(MEStation,id.ring()));
-    if (stations_to_use_.count(st) == 0) continue;
+    // const int st(detIdToMEStation(MEStation,id.ring()));
+    // if (stations_to_use_.count(st) == 0) continue;
 
-    const bool odd(id.chamber()%2==1);
-    if (odd) etrk_[st].has_gem_copad |= 1;
-    else     etrk_[st].has_gem_copad |= 2;
+    // const bool odd(id.chamber()%2==1);
+    // if (odd) etrk_[st].has_gem_copad |= 1;
+    // else     etrk_[st].has_gem_copad |= 2;
     
-    auto copads = match_gd.coPadsInSuperChamber(d);
-    if (copads.size() == 0) continue;
-    if (odd) etrk_[st].Copad_odd = digi_channel(copads.at(0));
-    else etrk_[st].Copad_even = digi_channel(copads.at(0));
-
-    if (st==2 or st==3)
-    {
-    if (odd) etrk_[1].has_gem_copad |= 1;
-    else     etrk_[1].has_gem_copad |= 2;
-    
-    auto copads = match_gd.coPadsInSuperChamber(d);
-    if (copads.size() == 0) continue;
-    if (odd) etrk_[1].Copad_odd = digi_channel(copads.at(0));
-    else etrk_[1].Copad_even = digi_channel(copads.at(0));
+    for (auto pad : match_gd.gemPadsInSuperChamber(d)){
+      cout << "\tPad " << pad << endl;
     }
+    // auto copads = match_gd.coPadsInSuperChamber(d);
+    // if (copads.size() == 0) continue;
+    // if (odd) etrk_[st].Copad_odd = digi_channel(copads.at(0));
+    // else etrk_[st].Copad_even = digi_channel(copads.at(0));
+
+    // if (st==2 or st==3)
+    // {
+    //   if (odd) etrk_[1].has_gem_copad |= 1;
+    //   else     etrk_[1].has_gem_copad |= 2;
+      
+    //   auto copads = match_gd.coPadsInSuperChamber(d);
+    //   if (copads.size() == 0) continue;
+    //   if (odd) etrk_[1].Copad_odd = digi_channel(copads.at(0));
+    //   else etrk_[1].Copad_even = digi_channel(copads.at(0));
+    // }
   }
 
   for (auto s: stations_to_use_)
