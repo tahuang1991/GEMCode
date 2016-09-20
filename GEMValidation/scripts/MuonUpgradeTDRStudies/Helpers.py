@@ -55,6 +55,7 @@ def draw_geff(t, title, h_bins, to_draw, den_cut, extra_num_cut,
     num = TH1F("num", "", nBins, minBin, maxBin) 
     den = TH1F("den", "", nBins, minBin, maxBin)
 
+    print t
     t.Draw(to_draw + ">>num", num_cut, "goff")
     t.Draw(to_draw + ">>den", den_cut, "goff")
 
