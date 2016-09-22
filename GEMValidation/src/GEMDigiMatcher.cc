@@ -154,13 +154,13 @@ GEMDigiMatcher::matchCoPadsToSimTrack(const GEMCoPadDigiCollection& co_pads)
     {
       // check that the pad BX is within the range
       if (pad->first().bx() < minBXGEMCoPad_ || 
-	  pad->first().bx() > maxBXGEMCoPad_ ||
-	  pad->second().bx() < minBXGEMCoPad_ || 
-	  pad->second().bx() > maxBXGEMCoPad_) continue;
+          pad->first().bx() > maxBXGEMCoPad_ ||
+          pad->second().bx() < minBXGEMCoPad_ || 
+          pad->second().bx() > maxBXGEMCoPad_) continue;
       // check that it matches a coincidence pad that was hit by SimHits from our track
       if (hit_co_pads.find(pad->first().pad()) == hit_co_pads.end() or 
-	  hit_co_pads.find(pad->second().pad()) == hit_co_pads.end()) continue;
-
+          hit_co_pads.find(pad->second().pad()) == hit_co_pads.end()) continue;
+      
       superchamber_to_gemcopads_[ superch_id() ].push_back(*pad);
     }
   }

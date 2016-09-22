@@ -89,10 +89,14 @@ struct TrackEff
   Int_t nlayers_st_dg_even;
   Int_t pad_odd;
   Int_t pad_even;
-  Int_t Copad_L1_odd;
-  Int_t Copad_L1_even;
-  Int_t Copad_L2_odd;
-  Int_t Copad_L2_even;
+  Int_t pad_L1_odd;
+  Int_t pad_L1_even;
+  Int_t pad_L2_odd;
+  Int_t pad_L2_even;
+  Int_t copad_L1_odd;
+  Int_t copad_L1_even;
+  Int_t copad_L2_odd;
+  Int_t copad_L2_even;
   Int_t hsfromgem_odd;
   Int_t hsfromgem_even;
 
@@ -181,10 +185,14 @@ void TrackEff::init()
   nlayers_st_dg_even = -1;
   pad_odd = -1;
   pad_even = -1;
-  Copad_L1_odd = -1;
-  Copad_L1_even = -1;
-  Copad_L2_odd = -1;
-  Copad_L2_even = -1;
+  pad_L1_odd = -1;
+  pad_L1_even = -1;
+  pad_L2_odd = -1;
+  pad_L2_even = -1;
+  copad_L1_odd = -1;
+  copad_L1_even = -1;
+  copad_L2_odd = -1;
+  copad_L2_even = -1;
 
   hsfromgem_odd = -1;
   hsfromgem_even = -1;
@@ -272,10 +280,14 @@ TTree* TrackEff::book(TTree *t, const std::string & name)
 
   t->Branch("pad_odd", &pad_odd);
   t->Branch("pad_even", &pad_even);
-  t->Branch("Copad_L1_odd", &Copad_L1_odd);
-  t->Branch("copad_L1_even", &Copad_L1_even);
-  t->Branch("Copad_L2_odd", &Copad_L2_odd);
-  t->Branch("copad_L2_even", &Copad_L2_even);
+  t->Branch("pad_L1_odd", &pad_L1_odd);
+  t->Branch("pad_L1_even", &pad_L1_even);
+  t->Branch("pad_L2_odd", &pad_L2_odd);
+  t->Branch("pad_L2_even", &pad_L2_even);
+  t->Branch("copad_L1_odd", &copad_L1_odd);
+  t->Branch("copad_L1_even", &copad_L1_even);
+  t->Branch("copad_L2_odd", &copad_L2_odd);
+  t->Branch("copad_L2_even", &copad_L2_even);
 
   t->Branch("hsfromgem_odd", &hsfromgem_odd);
   t->Branch("hsfromgem_even", &hsfromgem_even);
@@ -1196,10 +1208,9 @@ void MuonUpgradeTDREfficiency::analyzeTrackEff(SimTrackMatchManager& match, int 
    }
 
   cout << "Number of matching chambers with pads: " << match_gd.superChamberIdsPad().size() << endl; 
-  for(auto d: match_gd.superChamberIdsPad())
+  for(auto d: match_gd.superChamberIdsCoPad())
   {
     GEMDetId id(d);
-    //int MEStation;
     std::cout << "GEM id " << id << std::endl;
     // if (id.station() == 3) MEStation = 2;
     // else if (id.station() == 2) continue;
@@ -1212,7 +1223,7 @@ void MuonUpgradeTDREfficiency::analyzeTrackEff(SimTrackMatchManager& match, int 
     // if (odd) etrk_[st].has_gem_copad |= 1;
     // else     etrk_[st].has_gem_copad |= 2;
     
-    for (auto pad : match_gd.gemPadsInSuperChamber(d)){
+    for (auto pad : match_gd.gemCoPadsInSuperChamber(d)){
       cout << "\tPad " << pad << endl;
     }
     // auto copads = match_gd.coPadsInSuperChamber(d);
