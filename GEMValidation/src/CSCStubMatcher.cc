@@ -1115,7 +1115,6 @@ CSCStubMatcher::nChambersWithMPLCT(int min_quality) const
 }
 
 
-
 bool 
 CSCStubMatcher::checkStubInChamber(CSCDetId id, CSCCorrelatedLCTDigi lct) const
 {
@@ -1166,4 +1165,23 @@ float
 CSCStubMatcher::getFractionalStrip(const CSCCorrelatedLCTDigi& lct) const
 {
   return 0.5 * (lct.getStrip() + 1) - 0.25;
+}
+
+
+float 
+CSCStubMatcher::getAverageBendingLCT(unsigned int rawId, const CSCCorrelatedLCTDigi& lct) const
+{
+  CSCDetId cscId = CSCDetId(rawId);
+  float hsWidth(gemvalidation::cscHalfStripWidth(cscId));
+  
+  // map the pattern number to min int bending, max int bending
+  int maxBendList[CSCConstants::NUM_CLCT_PATTERNS] = {
+    0, 11, 11, -11, 9, -9, 7, -7, 5, -5, 3};
+  int minBendList[CSCConstants::NUM_CLCT_PATTERNS] = {
+    0, 0,   7, -7,  5, -5, 3, -3, 0, 0, -3};
+  
+  int averageBend = 0.5 * (minBendList[lct.getPattern()] + maxBendList[lct.getPattern()] );
+                   
+  // return the average bending
+  return averageBend * hsWidth;
 }

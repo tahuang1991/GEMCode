@@ -118,6 +118,9 @@ public:
   // get the fractional strip for an LCT that can be used in the geometry
   float getFractionalStrip(const CSCCorrelatedLCTDigi& lct) const;
   
+  // get the bending angle from the pattern number and bending bit
+  float getAverageBendingLCT(unsigned int rawId, const CSCCorrelatedLCTDigi& lct) const;
+  
 private:
 
   void matchCLCTsToSimTrack(const CSCCLCTDigiCollection&);
