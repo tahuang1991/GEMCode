@@ -625,7 +625,7 @@ def plotalleta(pt, pt1, netas, fraction=95, yaxis = "(csc_bending_angle12_xfacto
     if ME21CSConly:
     	extrapic = "_ME21CSConly"
         extratxt = ", ME21 CSC only"
-    #LUT = open("HybridLUT_Pt%d_BGPt%d_eta%dto%d%s_0925.log"%(pt,pt1,int(netas[0]*10), int(netas[-1]*10), extrapic),"w+")
+    LUT = open("HybridLUT_Pt%d_BGPt%d_eta%dto%d%s_0925.log"%(pt,pt1,int(netas[0]*10), int(netas[-1]*10), extrapic),"w+")
     for neta in range(len(netas)-1):
        if (netas[neta]<0 or netas[neta+1]<0):
 	    continue
@@ -664,7 +664,7 @@ def plotalleta(pt, pt1, netas, fraction=95, yaxis = "(csc_bending_angle12_xfacto
 		astart = .6
 		bstart = .0# not used 
 		(maxa, maxb, alpha, x0, y0) = loopEllipse(filedirs_v6, treename, fraction, astart, bstart, xaxis, yaxis,x_bins, y_bins,xtitle, ytitle,st_title, netas[neta], netas[neta+1], dens_L1,text,outputdir1+"GEMCSC_ctau0andctau1000_hyrid_profile_20160925_pt%d_ptbg%d_fraction%d_st2eta%dto%d_npar%d%s"%(pt, pt1, fraction, int(netas[neta]*10),int(netas[neta+1]*10), npar, extrapic))
-		#LUT.write("eta%dto%dnpar%dfraction%d:(%f,%f,%f,%f,%f)\n"%(int(netas[neta]*10), int(netas[neta+1]*10), npar,fraction,maxa,maxb,alpha, x0, y0))		
+		LUT.write("eta%dto%dnpar%dfraction%d:(%f,%f,%f,%f,%f)\n"%(int(netas[neta]*10), int(netas[neta+1]*10), npar,fraction,maxa,maxb,alpha, x0, y0))		
 		#print "max_a ",maxa," maxb ",maxb," alpha ",alpha," x0 ",x0, " y0 ",y0
 		xaxis1 = "(%s*TMath::Cos(%f)-%s*TMath::Sin(%f)-%f)"%(xaxis, alpha, yaxis, alpha, x0)
 		yaxis1 = "(%s*TMath::Sin(%f)+%s*TMath::Cos(%f)-%f)"%(xaxis, alpha, yaxis, alpha, y0)

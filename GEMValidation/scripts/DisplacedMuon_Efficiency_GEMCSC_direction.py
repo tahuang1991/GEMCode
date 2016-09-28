@@ -1,6 +1,7 @@
 import ROOT
 import random
 import os
+import sys
 import numpy as np
 import array
 import math
@@ -89,7 +90,7 @@ def getAllEff(chain,den, num, picname, txt, todraw="pt"):
 	b1.GetYaxis().SetTitle("Efficiency")
 	b1.GetXaxis().SetTitle("True muon p_{T} [GeV]")
 	b1.GetXaxis().SetTitleSize(0.045)
-	b1.SetTitle("CMS Simulation Preliminary"+"  "*20+" PU0, 14TeV")
+	b1.SetTitle("#scale[1.4]{#font[61]{CMS}} #font[52]{Simulation preliminary}"+"  "*10+" 14 TeV, 0 PU")
 	b1.SetStats(0)
 
 #	treename2 = "HLTBendingAngle/trk_eff_csc_ME21" 
@@ -252,7 +253,10 @@ def DrawProfileAndScatter_pT(filedir,treename,fraction, xaxis,yaxis0, yaxis,x_bi
     b0 = ROOT.TH2F("b0","b0",xBins,xminBin,xmaxBin,yBins0,yminBin0,ymaxBin0)
     b0.GetXaxis().SetTitle("%s"%xtitle)
     b0.GetYaxis().SetTitle("%s"%ytitle0)
-    b0.SetTitle("%s Vs %s,%s"%(ytitle0, xtitle, st_title)) 
+    b0.GetXaxis().SetTitleSize(.04)
+    b0.GetYaxis().SetTitleSize(.04)
+    b0.SetTitle("#scale[1.4]{#font[61]{CMS}} #font[52]{Simulation preliminary}"+"  "*10+" 14 TeV, 0 PU")
+    #b0.SetTitle("%s Vs %s,%s"%(ytitle0, xtitle, st_title)) 
     #b1.SetTitleFont(62)
     b0.SetTitleSize(0.05)
     #b1.SetMaximum(30)
@@ -262,10 +266,14 @@ def DrawProfileAndScatter_pT(filedir,treename,fraction, xaxis,yaxis0, yaxis,x_bi
     print "todraw ",todrawb0, " cut ",cuts
 
     #tex1 = TLatex(0.35,.8,"#splitline{%s}{%.1f<|#eta|<%.1f,20<p_{T}<50}"%(st_title,etamin,etamax))
-    tex1 = ROOT.TLatex(0.15,.8,"#splitline{%s}{%s}"%(st_title,text))
+    #tex1 = ROOT.TLatex(0.15,.8,"#splitline{%s}{%s}"%(st_title,text))
     #tex1 = TLatex(0.2,.7,"%s"%(st_title))
+    tex1 = ROOT.TLatex(0.2,.8,"%s"%(text))
     tex1.SetNDC()
     tex1.Draw("same")
+    c0.SaveAs("%s"%picname+"_0.png")
+    c0.SaveAs("%s"%picname+"_0.C")
+    """
     printa = 0
     (Xs, Ys, exl, exh, eyl, eyh) = FitHistoFunction(b0,xBins, xminBin, xmaxBin, yBins0, yminBin0,ymaxBin0, fraction, printa)
     r0 = ROOT.TGraphAsymmErrors(len(Xs),Xs,Ys,exl,exh,eyl,eyh)
@@ -277,8 +285,6 @@ def DrawProfileAndScatter_pT(filedir,treename,fraction, xaxis,yaxis0, yaxis,x_bi
     r0.SetLineColor(ROOT.kBlack)
     r0.Draw("esame")
 
-    c0.SaveAs("%s"%picname+"_0.png")
-    """
     c1 = ROOT.TCanvas("c1","c1")
     c1.SetGridx()
     c1.SetGridy()
@@ -364,7 +370,7 @@ def makeEffplot(filedir,todraw, treename0,ptthreshold,fractionToKeep, den, num, 
 	b1.GetYaxis().SetTitle("Efficiency")
 	b1.GetXaxis().SetTitle("True muon p_{T} [GeV]")
 	b1.GetXaxis().SetTitleSize(0.045)
-	b1.SetTitle("CMS Simulation Preliminary"+"  "*20+" PU0, 14TeV")
+        b1.SetTitle("#scale[1.4]{#font[61]{CMS}} #font[52]{Simulation preliminary}"+"  "*10+" 14 TeV, 0 PU")
 	b1.SetStats(0)
 
     	chain = ROOT.TChain(treename0)
@@ -484,7 +490,7 @@ def printcuts(filedir, treename0, den, num, pt, npar,etamin, etamax, fractionToK
     			deltapt=.5
 		else:
 	   		deltapt=1.0	   
-        	chain.Draw("TMath::Abs(%s)>>hist"%(num),den+"&& npar==%d && pt>%f && pt<%f && TMath::Abs(%s)<.6"%(npar,pt-deltapt, pt+deltapt, num)+hasnum)
+        	chain.Draw("TMath::Abs(%s)>>hist"%(num),den+"&& npar==%d && pt>%f && pt<%f && TMath::Abs(%s)<1"%(npar,pt-deltapt, pt+deltapt, num)+hasnum)
        		#print "cuts ",den+"&& npar==%d && pt>%f && pt<%f && TMath::Abs(%s)<.6"%(npar,pt-1, pt+1, num)+hasnum
        			#hist.Print("ALL")
 		upperlim = getUpperlimit(hist, fractionToKeep)
@@ -539,12 +545,15 @@ def makeEffplot_v2(filedirs,todraw, treename0, den, num, pt, allnpar, fractionTo
 	
 	b1 = ROOT.TH1F("b1","b1",len(ptbins)-1, ptbins)
 	b1.GetYaxis().SetRangeUser(0.0,1.05)
-	b1.GetYaxis().SetTitleOffset(1.2)
 	b1.GetYaxis().SetNdivisions(520)
 	b1.GetYaxis().SetTitle("Efficiency")
 	b1.GetXaxis().SetTitle("True muon p_{T} [GeV]")
-	b1.GetXaxis().SetTitleSize(0.045)
-	b1.SetTitle("CMS Simulation Preliminary"+"  "*10+" PU0, 14TeV")
+	b1.GetXaxis().SetTitleSize(0.05)
+	b1.GetYaxis().SetTitleOffset(1.1)
+	b1.GetYaxis().SetTitleSize(.05)
+	b1.GetYaxis().SetLabelSize(.05)
+	b1.GetXaxis().SetLabelSize(.05)
+        b1.SetTitle("#scale[1.4]{#font[61]{CMS}} #font[52]{Simulation preliminary}"+"  "*10+" 14 TeV, 0 PU")
 	
 	
 	Teffs = []
@@ -556,11 +565,13 @@ def makeEffplot_v2(filedirs,todraw, treename0, den, num, pt, allnpar, fractionTo
         maker = [20,21,22,23,33]
 	print "filedirs ",filedirs
 	
-	legend = ROOT.TLegend(0.4,0.15,0.92,0.5)
+	#legend = ROOT.TLegend(0.4,0.15,0.92,0.5)
+	legend = ROOT.TLegend(0.4,0.5,0.8,0.5)
 	legend.SetFillColor(ROOT.kWhite)
 	legend.SetTextFont(42)
+	legend.SetTextSize(.05)
 	legend.SetHeader("stub alignment algo")
-	muons = ["Prompt Muons","Displaced Muons, 5<|d_{xy}|<50cm"]
+	muons = ["Prompt muon","#splitline{Displaced muon}{5<|d_{xy}|<50cm}"]
 	for n in range(len(filedirs)):
 		print "n ",n
 		hden = ROOT.TH1F("hden%d"%n,"hden%d"%n,len(ptbins)-1, ptbins)
@@ -580,7 +591,7 @@ def makeEffplot_v2(filedirs,todraw, treename0, den, num, pt, allnpar, fractionTo
     			ls = os.listdir(filedir)
     	 		for x in ls:
 	      			if not(x.endswith(".root")):
-					print "x.endswith(.root) ", x.endswith(".root")
+					#print "x.endswith(.root) ", x.endswith(".root")
 					continue
 				x = filedir[:]+x
     				if os.path.isdir(x):
@@ -603,8 +614,8 @@ def makeEffplot_v2(filedirs,todraw, treename0, den, num, pt, allnpar, fractionTo
 		     npar = allnpar[xpar]	
 		     if n==0:
 			hist = ROOT.TH1F("hist","hist",4000,0.0,0.4)
-        		chain.Draw("TMath::Abs(%s)>>hist"%(num[n]),den[n]+"&& npar==%d && pt>%f && pt<%f && TMath::Abs(%s)<.6"%(npar,pt-1, pt+1, num[n])+hasnum)
-       			#print "cuts ",den[n]+"&& npar==%d && pt>%f && pt<%f && TMath::Abs(%s)<.5"%(npar,pt-1, pt+1, num[n])+hasnum
+        		chain.Draw("TMath::Abs(%s)>>hist"%(num[n]),den[n]+"&& npar==%d && pt>%f && pt<%f && TMath::Abs(%s)<1"%(npar,pt-1, pt+1, num[n])+hasnum)
+       			print "cuts ",den[n]+"&& npar==%d && pt>%f && pt<%f && TMath::Abs(%s)<1.0"%(npar,pt-1, pt+1, num[n])+hasnum
        			#hist.Print("ALL")
 			upperlim = getUpperlimit(hist, fractionToKeep)
     			Upperlimits[xpar] = upperlim
@@ -657,8 +668,12 @@ def makeEffplot_v3(filedirs,todraw, treename0, den, num, Pts, netas, allnpar, fr
 	b1.GetYaxis().SetNdivisions(520)
 	b1.GetYaxis().SetTitle("Efficiency")
 	b1.GetXaxis().SetTitle("True muon p_{T} [GeV]")
-	b1.GetXaxis().SetTitleSize(0.045)
-	b1.SetTitle("CMS Simulation Preliminary"+"  "*20+" PU0, 14TeV")
+	b1.GetXaxis().SetTitleSize(0.05)
+	b1.GetYaxis().SetTitleOffset(1.1)
+	b1.GetYaxis().SetTitleSize(.05)
+	b1.GetYaxis().SetLabelSize(.05)
+	b1.GetXaxis().SetLabelSize(.05)
+        b1.SetTitle("#scale[1.4]{#font[61]{CMS}} #font[52]{Simulation preliminary}"+"  "*10+" 14 TeV, 0 PU")
 	
 	
 	Teffs = []
@@ -670,9 +685,10 @@ def makeEffplot_v3(filedirs,todraw, treename0, den, num, Pts, netas, allnpar, fr
 		pt = Pts[npt]
 		npad = neta*len(Pts)+npt
 		c1.cd(npad+1)
-		legend = ROOT.TLegend(0.5,0.12,0.96,0.5)
+		legend = ROOT.TLegend(0.4,0.2,0.8,0.5)
 		legend.SetFillColor(ROOT.kWhite)
 		legend.SetTextFont(42)
+	        legend.SetTextSize(.05)
 		legend.SetHeader("stubs alignment algo")
     		den_v2 = []
     		for x in den:
@@ -702,12 +718,15 @@ def makeplots(Teffs, legs, text, picname):
 
 	b1 = ROOT.TH1F("b1","b1",len(ptbins)-1, ptbins)
 	b1.GetYaxis().SetRangeUser(0.0,1.05)
-	b1.GetYaxis().SetTitleOffset(1.2)
+	b1.GetYaxis().SetTitleOffset(1.1)
 	b1.GetYaxis().SetNdivisions(520)
 	b1.GetYaxis().SetTitle("Efficiency")
 	b1.GetXaxis().SetTitle("True muon p_{T} [GeV]")
-	b1.GetXaxis().SetTitleSize(0.045)
-	b1.SetTitle("CMS Simulation Preliminary"+"  "*10+" PU0, 14TeV")
+	b1.GetXaxis().SetTitleSize(0.05)
+	b1.GetXaxis().SetLabelSize(0.05)
+	b1.GetYaxis().SetTitleSize(0.05)
+	b1.GetYaxis().SetLabelSize(0.05)
+        b1.SetTitle("#scale[1.4]{#font[61]{CMS}} #font[52]{Simulation preliminary}"+"  "*10+" 14 TeV, 0 PU")
 	
 	
 	c1 = ROOT.TCanvas()
@@ -718,9 +737,10 @@ def makeplots(Teffs, legs, text, picname):
 
         color = [ROOT.kBlue, ROOT.kRed, ROOT.kMagenta+2, ROOT.kGreen+2,ROOT.kCyan+2]
         maker = [20,21,22,23,33]
-	legend = ROOT.TLegend(0.4,0.15,0.9,0.5)
+	legend = ROOT.TLegend(0.4,0.25,0.8,0.45)
 	legend.SetFillColor(ROOT.kWhite)
 	legend.SetTextFont(42)
+	legend.SetTextSize(.05)
 	#legend.SetHeader("%"%legheader)
 	b1.SetStats(0)
 	b1.Draw()
@@ -755,7 +775,9 @@ filedir1 = "/eos/uscms/store/user/tahuang/SLHC26_patch1_2023Muon_1M_Ana_PU0_Pt2_
 #filedir16 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0827/160901_002000/0000/"
 #filedir16 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0901/160901_222813/0000/"
 #filedir16 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0901_v2/160830_170002/0000/"
-filedir16 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0901/160901_043538/0000/"
+#filedir16 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0901/160901_043538/0000/"
+#filedir16 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0925/160926_050053/0000/"
+filedir16 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0925_v2/160926_194628/0000/"
 filedir14 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0812_v4/160813_141149/0000/"
 filedir10 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0812_v0/160813_204308/0000/"
 filedir15 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0816_v5/160815_185029/0000/"
@@ -770,7 +792,9 @@ filedir4 = "/eos/uscms/store/user/tahuang/SLHC26_patch1_2023Muon_1M_Ana_PU0_ctau
 #filedir46 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0827/160901_001931/0000/"
 #filedir46 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0901/160901_223815/0000/"
 #filedir46 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0901/160830_152048/0000/"
-filedir46 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0901/160901_043623/0000/"
+#filedir46 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0901/160901_043623/0000/"
+#filedir46 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0925/160926_050000/0000/"
+filedir46 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0925_v2/160926_194711/0000/"
 filedir44 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0812_v4/160813_141529/0000/"
 filedir40 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0812_v0/160813_204646/0000/"
 filedir45 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0816_v5/160815_185325/0000/"
@@ -833,7 +857,7 @@ dens_loweta =  ["fabs(csc_bending_angle12_xfactor_smear3) <1","fabs(csc_bending_
 nums = ["csc_bending_angle12_xfactor_L1_2","csc_bending_angle12_xfactor_L1_2"]
 allnpar = [0,1,2,3]
 #allnpar = [2,3]
-legs = ["Prompt muon", "Displaced Muon, 5<|d_{xy}|<50"]
+legs = ["Prompt muon", "#splitline{Displaced muon}{5<|d_{xy}|<50cm}"]
 nums_loweta = ["csc_bending_angle12_xfactor_smear3","csc_bending_angle12_xfactor_smear3"]
 #makeEffplot_v3(filedirs,"pt", treename0, dens, nums, Pts, netas, 90, "true muon p_T", "Efficiency",legs, evenodds[npar],"DirectionPt_Dxy_0803/GEMCSC_ctau0andctau1000_directionOnly_Eff_recopt_20160803_npar%d_v"%(npar))
 #makeEffplot_v3(filedirs_v6,"pt", treename0, dens, nums, Pts, netas,allnpar, 90, "true muon p_T", "Efficiency",legs, evenodds[npar],"DirectionPt_Dxy_0817/GEMCSC_ctau0andctau1000_directionOnly_Eff_recopt_20160817_npar%d_v6"%(npar))
@@ -843,6 +867,15 @@ nums_loweta = ["csc_bending_angle12_xfactor_smear3","csc_bending_angle12_xfactor
 #makeEffplot_v3(filedirs_v5,"pt", treename0, dens, nums, Pts, netas, allnpar, 90, "true muon p_T", "Efficiency",legs, evenodds[npar],"DirectionPt_Dxy_0815/GEMCSC_ctau0andctau1000_directionOnly_Eff_recopt_20160815_npar%d_v5"%(npar))
 
 #printallcuts(filedir16, treename0,"hasSt3orSt4_sh", "csc_bending_angle12_xfactor_L1_2", netas, [2,3,4,5,7,10,15,20,30,40], 90, "|#Delta#phi_{dir}|", "Entries", "digi level ","Direction_PT_Cut_0909/GEMCSC_ctau0_directionOnly_20160909")
+
+if len(sys.argv)>=2:
+	#take dir name from arguments, condor mode
+	outputdir = sys.argv[1]
+	filedirs_v6 = ["out_ana_prompt.root","out_ana_displaced.root"]
+	if outputdir[-1] != "/":
+		outputdir = outputdir+"/"
+else:
+	outputdir = "Direction_PT_0925/"
 def plotalleta(pt, netas, fraction=95, yaxis = "(csc_bending_angle12_xfactor_L1_2)",ME21CSConly=False):
     Teffs_0 = []
     Teffs_1 = []
@@ -863,10 +896,9 @@ def plotalleta(pt, netas, fraction=95, yaxis = "(csc_bending_angle12_xfactor_L1_
        if (netas[neta]>=1.6):
 	 allnpar = [0,1,2,3]
 	 ring =1
-       legs = ["Prompt muon", "Displaced Muon, 10<|d_{xy}|<50"]
+       legs = ["Prompt muon", "#splitline{Displaced muon}{10<|d_{xy}|<50 cm}"]
        Tefftotal = []
        Tefftotal_csc = []
-       fraction = 90
        for npar in allnpar:
         allnpars = [npar]
 	me11 = evenodds[npar].split(',')[0]
@@ -874,20 +906,20 @@ def plotalleta(pt, netas, fraction=95, yaxis = "(csc_bending_angle12_xfactor_L1_
 	chambers = "ME1%d %s,ME2%d %s"%(ring, me11, ring, me21)
 	#dens =  ["hasSt3orSt4_sh && fabs(csc_bending_angle12_xfactor_L1_1)>0 && fabs(eta_st2_sh)>%f && fabs(eta_st2_sh)<%f"%(netas[neta],netas[neta+1]),"hasSt3orSt4_sh && fabs(csc_bending_angle12_xfactor_L1_1)>0 && fabs(eta_st2_sh)>%f && fabs(eta_st2_sh)<%f && fabs(genGdMu_dxy)>10 && fabs(genGdMu_dxy)<50 && fabs(genGdMu_dR)<0.1"%(netas[neta],netas[neta+1])]
 	nums_L1 = [yaxis, yaxis]
-	dens_L1 =  ["hasSt3orSt4_sh && fabs(eta_st2_sh)>%f && fabs(eta_st2_sh)<%f"%(netas[neta],netas[neta+1])+"&& fabs(%s)>0"%nums_L1[0],"hasSt3orSt4_sh && fabs(eta_st2_sh)>%f && fabs(eta_st2_sh)<%f && fabs(genGdMu_dxy)>10 && fabs(genGdMu_dxy)<50 && fabs(genGdMu_dR)<0.1"%(netas[neta],netas[neta+1])+"&&fabs(%s)>0"%nums_L1[0]]
-	text = "#splitline{%s}{%.1f<|#eta|<%.1f, p_{T}>%d GeV%s}"%(chambers, netas[neta],netas[neta+1],pt, extratxt)
-	Teffs = makeEffplot_v2(filedirs_v6,"pt", treename0, dens_L1, nums_L1, pt, allnpars, 90, "true muon p_T", "Efficiency",legs, text,"Direction_PT_0922/GEMCSC_ctau0andctau1000_directionOnly_Eff_recopt_20160922_dxy10_50_st2eta%dto%d_npar%d%s"%(int(netas[neta]*10), int(netas[neta+1]*10), npar,extrapic))
+	dens_L1 =  ["hasSt3orSt4_sh && fabs(eta_st2_sh)>%f && fabs(eta_st2_sh)<%f"%(netas[neta],netas[neta+1])+"&& fabs(%s)>0"%nums_L1[0]+" && meRing==%d"%(ring),"hasSt3orSt4_sh && fabs(eta_st2_sh)>%f && fabs(eta_st2_sh)<%f && fabs(genGdMu_dxy)>10 && fabs(genGdMu_dxy)<50 && fabs(genGdMu_dR)<0.1"%(netas[neta],netas[neta+1])+"&&fabs(%s)>0"%nums_L1[0]+" && meRing==%d"%(ring)]
+	text = "#splitline{%s}{%.1f<|#eta|<%.1f, p_{T}^{L1}>%d GeV%s}"%(chambers, netas[neta],netas[neta+1],pt, extratxt)
+	Teffs = makeEffplot_v2(filedirs_v6,"pt", treename0, dens_L1, nums_L1, pt, allnpars, fraction, "true muon p_T", "Efficiency",legs, text,outputdir+"GEMCSC_ctau0andctau1000_directionOnly_Eff_recopt_20160925_dxy10_50_st2eta%dto%d_npar%d%s"%(int(netas[neta]*10), int(netas[neta+1]*10), npar,extrapic))
 	Tefftotal.append(Teffs)
        print "Tefftotal len ",len(Tefftotal),Tefftotal
        Teff0 = Tefftotal[0][0]
        Teff1 = Tefftotal[0][1]
        Teff0.SetName("directioneta%dto%d"%(int(netas[neta]*10),int(netas[neta+1]*10))+"promptmuonpt%d"%(pt))
        Teff1.SetName("directioneta%dto%d"%(int(netas[neta]*10),int(netas[neta+1]*10))+"displacedmuonpt%d"%(pt))
-       text_h = "#splitline{stub alignment algorithm}{%.1f<|#eta|<%.1f, p_{T}>%d GeV%s}"%(netas[neta],netas[neta+1], pt, extratxt)
+       text_h = "#splitline{Stub alignment algorithm}{%.1f<|#eta|<%.1f, p_{T}^{L1}>%d GeV%s}"%(netas[neta],netas[neta+1], pt, extratxt)
        for xpar in range(len(Tefftotal)-1):
    	Teff0.Add(Tefftotal[xpar+1][0])		   
    	Teff1.Add(Tefftotal[xpar+1][1])		   
-       makeplots([Teff0, Teff1], legs, text_h,"Direction_PT_0922/GEMCSC_ctau0andctau1000_direction_Eff_recopt_20160922_dxy10_50_st2eta%dto%d_allnpar_Plateau%d_binsimPt%d%s"%(int(netas[neta]*10), int(netas[neta+1]*10),fraction, pt, extrapic))
+       makeplots([Teff0, Teff1], legs, text_h,outputdir+"GEMCSC_ctau0andctau1000_direction_Eff_recopt_20160925_dxy10_50_st2eta%dto%d_allnpar_Plateau%d_binsimPt%d%s"%(int(netas[neta]*10), int(netas[neta+1]*10),fraction, pt, extrapic))
        """
        Teff_out.Reopen("Update")
        Teff0.Write(Teff_out)
@@ -903,19 +935,26 @@ def plotalleta(pt, netas, fraction=95, yaxis = "(csc_bending_angle12_xfactor_L1_
        Teffs1_alleta.Add(Teffs_1[xeta+1])	 
     Teffs0_alleta.SetName("directionpromptmuonpt%d"%(pt))
     Teffs1_alleta.SetName("directiondisplacedmuonpt%d"%(pt))
-    text_alleta = "#splitline{Stub alignment algorithm}{%.1f<|#eta|<%.1f, p_{T}>%d GeV%s}"%(netas[0],netas[-1], pt, extratxt)
-    makeplots([Teffs0_alleta, Teffs1_alleta], legs, text_alleta,"Direction_PT_0922/GEMCSC_ctau0andctau1000_direction_Eff_20160922_pt%d_fraction%d_St2eta%dto%d_allnpar%s"%(pt, fraction,int(netas[0]*10),int(netas[-1]*10), extrapic)) 
+    text_alleta = "#splitline{Stub alignment algorithm}{%.1f<|#eta|<%.1f, p_{T}^{L1}>%d GeV%s}"%(netas[0],netas[-1], pt, extratxt)
+    makeplots([Teffs0_alleta, Teffs1_alleta], legs, text_alleta,outputdir+"GEMCSC_ctau0andctau1000_direction_Eff_20160925_pt%d_fraction%d_St2eta%dto%d_allnpar%s"%(pt, fraction,int(netas[0]*10),int(netas[-1]*10), extrapic)) 
     """
     Teff_out.Reopen("Update")
     Teffs0_alleta.Write(Teff_out)
     Teffs1_alleta.Write(Teff_out)
     Teff_out.Close()
     """
-plotalleta(10,[1.6,1.8,2.0,2.2],95,"(csc_bending_angle12_xfactor_L1_2)",False)
-plotalleta(10,[1.6,1.8,2.0,2.2],95,"(csc_bending_angle12_xfactor_L1_2)",True)
-#plotalleta(10,[1.2,1.4,1.6],95,"(csc_bending_angle12_xfactor_L1_2)",False)
+if not os.path.exists(outputdir):
+        os.makedirs(outputdir)
+plotalleta(10,[1.6,1.8,2.0,2.2],90,"(csc_bending_angle12_xfactor_L1_2)",False)
+plotalleta(10,[1.6,1.8,2.0,2.2],90,"(csc_bending_angle12_xfactor_L1_1)",True)
+plotalleta(10,[1.2,1.4,1.6],90,"(csc_bending_angle12_xfactor_L1_2)",False)
 
-netas = [1.6,1.8,2.0,2.2]
+#plotalleta(20,[1.6,1.8,2.0,2.2],90,"(csc_bending_angle12_xfactor_L1_2)",False)
+#plotalleta(20,[1.6,1.8,2.0,2.2],90,"(csc_bending_angle12_xfactor_L1_1)",True)
+#plotalleta(20,[1.2,1.4,1.6],90,"(csc_bending_angle12_xfactor_L1_2)",False)
+
+#netas = [1.6,1.8,2.0,2.2]
+netas = [1.6,2.2]
 for ptthreshold1 in [20,30]:
 	for neta in range(len(netas)-1):
 	    #for ndxy in range(len(dxymin)):
@@ -957,23 +996,26 @@ for ptthreshold1 in [20,30]:
 		y_title2 = "|#Delta#Phi^{momentum}|"
 		sttitle="c#tau=0, ME11 %s,ME21 %s"%(me11, me21)
 		sttitle_ctau1000="displaced muon, 10<|d_{xy}|<50, ME11 %s,ME21 %s"%(me11, me21)
-		text = " %.1f<|#eta|<%.1f, with GE21"%(netas[neta],netas[neta+1])
+		#text = " %.1f<|#eta|<%.1f, with GE21"%(netas[neta],netas[neta+1])
+		text = "GE2/1+ME2/1"
 		phi_bins = "(80,0,3.2)"
-		title_phi1 = "#phi_{dir}^{st1}"
-		title_phi2 = "#phi_{dir}^{st2}"
+		phi_bins2 = "(90,0,3.6)"
+		title_phi1 = "muon #phi direction in St. 1"
+		title_phi2 = "muon #phi direction in St. 2"
 		hasxy1 = "&& fabs(phiM_st1_L1_1)>0 && fabs(phiM_st2_L1_1)>0 && fabs(csc_bending_angle12_xfactor_L1_1)>0"
 		hasxy2 = "&& fabs(phiM_st1_L1_2)>0 && fabs(phiM_st2_L1_2)>0 && fabs(csc_bending_angle12_xfactor_L1_2)>0"
 		#DrawProfileAndScatter_pT(filedir16,treename0, fraction, "pt","fabs(%s)"%y,"1/fabs("+y+")",x_bins,y_bins1, y_bins2,x_title,y_title2, y_title2+"^{-1}",sttitle,netas[neta],netas[neta+1],cuts+hasxy2,text,"Profile_Xfactor_PT_0901/GEMCSC_ctau0_%s_20160901_fraction%d_st2eta%dto%d_npar%d_withGE21"%(y,fraction,int(netas[neta]*10), int(netas[neta+1]*10), npar))
 		#DrawProfileAndScatter_pT(filedir46,treename0, fraction, "pt","fabs(%s)"%y,"1/fabs("+y+")",x_bins,y_bins1, y_bins2,x_title,y_title2, y_title2+"^{-1}",sttitle_ctau1000,netas[neta],netas[neta+1],cuts_ctau1000,text,"Profile_Xfactor_PT_0901/GEMCSC_dxy10_50_ctau1000_%s_20160901_fraction%d_st2eta%dto%d_npar%d_withGE21"%(y,fraction,int(netas[neta]*10), int(netas[neta+1]*10), npar))
-		#DrawProfileAndScatter_pT(filedir16,treename0, fraction, "abs(phiM_st1_L1_2)","abs(phiM_st2_L1_2)","1/fabs("+y+")", phi_bins,phi_bins, y_bins2, title_phi1, title_phi2, y_title2+"^{-1}",sttitle,netas[neta],netas[neta+1],cuts+"&& pt>10"+hasxy2, text+",p_{T}>10 GeV","Profile_Xfactor_PT_0901/GEMCSC_ctau0_20160901_pt10_st2eta%dto%d_npar%d_withGE21"%(int(netas[neta]*10), int(netas[neta+1]*10), npar))
-		#DrawProfileAndScatter_pT(filedir46,treename0, fraction, "abs(phiM_st1_L1_2)","abs(phiM_st2_L1_2)","1/fabs("+y+")", phi_bins,phi_bins, y_bins2, title_phi1, title_phi2, y_title2+"^{-1}",sttitle_ctau1000,netas[neta],netas[neta+1],cuts_ctau1000+"&&pt>10"+hasxy2, text+",p_{t}>10 GeV","Profile_Xfactor_PT_0901/GEMCSC_ctau1000_20160901_pt10_st2eta%dto%d_npar%d_withGE21"%(int(netas[neta]*10), int(netas[neta+1]*10), npar))
+		#DrawProfileAndScatter_pT(filedir16,treename0, fraction, "abs(phiM_st1_L1_2)","abs(phiM_st2_L1_2)","1/fabs("+y+")", phi_bins,phi_bins2, y_bins2, title_phi1, title_phi2, y_title2+"^{-1}",sttitle,netas[neta],netas[neta+1],cuts+"&& pt>10"+hasxy2, text+",p_{T}>10 GeV","Profile_Xfactor_PT_0925/GEMCSC_ctau0_20160925_pt10_st2eta%dto%d_npar%d_withGE21"%(int(netas[neta]*10), int(netas[neta+1]*10), npar))
+		#DrawProfileAndScatter_pT(filedir46,treename0, fraction, "abs(phiM_st1_L1_2)","abs(phiM_st2_L1_2)","1/fabs("+y+")", phi_bins,phi_bins2, y_bins2, title_phi1, title_phi2, y_title2+"^{-1}",sttitle_ctau1000,netas[neta],netas[neta+1],cuts_ctau1000+"&&pt>10"+hasxy2, text+",p_{t}>10 GeV","Profile_Xfactor_PT_0925/GEMCSC_ctau1000_20160925_pt10_st2eta%dto%d_npar%d_withGE21"%(int(netas[neta]*10), int(netas[neta+1]*10), npar))
 		y = "csc_bending_angle12_xfactor_L1_1"
-		text2 = " %.1f<|#eta|<%.1f, without GE21"%(netas[neta],netas[neta+1])
-		#DrawProfileAndScatter_pT(filedir16,treename0, fraction, "pt","fabs(%s)"%y,"1/fabs("+y+")",x_bins,y_bins1, y_bins2,x_title,y_title2, y_title2+"^{-1}",sttitle,netas[neta],netas[neta+1],cuts+hasxy1,text2,"Profile_Xfactor_PT_0901/GEMCSC_ctau0_%s_20160901_fraction%d_st2eta%dto%d_npar%d_CSConly"%(y,fraction,int(netas[neta]*10), int(netas[neta+1]*10), npar))
+		#text2 = " %.1f<|#eta|<%.1f, without GE21"%(netas[neta],netas[neta+1])
+		text2 = "ME2/1 only"
+		#DrawProfileAndScatter_pT(filedir16,treename0, fraction, "pt","fabs(%s)"%y,"1/fabs("+y+")",x_bins,y_bins1, y_bins2,x_title,y_title2, y_title2+"^{-1}",sttitle,netas[neta],netas[neta+1],cuts+hasxy1,text2,"Profile_Xfactor_PT_0925/GEMCSC_ctau0_%s_20160925_fraction%d_st2eta%dto%d_npar%d_CSConly"%(y,fraction,int(netas[neta]*10), int(netas[neta+1]*10), npar))
 		#DrawProfileAndScatter_pT(filedir46,treename0, fraction, "pt","fabs(%s)"%y,"1/fabs("+y+")",x_bins,y_bins1, y_bins2,x_title,y_title2, y_title2+"^{-1}",sttitle_ctau1000,netas[neta],netas[neta+1],cuts_ctau1000,text2,"Profile_Xfactor_PT_0901/GEMCSC_ctau1000_%s_20160901_fraction%d_st2eta%dto%d_npar%d_CSConly"%(y,fraction,int(netas[neta]*10), int(netas[neta+1]*10), npar))
 		
-		#DrawProfileAndScatter_pT(filedir16,treename0, fraction, "abs(phiM_st1_L1_1)","abs(phiM_st2_L1_1)","1/fabs("+y+")", phi_bins,phi_bins, y_bins2, title_phi1, title_phi2, y_title2+"^{-1}",sttitle,netas[neta],netas[neta+1],cuts+"&& pt>10"+hasxy1,text2+",p_{T}>10 GeV","Profile_Xfactor_PT_0901/GEMCSC_ctau0_20160901_pt10_st2eta%dto%d_npar%d_CSConly"%(int(netas[neta]*10), int(netas[neta+1]*10), npar))
-		#DrawProfileAndScatter_pT(filedir46,treename0, fraction, "abs(phiM_st1_L1_1)","abs(phiM_st2_L1_1)","1/fabs("+y+")", phi_bins,phi_bins, y_bins2, title_phi1, title_phi2, y_title2+"^{-1}",sttitle_ctau1000,netas[neta],netas[neta+1],cuts_ctau1000+"&&pt>10"+hasxy1,text2+"p_{T}>10 GeV","Profile_Xfactor_PT_0901/GEMCSC_ctau1000_20160901_pt10_st2eta%dto%d_npar%d_CSConly"%(int(netas[neta]*10), int(netas[neta+1]*10), npar))
+		#DrawProfileAndScatter_pT(filedir16,treename0, fraction, "abs(phiM_st1_L1_1)","abs(phiM_st2_L1_1)","1/fabs("+y+")", phi_bins,phi_bins2, y_bins2, title_phi1, title_phi2, y_title2+"^{-1}",sttitle,netas[neta],netas[neta+1],cuts+"&& pt>10"+hasxy1,text2+",p_{T}>10 GeV","Profile_Xfactor_PT_0925/GEMCSC_ctau0_20160925_pt10_st2eta%dto%d_npar%d_CSConly"%(int(netas[neta]*10), int(netas[neta+1]*10), npar))
+		#DrawProfileAndScatter_pT(filedir46,treename0, fraction, "abs(phiM_st1_L1_1)","abs(phiM_st2_L1_1)","1/fabs("+y+")", phi_bins,phi_bins2, y_bins2, title_phi1, title_phi2, y_title2+"^{-1}",sttitle_ctau1000,netas[neta],netas[neta+1],cuts_ctau1000+"&&pt>10"+hasxy1,text2+"p_{T}>10 GeV","Profile_Xfactor_PT_0925/GEMCSC_ctau1000_20160925_pt10_st2eta%dto%d_npar%d_CSConly"%(int(netas[neta]*10), int(netas[neta+1]*10), npar))
 		y0 = "ptphi_diff_sh"
 		text0 = " %.1f<|#eta|<%.1f, SIM level"%(netas[neta],netas[neta+1])
 		#DrawProfileAndScatter_pT(filedir1,treename0, fraction, "pt","fabs(%s)"%y0,"1/fabs("+y0+")",x_bins,y_bins1, y_bins2,x_title,y_title2, y_title2+"^{-1}",sttitle,netas[neta],netas[neta+1],cuts,text0,"Profile_Xfactor_PT_0802/GEMCSC_ctau0_%s_20160802_fraction%d_npar%d_St1eta%d"%(y0,fraction, npar, neta))

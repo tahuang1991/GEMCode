@@ -1,6 +1,7 @@
 import ROOT
 import random
 import os
+import sys
 import numpy as np
 import array
 import math
@@ -113,7 +114,7 @@ def getAllEff(chain,den, num, picname, txt, todraw="pt"):
 	b1.GetYaxis().SetTitle("Efficiency")
 	b1.GetXaxis().SetTitle("True muon p_{T} [GeV]")
 	b1.GetXaxis().SetTitleSize(0.045)
-	b1.SetTitle("CMS Simulation Preliminary"+"  "*20+" PU0, 14TeV")
+	b1.SetTitle(" #scale[1.4]{#font[61]{CMS}} #font[52]{Simulation preliminary}"+"  "*10+" 14 TeV, 0 PU")
 	b1.SetStats(0)
 
 #	treename2 = "HLTBendingAngle/trk_eff_csc_ME21" 
@@ -512,7 +513,7 @@ def makeEffplot(filedir,todraw, treename0,ptthreshold,fractionToKeep, den, num, 
 	b1.GetYaxis().SetTitle("Efficiency")
 	b1.GetXaxis().SetTitle("True muon p_{T} [GeV]")
 	b1.GetXaxis().SetTitleSize(0.045)
-	b1.SetTitle("CMS Simulation Preliminary"+"  "*20+" PU0, 14TeV")
+	b1.SetTitle(" #scale[1.4]{#font[61]{CMS}} #font[52]{Simulation preliminary}"+"  "*10+" 14 TeV, 0 PU")
 	b1.SetStats(0)
 
     	chain = ROOT.TChain(treename0)
@@ -589,6 +590,7 @@ def makeEffplot(filedir,todraw, treename0,ptthreshold,fractionToKeep, den, num, 
 	legend = ROOT.TLegend(0.6,0.14,0.96,0.43)
 	legend.SetFillColor(ROOT.kWhite)
 	legend.SetTextFont(42)
+	legend.SetTextSize(.05)
 #legend.SetBorderSize(0)
 #legend.SetTextSize()
 #legend.SetHeader("p_{T}^{sim}>10,2.14>|#eta|>1.64, has at least 3stubs and hasME1")
@@ -707,12 +709,15 @@ def makeEffplot_v2(filedirs,todraw, treename0, den, deltay12, deltay23, pt, alln
 	
 	b1 = ROOT.TH1F("b1","b1",len(ptbins)-1, ptbins)
 	b1.GetYaxis().SetRangeUser(0.0,1.05)
-	b1.GetYaxis().SetTitleOffset(1.2)
+	b1.GetYaxis().SetTitleOffset(1.1)
 	b1.GetYaxis().SetNdivisions(520)
 	b1.GetYaxis().SetTitle("Efficiency")
 	b1.GetXaxis().SetTitle("True muon p_{T} [GeV]")
-	b1.GetXaxis().SetTitleSize(0.045)
-	b1.SetTitle("CMS Simulation Preliminary"+"  "*10+" PU0, 14TeV")
+	b1.GetXaxis().SetTitleSize(0.05)
+	b1.GetXaxis().SetLabelSize(0.05)
+	b1.GetYaxis().SetTitleSize(0.05)
+	b1.GetYaxis().SetLabelSize(0.05)
+	b1.SetTitle(" #scale[1.4]{#font[61]{CMS}} #font[52]{Simulation preliminary}"+"  "*10+" 14 TeV, 0 PU")
 	
 	
 	Teffs = []
@@ -728,11 +733,13 @@ def makeEffplot_v2(filedirs,todraw, treename0, den, deltay12, deltay23, pt, alln
     		ring = 2
     	if (etamin>=1.6):
         	ring = 1
-	legend = ROOT.TLegend(0.45,0.15,0.9,0.5)
+	#legend = ROOT.TLegend(0.45,0.15,0.9,0.5)
+	legend = ROOT.TLegend(0.4,0.2,0.8,0.5)
 	legend.SetFillColor(ROOT.kWhite)
 	legend.SetTextFont(42)
-	legend.SetHeader("Position based algo")
-	muons = ["Prompt Muons","Displaced Muons, 5<|d_{xy}|<50cm"]
+	legend.SetTextSize(.05)
+	legend.SetHeader("Position-based algo")
+	muons = ["Prompt muon","#splitline{Displaced muons}{5<|d_{xy}|<50 cm}"]
 	for n in range(len(filedirs)):
 		print "n ",n
 		hden = ROOT.TH1F("hden%d"%n,"hden%d"%n,len(ptbins)-1, ptbins)
@@ -753,7 +760,7 @@ def makeEffplot_v2(filedirs,todraw, treename0, den, deltay12, deltay23, pt, alln
     			ls = os.listdir(filedir)
     	 		for x in ls:
 	      			if not(x.endswith(".root")):
-					print "x.endswith(.root) ", x.endswith(".root")
+					#print "x.endswith(.root) ", x.endswith(".root")
 					continue
 				x = filedir[:]+x
     				if os.path.isdir(x):
@@ -782,7 +789,7 @@ def makeEffplot_v2(filedirs,todraw, treename0, den, deltay12, deltay23, pt, alln
 		     num = "%s-%s*%f"%(deltay23[n],deltay12[n], prop)
 		     me11 = evenodds[npar].split(',')[0]
 	             me21 = evenodds[npar].split(',')[1]
-		     deltay = "&& fabs(%s)>0 && fabs(%s)>0 && fabs(%s)<50 && fabs(%s)<50"%(deltay23[n],deltay23[n], deltay12[n],deltay12[n])
+		     deltay = "&& fabs(%s)>0 && fabs(%s)>0 && fabs(%s)<50 && fabs(%s)<50"%(deltay12[n],deltay23[n], deltay12[n],deltay23[n])
 		     hasfitcut = "&& fabs(trk_eff_CSC_ME1%d.phi_layer3_fit_%s)<4 && fabs(trk_eff_CSC_ME2%d.phi_layer3_fit_%s)<4 && fabs(trk_eff_CSC_ME3%d.phi_layer3_fit_%s)<4"%(ring, me11, ring, me21, ring, me21)
 		     #deltay =deltay+hasfitcut
 		     #num = "(1/fabs(%s-%s*%f)+%f)/%f"%(deltay23[n],deltay12[n],prop, intercept,slope)
@@ -830,7 +837,7 @@ def makeEffplot_v2(filedirs,todraw, treename0, den, deltay12, deltay23, pt, alln
 	legend.Draw("same")
 
 	#tex = ROOT.TLatex(0.15,0.87,"%s"%txt)
-	tex = ROOT.TLatex(0.4,0.6,"#splitline{%s}{p_{T}>%d GeV}"%(txt, pt))
+	tex = ROOT.TLatex(0.4,0.6,"#splitline{%s}{p_{T}^{L1}>%d GeV}"%(txt, pt))
 	#tex = ROOT.TLatex(0.45,0.57,"#splitline{%s}{check the sign of #Delta Y_{12} and #Delta Y_{23}}"%(txt))
 	tex.SetTextSize(0.05)
 	tex.SetTextFont(62)
@@ -849,12 +856,15 @@ def makeEffplot_v3(filedirs,todraw, treename0, den, num, Pts, netas, allnpar, fr
 	
 	b1 = ROOT.TH1F("b1","b1",len(ptbins)-1, ptbins)
 	b1.GetYaxis().SetRangeUser(0.0,1.05)
-	b1.GetYaxis().SetTitleOffset(1.2)
+	b1.GetYaxis().SetTitleOffset(1.1)
 	b1.GetYaxis().SetNdivisions(520)
 	b1.GetYaxis().SetTitle("Efficiency")
 	b1.GetXaxis().SetTitle("True muon p_{T} [GeV]")
-	b1.GetXaxis().SetTitleSize(0.045)
-	b1.SetTitle("CMS Simulation Preliminary"+"  "*20+" PU0, 14TeV")
+	b1.GetXaxis().SetTitleSize(0.05)
+	b1.GetXaxis().SetLabelSize(0.05)
+	b1.GetYaxis().SetTitleSize(0.05)
+	b1.GetYaxis().SetLabelSize(0.05)
+	b1.SetTitle(" #scale[1.4]{#font[61]{CMS}} #font[52]{Simulation preliminary}"+"  "*10+" 14 TeV, 0 PU")
 	
 	
 	Teffs = []
@@ -870,10 +880,12 @@ def makeEffplot_v3(filedirs,todraw, treename0, den, num, Pts, netas, allnpar, fr
 		#c1.GetListOfPrimitives().At(npad).SetGridy()
 		#c1.GetListOfPrimitives().At(npad).SetTridx()
 		#c1.GetListOfPrimitives().At(npad).SetTridy()
-		legend = ROOT.TLegend(0.5,0.12,0.96,0.5)
+		#legend = ROOT.TLegend(0.5,0.12,0.96,0.5)
+		legend = ROOT.TLegend(0.4,0.2,0.8,0.5)
+		legend.SetTextSize(.05)
 		legend.SetFillColor(ROOT.kWhite)
 		legend.SetTextFont(42)
-		legend.SetHeader("stubs alignment algo")
+		legend.SetHeader("Position-based algo")
     		den_v2 = []
     		for x in den:
 			den_v2.append(x+"&& fabs(eta_st2_sh)>%f && fabs(eta_st2_sh)<%f"%(netas[neta],netas[neta+1]))
@@ -901,12 +913,15 @@ def makeplots(Teffs, legs, text, picname):
 
 	b1 = ROOT.TH1F("b1","b1",len(ptbins)-1, ptbins)
 	b1.GetYaxis().SetRangeUser(0.0,1.05)
-	b1.GetYaxis().SetTitleOffset(1.2)
+	b1.GetYaxis().SetTitleOffset(1.1)
 	b1.GetYaxis().SetNdivisions(520)
 	b1.GetYaxis().SetTitle("Efficiency")
 	b1.GetXaxis().SetTitle("True muon p_{T} [GeV]")
-	b1.GetXaxis().SetTitleSize(0.045)
-	b1.SetTitle("CMS Simulation Preliminary"+"  "*10+" PU0, 14TeV")
+	b1.GetXaxis().SetTitleSize(0.05)
+	b1.GetXaxis().SetLabelSize(0.05)
+	b1.GetYaxis().SetTitleSize(0.05)
+	b1.GetYaxis().SetLabelSize(0.05)
+	b1.SetTitle(" #scale[1.4]{#font[61]{CMS}} #font[52]{Simulation preliminary}"+"  "*10+" 14 TeV, 0 PU")
 	
 	
 	c1 = ROOT.TCanvas()
@@ -917,9 +932,11 @@ def makeplots(Teffs, legs, text, picname):
 
         color = [ROOT.kBlue, ROOT.kRed, ROOT.kMagenta+2, ROOT.kGreen+2,ROOT.kCyan+2]
         maker = [20,21,22,23,33]
-	legend = ROOT.TLegend(0.45,0.15,0.9,0.5)
+	#legend = ROOT.TLegend(0.45,0.15,0.9,0.5)
+	legend = ROOT.TLegend(0.4,0.25,0.8,0.45)
 	legend.SetFillColor(ROOT.kWhite)
 	legend.SetTextFont(42)
+	legend.SetTextSize(.05)
 	#legend.SetHeader("%"%legheader)
 	b1.SetStats(0)
 	b1.Draw()
@@ -954,7 +971,9 @@ filedir1 = "/eos/uscms/store/user/tahuang/SLHC26_patch1_2023Muon_1M_Ana_PU0_Pt2_
 #filedir16 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0826/160826_200750/0000/"
 #filedir16 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0827/160901_002000/0000/"
 #filedir16 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0901/160901_222813/0000/"
-filedir16 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0901/160901_043538/0000/"
+#filedir16 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0901/160901_043538/0000/"
+#filedir16 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0925/160926_050053/0000/"
+filedir16 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0925_v2/160926_194628/0000/"
 filedir14 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0812_v4/160813_141149/0000/"
 filedir10 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0812_v0/160813_204308/0000/"
 filedir15 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0816_v5/160815_185029/0000/"
@@ -970,7 +989,9 @@ filedir4 = "/eos/uscms/store/user/tahuang/SLHC26_patch1_2023Muon_1M_Ana_PU0_ctau
 #filedir46 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0826/160826_215302/0000/"
 #filedir46 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0827/160901_001931/0000/"
 #filedir46 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0901/160901_223815/0000/"
-filedir46 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0901/160901_043623/0000/"
+#filedir46 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0901/160901_043623/0000/"
+#filedir46 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0925/160926_050000/0000/"
+filedir46 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0925_v2/160926_194711/0000/"
 filedir44 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0812_v4/160813_141529/0000/"
 filedir40 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0812_v0/160813_204646/0000/"
 filedir45 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0816_v5/160815_185325/0000/"
@@ -1040,7 +1061,15 @@ nums_loweta = ["csc_bending_angle12_xfactor_smear3","csc_bending_angle12_xfactor
 #makeEffplot_v3(filedirs_v0,"pt", treename0, dens, nums, Pts, netas, allnpar, 90, "true muon p_T", "Efficiency",legs, evenodds[npar],"DirectionPt_Dxy_0812/GEMCSC_ctau0andctau1000_directionOnly_Eff_recopt_20160812_npar%d_v0"%(npar))
 #makeEffplot_v3(filedirs_v5,"pt", treename0, dens, nums, Pts, netas, allnpar, 90, "true muon p_T", "Efficiency",legs, evenodds[npar],"DirectionPt_Dxy_0815/GEMCSC_ctau0andctau1000_directionOnly_Eff_recopt_20160815_npar%d_v5"%(npar))
 #printallcuts(filedir16, treename0,"hasSt1St2St3", "deltay12_fit", "deltay23_fit", netas, [2,3,4,5,7,10,15,20,30,40], 90, "|#Delta#Delta Y|", "Entries", "digi level ","Position_PT_Cut_0909/GEMCSC_ctau0_PositionOnly_20160909")
-def plotalleta(pt, netas, fraction=95):
+if len(sys.argv)>=2:
+	#take dir name from arguments, condor mode
+	outputdir = sys.argv[1]
+	filedirs_v6 = ["out_ana_prompt.root","out_ana_displaced.root"]
+	if outputdir[-1] != "/":
+		outputdir = outputdir+"/"
+else:
+	outputdir = "Position_PT_0925/"
+def plotalleta(pt, netas, fraction=90):
     Teffs_0 = []
     Teffs_1 = []
     for neta in range(len(netas)-1):
@@ -1050,11 +1079,9 @@ def plotalleta(pt, netas, fraction=95):
        if (netas[neta]>=1.6):
 	 allnpar = [0,1,2,3]
 	 ring =1
-       legs = ["Prompt muon", "Displaced Muon, 10<|d_{xy}|<50"]
+       legs = ["Prompt muon", "#splitline{Displaced muon}{10<|d_{xy}|<50 cm}"]
        #pt = Pts[npt]
        Tefftotal = []
-       fraction = 92
-
        for npar in allnpar:
 	#if (netas[neta]<1.6 and (npar==0 or npar ==3)):
 	#    continue
@@ -1063,26 +1090,25 @@ def plotalleta(pt, netas, fraction=95):
 	me11 = evenodds[npar].split(',')[0]
 	me21 = evenodds[npar].split(',')[1]
 	chambers = "ME1%d %s,ME2%d %s,ME3%d %s"%(ring, me11, ring, me21, ring, me21)
-	dens_L1 =  ["hasSt1St2St3 && fabs(eta_st2_sh)>%f && fabs(eta_st2_sh)<%f"%(netas[neta],netas[neta+1]),"hasSt1St2St3 && fabs(eta_st2_sh)>%f && fabs(eta_st2_sh)<%f && fabs(genGdMu_dxy)>10 && fabs(genGdMu_dxy)<50 && fabs(genGdMu_dR)<0.1"%(netas[neta],netas[neta+1])]
+	dens_L1 =  ["hasSt1St2St3 && fabs(eta_st2_sh)>%f && fabs(eta_st2_sh)<%f && meRing==%d"%(netas[neta],netas[neta+1], ring),"hasSt1St2St3 && fabs(eta_st2_sh)>%f && fabs(eta_st2_sh)<%f && fabs(genGdMu_dxy)>10 && fabs(genGdMu_dxy)<50 && fabs(genGdMu_dR)<0.1 && meRing==%d"%(netas[neta],netas[neta+1], ring)]
 	#nums_L1 = ["fabs(deltay23_fit-deltay12_fit*%f)"%slope,"fabs(deltay23_fit-deltay12_fit*%f)"%slope]
 	deltay12 = ["deltay12_fit","deltay12_fit"]
 	deltay23 = ["deltay23_fit","deltay23_fit"]
 	deltay12_sim = ["deltay12_sim","deltay12_sim"]
 	deltay23_sim = ["deltay23_sim","deltay23_sim"]
-	legs = ["Prompt muon", "Displaced Muon, 10<|d_{xy}|<50"]
 	text = "#splitline{%s}{%.1f<|#eta|<%.1f}"%(chambers, netas[neta],netas[neta+1])
-	Teffs = makeEffplot_v2(filedirs_v6,"pt", treename0, dens_L1, deltay12, deltay23, pt, allnpars, fraction, netas[neta],netas[neta+1], "true muon p_T", "Efficiency",legs,"%.1f<|#eta|<%.1f %s"%(netas[neta],netas[neta+1], chambers),"Position_PTNofitcheck_0922/GEMCSC_ctau0andctau1000_position_dxy10_50_Eff_recopt_20160922_pt%d_st2eta%dto%d_npar%d"%(pt, int(netas[neta]*10), int(netas[neta+1]*10), npar))
+	Teffs = makeEffplot_v2(filedirs_v6,"pt", treename0, dens_L1, deltay12, deltay23, pt, allnpars, fraction, netas[neta],netas[neta+1], "true muon p_T", "Efficiency",legs,"%.1f<|#eta|<%.1f %s"%(netas[neta],netas[neta+1], chambers),outputdir+"GEMCSC_ctau0andctau1000_position_dxy10_50_Eff_recopt_20160925_pt%d_st2eta%dto%d_npar%d"%(pt, int(netas[neta]*10), int(netas[neta+1]*10), npar))
 	Tefftotal.append(Teffs)
        print "Tefftotal len ",len(Tefftotal),Tefftotal
        Teff0 = Tefftotal[0][0]
        Teff1 = Tefftotal[0][1]
        Teff0.SetName("positioneta%dto%d"%(int(netas[neta]*10),int(netas[neta+1]*10))+"promptmuonpt%d"%(pt))
        Teff1.SetName("positioneta%dto%d"%(int(netas[neta]*10),int(netas[neta+1]*10))+"displacedmuonpt%d"%(pt))
-       text_h = "#splitline{position based method}{%.1f<|#eta|<%.1f, p_{T}>%d GeV}"%(netas[neta],netas[neta+1], pt)
+       text_h = "#splitline{Position-based method}{%.1f<|#eta|<%.1f, p_{T}^{L1}>%d GeV}"%(netas[neta],netas[neta+1], pt)
        for xpar in range(len(Tefftotal)-1):
    	Teff0.Add(Tefftotal[xpar+1][0])		   
    	Teff1.Add(Tefftotal[xpar+1][1])		   
-       makeplots([Teff0, Teff1], legs, text_h,"Position_PTNofitcheck_0922/GEMCSC_ctau0andctau1000_position_dxy10_50_Eff_recopt_20160922_st2eta%dto%d_allnpar_Plateau%d_binsimPt%d"%(int(netas[neta]*10), int(netas[neta+1]*10),fraction, pt))
+       makeplots([Teff0, Teff1], legs, text_h,outputdir+"GEMCSC_ctau0andctau1000_position_dxy10_50_Eff_recopt_20160925_st2eta%dto%d_allnpar_Plateau%d_binsimPt%d"%(int(netas[neta]*10), int(netas[neta+1]*10),fraction, pt))
        """
        Teff_out.Reopen("Update")
        Teff0.Write(Teff_out)
@@ -1098,16 +1124,20 @@ def plotalleta(pt, netas, fraction=95):
        Teffs1_alleta.Add(Teffs_1[xeta+1])	 
     Teffs0_alleta.SetName("positionpromptmuonpt%d"%(pt))
     Teffs1_alleta.SetName("positiondisplacedmuonpt%d"%(pt))
-    text_alleta = "#splitline{Position based method}{%.1f<|#eta|<%.1f, p_{T}>%d GeV}"%(netas[0],netas[-1], pt)
-    makeplots([Teffs0_alleta, Teffs1_alleta], legs, text_alleta,"Position_PTNofitcheck_0922/GEMCSC_ctau0andctau1000_position_Eff_20160922_pt%d_fraction%d_St2eta%dto%d_allnpar"%(pt, fraction,int(netas[0]*10),int(netas[-1]*10))) 
+    text_alleta = "#splitline{Position-based method}{%.1f<|#eta|<%.1f, p_{T}^{L1}>%d GeV}"%(netas[0],netas[-1], pt)
+    makeplots([Teffs0_alleta, Teffs1_alleta], legs, text_alleta, outputdir+"GEMCSC_ctau0andctau1000_position_Eff_20160925_pt%d_fraction%d_St2eta%dto%d_allnpar"%(pt, fraction,int(netas[0]*10),int(netas[-1]*10))) 
     """
     Teff_out.Reopen("Update")
     Teffs0_alleta.Write(Teff_out)
     Teffs1_alleta.Write(Teff_out)
     Teff_out.Close()
     """
-plotalleta(10,[1.2,1.4,1.6],95)
-#plotalleta(10,[1.6,1.8,2.0,2.2,2.4],95)
+if not os.path.exists(outputdir):
+        os.makedirs(outputdir)
+plotalleta(10,[1.2,1.4,1.6],90)
+plotalleta(10,[1.6,1.8,2.0,2.2,2.4],90)
+#plotalleta(20,[1.2,1.4,1.6],90)
+#plotalleta(20,[1.6,1.8,2.0,2.2],90)
        
 
 
