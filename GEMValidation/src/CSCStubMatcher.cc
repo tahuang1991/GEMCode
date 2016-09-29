@@ -1142,6 +1142,17 @@ CSCStubMatcher::checkStubInChamber(CSCDetId id, CSCCorrelatedLCTDigi lct) const
 }
 
 
+bool 
+CSCStubMatcher::wasStubMatchedInChamber(CSCDetId id, CSCCorrelatedLCTDigi lct) const
+{
+  auto stubs(cscLctsInChamber(id.rawId()));
+  for (auto stub: stubs){
+    if (stub==lct) return true;
+  }
+  return false;
+}
+
+
 GlobalPoint 
 CSCStubMatcher::getGlobalPosition(unsigned int rawId, const CSCCorrelatedLCTDigi& lct) const
 {

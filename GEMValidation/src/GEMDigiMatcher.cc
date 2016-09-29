@@ -568,10 +568,10 @@ GEMDigiMatcher::positionPad2InDetId(unsigned int id) const
     if (verbose) std::cout << "Strip " << p.strip() << std::endl;
     float middleStripOfPad = 0;
     if (p.strip()%2==0){
-      middleStripOfPad = p.strip() - 0.5;
+      middleStripOfPad = p.strip() - 1.;
     }
     else{
-      middleStripOfPad = p.strip() + 0.5;
+      middleStripOfPad = p.strip() + 0.;
     }
     if (verbose) std::cout << "middle strip " << middleStripOfPad << std::endl;
     LocalPoint gem_lp = getGEMGeometry()->etaPartition(gem_id)->centreOfStrip(middleStripOfPad);
@@ -592,16 +592,16 @@ GEMDigiMatcher::positionPad4InDetId(unsigned int id) const
     if (verbose) std::cout << "Strip " << p.strip() << std::endl;
     float middleStripOfPad = 0;
     if (p.strip()%4==0){
-      middleStripOfPad = p.strip() - 1.5;
+      middleStripOfPad = p.strip() - 2.;
     }
     else if (p.strip()%4==3){
-      middleStripOfPad = p.strip() - 0.5;
+      middleStripOfPad = p.strip() - 1.;
     }
     else if (p.strip()%4==2){
-      middleStripOfPad = p.strip() + 0.5;
+      middleStripOfPad = p.strip() + 0.;
     }
     else{
-      middleStripOfPad = p.strip() + 1.5;
+      middleStripOfPad = p.strip() + 1.;
     }
     if (verbose) std::cout << "middle strip " << middleStripOfPad << std::endl;
     LocalPoint gem_lp = getGEMGeometry()->etaPartition(gem_id)->centreOfStrip(middleStripOfPad);
@@ -622,28 +622,28 @@ GEMDigiMatcher::positionPad8InDetId(unsigned int id) const
     if (verbose) std::cout << "Strip " << p.strip() << std::endl;
     float middleStripOfPad = 0;
     if (p.strip()%8==0){
-      middleStripOfPad = p.strip() - 3.5;
+      middleStripOfPad = p.strip() - 4.;
     }
     else if (p.strip()%8==7){
-      middleStripOfPad = p.strip() - 2.5;
+      middleStripOfPad = p.strip() - 3.;
     }
     else if (p.strip()%8==6){
-      middleStripOfPad = p.strip() - 1.5;
+      middleStripOfPad = p.strip() - 2.;
     }
     else if (p.strip()%8==5){
-      middleStripOfPad = p.strip() - 0.5;
+      middleStripOfPad = p.strip() - 1.;
     }
     else if (p.strip()%8==4){
-      middleStripOfPad = p.strip() + 0.5;
+      middleStripOfPad = p.strip() + 0.;
     }
     else if (p.strip()%8==3){
-      middleStripOfPad = p.strip() + 1.5;
+      middleStripOfPad = p.strip() + 1.;
     }
     else if (p.strip()%8==2){
-      middleStripOfPad = p.strip() + 2.5;
+      middleStripOfPad = p.strip() + 2.;
     }
     else{
-      middleStripOfPad = p.strip() + 3.5;
+      middleStripOfPad = p.strip() + 3.;
     }
     if (verbose) std::cout << "middle strip " << middleStripOfPad << std::endl;
     LocalPoint gem_lp = getGEMGeometry()->etaPartition(gem_id)->centreOfStrip(middleStripOfPad);

@@ -111,6 +111,7 @@ public:
   int nChambersWithMPLCT(int min_quality = 0) const;
 
   bool checkStubInChamber(CSCDetId id, CSCCorrelatedLCTDigi lct) const;
+  bool wasStubMatchedInChamber(CSCDetId id, CSCCorrelatedLCTDigi lct) const;
 
   // get the position of an LCT in global coordinates
   GlobalPoint getGlobalPosition(unsigned int rawId, const CSCCorrelatedLCTDigi& lct) const;
