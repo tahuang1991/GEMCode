@@ -61,7 +61,9 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
   bool isEven[4]={false, false, false, false};
   for (auto idlcts : chamberid_lcts_){
   	CSCDetId chid(idlcts.first);
-	if (chid.station()==2 ) meRing = chid.ring();
+	//check the ring number that muon is flying through, 2nd station as reference
+	//later use this one to check whether we should use GE21 or ME21only
+	if (chid.station()==2) meRing = chid.ring();
 	if (chid.chamber()%2 == 0) isEven[chid.station()-1] = true;
 	if (chid.station() == 1 and idlcts.second.size()>0 ) hasStub_st1 = true;
 	else if (chid.station() == 2 and idlcts.second.size()>0 ) hasStub_st2 = true;
@@ -240,6 +242,7 @@ void DisplacedMuonTriggerPtassignment::fitComparatorsLCT(const CSCComparatorDigi
     float phi_tmp = 0.0;
     float perp_tmp = 0.0;
     float z_tmp = 0.0;
+    if (p.second.size()==0) continue; 
     for (auto hit: p.second){
       float fractional_strip = getFractionalStrip(hit);
       auto layer_geo = cscChamber->layer(detId.layer())->geometry();
@@ -258,6 +261,7 @@ void DisplacedMuonTriggerPtassignment::fitComparatorsLCT(const CSCComparatorDigi
       z_tmp = csc_gp.z();
       perp_tmp += csc_gp.perp();
     }
+    //in case there are more than one comparator digis in one layer
     perp = perp_tmp/(p.second).size();
     phi_tmp = phi_tmp/(p.second).size();
     std::cout <<"detid "<< detId <<" perp "<< perp <<" phi "<< phi_tmp <<" z "<< z_tmp << std::endl;
@@ -268,6 +272,7 @@ void DisplacedMuonTriggerPtassignment::fitComparatorsLCT(const CSCComparatorDigi
     ephis.push_back(gemvalidation::cscHalfStripWidth(detId)/sqrt(12));
   }
   
+  // use average perp  
   perp = perp/phis.size();
   // do a fit to the comparator digis
   float alpha = 0., beta = 0.;
@@ -298,7 +303,7 @@ void DisplacedMuonTriggerPtassignment::globalPositionOfLCT(const CSCCorrelatedLC
   float fit_z_layer1, fit_z_layer3, fit_z_layer6;
   float perp;
   fitComparatorsLCT(*hCSCComparators.product(), stub, chid, fit_phi_layer1, fit_phi_layer3, fit_phi_layer6, fit_z_layer1, fit_z_layer3, fit_z_layer6, perp);
-  //gp calculated here can have negative Z!!!
+  //gp calculated here can have negative Z!!! later use fabs() to get distance 
   if (chid.station() == 1){
       gp_st1_layer1 = GlobalPoint(GlobalPoint::Cylindrical(perp, fit_phi_layer1, fit_z_layer1));
       gp_st1 = GlobalPoint(GlobalPoint::Cylindrical(perp, fit_phi_layer3, fit_z_layer3));
@@ -313,7 +318,8 @@ void DisplacedMuonTriggerPtassignment::globalPositionOfLCT(const CSCCorrelatedLC
   else if (chid.station() == 3){
       gp_st3 = GlobalPoint(GlobalPoint::Cylindrical(perp, fit_phi_layer3, fit_z_layer3));
       std::cout <<"LCT position st3 chid "<< chid <<" gp eta "<< gp_st3.eta()<<" phi "<<gp_st3.phi() << std::endl;
-  }else 
+  }
+  else 
       std::cout <<" not in CSC station 1 , 2 ,3 , chamber id  "<< chid << std::endl;
   
 
@@ -331,11 +337,13 @@ void DisplacedMuonTriggerPtassignment::globalPositionOfGEMPad(const GEMCSCPadDig
   }
 
   const LocalPoint lpGEM(gemRoll->centreOfPad(gempad.pad()));
-  if (gemid.station() == 1)
+  if (gemid.station() == 1){
   	gp_ge11 = GlobalPoint(gemRoll->toGlobal(lpGEM));
-  else if (gemid.station() == 3)
+	std::cout <<" gempad in GE11, gp eta "<< gp_ge11.eta()<<" phi "<< gp_ge11.phi()<< std::endl;
+  }else if (gemid.station() == 3){
   	gp_ge21 = GlobalPoint(gemRoll->toGlobal(lpGEM));
-  else 
+	std::cout <<" gempad in GE21, gp eta "<< gp_ge21.eta()<<" phi "<< gp_ge21.phi()<< std::endl;
+  }else 
       std::cout <<" gemid "<< gemid  <<" not in station 1 or 3" << std::endl;
 
 }
@@ -479,6 +487,8 @@ bool DisplacedMuonTriggerPtassignment::runDirectionbasedCSConly()
 
 float DisplacedMuonTriggerPtassignment::getlocalPhiDirection(int st) const
 {
+    //st =1 :station1 , st=2: station2 
+    //st = 12 : between station1 and station2; st = 23 : between station2 and station3
    if (st==1 and hasStub_st1 and hasGEMPad_st1) return phiM_st1;
    else if (st==2 and hasStub_st2 and hasGEMPad_st2) return phiM_st2;
    else if (st == 12 and hasStub_st1 and hasStub_st2) return phiM_st12;
@@ -497,7 +507,7 @@ float DisplacedMuonTriggerPtassignment::getdeltaPhiDirection(int st1, int st2) c
    else if (((st1 == 2 and st2 == 23) or (st1 == 23 and st2 == 2)) and hasStub_st2 and hasGEMPad_st2 and hasStub_st3) return dPhi_dir_st2_st23;
    else if (((st1 == 12 and st2 == 23) or (st1 == 23 and st2 == 12)) and hasStub_st1 and hasStub_st2 and hasStub_st3) return dPhi_dir_st12_st23;
    else{
-   	std::cout <<" error in getlocalPhiDirection, st1 "<<st1 <<" st2 "<< st2 <<" not in range or not not have stub or GEMpad" << std::endl;
+   	std::cout <<" error in getdeltaPhiDirection, st1 "<< st1 <<" st2 "<< st2 <<" not in range or not not have stub or GEMpad" << std::endl;
 	return -99;
    }
 
