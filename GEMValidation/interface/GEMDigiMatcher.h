@@ -72,6 +72,7 @@ public:
   // GEM co-pads from a particular partition or superchamber
   const GEMCSCPadDigiContainer& gemCoPadsInSuperChamber(unsigned int) const;
 
+  const std::map<unsigned int, GEMCSCPadDigiContainer> allGempadsMatch2SimMuon() const { return detid_to_gempads_; }
   // #layers with digis from this simtrack
   int nLayersWithDigisInSuperChamber(unsigned int) const;
   int nLayersWithPadsInSuperChamber(unsigned int) const;

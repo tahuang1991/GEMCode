@@ -82,6 +82,8 @@ public:
   const CSCCorrelatedLCTDigiContainer& cscLctsInChamber(unsigned int) const;
   const CSCCorrelatedLCTDigiContainer& cscMplctsInChamber(unsigned int) const;
 
+  ///return all lcts matched to simmuon
+  std::map<unsigned int, CSCCorrelatedLCTDigiContainer> allLctsMatched2SimMuon() const { return chamber_to_cscLcts_; }
   /// best matching from a particular crossed chamber
   CSCCLCTDigi bestCscClctInChamber(unsigned int) const;
   CSCALCTDigi bestCscAlctInChamber(unsigned int) const;

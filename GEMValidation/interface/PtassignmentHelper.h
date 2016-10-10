@@ -4,6 +4,7 @@
 
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 
+#define PI 3.14159265
 
 //eta partitions:1.2-1.4,1.4-1.6,1.6-1.8, 1.8-2.0, 2.0-2.2, 2.2-2.4
 enum {EtaPartitions=6, Parity=4};
@@ -133,4 +134,7 @@ void calculateAlphaBeta(const std::vector<float>& v,
                         const std::vector<float>& ew, 
                         const std::vector<float>& status,
                         float& alpha, float& beta);
+
+float normalizePhi(float phi);
+
 #endif

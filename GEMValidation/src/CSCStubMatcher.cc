@@ -1039,7 +1039,7 @@ CSCStubMatcher::positionsOfComparatorInLCT(unsigned int detid, const CSCCorrelat
 		    sum_y += csc_gp.y();
 		    sum_z += csc_gp.z();
 		    n++;
-		    //std::cout <<"layerid "<< l_id <<" comparadigi fractional strip "<< fractional_strip << " wg "<< wire << std::endl;
+		    //std::cout <<"n "<< n <<" layerid "<< l_id <<" comparadigi hs "<< comp << " fractional strip "<< fractional_strip << " wg "<< wire <<" csc_phi "<< csc_gp.phi()<<" lp "<< csc_intersect.phi() << std::endl;
 		}
 	 }
 	 if (n>0 and verboseLCT_) std::cout <<"Digi cscid "<< l_id <<" n "<< n <<" x "<< sum_x/n <<" y "<< sum_y/n <<" z "<< sum_z/n << std::endl;
