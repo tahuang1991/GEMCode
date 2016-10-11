@@ -262,9 +262,10 @@ void DisplacedMuonTriggerPtassignment::fitComparatorsLCT(const CSCComparatorDigi
       perp_tmp += csc_gp.perp();
     }
     //in case there are more than one comparator digis in one layer
-    perp = perp_tmp/(p.second).size();
+    perp_tmp = perp_tmp/(p.second).size();
     phi_tmp = phi_tmp/(p.second).size();
-    std::cout <<"detid "<< detId <<" perp "<< perp <<" phi "<< phi_tmp <<" z "<< z_tmp << std::endl;
+    std::cout <<"detid "<< detId <<" perp "<< perp_tmp <<" phi "<< phi_tmp <<" z "<< z_tmp << std::endl;
+    perp += perp_tmp;
     phis.push_back(phi_tmp);
     zs.push_back(z_tmp);
     ezs.push_back(0);
@@ -308,16 +309,16 @@ void DisplacedMuonTriggerPtassignment::globalPositionOfLCT(const CSCCorrelatedLC
       gp_st1_layer1 = GlobalPoint(GlobalPoint::Cylindrical(perp, fit_phi_layer1, fit_z_layer1));
       gp_st1 = GlobalPoint(GlobalPoint::Cylindrical(perp, fit_phi_layer3, fit_z_layer3));
       gp_st1_layer6 = GlobalPoint(GlobalPoint::Cylindrical(perp, fit_phi_layer6, fit_z_layer6));
-      std::cout <<"LCT position st1 chid "<< chid <<" gp eta "<< gp_st1.eta()<<" phi "<<gp_st1.phi() << std::endl;
+      std::cout <<"LCT position st1 chid "<< chid <<" gp eta "<< gp_st1.eta()<<" phi "<<gp_st1.phi()<<" perp "<< gp_st1.perp() << std::endl;
   }else if (chid.station() == 2){
       gp_st2_layer1 = GlobalPoint(GlobalPoint::Cylindrical(perp, fit_phi_layer1, fit_z_layer1));
       gp_st2 = GlobalPoint(GlobalPoint::Cylindrical(perp, fit_phi_layer3, fit_z_layer3));
       gp_st2_layer6 = GlobalPoint(GlobalPoint::Cylindrical(perp, fit_phi_layer6, fit_z_layer6));
-      std::cout <<"LCT position st2 chid "<< chid <<" gp eta "<< gp_st2.eta()<<" phi "<<gp_st2.phi() << std::endl;
+      std::cout <<"LCT position st2 chid "<< chid <<" gp eta "<< gp_st2.eta()<<" phi "<<gp_st2.phi() <<" perp "<< gp_st2.perp() << std::endl;
   }
   else if (chid.station() == 3){
       gp_st3 = GlobalPoint(GlobalPoint::Cylindrical(perp, fit_phi_layer3, fit_z_layer3));
-      std::cout <<"LCT position st3 chid "<< chid <<" gp eta "<< gp_st3.eta()<<" phi "<<gp_st3.phi() << std::endl;
+      std::cout <<"LCT position st3 chid "<< chid <<" gp eta "<< gp_st3.eta()<<" phi "<<gp_st3.phi() <<" perp "<< gp_st3.perp() << std::endl;
   }
   else 
       std::cout <<" not in CSC station 1 , 2 ,3 , chamber id  "<< chid << std::endl;
@@ -427,8 +428,7 @@ bool DisplacedMuonTriggerPtassignment::runPositionbased()
 {
    if (npar<0)
    	return false;
-   std::cout <<" gp1 eta "<< gp_st1.eta() <<" phi "<< gp_st1.phi()<<" gp2 eta "<< gp_st2.eta()<<" phi "<< gp_st2.phi()<<" gp3 eta "<< gp_st3.eta()
-       <<" phi "<< gp_st3.phi() << std::endl;
+   std::cout <<" gp1 eta "<< gp_st1.eta() <<" phi "<< gp_st1.phi()<<" perp "<< gp_st1.perp() <<" gp2 eta "<< gp_st2.eta()<<" phi "<< gp_st2.phi()<<" pepr "<< gp_st2.perp() <<" gp3 eta "<< gp_st3.eta() <<" phi "<< gp_st3.phi()<<" perp "<< gp_st3.perp() << std::endl;
    ddY123 = deltadeltaYcalculation(gp_st1, gp_st2, gp_st3, gp_st2.eta(), npar);
    deltaY12 = deltaYcalculation(gp_st1, gp_st2); 
    deltaY23 = -deltaYcalculation(gp_st3, gp_st2); 
@@ -439,7 +439,7 @@ bool DisplacedMuonTriggerPtassignment::runPositionbased()
 bool DisplacedMuonTriggerPtassignment::runDirectionbasedGE21()
 {
    if (not (npar<4 and npar>=0 and hasGEMPad_st1 and hasGEMPad_st2)) return false; 
-   if (fabs(phi_ge21)>4) return false;
+   if (fabs(phi_ge21)>4) return false;//check this because we want to use setPhiGE21() to set phi_ge21 (using 2strips-pad)
    float xfactor_st1 = xfactor*fabs(gp_ge11.z() - gp_st1.z());
    float xfactor_st2 = xfactor*fabs(gp_ge21.z() - gp_st2.z())/(xfactor*fabs(gp_st1.z() - gp_st2.z())+1);
    float xfactor_st12 = xfactor*fabs(gp_st1.z() - gp_st2.z())/(xfactor*fabs(gp_st1.z() - gp_st2.z())+1);
