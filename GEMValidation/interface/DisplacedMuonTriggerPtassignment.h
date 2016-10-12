@@ -132,7 +132,7 @@ public:
   const edm::Event& ev_;
   const edm::EventSetup& es_;
   
-  void initBoolVariables();
+  void initVariables();
   void setupGeometry(const edm::EventSetup& es );
   int verbose_;
   unsigned int region_;
@@ -153,9 +153,11 @@ public:
   edm::Handle< CSCComparatorDigiCollection > hCSCComparators;
 
  private:
+  //void fitComparatorsLCT(const CSCComparatorDigiCollection&, const CSCCorrelatedLCTDigi& tp, 
+ //	                          CSCDetId chid, float& fit_phi_layer1, float& fit_phi_layer3, float& fit_phi_layer6, 
+  //				  float& fit_z_layer1, float& fit_z_layer3, float& fit_z_layer6, float& perp); 
   void fitComparatorsLCT(const CSCComparatorDigiCollection&, const CSCCorrelatedLCTDigi& tp, 
-	                          CSCDetId chid, float& fit_phi_layer1, float& fit_phi_layer3, float& fit_phi_layer6, 
-				  float& fit_z_layer1, float& fit_z_layer3, float& fit_z_layer6, float& perp); 
+	                          CSCDetId chid, float* fit_phi_layers, float* fit_z_layers, float& perp); 
 
   void globalPositionOfLCT(const CSCCorrelatedLCTDigi stub, CSCDetId chid);
   void globalPositionOfGEMPad(const GEMCSCPadDigi gempad, GEMDetId gemid);
@@ -183,24 +185,25 @@ public:
 
  public:
   
-  void setRadiusSt1(float x) { radius_st1 = x; }
-  void setRadiusSt2(float x) { radius_st2 = x; }
-  void setRadiusSt3(float x) { radius_st3 = x; }
+  void setRadiusSt(float x, int st) { radius_st[st-1] = x; }
   void setNParity(int x) { npar=x; }
   void setxfactor(float x) { xfactor = x; }
   void setPhiGE11(float x) { phi_ge11 = x; }
   void setPhiGE21(float x) { phi_ge21 = x; }
+  void setPositionPhi(float x, int st, int layer) { phi_st_layers[st-1][layer-1] = x; }
+  void setPositionZ(float x, int st, int layer) { z_st_layers[st-1][layer-1] = x; }
+
  private:
   //endcap, direction based
+  //bool isEven[4];
+  bool isEven[4]={false, false, false, false};
   bool hasStub_st1;
   bool hasStub_st2;
   bool hasStub_st3;
   bool hasStub_st4;
   bool hasGEMPad_st1;
   bool hasGEMPad_st2;
-  float radius_st1;
-  float radius_st2;
-  float radius_st3;
+  float radius_st[4] = {0.0, 0.0, 0.0, 0.0};
   float xfactor;
   int npar;
   int meRing ;
@@ -209,17 +212,16 @@ public:
   float eta_st3;
   float phi_ge11;
   float phi_ge21;
-  float phi_st1_layer1;
-  float phi_st1_layer3;
-  float phi_st1_layer6;
-  float phi_st2_layer1;
-  float phi_st2_layer3;
-  float phi_st2_layer6;
-  float phi_st3_layer1;
-  float phi_st3_layer3;
-  float phi_st3_layer6;
+  float phi_st_layers[4][6] = {{-9, -9, -9, -9, -9, -9},
+      			       {-9, -9, -9, -9, -9, -9},
+      			       {-9, -9, -9, -9, -9, -9},
+      			       {-9, -9, -9, -9, -9, -9}};
+  float z_st_layers[4][6] = {{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+  				{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+  				{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
+  				{0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
   //GlobalPoint gp_st1, gp_st2, gp_st3, gp_ge11, gp_ge21; 
-  GlobalPoint gp_st1, gp_st2, gp_st3, gp_ge11;
+  GlobalPoint gp_st1, gp_st2, gp_st3, gp_st4, gp_ge11;
   GlobalPoint gp_ge21, gp_st1_layer1, gp_st1_layer6, gp_st2_layer1, gp_st2_layer6;
 
   //position-based
