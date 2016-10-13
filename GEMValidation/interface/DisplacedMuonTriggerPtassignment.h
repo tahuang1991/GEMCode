@@ -1,3 +1,4 @@
+
 #ifndef GEMCode_GEMValidation_DisplacedMuonTriggerPtassignment_h
 #define GEMCode_GEMValidation_DisplacedMuonTriggerPtassignment_h
 
@@ -68,12 +69,30 @@ public:
   //step1 get fitting positions from fitting compara digis after assoicating comparator digis to LCTs
   //step2 calculate all variables used pt assignment, requires eta,phi,radius,Z
   //step3 assgin L1 pt according to LUTs (in short future)
-  DisplacedMuonTriggerPtassignment(const CSCCorrelatedLCTDigiCollection* lcts, const edm::EventSetup& es, const edm::Event& iEvent); // region_=2, not used yet
-  DisplacedMuonTriggerPtassignment(const CSCCorrelatedLCTDigiContainer lcts, const CSCDetIdContainer cscids, const edm::EventSetup& es,const edm::Event& iEvent);//not used yet
+  DisplacedMuonTriggerPtassignment(const CSCCorrelatedLCTDigiCollection* lcts, 
+                                   const edm::EventSetup& es, 
+                                   const edm::Event& iEvent); // region_=2, not used yet
 
-  DisplacedMuonTriggerPtassignment(std::map<unsigned int, CSCCorrelatedLCTDigiContainer> chamberid_lcts, std::map<unsigned int, GEMCSCPadDigiContainer> detid_pads, const edm::EventSetup& es,const edm::Event& iEvent);
+  DisplacedMuonTriggerPtassignment(const CSCCorrelatedLCTDigiContainer lcts, 
+                                   const CSCDetIdContainer cscids, 
+                                   const edm::EventSetup& es,
+                                   const edm::Event& iEvent);//not used yet
 
-  DisplacedMuonTriggerPtassignment(GlobalPoint gp1, GlobalPoint gp2, GlobalPoint gp3, GlobalPoint gp4, GlobalPoint gp_ge11, GlobalPoint gp_ge21, int npar,const edm::EventSetup& es,const  edm::Event& iEvent); //sim level
+  DisplacedMuonTriggerPtassignment(std::map<unsigned int, CSCCorrelatedLCTDigiContainer> chamberid_lct, 
+                                   std::map<unsigned int, GEMCSCPadDigiContainer> detid_pads, 
+                                   const edm::EventSetup& es,
+                                   const edm::Event& iEvent);
+
+  DisplacedMuonTriggerPtassignment(GlobalPoint gp1, 
+                                   GlobalPoint gp2, 
+                                   GlobalPoint gp3, 
+                                   GlobalPoint gp4, 
+                                   GlobalPoint gp_ge11, 
+                                   GlobalPoint gp_ge21, 
+                                   int npar,
+                                   const edm::EventSetup& es,
+                                   const  edm::Event& iEvent); //sim level
+
   DisplacedMuonTriggerPtassignment(); //test constructor
 
   ~DisplacedMuonTriggerPtassignment();
@@ -110,7 +129,27 @@ public:
   const DTGeometry* getDTGeometry() const {return dtGeometry_;}
 
 
- protected:
+  int getNParity() const {return npar; } 
+  int getMeRing() const {return meRing; } 
+  float assignedPositionPt();
+  float assignedDirectionPt();
+  float getdeltaY12() const { return deltaY12; }
+  float getdeltaY23() const { return deltaY23; }
+  float getdeltaY123() const { return ddY123; }
+  float getlocalPhiDirection(int st) const;
+  float getdeltaPhiDirection(int st1, int st2) const;
+
+
+  void setRadiusSt(float x, int st) { radius_st[st-1] = x; }
+  void setNParity(int x) { npar=x; }
+  void setxfactor(float x) { xfactor = x; }
+  void setPhiGE11(float x) { phi_ge11 = x; }
+  void setPhiGE21(float x) { phi_ge21 = x; }
+  void setPositionPhi(float x, int st, int layer) { phi_st_layers[st-1][layer-1] = x; }
+  void setPositionZ(float x, int st, int layer) { z_st_layers[st-1][layer-1] = x; }
+
+ private:
+ 
   // should use geometry
   bool hasGEMGeometry_;
   bool hasRPCGeometry_;
@@ -124,9 +163,6 @@ public:
   const GEMGeometry* gemGeometry_;
   const ME0Geometry* me0Geometry_;
   const DTGeometry* dtGeometry_;
-
- private:
-
 
   //const edm::ParameterSet& conf_;
 
@@ -150,51 +186,30 @@ public:
   edm::ESHandle<DTGeometry> dt_geom_;
   
   //extra collection to get better CSC positions
- private:
   edm::Handle< CSCComparatorDigiCollection > hCSCComparators;
 
- private:
   //void fitComparatorsLCT(const CSCComparatorDigiCollection&, const CSCCorrelatedLCTDigi& tp, 
  //	                          CSCDetId chid, float& fit_phi_layer1, float& fit_phi_layer3, float& fit_phi_layer6, 
   //				  float& fit_z_layer1, float& fit_z_layer3, float& fit_z_layer6, float& perp); 
-  void fitComparatorsLCT(const CSCComparatorDigiCollection&, const CSCCorrelatedLCTDigi& tp, 
-	                          CSCDetId chid, float* fit_phi_layers, float* fit_z_layers, float& perp); 
+  void fitComparatorsLCT(const CSCComparatorDigiCollection&, 
+                         const CSCCorrelatedLCTDigi& tp, 
+                         CSCDetId chid, 
+                         float* fit_phi_layers, float* fit_z_layers, float& perp); 
 
   void globalPositionOfLCT(const CSCCorrelatedLCTDigi stub, CSCDetId chid);
   void globalPositionOfGEMPad(const GEMCSCPadDigi gempad, GEMDetId gemid);
-//pt assignment 
- private:
+
+  //pt assignment 
   int getEtaPartition(float eta) const;
   float deltaYcalculation(GlobalPoint gp1, GlobalPoint gp2) const;
   float deltadeltaYcalculation(GlobalPoint gp1, GlobalPoint gp2, GlobalPoint gp3, float eta, int par) const;
+
   //float PhiMomentum(float dphi, float phi_position, int st, bool evenodd);
   //float PhiMomentum_Radius(float dphi, float phi_position, float radius_csc, float radius_gem);
   //float PhiMomentum_Xfactor(float dphi, float phi_position, float xfactor);
   //float xFactocalculation(float r1, float r2, float r3);//?
   float phiMomentum_Xfactor(float phi_CSC, float phi_GEM, float xfactor) const;
- public:
-  int getNParity() const {return npar; } 
-  int getMeRing() const {return meRing; } 
-  float assignedPositionPt();
-  float assignedDirectionPt();
-  float getdeltaY12() const { return deltaY12; }
-  float getdeltaY23() const { return deltaY23; }
-  float getdeltaY123() const { return ddY123; }
-  float getlocalPhiDirection(int st) const;
-  float getdeltaPhiDirection(int st1, int st2) const;
 
-
- public:
-  
-  void setRadiusSt(float x, int st) { radius_st[st-1] = x; }
-  void setNParity(int x) { npar=x; }
-  void setxfactor(float x) { xfactor = x; }
-  void setPhiGE11(float x) { phi_ge11 = x; }
-  void setPhiGE21(float x) { phi_ge21 = x; }
-  void setPositionPhi(float x, int st, int layer) { phi_st_layers[st-1][layer-1] = x; }
-  void setPositionZ(float x, int st, int layer) { z_st_layers[st-1][layer-1] = x; }
-
- private:
   //endcap, direction based
   //bool isEven[4];
   bool isEven[4]={false, false, false, false};
@@ -240,12 +255,10 @@ public:
   float dPhi_dir_st2_st23;
   float dPhi_dir_st12_st23;
 
- private:
   const CSCCorrelatedLCTDigiContainer lcts;
   const CSCDetIdContainer cscids;
   std::map<unsigned int, CSCCorrelatedLCTDigiContainer> chamberid_lcts_;
   std::map<unsigned int, GEMCSCPadDigiContainer> detid_pads_;
-
 };
 
 #endif

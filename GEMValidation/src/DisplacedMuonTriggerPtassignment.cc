@@ -11,7 +11,6 @@ Author: tao.huang@cern.ch
 #include "DataFormats/Math/interface/deltaPhi.h"
 #include "GEMCode/GEMValidation/interface/DisplacedMuonTriggerPtassignment.h"
 #include "GEMCode/GEMValidation/interface/PtassignmentHelper.h"
-//#include "MuJetAnalysis/DisplacedL1MuFilter/plugins/CSCStubPatterns.h"
 
 
 int
