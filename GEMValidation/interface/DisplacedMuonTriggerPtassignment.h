@@ -39,6 +39,9 @@
 #include "DataFormats/CSCDigi/interface/CSCCorrelatedLCTDigiCollection.h"
 //#include "DataFormats/GEMDigi/interface/GEMDigiCollection.h"
 #include "DataFormats/GEMDigi/interface/GEMCSCPadDigiCollection.h"
+#include "L1Trigger/DTTrackFinder/interface/L1MuDTTrack.h"
+#include "L1Trigger/DTTrackFinder/src/L1MuDTTrackSegPhi.h"
+#include "DataFormats/L1CSCTrackFinder/interface/L1CSCTrackCollection.h"
 
 #include "GEMCode/GEMValidation/interface/Helpers.h"
 #include "GEMCode/GEMValidation/interface/CSCStubPatterns.h"
@@ -53,11 +56,18 @@
 // 0.9<|eta|<1.2 not yet, region_=1
 // 1.2<|eta|<1.6 ok, position-based and stub alignment, region_=2
 // 1.6<|eta|<2.4 ok, position-based and stub alignment, region_=2
+typedef std::vector<CSCDetId> CSCDetIdContainer;
+typedef std::pair<CSCDetId, CSCCorrelatedLCTDigi> CSCCorrelatedLCTDigiId;
 typedef std::vector<CSCCorrelatedLCTDigi> CSCCorrelatedLCTDigiContainer;
-typedef std::vector<GEMCSCPadDigi> GEMCSCPadDigiContainer;
+
 typedef std::vector<CSCComparatorDigi> CSCComparatorDigiContainer;
 typedef std::vector<std::pair<CSCDetId, CSCComparatorDigiContainer> > CSCComparatorDigiContainerIds;
-typedef std::vector<CSCDetId> CSCDetIdContainer;
+
+typedef std::pair<GEMDetId, GEMCSCPadDigi> GEMCSCPadDigiId;
+typedef std::vector<GEMCSCPadDigi> GEMCSCPadDigiContainer;
+
+typedef std::vector<std::vector<L1MuDTTrackSegPhi> > L1MuDTTrackSegPhiContainer;
+typedef std::vector<std::pair<L1MuDTTrack,std::vector<L1MuDTTrackSegPhi> > > L1MuDTTrackCollection;
 
 class DisplacedMuonTriggerPtassignment
 {
@@ -83,6 +93,13 @@ public:
                                    const edm::EventSetup& es,
                                    const edm::Event& iEvent);
 
+  // starting from a CSC TF Track and the CSC LCT collection
+  DisplacedMuonTriggerPtassignment(const L1CSCTrack&,
+                                   const CSCCorrelatedLCTDigiCollection&,
+                                   bool doStubRecovery,
+                                   const edm::EventSetup& es, 
+                                   const edm::Event& iEvent);
+
   DisplacedMuonTriggerPtassignment(GlobalPoint gp1, 
                                    GlobalPoint gp2, 
                                    GlobalPoint gp3, 
@@ -92,6 +109,11 @@ public:
                                    int npar,
                                    const edm::EventSetup& es,
                                    const  edm::Event& iEvent); //sim level
+
+  // constructor for barrel
+  DisplacedMuonTriggerPtassignment(const L1MuDTTrackSegPhiContainer&,
+                                   const edm::EventSetup& es, 
+                                   const edm::Event& iEvent);
 
   DisplacedMuonTriggerPtassignment(); //test constructor
 
@@ -107,9 +129,10 @@ public:
   
   bool runPositionbased();
   bool runDirectionbased(bool useGE21){ 
-      if (useGE21 and meRing==1) return runDirectionbasedGE21(); 
-      else return runDirectionbasedCSConly();
-   } 
+    if (useGE21 and meRing==1) return runDirectionbasedGE21(); 
+    else return runDirectionbasedCSConly();
+  } 
+  bool runPositionbasedBarrel();  
   bool runDirectionbasedGE21();
   bool runDirectionbasedCSConly();
   void setVerbose(int v) { verbose_ = v; }
@@ -128,6 +151,8 @@ public:
   const CSCGeometry* getCSCGeometry() const {return cscGeometry_;}
   const DTGeometry* getDTGeometry() const {return dtGeometry_;}
 
+  int getHalfStrip(const CSCComparatorDigi& digi);
+  float getFractionalStrip(const CSCComparatorDigi&d);
 
   int getNParity() const {return npar; } 
   int getMeRing() const {return meRing; } 
@@ -148,6 +173,17 @@ public:
   void setPositionPhi(float x, int st, int layer) { phi_st_layers[st-1][layer-1] = x; }
   void setPositionZ(float x, int st, int layer) { z_st_layers[st-1][layer-1] = x; }
 
+  //pad/stub recovery functions in case we are not using simTrack matched objects
+  bool stubInCSCTFTracks(const CSCCorrelatedLCTDigi& candidateStub, const L1CSCTrackCollection& l1Tracks) const;
+  bool stubInDTTFTracks(const L1MuDTTrackSegPhi& candidateStub, const L1MuDTTrackCollection& l1Tracks) const;
+  CSCCorrelatedLCTDigiId pickBestMatchingStub(float xref, float yref,
+                                              const CSCCorrelatedLCTDigiId& oldStub,
+                                              const CSCCorrelatedLCTDigiId& newStub, 
+                                              int refBx) const;
+  GEMCSCPadDigiId pickBestMatchingPad(float xref, float yref,
+                                      const GEMCSCPadDigiId& oldPad,
+                                      const GEMCSCPadDigiId& newPad, 
+                                      int bxref) const;
  private:
  
   // should use geometry
@@ -259,6 +295,11 @@ public:
   const CSCDetIdContainer cscids;
   std::map<unsigned int, CSCCorrelatedLCTDigiContainer> chamberid_lcts_;
   std::map<unsigned int, GEMCSCPadDigiContainer> detid_pads_;
+
+  // Barrel members
+  bool has_stub_mb1, has_stub_mb2, has_stub_mb3, has_stub_mb4; 
+  float phi_mb1, phi_mb2, phi_mb3, phi_mb4;
+  float phib_mb1, phib_mb2, phib_mb3, phib_mb4;
 };
 
 #endif
