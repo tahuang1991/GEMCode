@@ -40,6 +40,7 @@ Author: tao.huang@cern.ch
 #include "DataFormats/GEMDigi/interface/GEMCSCPadDigiCollection.h"
 
 #include "GEMCode/GEMValidation/interface/Helpers.h"
+#include "GEMCode/GEMValidation/interface/CSCStubPatterns.h"
 
 #include <vector>
 #include <map>

@@ -4,6 +4,8 @@
 #include "DataFormats/CSCDigi/interface/CSCCorrelatedLCTDigiCollection.h"
 #include <vector>
 
+namespace{
+
  std::vector<std::vector<int> > pat0delta {  
    { 999, 999, 999, 999, 999, 999, 999, 999, 999, 999, 999}, 
      { 999, 999, 999, 999, 999}, 
@@ -125,6 +127,8 @@ comparatorInLCTPattern(int keyStrip, int pattern, int layer, int halfStrip)
                   std::find(subpat.begin(), subpat.end(), halfStripDelta)   != subpat.end() or
                   std::find(subpat.begin(), subpat.end(), halfStripDelta-1) != subpat.end() );
   return returnValue;
+}
+
 }
 
 #endif
