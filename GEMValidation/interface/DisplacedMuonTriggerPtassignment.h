@@ -5,8 +5,8 @@
 /**\class DisplacedMuonTriggerPtassignment
 
   Displaced Muon Trigger Design based on Muon system
-
-Author: tao.huang@cern.ch
+  
+  Author: tao.huang@cern.ch, sven.dildick@cern.ch
 
 */
 
