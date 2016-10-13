@@ -1,10 +1,9 @@
-
 #ifndef GEMCode_GEMValidation_Ptassignment_h
 #define GEMCode_GEMValidation_Ptassignment_h
 
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 
-#define PI 3.14159265
+namespace { 
 
 //eta partitions:1.2-1.4,1.4-1.6,1.6-1.8, 1.8-2.0, 2.0-2.2, 2.2-2.4
 enum {EtaPartitions=6, Parity=4};
@@ -171,5 +170,7 @@ void calculateAlphaBeta(const std::vector<float>& v,
                         float& alpha, float& beta);
 
 float normalizePhi(float phi);
+
+}
 
 #endif

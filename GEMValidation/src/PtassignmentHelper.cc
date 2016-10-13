@@ -64,7 +64,7 @@ float Ptassign_Position_gp(GlobalPoint gp1, GlobalPoint gp2, GlobalPoint gp3, fl
 
 float Ptassign_Direction(float bending_12, float eta, int par){
     int neta = GetEtaPartition(eta);
-    if (par<0 or par>3 or neta==-1 or fabs(bending_12) > PI) return -1;
+    if (par<0 or par>3 or neta==-1 or fabs(bending_12) > M_PI) return -1;
 
     float pt=(1/fabs(bending_12)+DirectionEpLUT[par][neta][1])/DirectionEpLUT[par][neta][0];
     //std::cout <<"Pt Direction, npar "<< par <<" neta "<<neta <<" slope "<< DirectionEpLUT[par][neta][0]<<" intercep "<< DirectionEpLUT[par][neta][1] << " bending_12 " << bending_12 <<" pt "<<pt <<std::endl;
@@ -90,18 +90,18 @@ float PhiMomentum(float dphi, float phi_position, int st, bool evenodd){
 float PhiMomentum_Radius(float dphi, float phi_position, float radius_csc, float radius_gem){
     
      // usually radius_csc>radius_gem
-     if (fabs(dphi) > PI or fabs(phi_position) > PI or radius_csc<radius_gem) return -9;
+     if (fabs(dphi) > M_PI or fabs(phi_position) > M_PI or radius_csc<radius_gem) return -9;
      float radius_diff = radius_gem-radius_csc*cos(dphi);
      float phi_diff = 0.0;
      if (fabs(radius_diff) > 0.0) phi_diff = atan(radius_csc*sin(dphi)/radius_diff);
-     else phi_diff = PI/2.0;
+     else phi_diff = M_PI/2.0;
      
-     if (phi_diff <= -PI) phi_diff = phi_diff+2*PI;
-     else if (phi_diff > PI) phi_diff = phi_diff-2*PI;
+     if (phi_diff <= -M_PI) phi_diff = phi_diff+2*M_PI;
+     else if (phi_diff > M_PI) phi_diff = phi_diff-2*M_PI;
 
      float phiM = phi_position-phi_diff;
-     if (phiM <= -PI) phiM = phiM+2*PI;
-     else if (phiM > PI) phiM = phiM-2*PI;
+     if (phiM <= -M_PI) phiM = phiM+2*M_PI;
+     else if (phiM > M_PI) phiM = phiM-2*M_PI;
 
      //std::cout <<" radius_csc "<< radius_csc <<" radius_gem "<< radius_gem <<" dphi "<< dphi << " phi_position "<< phi_position<<" radius_diff "<< radius_diff <<" phi_diff "<< phi_diff <<" phiM "<< phiM << std::endl;
      return phiM;
@@ -114,19 +114,19 @@ float PhiMomentum_Radius(float dphi, float phi_position, float radius_csc, float
 float PhiMomentum_Xfactor(float dphi, float phi_position, float X){
 
       
-     if (fabs(dphi) > PI or fabs(phi_position) > PI) return -9;
+     if (fabs(dphi) > M_PI or fabs(phi_position) > M_PI) return -9;
      float y = 1.0-cos(dphi)- X;
       
      float phi_diff = 0.0;
      if (fabs(y) > 0.0) phi_diff = atan(sin(dphi)/y);
-     else phi_diff = PI/2.0;
+     else phi_diff = M_PI/2.0;
 
-     if (phi_diff <= -PI) phi_diff = phi_diff+2*PI;
-     else if (phi_diff > PI) phi_diff = phi_diff-2*PI;
+     if (phi_diff <= -M_PI) phi_diff = phi_diff+2*M_PI;
+     else if (phi_diff > M_PI) phi_diff = phi_diff-2*M_PI;
 
      float phiM = phi_position-phi_diff;
-     if (phiM <= -PI) phiM = phiM+2*PI;
-     else if (phiM > PI) phiM = phiM-2*PI;
+     if (phiM <= -M_PI) phiM = phiM+2*M_PI;
+     else if (phiM > M_PI) phiM = phiM-2*M_PI;
      
      //std::cout <<"PhiMomentum_Xfactor: dphi "<< dphi <<" phi_position "<< phi_position <<" X "<<X <<" phi_diff "<< phi_diff <<" phiM "<< phiM << std::endl;
      return phiM;
@@ -137,20 +137,20 @@ float PhiMomentum_Xfactor(float dphi, float phi_position, float X){
 
 float PhiMomentum_Xfactor_V2(float phi_CSC, float phi_GEM, float X){
 
-     if (fabs(phi_CSC) > PI or fabs(phi_GEM) > PI) return -9;
+     if (fabs(phi_CSC) > M_PI or fabs(phi_GEM) > M_PI) return -9;
      float dphi = deltaPhi(phi_CSC,phi_GEM);
      float y = 1.0-cos(dphi)- X;
       
      float phi_diff = 0.0;
      if (fabs(y) > 0.0) phi_diff = atan(sin(dphi)/y);
-     else phi_diff = PI/2.0;
+     else phi_diff = M_PI/2.0;
 
-     if (phi_diff <= -PI) phi_diff = phi_diff+2*PI;
-     else if (phi_diff > PI) phi_diff = phi_diff-2*PI;
+     if (phi_diff <= -M_PI) phi_diff = phi_diff+2*M_PI;
+     else if (phi_diff > M_PI) phi_diff = phi_diff-2*M_PI;
 
      float phiM = phi_GEM-phi_diff;
-     if (phiM <= -PI) phiM = phiM+2*PI;
-     else if (phiM > PI) phiM = phiM-2*PI;
+     if (phiM <= -M_PI) phiM = phiM+2*M_PI;
+     else if (phiM > M_PI) phiM = phiM-2*M_PI;
      
      //std::cout <<"PhiMomentum_Xfactor: dphi "<< dphi <<" phi_poistion1 "<< phi_GEM <<" phi_position2 "<< phi_CSC <<" Xfactor "<<X <<" phi_diff "<< phi_diff <<" phiM "<< phiM << std::endl;
 
