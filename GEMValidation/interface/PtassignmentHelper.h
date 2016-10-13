@@ -3,8 +3,6 @@
 
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 
-namespace { 
-
 //eta partitions:1.2-1.4,1.4-1.6,1.6-1.8, 1.8-2.0, 2.0-2.2, 2.2-2.4
 enum {EtaPartitions=6, Parity=4};
 //slopes_1 = [1.279, 0.6357, 1.001, 0.5252]
@@ -170,7 +168,5 @@ void calculateAlphaBeta(const std::vector<float>& v,
                         float& alpha, float& beta);
 
 float normalizePhi(float phi);
-
-}
 
 #endif
