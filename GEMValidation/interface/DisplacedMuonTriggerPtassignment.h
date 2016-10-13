@@ -250,7 +250,6 @@ public:
 
 
   //endcap, direction based
-  //bool isEven[4];
   bool hasStub_st[4] = {false, false, false, false};
   bool isEven[4]={false, false, false, false};
   bool hasGEMPad_st1;
@@ -270,12 +269,9 @@ public:
   				{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
   				{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
   				{0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
-  //GlobalPoint gp_st1, gp_st2, gp_st3, gp_ge11, gp_ge21; 
   GlobalPoint gp_st_layer3[4];
   GlobalPoint gp_st_layer1[4];
   GlobalPoint gp_st_layer6[4];
-  //GlobalPoint gp_st1, gp_st2, gp_st3, gp_st4, gp_ge11;
-  //GlobalPoint gp_ge21, gp_st1_layer1, gp_st1_layer6, gp_st2_layer1, gp_st2_layer6;
   GlobalPoint gp_ge11, gp_ge21;
 
   //position-based

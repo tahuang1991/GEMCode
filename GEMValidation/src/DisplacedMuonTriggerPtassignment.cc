@@ -17,7 +17,7 @@
 //to get position from fitting, we also need all comparator digis
 //step0 get LCTs and associated cscids, GEMPads and associated gemids, and geometry. 
 //step1 get fitting positions from fitting compara digis after assoicating comparator digis to LCTs
-//step2 calculate all variables used pt assignment, requires eta,phi,radius,Z
+//step2 calculate all variables used pt in assignment, requires eta,phi,radius,Z
 //step3 assgin L1 pt according to LUTs (in short future)
 DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const CSCCorrelatedLCTDigiCollection* lcts, const edm::EventSetup& es, const edm::Event& ev)
   : ev_(ev), es_(es), verbose_(0)
@@ -43,28 +43,11 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
   initVariables(); 
   for (auto idlcts : chamberid_lcts_){
   	CSCDetId chid(idlcts.first);
-/*<<<<<<< Updated upstream
-    //check the ring number that muon is flying through, 2nd station as reference
-    //later use this one to check whether we should use GE21 or ME21only
-    if (chid.station()==2) meRing = chid.ring();
-    if (chid.chamber()%2 == 0) isEven[chid.station()-1] = true;
-    if (chid.station() == 1 and idlcts.second.size()>0 ) hasStub_st1 = true;
-    else if (chid.station() == 2 and idlcts.second.size()>0 ) hasStub_st2 = true;
-    else if (chid.station() == 3 and idlcts.second.size()>0 ) hasStub_st3 = true;
-    else if (chid.station() == 4 and idlcts.second.size()>0 ) hasStub_st4 = true;
-    else {
-=======*/
 	//check the ring number that muon is flying through, 2nd station as reference
 	//later use this one to check whether we should use GE21 or ME21only
 	if (chid.station()==2) meRing = chid.ring();
 	if (chid.chamber()%2 == 0) isEven[chid.station()-1] = true;
 	if (idlcts.second.size()>0) hasStub_st[chid.station()-1] =true;
-	/*
-	if (chid.station() == 1 and idlcts.second.size()>0 ) hasStub_st1 = true;
-	else if (chid.station() == 2 and idlcts.second.size()>0 ) hasStub_st2 = true;
-	else if (chid.station() == 3 and idlcts.second.size()>0 ) hasStub_st3 = true;
-	else if (chid.station() == 4 and idlcts.second.size()>0 ) hasStub_st4 = true;
-	*/
 	else {
 	    std::cout <<" chid "<< chid <<"  number of lcts "<< idlcts.second.size() << std::endl;
 	    continue;
@@ -130,12 +113,6 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const L1CSCTr
       v.push_back(stub);
     }
     hasStub_st[ch_id.station()-1] = true;
-    /*
-    if (ch_id.station() == 1) hasStub_st1 = true;
-    if (ch_id.station() == 2) hasStub_st2 = true;
-    if (ch_id.station() == 3) hasStub_st3 = true;
-    if (ch_id.station() == 4) hasStub_st4 = true;
-    */
 
     chamberid_lct[ch_id.rawId()] = v;
   }
@@ -144,9 +121,9 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const L1CSCTr
 
   // second step: stub recovery
   const bool atLeast1StubMissing( (not hasStub_st[0]) or
-                                  (not hasStub_st[0]) or
-                                  (not hasStub_st[0]) or
-                                  (not hasStub_st[0]) ); 
+                                  (not hasStub_st[1]) or
+                                  (not hasStub_st[2]) or
+                                  (not hasStub_st[3]) ); 
   
   if (doStubRecovery and atLeast1StubMissing){
     //int triggerSector = tftrack.sector();
@@ -300,15 +277,6 @@ DisplacedMuonTriggerPtassignment::~DisplacedMuonTriggerPtassignment(){
 
 void DisplacedMuonTriggerPtassignment::initVariables()
 {
-/*<<<<<<< Updated upstream
-  /// endcap
-  hasStub_st1 = false; 
-  hasStub_st2 = false; 
-  hasStub_st3 = false; 
-  hasStub_st4 = false; 
-=======
-
->>>>>>> Stashed changes*/
   hasGEMPad_st1 = false; 
   hasGEMPad_st2 = false; 
   npar = -1;
