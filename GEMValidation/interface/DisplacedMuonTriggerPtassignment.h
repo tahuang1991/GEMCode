@@ -174,7 +174,7 @@ public:
   float getdeltaPhiDirection(int st1, int st2) const;
 
 
-  void setRadiusSt(float x, int st) { radius_st[st-1] = x; }
+  void setRadiusSt(float x, int st) { radius_st_ME[st-1] = x; }
   void setNParity(int x) { npar=x; }
   void setxfactor(float x) { xfactor = x; }
   void setPhiGE11(float x) { phi_ge11 = x; }
@@ -256,7 +256,10 @@ public:
   //float PhiMomentum(float dphi, float phi_position, int st, bool evenodd);
   //float PhiMomentum_Radius(float dphi, float phi_position, float radius_csc, float radius_gem);
   //float PhiMomentum_Xfactor(float dphi, float phi_position, float xfactor);
-  //float xFactocalculation(float r1, float r2, float r3);//?
+  //float xFactocalculation(float r1, float r2, float
+  //
+  //
+  //r3);//?
   float phiMomentum_Xfactor(float phi_CSC, float phi_GEM, float xfactor) const;
   //void fitComparatorsLCT(const CSCComparatorDigiCollection&, const CSCCorrelatedLCTDigi& tp, 
  //	                          CSCDetId chid, float& fit_phi_layer1, float& fit_phi_layer3, float& fit_phi_layer6, 
@@ -265,6 +268,7 @@ public:
                          const CSCCorrelatedLCTDigi& tp, 
                          CSCDetId chid, 
                          float* fit_phi_layers, float* fit_z_layers, float& perp); 
+  void fitTrackRadius(GlobalPoint* gps, float* radius);
 
  private:
   void globalPositionOfLCT(const CSCCorrelatedLCTDigi stub, CSCDetId chid);
@@ -276,7 +280,7 @@ public:
   bool isEven[4]={false, false, false, false};
   bool hasGEMPad_st1;
   bool hasGEMPad_st2;
-  float radius_st[4] = {0.0, 0.0, 0.0, 0.0};
+  float radius_st_ME[4] = {0.0, 0.0, 0.0, 0.0};
   float xfactor;
   int npar;
   int meRing ;
