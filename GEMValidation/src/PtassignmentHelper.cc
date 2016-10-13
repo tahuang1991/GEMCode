@@ -3,9 +3,9 @@
 
 #include "DataFormats/Math/interface/deltaPhi.h"
 #include "GEMCode/GEMValidation/interface/PtassignmentHelper.h"
+#include "GEMCode/GEMValidation/interface/DisplacedMuonTriggerPtassignment.h"
 #include <iostream>
 #include <math.h>       /* atan */
-
 
 int GetEtaPartition(float eta ){
 

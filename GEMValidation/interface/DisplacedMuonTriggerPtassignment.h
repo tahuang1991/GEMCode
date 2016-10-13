@@ -48,6 +48,7 @@
 
 #include <vector>
 #include <map>
+#include <math.h>       /* atan */
 
 //=================================
 //this class take DT stubs or CSC stubs to assign displaced muons L1 pt
@@ -224,17 +225,7 @@ public:
   //extra collection to get better CSC positions
   edm::Handle< CSCComparatorDigiCollection > hCSCComparators;
 
-  //void fitComparatorsLCT(const CSCComparatorDigiCollection&, const CSCCorrelatedLCTDigi& tp, 
- //	                          CSCDetId chid, float& fit_phi_layer1, float& fit_phi_layer3, float& fit_phi_layer6, 
-  //				  float& fit_z_layer1, float& fit_z_layer3, float& fit_z_layer6, float& perp); 
-  void fitComparatorsLCT(const CSCComparatorDigiCollection&, 
-                         const CSCCorrelatedLCTDigi& tp, 
-                         CSCDetId chid, 
-                         float* fit_phi_layers, float* fit_z_layers, float& perp); 
-
-  void globalPositionOfLCT(const CSCCorrelatedLCTDigi stub, CSCDetId chid);
-  void globalPositionOfGEMPad(const GEMCSCPadDigi gempad, GEMDetId gemid);
-
+ public:
   //pt assignment 
   int getEtaPartition(float eta) const;
   float deltaYcalculation(GlobalPoint gp1, GlobalPoint gp2) const;
@@ -245,23 +236,30 @@ public:
   //float PhiMomentum_Xfactor(float dphi, float phi_position, float xfactor);
   //float xFactocalculation(float r1, float r2, float r3);//?
   float phiMomentum_Xfactor(float phi_CSC, float phi_GEM, float xfactor) const;
+  //void fitComparatorsLCT(const CSCComparatorDigiCollection&, const CSCCorrelatedLCTDigi& tp, 
+ //	                          CSCDetId chid, float& fit_phi_layer1, float& fit_phi_layer3, float& fit_phi_layer6, 
+  //				  float& fit_z_layer1, float& fit_z_layer3, float& fit_z_layer6, float& perp); 
+  void fitComparatorsLCT(const CSCComparatorDigiCollection&, 
+                         const CSCCorrelatedLCTDigi& tp, 
+                         CSCDetId chid, 
+                         float* fit_phi_layers, float* fit_z_layers, float& perp); 
+
+ private:
+  void globalPositionOfLCT(const CSCCorrelatedLCTDigi stub, CSCDetId chid);
+  void globalPositionOfGEMPad(const GEMCSCPadDigi gempad, GEMDetId gemid);
+
 
   //endcap, direction based
   //bool isEven[4];
+  bool hasStub_st[4] = {false, false, false, false};
   bool isEven[4]={false, false, false, false};
-  bool hasStub_st1;
-  bool hasStub_st2;
-  bool hasStub_st3;
-  bool hasStub_st4;
   bool hasGEMPad_st1;
   bool hasGEMPad_st2;
   float radius_st[4] = {0.0, 0.0, 0.0, 0.0};
   float xfactor;
   int npar;
   int meRing ;
-  float eta_st1;
-  float eta_st2;
-  float eta_st3;
+  float eta_st[4] = {-9, -9, -9, -9};
   float phi_ge11;
   float phi_ge21;
   float phi_st_layers[4][6] = {{-9, -9, -9, -9, -9, -9},
@@ -273,8 +271,12 @@ public:
   				{0.0, 0.0, 0.0, 0.0, 0.0, 0.0},
   				{0.0, 0.0, 0.0, 0.0, 0.0, 0.0}};
   //GlobalPoint gp_st1, gp_st2, gp_st3, gp_ge11, gp_ge21; 
-  GlobalPoint gp_st1, gp_st2, gp_st3, gp_st4, gp_ge11;
-  GlobalPoint gp_ge21, gp_st1_layer1, gp_st1_layer6, gp_st2_layer1, gp_st2_layer6;
+  GlobalPoint gp_st_layer3[4];
+  GlobalPoint gp_st_layer1[4];
+  GlobalPoint gp_st_layer6[4];
+  //GlobalPoint gp_st1, gp_st2, gp_st3, gp_st4, gp_ge11;
+  //GlobalPoint gp_ge21, gp_st1_layer1, gp_st1_layer6, gp_st2_layer1, gp_st2_layer6;
+  GlobalPoint gp_ge11, gp_ge21;
 
   //position-based
   float ddY123;

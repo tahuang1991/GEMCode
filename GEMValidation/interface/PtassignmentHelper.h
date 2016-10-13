@@ -144,7 +144,7 @@ const double BendingAngleLUT[2][2] = {
 
 };
 
-int GetEtaPartition(float eta );
+int getEtaPartition(float eta);
 
 float Ptassign_Position(float deltay12, float deltay23, float eta, int par);
 

@@ -284,9 +284,9 @@ def loopEllipse(filedir, treename,fraction, astart, bstart, xaxis, yaxis,x_bins,
     #print "arange ",a_range, " brange ",b_range
     print "arange astart ",astart, " xbinwidth ", xbinwidth ," xbins ",x_bins, " ybins ",y_bins
 
-    todrawb0 = "%s"%yaxis+":"+"%s>>b0"%xaxis
+    todrawb0 = "%s*charge"%yaxis+":"+"%s*charge>>b0"%xaxis
     todrawb01 = "(-1)*%s"%yaxis+":"+"(-1)*%s>>b01"%xaxis
-    todrawb1 = "%s"%yaxis+":"+"%s>>b1"%xaxis
+    todrawb1 = "%s*charge"%yaxis+":"+"%s*charge>>b1"%xaxis
     todrawb11 = "(-1)*%s"%yaxis+":"+"(-1)*%s>>b11"%xaxis
     b0 = TH2F("b0","b0",xBins,xminBin,xmaxBin,yBins,yminBin,ymaxBin)
     b01 = TH2F("b01","b01",xBins,xminBin,xmaxBin,yBins,yminBin,ymaxBin)
@@ -295,10 +295,10 @@ def loopEllipse(filedir, treename,fraction, astart, bstart, xaxis, yaxis,x_bins,
     #b0.SetTitle("%s Vs %s,%s"%(ytitle, xtitle, st_title)) 
     #b0.SetTitleSize(0.05)
     b0.SetStats(1)
-    chain.Draw(todrawb0,cuts[0]+"&& charge>0","colz")#background
-    chain.Draw(todrawb01,cuts[0]+"&& charge<0","colz")#background
-    b0.Add(b01)
-    print "background todraw ",todrawb0," and ",todrawb01, " cuts ", cuts[0]," b0.Getentries ",b0.GetEntries()
+    chain.Draw(todrawb0,cuts[0],"colz")#background
+    #chain.Draw(todrawb01,cuts[0]+"&& charge<0","colz")#background
+    #b0.Add(b01)
+    print "background todraw ",todrawb0, " cuts ", cuts[0]," b0.Getentries ",b0.GetEntries()
     
     b1 = TH2F("b1","b1",xBins,xminBin,xmaxBin,yBins,yminBin,ymaxBin)
     b11 = TH2F("b11","b11",xBins,xminBin,xmaxBin,yBins,yminBin,ymaxBin)
@@ -309,10 +309,10 @@ def loopEllipse(filedir, treename,fraction, astart, bstart, xaxis, yaxis,x_bins,
     #b1.SetTitleSize(0.05)
     #b1.SetMaximum(30)
     b1.SetStats(1)
-    chain1.Draw(todrawb1,cuts[1]+"&& charge>0","colz")#signal
-    chain1.Draw(todrawb11,cuts[1]+"&& charge<0","colz")#signal
-    b1.Add(b11)
-    print "signal todraw ",todrawb1," and ", todrawb11, " cuts ", cuts[1]," b1.Getentries ",b1.GetEntries()
+    chain1.Draw(todrawb1,cuts[1],"colz")#signal
+    #chain1.Draw(todrawb11,cuts[1]+"&& charge<0","colz")#signal
+    #b1.Add(b11)
+    print "signal todraw ",todrawb1, " cuts ", cuts[1]," b1.Getentries ",b1.GetEntries()
     
     meanx_s = b1.GetMean(1)
     meany_s = b1.GetMean(2)
@@ -346,7 +346,8 @@ def loopEllipse(filedir, treename,fraction, astart, bstart, xaxis, yaxis,x_bins,
     #for a_axis in range(0):
     nalpha = 0
     alpha = 0.0
-    for xratio in [0.0,.25,.5,.75]:
+    #for xratio in [0.0, 0.1, 0.2, .25,.5]:
+    for xratio in [0.0, 0.1,0.2,0.4,0.5]:
        centerx = meanx_s*xratio
        centery = meany_s*xratio
        """
@@ -369,14 +370,14 @@ def loopEllipse(filedir, treename,fraction, astart, bstart, xaxis, yaxis,x_bins,
        max_b_highedge = ymaxBin
        b_axis = max_b_highedge
        m =0
-       #print "nalpha ", nalpha," alpha ",alpha, " max_b ",b_axis," high dege ",max_b_highedge," max_a ",max_a, " arange ",a_range
+       #print "nalpha ", nalpha," alpha ",alpha, " max_b ",b_axis," high dege ",max_b_highedge," centerx ",centerx," centery ", centery, " arange ",a_range
        for a_axis in a_range:
 	#alpha = 0.0
         m = m+1
         max_b_lowedge = 0.0
 	signalAcceptanceFactor, backgroundRejectionFactor = getBackgroundRejectionEllipse(a_axis, b_axis, alpha, centerx, centery, b1, b0)
     	#drawEllipse(b1, b0, a_axis, b_axis, alpha, meanx_s, meany_s, signalAcceptanceFactor, backgroundRejectionFactor, xtitle, ytitle,st_title, text, picname+"_nalpha%d_m%d"%(nalpha, m))
-        #print " a ", a_axis, " b ", b_axis, " alpha ",alpha, " x0 ",meanx_s," y0 ",meany_s," bhigh ",max_b_highedge, " blow ", max_b_lowedge, " signal ", signalAcceptanceFactor, " bg ",backgroundRejectionFactor
+        #print "new cnenter a ", a_axis, " b ", b_axis, " alpha ",alpha, " x0 ",centerx," y0 ",centery," bhigh ",max_b_highedge, " blow ", max_b_lowedge, " signal ", signalAcceptanceFactor, " bg ",backgroundRejectionFactor
     	if signalAcceptanceFactor < fraction:
 		continue
 	step = max_b_highedge - max_b_lowedge
@@ -406,7 +407,7 @@ def loopEllipse(filedir, treename,fraction, astart, bstart, xaxis, yaxis,x_bins,
 	max_b_highedge = b_axis
 	
     
-    #ellipes = "%s*%s/(%f*%f)+%s*%s/(%f*%f)<1.0"%(xaxis, xaxis, max_a, max_a, yaxis, yaxis, max_b, max_b)
+    #ellipse = "%s*%s/(%f*%f)+%s*%s/(%f*%f)<1.0"%(xaxis, xaxis, max_a, max_a, yaxis, yaxis, max_b, max_b)
     print "max_a ",max_a," max_b ",max_b, " alpha ",max_alpha, " x0 ",max_centerx," y0 ",max_centery ," signalAcceptanceFactor ",maxAccept," backgroundRejectionFactor ",maxRej
     return (max_a, max_b, max_alpha, max_centerx, max_centery)
             
@@ -425,7 +426,7 @@ def makeEffplot_v2(filedirs,todraw, treename0, den, num, etamin, etamax, xtitle,
 	b1.GetYaxis().SetRangeUser(0.0,1.05)
 	b1.GetYaxis().SetTitleOffset(1.1)
 	b1.GetYaxis().SetNdivisions(520)
-	b1.GetYaxis().SetTitle("Efficiency")
+	b1.GetYaxis().SetTitle("Trigger Efficiency")
 	b1.GetXaxis().SetTitle("True muon p_{T} [GeV]")
 	b1.GetXaxis().SetTitleSize(0.05)
 	b1.GetXaxis().SetLabelSize(0.05)
@@ -539,7 +540,7 @@ def makeplots(Teffs, legs, text, picname):
 	b1.GetYaxis().SetRangeUser(0.0,1.05)
 	b1.GetYaxis().SetTitleOffset(1.1)
 	b1.GetYaxis().SetNdivisions(520)
-	b1.GetYaxis().SetTitle("Efficiency")
+	b1.GetYaxis().SetTitle("Trigger Efficiency")
 	b1.GetXaxis().SetTitle("True muon p_{T} [GeV]")
 	b1.GetXaxis().SetTitleSize(0.05)
 	b1.GetXaxis().SetLabelSize(0.05)
@@ -604,24 +605,29 @@ Pts = [10]
 Pts_1 = [5,7]
 filedirs_v6 = [filedir16, filedir46]
 Teff_out = ROOT.TFile("Teff_out.root","RECREATE")
-if len(sys.argv)>=3:
+if len(sys.argv)>=5:
 	#take dir name from arguments, condor mode
-	outputdir1 = sys.argv[1]
-	outputdir2 = sys.argv[2]
+	pt1 = int(sys.argv[1])
+	pt2 = int(sys.argv[2])
+        outputdir1 = sys.argv[3]
+        outputdir2 = sys.argv[4]
+	#outputdir1 = "Profile_Ellipse_PT_0929_Pt%d_BGPt%d/"%(pt1,pt2)
+	#outputdir2 = "Hybrid_Ellipse_PT_0929_Pt%d_BGPt%d/"%(pt1,pt2)
 	filedirs_v6 = ["out_ana_prompt.root","out_ana_displaced.root"]
-	if outputdir1[-1] != "/":
-		outputdir1 = outputdir1+"/"
-	if outputdir2[-1] != "/":
-		outputdir2 = outputdir2+"/"
+	#if outputdir1[-1] != "/":
+	#	outputdir1 = outputdir1+"/"
+	#if outputdir2[-1] != "/":
+	#	outputdir2 = outputdir2+"/"
 else:
-	outputdir1 = "Profile_Ellipse_PT_0928_00_norotation/"
-	outputdir2 = "Hybrid_Ellipse_PT_0928_00_norotation/"
+	outputdir1 = "Profile_Ellipse_PT_0929_00_norotation/"
+	outputdir2 = "Hybrid_Ellipse_PT_0929_00_norotation/"
 #for npt in range(len(Pts)):	
 def plotalleta(pt, pt1, netas, fraction=95, yaxis = "(csc_bending_angle12_xfactor_L1_2)",ME21CSConly=False):
     Teffs_0 = []
     Teffs_1 = []
     extrapic=""
     extratxt=""
+    fraction_d = 99
     if ME21CSConly:
     	extrapic = "_ME21CSConly"
         extratxt = ", ME21 CSC only"
@@ -657,19 +663,30 @@ def plotalleta(pt, pt1, netas, fraction=95, yaxis = "(csc_bending_angle12_xfacto
 		cuts =  ["hasSt1St2St3 && fabs(eta_st2_sh)>%f && fabs(eta_st2_sh)<%f && npar==%d"%(netas[neta],netas[neta+1], npar)+checkvalue, "hasSt1St2St3 && fabs(deltay12_fit)<50 &&  fabs(deltay23_fit)<50 && fabs(eta_st2_sh)>%f && fabs(eta_st2_sh)<%f && fabs(genGdMu_dxy)>10 && fabs(genGdMu_dxy)<50 && fabs(genGdMu_dR)<0.1 && npar==%d"%(netas[neta],netas[neta+1], npar)+checkvalue]
 		dens_L1 = [cuts[0]+" && pt>2 && pt<=%f"%(pt1), cuts[1]+"&& pt>=%f"%(pt)]
 		x_bins = "(200, -30, 30.0)"
-		y_bins = "(120, -.6,.6)"
+		y_bins = "(160, -.8,.8)"
 		xtitle = "#Delta#Delta Y"
 		ytitle = "#Delta#phi_{dir}"
 		text = "#splitline{%s}{%.1f<|#eta|<%.1f, p_{T}^{L1}>%d GeV}"%(chambers,netas[neta],netas[neta+1],pt)
 		astart = .6
 		bstart = .0# not used 
-		(maxa, maxb, alpha, x0, y0) = loopEllipse(filedirs_v6, treename, fraction, astart, bstart, xaxis, yaxis,x_bins, y_bins,xtitle, ytitle,st_title, netas[neta], netas[neta+1], dens_L1,text,outputdir1+"GEMCSC_ctau0andctau1000_hyrid_profile_20160925_pt%d_ptbg%d_fraction%d_st2eta%dto%d_npar%d%s"%(pt, pt1, fraction, int(netas[neta]*10),int(netas[neta+1]*10), npar, extrapic))
-		LUT.write("eta%dto%dnpar%dfraction%d:(%f,%f,%f,%f,%f)\n"%(int(netas[neta]*10), int(netas[neta+1]*10), npar,fraction,maxa,maxb,alpha, x0, y0))		
+		(maxa, maxb, alpha, x0, y0) = loopEllipse(filedirs_v6, treename, fraction, astart, bstart, xaxis, yaxis,x_bins, y_bins,xtitle, ytitle,st_title, netas[neta], netas[neta+1], dens_L1,text,outputdir1+"GEMCSC_ctau0andctau1000_hyrid_profile_20160929_pt%d_ptbg%d_fraction%d_st2eta%dto%d_npar%d%s"%(pt, pt1, fraction, int(netas[neta]*10),int(netas[neta+1]*10), npar, extrapic))
 		#print "max_a ",maxa," maxb ",maxb," alpha ",alpha," x0 ",x0, " y0 ",y0
-		xaxis1 = "(%s*TMath::Cos(%f)-%s*TMath::Sin(%f)-%f)"%(xaxis, alpha, yaxis, alpha, x0)
-		yaxis1 = "(%s*TMath::Sin(%f)+%s*TMath::Cos(%f)-%f)"%(xaxis, alpha, yaxis, alpha, y0)
-		ellipes = "(%s*%s/(%f*%f)+%s*%s/(%f*%f))<=1.0"%(xaxis1, xaxis1, maxa, maxa, yaxis1, yaxis1, maxb, maxb)
-		Teffs = makeEffplot_v2(filedirs_v6, "pt", treename, cuts, [ellipes, ellipes], netas[neta], netas[neta+1],"true muon p_{T} GeV","Efficiency",legs ,text,outputdir2+"GEMCSC_ctau0andctau1000_hybrid_eff_20160925_pt%d_ptbg%d_fraction%d_st2eta%dto%d_npar%d%s"%(pt, pt1, fraction, int(netas[neta]*10),int(netas[neta+1]*10), npar, extrapic))
+		xaxis1 = "(%s*TMath::Cos(%f)*charge-%s*TMath::Sin(%f)*charge-%f)"%(xaxis, alpha, yaxis, alpha, x0)
+		yaxis1 = "(%s*TMath::Sin(%f)*charge+%s*TMath::Cos(%f)*charge-%f)"%(xaxis, alpha, yaxis, alpha, y0)
+		ellipse = "(%s*%s/(%f*%f)+%s*%s/(%f*%f))<=1.0"%(xaxis1, xaxis1, maxa, maxa, yaxis1, yaxis1, maxb, maxb)
+		Teffs = makeEffplot_v2(filedirs_v6, "pt", treename, cuts, [ellipse, ellipse], netas[neta], netas[neta+1],"true muon p_{T} GeV","Trigger Efficiency",legs ,text,outputdir2+"GEMCSC_ctau0andctau1000_hybrid_eff_20160929_pt%d_ptbg%d_fraction%d_st2eta%dto%d_npar%d_dirinterstation%s"%(pt, pt1, fraction, int(netas[neta]*10),int(netas[neta+1]*10), npar, extrapic))
+		cuts_d = [cuts[0]+"&& "+ellipse+"&& pt<%f"%(pt-1), cuts[1]+"&& "+ellipse+" && pt>=%f"%(pt)]
+		xaxis_d = "(dphi_dir_st1_st12_L1)"
+		yaxis_d = "(dphi_dir_st2_st23_L1)"
+		xtitle_d = "#Delta#phi_{dir}(st1, st12)"
+		ytitle_d = "#Delta#phi_{dir}(st2, st23)"
+		astart_d = 1.2/120
+		(maxa_d, maxb_d, alpha_d, x0_d, y0_d) = loopEllipse(filedirs_v6, treename, fraction_d, astart_d, bstart, xaxis_d, yaxis_d,y_bins, y_bins,xtitle_d, ytitle_d,st_title, netas[neta], netas[neta+1], cuts_d,text,outputdir1+"GEMCSC_ctau0andctau1000_hyrid_profile_20160929_pt%d_ptbg%d_fraction%d_fractiond%d_st2eta%dto%d_npar%d_dirinterstation%s"%(pt, pt1, fraction, fraction_d, int(netas[neta]*10),int(netas[neta+1]*10), npar, extrapic))
+		LUT.write("eta%dto%dnpar%dfraction%d:(%f,%f,%f,%f,%f,%f,%f,%f,%f,%f)\n"%(int(netas[neta]*10), int(netas[neta+1]*10), npar,fraction,maxa,maxb,alpha, x0, y0, maxa_d,maxb_d,alpha_d, x0_d, y0_d))		
+		xaxis1_d = "(%s*TMath::Cos(%f)*charge-%s*TMath::Sin(%f)*charge-%f)"%(xaxis_d, alpha_d, yaxis_d, alpha_d, x0_d)
+		yaxis1_d = "(%s*TMath::Sin(%f)*charge+%s*TMath::Cos(%f)*charge-%f)"%(xaxis_d, alpha_d, yaxis_d, alpha_d, y0_d)
+		ellipse_d = "(%s*%s/(%f*%f)+%s*%s/(%f*%f))<=1.0"%(xaxis1_d, xaxis1_d, maxa_d, maxa_d, yaxis1_d, yaxis1_d, maxb_d, maxb_d)
+		Teffs = makeEffplot_v2(filedirs_v6, "pt", treename, cuts, [ellipse+"&&"+ellipse_d, ellipse+"&&"+ellipse_d], netas[neta], netas[neta+1],"true muon p_{T} GeV","Trigger Efficiency",legs ,text,outputdir2+"GEMCSC_ctau0andctau1000_hybrid_eff_20160929_pt%d_ptbg%d_fraction%d_fractiond%d_st2eta%dto%d_npar%d_dirinterstation%s"%(pt, pt1, fraction, fraction_d, int(netas[neta]*10),int(netas[neta+1]*10), npar, extrapic))
 		Teffallnpars.append(Teffs)
        print "Teffallnpars len ",len(Teffallnpars),Teffallnpars
        Teff0 = Teffallnpars[0][0]
@@ -680,7 +697,7 @@ def plotalleta(pt, pt1, netas, fraction=95, yaxis = "(csc_bending_angle12_xfacto
    	Teff1.Add(Teffallnpars[xpar+1][1])		   
        Teff0.SetName("hybrideta%dto%d"%(int(netas[neta]*10),int(netas[neta+1]*10))+"promptmuonpt%dptbg%d"%(pt,pt1))
        Teff1.SetName("hybrideta%dto%d"%(int(netas[neta]*10),int(netas[neta+1]*10))+"displacedmuonpt%dptbg%d"%(pt,pt1))
-       makeplots([Teff0, Teff1], legs, text_h,outputdir2+"GEMCSC_ctau0andctau1000_hybrid_eff_20160925_pt%d_ptbg%d_fraction%d_St2eta%dto%d_allnpar%s"%(pt, pt1, fraction,  int(netas[neta]*10),int(netas[neta+1]*10), extrapic)) 
+       makeplots([Teff0, Teff1], legs, text_h,outputdir2+"GEMCSC_ctau0andctau1000_hybrid_eff_20160929_pt%d_ptbg%d_fraction%d_fractiond%d_St2eta%dto%d_allnpar_dirinterstation%s"%(pt, pt1, fraction, fraction_d, int(netas[neta]*10),int(netas[neta+1]*10), extrapic)) 
        """
        Teff_out.Reopen("Update")
        Teff0.Write(Teff_out)
@@ -697,7 +714,7 @@ def plotalleta(pt, pt1, netas, fraction=95, yaxis = "(csc_bending_angle12_xfacto
     Teffs0_alleta.SetName("hybrideta%dto%d"%(int(netas[0]*10),int(netas[-1]*10))+"promptmuonpt%dptbg%d"%(pt,pt1))
     Teffs1_alleta.SetName("hybrideta%dto%d"%(int(netas[0]*10),int(netas[-1]*10))+"displacedmuonpt%dptbg%d"%(pt,pt1))
     text_alleta = "#splitline{Hybrid algorithm}{%.1f<|#eta|<%.1f, p_{T}^{L1}>%d GeV%s}"%(netas[0],netas[-1], pt, extratxt)
-    makeplots([Teffs0_alleta, Teffs1_alleta], legs, text_alleta,outputdir2+"GEMCSC_ctau0andctau1000_hybrid_eff_20160925_pt%d_ptbg%d_fraction%d_St2eta%dto%d_allnpar%s"%(pt, pt1, fraction,int(netas[0]*10),int(netas[-1]*10), extrapic)) 
+    makeplots([Teffs0_alleta, Teffs1_alleta], legs, text_alleta,outputdir2+"GEMCSC_ctau0andctau1000_hybrid_eff_20160929_pt%d_ptbg%d_fraction%d_fractiond%d_St2eta%dto%d_allnpar%s"%(pt, pt1, fraction,fraction_d, int(netas[0]*10),int(netas[-1]*10), extrapic)) 
     """
     Teff_out.Reopen("Update")
     Teffs0_alleta.Write(Teff_out)
@@ -709,9 +726,12 @@ if not os.path.exists(outputdir1):
         os.makedirs(outputdir1)
 if not os.path.exists(outputdir2):
         os.makedirs(outputdir2)
-#plotalleta(10,5, [1.2,1.4,1.6],95,"(csc_bending_angle12_xfactor_L1_2)",False)
-plotalleta(10,5, [1.6,1.8,2.0,2.2],95,"(csc_bending_angle12_xfactor_L1_2)",False)
-#plotalleta(10,5, [1.6,1.8,2.0,2.2],95,"(csc_bending_angle12_xfactor_L1_1)",True)
+#plotalleta(10,5, [2.0,2.2],97,"(csc_bending_angle12_xfactor_L1_2)",False)
+#plotalleta(pt1,pt2, [2.0,2.2],95,"(csc_bending_angle12_xfactor_L1_2)",False)
+plotalleta(pt1,pt2, [1.2,1.4,1.6],95,"(csc_bending_angle12_xfactor_L1_2)",False)
+plotalleta(pt1,pt2, [1.6,1.8,2.0,2.2],95,"(csc_bending_angle12_xfactor_L1_2)",False)
+plotalleta(pt1,pt2, [1.6,1.8,2.0,2.2],95,"(csc_bending_angle12_xfactor_L1_1)",True)
+
 
 
 #plotalleta(3,3, [1.2,1.4,1.6],95,"(csc_bending_angle12_xfactor_L1_2)",False)

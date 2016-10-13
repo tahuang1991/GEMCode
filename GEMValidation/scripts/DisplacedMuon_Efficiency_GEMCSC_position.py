@@ -111,7 +111,7 @@ def getAllEff(chain,den, num, picname, txt, todraw="pt"):
 	b1.GetYaxis().SetRangeUser(-0.0,1.05)
 	b1.GetYaxis().SetTitleOffset(1.2)
 	b1.GetYaxis().SetNdivisions(520)
-	b1.GetYaxis().SetTitle("Efficiency")
+	b1.GetYaxis().SetTitle("Trigger efficiency")
 	b1.GetXaxis().SetTitle("True muon p_{T} [GeV]")
 	b1.GetXaxis().SetTitleSize(0.045)
 	b1.SetTitle(" #scale[1.4]{#font[61]{CMS}} #font[52]{Simulation preliminary}"+"  "*10+" 14 TeV, 0 PU")
@@ -510,7 +510,7 @@ def makeEffplot(filedir,todraw, treename0,ptthreshold,fractionToKeep, den, num, 
 	b1.GetYaxis().SetRangeUser(-0.0,1.05)
 	b1.GetYaxis().SetTitleOffset(1.2)
 	b1.GetYaxis().SetNdivisions(520)
-	b1.GetYaxis().SetTitle("Efficiency")
+	b1.GetYaxis().SetTitle("Trigger efficiency")
 	b1.GetXaxis().SetTitle("True muon p_{T} [GeV]")
 	b1.GetXaxis().SetTitleSize(0.045)
 	b1.SetTitle(" #scale[1.4]{#font[61]{CMS}} #font[52]{Simulation preliminary}"+"  "*10+" 14 TeV, 0 PU")
@@ -649,7 +649,7 @@ def printcuts(filedir, treename0, den, deltay12, deltay23, pt, npar,etamin, etam
 		#(prop, slope, intercept) =  getall_jose(npar, (etamin+etamax)/2.0)
 		num = "%s-%s*%f"%(deltay23,deltay12, prop)
 		hasnum = "&& fabs(%s)>0"%(num)
-		hist = ROOT.TH1F("hist","hist",4000,0.0,40)
+		hist = ROOT.TH1F("hist","hist",5000,0.0,50)
 	        deltapt =0.0
 	 	if pt<10 and pt>2:
 			deltapt = 0.5
@@ -711,7 +711,7 @@ def makeEffplot_v2(filedirs,todraw, treename0, den, deltay12, deltay23, pt, alln
 	b1.GetYaxis().SetRangeUser(0.0,1.05)
 	b1.GetYaxis().SetTitleOffset(1.1)
 	b1.GetYaxis().SetNdivisions(520)
-	b1.GetYaxis().SetTitle("Efficiency")
+	b1.GetYaxis().SetTitle("Trigger efficiency")
 	b1.GetXaxis().SetTitle("True muon p_{T} [GeV]")
 	b1.GetXaxis().SetTitleSize(0.05)
 	b1.GetXaxis().SetLabelSize(0.05)
@@ -858,7 +858,7 @@ def makeEffplot_v3(filedirs,todraw, treename0, den, num, Pts, netas, allnpar, fr
 	b1.GetYaxis().SetRangeUser(0.0,1.05)
 	b1.GetYaxis().SetTitleOffset(1.1)
 	b1.GetYaxis().SetNdivisions(520)
-	b1.GetYaxis().SetTitle("Efficiency")
+	b1.GetYaxis().SetTitle("Trigger efficiency")
 	b1.GetXaxis().SetTitle("True muon p_{T} [GeV]")
 	b1.GetXaxis().SetTitleSize(0.05)
 	b1.GetXaxis().SetLabelSize(0.05)
@@ -915,7 +915,7 @@ def makeplots(Teffs, legs, text, picname):
 	b1.GetYaxis().SetRangeUser(0.0,1.05)
 	b1.GetYaxis().SetTitleOffset(1.1)
 	b1.GetYaxis().SetNdivisions(520)
-	b1.GetYaxis().SetTitle("Efficiency")
+	b1.GetYaxis().SetTitle("Trigger efficiency")
 	b1.GetXaxis().SetTitle("True muon p_{T} [GeV]")
 	b1.GetXaxis().SetTitleSize(0.05)
 	b1.GetXaxis().SetLabelSize(0.05)
@@ -974,6 +974,7 @@ filedir1 = "/eos/uscms/store/user/tahuang/SLHC26_patch1_2023Muon_1M_Ana_PU0_Pt2_
 #filedir16 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0901/160901_043538/0000/"
 #filedir16 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0925/160926_050053/0000/"
 filedir16 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0925_v2/160926_194628/0000/"
+filedir16 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_PU140_1005/161010_150344/0000/"
 filedir14 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0812_v4/160813_141149/0000/"
 filedir10 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0812_v0/160813_204308/0000/"
 filedir15 = "/eos/uscms/store/user/tahuang/SLHC23_patch1_2023Muon_gen_sim_Pt2_50_1M/GEMCSCAna_ctau0_Pt2_50_0816_v5/160815_185029/0000/"
@@ -992,6 +993,7 @@ filedir4 = "/eos/uscms/store/user/tahuang/SLHC26_patch1_2023Muon_1M_Ana_PU0_ctau
 #filedir46 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0901/160901_043623/0000/"
 #filedir46 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0925/160926_050000/0000/"
 filedir46 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0925_v2/160926_194711/0000/"
+filedir46 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_PU140_1010/161011_050807/0000/"
 filedir44 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0812_v4/160813_141529/0000/"
 filedir40 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0812_v0/160813_204646/0000/"
 filedir45 = "/eos/uscms/store/user/tahuang/DarkSUSY_MH-125_MGammaD-20000_ctau1000_14TeV_madgraph-pythia6-tauola/GEMCSCAna_DarkSUSY_ctau1000_0816_v5/160815_185325/0000/"
@@ -1060,13 +1062,15 @@ nums_loweta = ["csc_bending_angle12_xfactor_smear3","csc_bending_angle12_xfactor
 #makeEffplot_v3(filedirs_v4,"pt", treename0, dens, nums, Pts, netas, allnpar, 90, "true muon p_T", "Efficiency",legs, evenodds[npar],"DirectionPt_Dxy_0812/GEMCSC_ctau0andctau1000_directionOnly_Eff_recopt_20160812_npar%d_v4"%(npar))
 #makeEffplot_v3(filedirs_v0,"pt", treename0, dens, nums, Pts, netas, allnpar, 90, "true muon p_T", "Efficiency",legs, evenodds[npar],"DirectionPt_Dxy_0812/GEMCSC_ctau0andctau1000_directionOnly_Eff_recopt_20160812_npar%d_v0"%(npar))
 #makeEffplot_v3(filedirs_v5,"pt", treename0, dens, nums, Pts, netas, allnpar, 90, "true muon p_T", "Efficiency",legs, evenodds[npar],"DirectionPt_Dxy_0815/GEMCSC_ctau0andctau1000_directionOnly_Eff_recopt_20160815_npar%d_v5"%(npar))
-#printallcuts(filedir16, treename0,"hasSt1St2St3", "deltay12_fit", "deltay23_fit", netas, [2,3,4,5,7,10,15,20,30,40], 90, "|#Delta#Delta Y|", "Entries", "digi level ","Position_PT_Cut_0909/GEMCSC_ctau0_PositionOnly_20160909")
-if len(sys.argv)>=2:
+printallcuts(filedir16, treename0,"hasSt1St2St3", "deltay12_fit", "deltay23_fit", netas, [2,3,4,5,7,10,15,20,30,40], 90, "|#Delta#Delta Y|", "Entries", "digi level ","Position_PT_Cut_1010/GEMCSC_ctau0_PositionOnly_20161010")
+if len(sys.argv)>=3:
 	#take dir name from arguments, condor mode
-	outputdir = sys.argv[1]
+	pt = int(sys.argv[1])
+	#outputdir = "Direction_PT%d_0925/"%(pt)
+        outputdir = sys.argv[2]
 	filedirs_v6 = ["out_ana_prompt.root","out_ana_displaced.root"]
-	if outputdir[-1] != "/":
-		outputdir = outputdir+"/"
+	#if outputdir[-1] != "/":
+	#	outputdir = outputdir+"/"
 else:
 	outputdir = "Position_PT_0925/"
 def plotalleta(pt, netas, fraction=90):
@@ -1134,10 +1138,13 @@ def plotalleta(pt, netas, fraction=90):
     """
 if not os.path.exists(outputdir):
         os.makedirs(outputdir)
-plotalleta(10,[1.2,1.4,1.6],90)
-plotalleta(10,[1.6,1.8,2.0,2.2,2.4],90)
-#plotalleta(20,[1.2,1.4,1.6],90)
-#plotalleta(20,[1.6,1.8,2.0,2.2],90)
+
+#plotalleta(pt,[2.0,2.2],90)
+#plotalleta(pt,[1.2,1.4,1.6],90)
+#plotalleta(pt,[1.6,1.8,2.0,2.2],90)
+#plotalleta(pt,[1.6,1.8,2.0,2.2,2.4],90)
+#plotalleta(pt,[1.2,1.4,1.6,1.8,2.0,2.2,2.4],90)
+
        
 
 
