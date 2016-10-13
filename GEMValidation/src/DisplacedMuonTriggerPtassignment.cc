@@ -43,17 +43,6 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
   initVariables(); 
   for (auto idlcts : chamberid_lcts_){
   	CSCDetId chid(idlcts.first);
-/*<<<<<<< Updated upstream
-    //check the ring number that muon is flying through, 2nd station as reference
-    //later use this one to check whether we should use GE21 or ME21only
-    if (chid.station()==2) meRing = chid.ring();
-    if (chid.chamber()%2 == 0) isEven[chid.station()-1] = true;
-    if (chid.station() == 1 and idlcts.second.size()>0 ) hasStub_st1 = true;
-    else if (chid.station() == 2 and idlcts.second.size()>0 ) hasStub_st2 = true;
-    else if (chid.station() == 3 and idlcts.second.size()>0 ) hasStub_st3 = true;
-    else if (chid.station() == 4 and idlcts.second.size()>0 ) hasStub_st4 = true;
-    else {
-=======*/
 	//check the ring number that muon is flying through, 2nd station as reference
 	//later use this one to check whether we should use GE21 or ME21only
 	if (chid.station()==2) meRing = chid.ring();
@@ -108,14 +97,17 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
 }
 
 DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const L1CSCTrack& tftrack,
-                                                                   const CSCCorrelatedLCTDigiCollection& lcts,
+                                                                   const L1CSCTrackCollection& l1Tracks,
+                                                                   const CSCCorrelatedLCTDigiCollection& CSCCorrelatedLCTs,
                                                                    bool doStubRecovery,
+                                                                   bool matchGEMPads,
                                                                    const edm::EventSetup& es, 
                                                                    const edm::Event& ev)
   : ev_(ev), es_(es), verbose_(0)
 {
   setupGeometry(es);
   initVariables(); 
+  setupTriggerScales(es);
   
   // first step: collect all stubs associated to the CSC TF Track
   std::map<unsigned int, CSCCorrelatedLCTDigiContainer> chamberid_lct;
@@ -130,104 +122,118 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const L1CSCTr
       v.push_back(stub);
     }
     hasStub_st[ch_id.station()-1] = true;
-    /*
-    if (ch_id.station() == 1) hasStub_st1 = true;
-    if (ch_id.station() == 2) hasStub_st2 = true;
-    if (ch_id.station() == 3) hasStub_st3 = true;
-    if (ch_id.station() == 4) hasStub_st4 = true;
-    */
-
     chamberid_lct[ch_id.rawId()] = v;
   }
 
-  // TF eta
+  // TF properties
+  auto track = tftrack.first;
+  const int sign(track.endcap()==1 ? 1 : -1);
+  unsigned gpt = 0, quality = 0;
+  csc::L1Track::decodeRank(track.rank(), gpt, quality);
+  
+  //const float csctf_pt = muPtScale_->getPtScale()->getLowEdge(gpt & 0x1f) + 1.e-6;
+  const float csctf_eta = muScales_->getRegionalEtaScale(2)->getCenter(track.eta_packed()) * sign;
+  //const float csctf_phi = normalizedPhi(muScales_->getPhiScale()->getLowEdge(phiL1CSCTrack(track)));
+  const int csctf_bx = track.bx();
 
   // second step: stub recovery
-  const bool atLeast1StubMissing( (not hasStub_st[0]) or
-                                  (not hasStub_st[0]) or
-                                  (not hasStub_st[0]) or
-                                  (not hasStub_st[0]) ); 
+  bool stubMissingSt1 = not hasStub_st[0];
+  bool stubMissingSt2 = not hasStub_st[1];
+  bool stubMissingSt3 = not hasStub_st[2];
+  bool stubMissingSt4 = not hasStub_st[3];
+  bool atLeast1StubMissing = stubMissingSt1 or stubMissingSt2 or stubMissingSt3 or stubMissingSt4;
   
   if (doStubRecovery and atLeast1StubMissing){
-    //int triggerSector = tftrack.sector();
+    int triggerSector = track.sector();
 
-    // for (int endcap=1; endcap<=2; endcap++){
-    //   //do not consider stubs in the wrong endcap
-    //   int zendcap(endcap!=1 ? -1 : +1 );
-    //   if (zendcap * event_.CSCTF_eta[j] < 0) continue;
-    //   for (int station=1; station<=4; station++){
+    for (int endcap=1; endcap<=2; endcap++){
+      // do not consider stubs in the wrong endcap
+      int zendcap(endcap!=1 ? -1 : +1 );
+      if (zendcap * csctf_eta < 0) continue;
+      for (int station=1; station<=4; station++){
           
-    //     // ignore station where a L1Mu stub is present!
-    //     if (not stubMissingSt1 and station==1) continue;
-    //     if (not stubMissingSt2 and station==2) continue;
-    //     if (not stubMissingSt3 and station==3) continue;
-    //     if (not stubMissingSt4 and station==4) continue;
-    //     if(verbose) std::cout << "Recovered stubs in station: " << station << std::endl;
-    //     // temp storage of candidate stubs per station and ring
-    //     CSCCorrelatedLCTDigiId bestMatchingStub;
-    //     int iStub = 0;
-    //     for (int ring=1; ring<=3; ring++){
-    //       if (station!=1 and ring==3) continue;
-    //       //std::cout << "Analyzing ring " << ring << std::endl;
+        // ignore station where a L1Mu stub is present!
+        if (not stubMissingSt1 and station==1) continue;
+        if (not stubMissingSt2 and station==2) continue;
+        if (not stubMissingSt3 and station==3) continue;
+        if (not stubMissingSt4 and station==4) continue;
+        // if(verbose) std::cout << "Recovered stubs in station: " << station << std::endl;
+        // temp storage of candidate stubs per station and ring
+        CSCCorrelatedLCTDigiId bestMatchingStub;
+        int iStub = 0;
+        for (int ring=1; ring<=3; ring++){
+          if (station!=1 and ring==3) continue;
+          //std::cout << "Analyzing ring " << ring << std::endl;
             
-    //       for (int chamber=1; chamber<=36; chamber++){
-    //         // do not consider invalid detids
-    //         if ( (station==2 or station==3 or station==4) and 
-    //              (ring==1) and chamber>18) continue;
-    //         //std::cout << "Analyzing chamber " << chamber << std::endl; 
-    //         // create the detid
-    //         CSCDetId ch_id(endcap, station, ring, chamber);
-    //         //std::cout << "ch_id " <<  ch_id << std::endl;
-    //         // get the stubs in this detid
-    //         auto range = CSCCorrelatedLCTs.get(ch_id);
-    //         for (auto digiItr = range.first; digiItr != range.second; ++digiItr){
-    //           iStub++; 
+          for (int chamber=1; chamber<=36; chamber++){
+            // do not consider invalid detids
+            if ( (station==2 or station==3 or station==4) and 
+                 (ring==1) and chamber>18) continue;
+            //std::cout << "Analyzing chamber " << chamber << std::endl; 
+            // create the detid
+            CSCDetId ch_id(endcap, station, ring, chamber);
+            //std::cout << "ch_id " <<  ch_id << std::endl;
+            // get the stubs in this detid
+            auto range = CSCCorrelatedLCTs.get(ch_id);
+            for (auto digiItr = range.first; digiItr != range.second; ++digiItr){
+              iStub++; 
 
-    //           auto stub(*digiItr);
+              auto stub(*digiItr);
 
-    //           // check that this stub is not already part of a CSC TF track
-    //           if (stubInCSCTFTracks(stub, l1Tracks)) continue;
+              // check that this stub is not already part of a CSC TF track
+              if (stubInCSCTFTracks(stub, l1Tracks)) continue;
 
-    //           // trigger sector must be the same
-    //           if (triggerSector != ch_id.triggerSector()) continue;
+              // trigger sector must be the same
+              if (triggerSector != ch_id.triggerSector()) continue;
                 
-    //           // BXs have to match
-    //           int deltaBX = std::abs(stub.getBX() - (6 + event_.CSCTF_bx[j]));
-    //           if (deltaBX > 1) continue;
+              // BXs have to match
+              int deltaBX = std::abs(stub.getBX() - (6 + csctf_bx));
+              if (deltaBX > 1) continue;
 
-    //           if(verbose) std::cout << ch_id << std::endl;
-    //           if(verbose) std::cout<<"Candidate " << stub << std::endl;
-    //           bestMatchingStub = pickBestMatchingStub(allxs[ch_id.station()-1], allys[ch_id.station()-1], 
-    //                                                   bestMatchingStub, std::make_pair(ch_id, stub), 6 + event_.CSCTF_bx[j]);
-    //         }
-    //         // consider the case ME1a
-    //         if (station==1 and ring==1){
-    //           CSCDetId me1a_id(endcap, station, 4, chamber);
-    //           auto range = CSCCorrelatedLCTs.get(me1a_id);
-    //           for (auto digiItr = range.first; digiItr != range.second; ++digiItr){
-    //             iStub++;
-    //             auto stub(*digiItr);
+              if(verbose()>2) std::cout << ch_id << std::endl;
+              if(verbose()>2) std::cout<<"Candidate " << stub << std::endl;
+               // bestMatchingStub = pickBestMatchingStub(allxs[ch_id.station()-1], allys[ch_id.station()-1], 
+               //                                         bestMatchingStub, std::make_pair(ch_id, stub), 6 + csctf_bx);
+             }
+             // consider the case ME1a
+             if (station==1 and ring==1){
+               CSCDetId me1a_id(endcap, station, 4, chamber);
+               auto range = CSCCorrelatedLCTs.get(me1a_id);
+               for (auto digiItr = range.first; digiItr != range.second; ++digiItr){
+                 iStub++;
+                 auto stub(*digiItr);
 
-    //             // check that this stub is not already part of a CSC TF track
-    //             if (stubInCSCTFTracks(stub, l1Tracks)) continue;
+                 // check that this stub is not already part of a CSC TF track
+                 if (stubInCSCTFTracks(stub, l1Tracks)) continue;
                   
-    //             // trigger sector must be the same
-    //             if (triggerSector != me1a_id.triggerSector()) continue;
+                 // trigger sector must be the same
+                 if (triggerSector != me1a_id.triggerSector()) continue;
                   
-    //             // BXs have to match
-    //             int deltaBX = std::abs(stub.getBX() - (6 + event_.CSCTF_bx[j]));
-    //             if (deltaBX > 1) continue; 
+                 // BXs have to match
+                 int deltaBX = std::abs(stub.getBX() - (6 + csctf_bx));
+                 if (deltaBX > 1) continue; 
 
-    //             if(verbose) std::cout << me1a_id << std::endl;
-    //             if(verbose) std::cout<<"Candidate " << stub << std::endl;
-    //             bestMatchingStub = pickBestMatchingStub(allxs[me1a_id.station()-1], allys[me1a_id.station()-1], 
-    //                                                     bestMatchingStub, std::make_pair(me1a_id, stub), 6 + event_.CSCTF_bx[j]);
-                  
-    //           }
-    //         }
-    //       }
-    //     }
+                 if(verbose()>2) std::cout << me1a_id << std::endl;
+                 if(verbose()>2) std::cout<<"Candidate " << stub << std::endl;
+                 // bestMatchingStub = pickBestMatchingStub(allxs[me1a_id.station()-1], allys[me1a_id.station()-1], 
+                 //                                         bestMatchingStub, std::make_pair(me1a_id, stub), 6 + csctf_bx);
+               }
+             }
+          }
+        }
+      }
+    }
+  }
 
+  // third step: add GEM pads
+  if (matchGEMPads) {
+
+    // GEMCSCPadDigiId bestPad_GE11_L1;
+    // GEMCSCPadDigiId bestPad_GE11_L2;
+    // GEMCSCPadDigiId bestPad_GE21_L1;
+    // GEMCSCPadDigiId bestPad_GE21_L2;
+
+    // FIXME
   }
 }
 
@@ -300,15 +306,9 @@ DisplacedMuonTriggerPtassignment::~DisplacedMuonTriggerPtassignment(){
 
 void DisplacedMuonTriggerPtassignment::initVariables()
 {
-/*<<<<<<< Updated upstream
-  /// endcap
-  hasStub_st1 = false; 
-  hasStub_st2 = false; 
-  hasStub_st3 = false; 
-  hasStub_st4 = false; 
-=======
+  muScalesCacheID_ = 0ULL ;
+  muPtScaleCacheID_ = 0ULL ;
 
->>>>>>> Stashed changes*/
   hasGEMPad_st1 = false; 
   hasGEMPad_st2 = false; 
   npar = -1;
@@ -396,6 +396,27 @@ void DisplacedMuonTriggerPtassignment::setupGeometry(const edm::EventSetup& es)
   }
 
 
+}
+
+
+void DisplacedMuonTriggerPtassignment::setupTriggerScales(const edm::EventSetup& es)
+{
+  hasMuScales_ = true;
+  hasMuPtScale_ = true;
+  
+  try {
+    es.get<L1MuTriggerScalesRcd>().get(muScales_);
+  } catch (edm::eventsetup::NoProxyException<L1MuTriggerScalesRcd>& e) {
+    hasMuScales_ = false;
+    LogDebug("DisplacedMuonTriggerPtassignment") << "+++ Info: L1MuTriggerScalesRcd is unavailable. +++\n";
+  }
+  
+  try {
+    es.get<L1MuTriggerPtScaleRcd>().get(muPtScale_);
+  } catch (edm::eventsetup::NoProxyException<L1MuTriggerPtScaleRcd>& e) {
+    hasMuPtScale_ = false;
+    LogDebug("DisplacedMuonTriggerPtassignment") << "+++ Info: L1MuTriggerPtScaleRcd is unavailable. +++\n";
+  }
 }
 
 //void DisplacedMuonTriggerPtassignment::fitComparatorsLCT(const CSCComparatorDigiCollection& hCSCComparators, const CSCCorrelatedLCTDigi& stub,
@@ -821,6 +842,26 @@ DisplacedMuonTriggerPtassignment::stubInCSCTFTracks(const CSCCorrelatedLCTDigi& 
     }
   }
   return isMatched;
+}
+
+double 
+phiL1DTTrack(const L1MuDTTrack& track)
+{
+  int phi_local = track.phi_packed(); //range: 0 < phi_local < 31
+  if ( phi_local > 15 ) phi_local -= 32; //range: -16 < phi_local < 15    
+  double dttrk_phi_global = normalizedPhi((phi_local*(M_PI/72.))+((M_PI/6.)*track.spid().sector()));// + 12*i->scNum(); //range: -16 < phi_global < 147 
+  // if(dttrk_phi_global < 0) dttrk_phi_global+=2*M_PI; //range: 0 < phi_global < 147
+  // if(dttrk_phi_global > 2*M_PI) dttrk_phi_global-=2*M_PI; //range: 0 < phi_global < 143
+  return dttrk_phi_global;
+}
+
+double 
+phiL1CSCTrack(const csc::L1Track& track)
+{
+  unsigned gbl_phi(track.localPhi() + ((track.sector() - 1)*24) + 6);
+  if(gbl_phi > 143) gbl_phi -= 143;
+  double phi_packed = gbl_phi & 0xff;
+  return phi_packed;
 }
 
 #endif
