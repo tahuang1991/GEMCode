@@ -3039,13 +3039,13 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
 
 
+  DisplacedMuonTriggerPtassignment displacedMuonL1Pt_sim(gp1, gp2, gp3, gp4, gp_ge11, gp_ge21, npar, match_lct.eventSetup(), match_lct.event()); 
   if ((etrk_[1].has_csc_sh || etrk_[4].has_csc_sh) and (etrk_[6].has_csc_sh || etrk_[7].has_csc_sh)) {
      if ((etrk_[8].has_csc_sh || etrk_[9].has_csc_sh) || (etrk_[10].has_csc_sh || etrk_[11].has_csc_sh))
      	etrk_[0].hasSt3orSt4_sh=true; 
   
      etrk_[0].npar = npar;
      std::cout <<"GEMCSCAnalyzer npar "<< npar << std::endl;
-     DisplacedMuonTriggerPtassignment displacedMuonL1Pt_sim(gp1, gp2, gp3, gp4, gp_ge11, gp_ge21, etrk_[0].npar, match_lct.eventSetup(), match_lct.event()); 
      if (etrk_[0].meRing == 1 and displacedMuonL1Pt.getNParity()>=0 and displacedMuonL1Pt.runDirectionbased(true)){
      	etrk_[0].phiM_st1_test = displacedMuonL1Pt.getlocalPhiDirection(1); 
      	etrk_[0].phiM_st2_test = displacedMuonL1Pt.getlocalPhiDirection(2); 
@@ -3072,11 +3072,6 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 		etrk_[0].dphi_dir_st2_st23_L1_csc = displacedMuonL1Pt.getdeltaPhiDirection(2, 23); 
 		etrk_[0].dphi_dir_st12_st23_L1 = displacedMuonL1Pt.getdeltaPhiDirection(12, 23); 
 	}
-     }
-     if (displacedMuonL1Pt.getNParity()>=0 and displacedMuonL1Pt.runPositionbased()){
-    	etrk_[1].deltay12_test = displacedMuonL1Pt.getdeltaY12();  
-    	etrk_[1].deltay23_test = displacedMuonL1Pt.getdeltaY23();  
-    	etrk_[1].deltay123_test = displacedMuonL1Pt.getdeltaY123();  
      }
 
      etrk_[0].pt_direction_sh=Ptassign_Direction(csc_bending_angle_12, gp2.eta(), npar);  
@@ -3137,12 +3132,10 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
      	etrk_[0].deltay23_sim = -deltaYcalculation(gp3, gp2); 
 	etrk_[0].pt_position_sh=Ptassign_Position_gp(gp1, gp2, gp3, gp2.eta(), npar); //t.momentum().eta() 
 	etrk_[0].pt_position_smeared=Ptassign_Position_gp(gp1_smeared, gp2_smeared, gp3_smeared, gp2_smeared.eta(), npar); //t.momentum().eta() 
-	if (verbose_){
+	//if (verbose_){
 		std::cout <<"GEMCSCAnalyer sim gp1 x"<< gp1.x()<<" y "<< gp1.y() <<" gp2 x "<< gp2.x()<<" y "<< gp2.y()<<" phi "<< gp2.phi()<< std::endl;
 		std::cout <<"at Sim deltay12 "<<  etrk_[0].deltay12_sim<<" deltay23 "<<  etrk_[0].deltay23_sim << std::endl;
-	}
-	if (etrk_[0].pt_position_sh>15 and   etrk_[0].pt_position_smeared<10 and verbose_)
-	   std::cout <<" npar "<< npar <<" simpt "<< etrk_[0].pt <<" simeta "<< etrk_[0].eta <<" pt_position_sh "<< etrk_[0].pt_position_sh <<" pt_position_smeared "<< etrk_[0].pt_position_smeared <<" gp1 phi "<< gp1.phi() <<" after smearing "<< gp1_smeared.phi() <<" gp2 phi "<< gp2.phi() <<" eta "<< gp2.eta() <<" after smearing "<< gp2_smeared.phi() <<" eta "<< gp2_smeared.eta() <<" gp3 phi "<< gp3.phi() <<" after smearing "<< gp3_smeared.phi() << std::endl;
+	//}
      }
 
 
@@ -3158,11 +3151,6 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
      }
 
       
-     std::cout <<"DisplacedMuon SIM get npar "<< displacedMuonL1Pt_sim.getNParity()<<" ring "<<displacedMuonL1Pt_sim.getMeRing() << std::endl;
-     if (displacedMuonL1Pt_sim.getNParity()>=0 and displacedMuonL1Pt_sim.runPositionbased())
-     {
-     	std::cout <<"DisplacedMuon SIM deltay12 "<< displacedMuonL1Pt_sim.getdeltaY12() <<" deltay23 "<< displacedMuonL1Pt_sim.getdeltaY23() <<" ddY123 "<< displacedMuonL1Pt_sim.getdeltaY123() <<" etrk deltay12 "<< etrk_[0].deltay12_sim <<" deltay23 "<< etrk_[0].deltay23_sim << std::endl;
-     }
      if (etrk_[0].meRing == 1 and displacedMuonL1Pt_sim.getNParity()>=0 and displacedMuonL1Pt_sim.runDirectionbased(true))
 	   std::cout<<"DisplacedMuon with GE21, SIM, phiM_st1 " << displacedMuonL1Pt_sim.getlocalPhiDirection(1)<<" phiM_st2 "<< displacedMuonL1Pt_sim.getlocalPhiDirection(2) <<" phiM_st12 " << displacedMuonL1Pt_sim.getlocalPhiDirection(12) <<" phiM_st23 "<< displacedMuonL1Pt_sim.getlocalPhiDirection(23) << std::endl;
      //should set phi and z in layer1 and layer6 in staion 1 and 2
@@ -3277,10 +3265,26 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
      etrk_[0].pt_position=Ptassign_Position_gp(gp1, gp2, gp3, gp2.eta(), npar);  
      etrk_[0].pt_position_fit=Ptassign_Position_gp(gp1_fit, gp2_fit, gp3_fit, gp2_fit.eta(), npar);  
   } 
-     if (verbose_ and displacedMuonL1Pt.getNParity()>=0 and displacedMuonL1Pt.runPositionbased() and etrk_[0].hasSt1St2St3)
+     if (displacedMuonL1Pt.getNParity()>=0 and displacedMuonL1Pt.runPositionbased()){
+    	etrk_[0].deltay12_test = displacedMuonL1Pt.getdeltaY12();  
+    	etrk_[0].deltay23_test = displacedMuonL1Pt.getdeltaY23();  
+    	etrk_[0].deltay123_test = displacedMuonL1Pt.getdeltaY123();  
+     }
+
+
+     std::cout <<"DisplacedMuon SIM get npar "<< displacedMuonL1Pt_sim.getNParity()<<" ring "<<displacedMuonL1Pt_sim.getMeRing() << std::endl;
+     if (displacedMuonL1Pt_sim.getNParity()>=0 and displacedMuonL1Pt_sim.runPositionbased())
      {
+     	std::cout <<"DisplacedMuon SIM deltay12 "<< displacedMuonL1Pt_sim.getdeltaY12() <<" deltay23 "<< displacedMuonL1Pt_sim.getdeltaY23() <<" ddY123 "<< displacedMuonL1Pt_sim.getdeltaY123() <<" etrk deltay12 "<< etrk_[0].deltay12_sim <<" deltay23 "<< etrk_[0].deltay23_sim << std::endl;
+     }
+     if (displacedMuonL1Pt.getNParity()>=0 and displacedMuonL1Pt.runPositionbased() and etrk_[0].hasSt1St2St3)
+     {
+	if (fabs(displacedMuonL1Pt.getdeltaY23()-etrk_[0].deltay23_fit)>.1) 
+	    std::cout <<"difference between module and ana "<< displacedMuonL1Pt.getdeltaY23()-etrk_[0].deltay23_fit << std::endl;
      	std::cout <<"DisplacedMuon deltay12 "<< displacedMuonL1Pt.getdeltaY12() <<" deltay23 "<< displacedMuonL1Pt.getdeltaY23() <<" ddY123 "<< displacedMuonL1Pt.getdeltaY123() <<" etrk deltay12 "<< etrk_[0].deltay12_fit <<" deltay23 "<< etrk_[0].deltay23_fit << std::endl;
      
+     }else if (etrk_[0].hasSt1St2St3){
+    	std::cout <<"GEMCSCAnalyer sim deltay12 "<< etrk_[0].deltay12_sim<<" deltay23 "<< etrk_[0].deltay23_sim << " L1 deltay12 "<< etrk_[0].deltay12_fit <<" deltay23 "<< etrk_[0].deltay23_fit << std::endl; 
      }
   
 

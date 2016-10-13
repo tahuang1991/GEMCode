@@ -43,6 +43,7 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
   initVariables(); 
   for (auto idlcts : chamberid_lcts_){
   	CSCDetId chid(idlcts.first);
+/*<<<<<<< Updated upstream
     //check the ring number that muon is flying through, 2nd station as reference
     //later use this one to check whether we should use GE21 or ME21only
     if (chid.station()==2) meRing = chid.ring();
@@ -52,6 +53,19 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
     else if (chid.station() == 3 and idlcts.second.size()>0 ) hasStub_st3 = true;
     else if (chid.station() == 4 and idlcts.second.size()>0 ) hasStub_st4 = true;
     else {
+=======*/
+	//check the ring number that muon is flying through, 2nd station as reference
+	//later use this one to check whether we should use GE21 or ME21only
+	if (chid.station()==2) meRing = chid.ring();
+	if (chid.chamber()%2 == 0) isEven[chid.station()-1] = true;
+	if (idlcts.second.size()>0) hasStub_st[chid.station()-1] =true;
+	/*
+	if (chid.station() == 1 and idlcts.second.size()>0 ) hasStub_st1 = true;
+	else if (chid.station() == 2 and idlcts.second.size()>0 ) hasStub_st2 = true;
+	else if (chid.station() == 3 and idlcts.second.size()>0 ) hasStub_st3 = true;
+	else if (chid.station() == 4 and idlcts.second.size()>0 ) hasStub_st4 = true;
+	*/
+	else {
 	    std::cout <<" chid "<< chid <<"  number of lcts "<< idlcts.second.size() << std::endl;
 	    continue;
     }
@@ -76,7 +90,7 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
     }
   }
   //npar>=0 is the flag to do pt assignment
-  if (hasStub_st1 and hasStub_st2 and hasStub_st3){
+  if (hasStub_st[0] and hasStub_st[1] and hasStub_st[2]){
   	if (not(isEven[0]) and isEven[1] and isEven[2]) npar = 0;
     else if (not(isEven[0]) and not(isEven[1]) and not(isEven[2])) npar = 1;
     else if (isEven[0] and isEven[1] and isEven[2]) npar = 2;
@@ -115,10 +129,13 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const L1CSCTr
       auto stub = *digiIt;
       v.push_back(stub);
     }
+    hasStub_st[ch_id.station()-1] = true;
+    /*
     if (ch_id.station() == 1) hasStub_st1 = true;
     if (ch_id.station() == 2) hasStub_st2 = true;
     if (ch_id.station() == 3) hasStub_st3 = true;
     if (ch_id.station() == 4) hasStub_st4 = true;
+    */
 
     chamberid_lct[ch_id.rawId()] = v;
   }
@@ -126,10 +143,10 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const L1CSCTr
   // TF eta
 
   // second step: stub recovery
-  const bool atLeast1StubMissing( (not hasStub_st1) or
-                                  (not hasStub_st2) or
-                                  (not hasStub_st3) or
-                                  (not hasStub_st4) ); 
+  const bool atLeast1StubMissing( (not hasStub_st[0]) or
+                                  (not hasStub_st[0]) or
+                                  (not hasStub_st[0]) or
+                                  (not hasStub_st[0]) ); 
   
   if (doStubRecovery and atLeast1StubMissing){
     //int triggerSector = tftrack.sector();
@@ -221,42 +238,44 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(GlobalPoint g
 
   setupGeometry(es);
   initVariables(); 
-  gp_st1 = GlobalPoint(gp1);
-  if (fabs(gp_st1.z())>100) hasStub_st1 = true;
-  else 
-      std::cout <<" gp_st1 x "<< gp_st1.x()<<" y "<< gp_st1.y()<<" z "<< gp_st1.z()<< " eta "<< gp_st1.eta()<<" phi "<< gp_st1.phi()<< std::endl;
-  gp_st2 = GlobalPoint(gp2);
-  if (fabs(gp_st2.z())>100) hasStub_st2 = true;
-  else 
-      std::cout <<" gp_st2 x "<< gp_st2.x()<<" y "<< gp_st2.y()<<" z "<< gp_st2.z()<< " eta "<< gp_st2.eta()<<" phi "<< gp_st2.phi()<< std::endl;
-  gp_st3 = GlobalPoint(gp3);
-  if (fabs(gp_st3.z())>100) hasStub_st3 = true;
-  else 
-      std::cout <<" gp_st3 x "<< gp_st3.x()<<" y "<< gp_st3.y()<<" z "<< gp_st3.z()<< " eta "<< gp_st3.eta()<<" phi "<< gp_st3.phi()<< std::endl;
-  gp_st4 = GlobalPoint(gp4);
+  gp_st_layer3[0] = GlobalPoint(gp1);
+  //use z>100 to make sure this is valid globalpoint
+  if (fabs(gp1.z())>100) hasStub_st[0] = true;
+  else if (verbose_>0)
+      std::cout <<" gp_st1 x "<< gp1.x()<<" y "<< gp1.y()<<" z "<< gp1.z()<< " eta "<< gp1.eta()<<" phi "<< gp1.phi()<< std::endl;
+  gp_st_layer3[1] = GlobalPoint(gp2);
+  if (fabs(gp2.z())>100) hasStub_st[1] = true;
+  else if (verbose_>0)
+      std::cout <<" gp_st2 x "<< gp2.x()<<" y "<< gp2.y()<<" z "<< gp2.z()<< " eta "<< gp2.eta()<<" phi "<< gp2.phi()<< std::endl;
+  gp_st_layer3[2] = GlobalPoint(gp3);
+  if (fabs(gp3.z())>100) hasStub_st[2] = true;
+  else if (verbose_>0)
+      std::cout <<" gp_st3 x "<< gp3.x()<<" y "<< gp3.y()<<" z "<< gp3.z()<< " eta "<< gp3.eta()<<" phi "<< gp3.phi()<< std::endl;
+  gp_st_layer3[3] = GlobalPoint(gp4);
+  if (fabs(gp4.z())>100) hasStub_st[3] = true;
+
   gp_ge11 = GlobalPoint(gp5);
   if (fabs(gp_ge11.z())>100) hasGEMPad_st1 = true;
-  else 
+  else if (verbose_>0)
       std::cout <<" gp_ge11 x "<< gp_ge11.x()<<" y "<< gp_ge11.y()<<" z "<< gp_ge11.z()<< " eta "<< gp_ge11.eta()<<" phi "<< gp_ge11.phi()<< std::endl;
   gp_ge21 = GlobalPoint(gp6);
   if (fabs(gp_ge21.z())>100) hasGEMPad_st2 = true;
-  else 
+  else if (verbose_>0)
       std::cout <<" gp_ge21 x "<< gp_ge21.x()<<" y "<< gp_ge21.y()<<" z "<< gp_ge21.z()<< " eta "<< gp_ge21.eta()<<" phi "<< gp_ge21.phi()<< std::endl;
-  if (hasStub_st1 and hasStub_st2)
+  if (hasStub_st[0] and hasStub_st[1])
   	npar = npar_in;
   else
       npar = -1;
-  std::cout <<"Constructor npar "<< npar << std::endl;
   if (hasGEMPad_st2)
   	phi_ge21 = gp_ge21.phi();
 
-  if (hasStub_st2 and fabs(gp2.eta())<1.6 and fabs(gp2.eta())>=1.2 and not(hasGEMPad_st2))
+  if (hasStub_st[1] and fabs(gp2.eta())<1.6 and fabs(gp2.eta())>=1.2 and not(hasGEMPad_st2))
       meRing =2;
-  else if (hasStub_st2 and fabs(gp2.eta())<=2.4 and fabs(gp2.eta())>=1.6)
+  else if (hasStub_st[1] and fabs(gp2.eta())<=2.4 and fabs(gp2.eta())>=1.6)
       meRing =1;
         
-  if (hasStub_st1 and hasStub_st2)
-	xfactor = (gp_st2.perp()/gp_st1.perp()-1.0)/fabs(gp_st1.z()-gp_st2.z());
+  if (hasStub_st[0] and hasStub_st[1])
+	xfactor = (gp_st_layer3[1].perp()/gp_st_layer3[0].perp()-1.0)/fabs(gp_st_layer3[0].z()-gp_st_layer3[1].z());
         
 }
 
@@ -281,11 +300,15 @@ DisplacedMuonTriggerPtassignment::~DisplacedMuonTriggerPtassignment(){
 
 void DisplacedMuonTriggerPtassignment::initVariables()
 {
+/*<<<<<<< Updated upstream
   /// endcap
   hasStub_st1 = false; 
   hasStub_st2 = false; 
   hasStub_st3 = false; 
   hasStub_st4 = false; 
+=======
+
+>>>>>>> Stashed changes*/
   hasGEMPad_st1 = false; 
   hasGEMPad_st2 = false; 
   npar = -1;
@@ -455,8 +478,18 @@ void DisplacedMuonTriggerPtassignment::fitComparatorsLCT(const CSCComparatorDigi
     ephis.push_back(gemvalidation::cscHalfStripWidth(detId)/sqrt(12));
   }
   
+
+  CSCDetId key_id(ch_id.endcap(), ch_id.station(), ch_id.ring(), ch_id.chamber(), CSCConstants::KEY_CLCT_LAYER);
+  float fractional_strip = 0.5 * (stub.getStrip() + 1) - 0.25;
+  auto layer_geo = cscChamber->layer(CSCConstants::KEY_CLCT_LAYER)->geometry();
+  // LCT::getKeyWG() also starts from 0
+  float wire = layer_geo->middleWireOfGroup(stub.getKeyWG() + 1);
+  LocalPoint csc_intersect = layer_geo->intersectionOfStripAndWire(fractional_strip, wire);
+  GlobalPoint csc_gp = cscGeometry_->idToDet(key_id)->surface().toGlobal(csc_intersect);
+  perp = csc_gp.perp();
+  if (verbose_>=0) std::cout <<"detid "<< ch_id<<" perp "<< perp << std::endl;
   // use average perp  
-  perp = perp/phis.size();
+  //perp = perp/phis.size();
   // do a fit to the comparator digis
   float alpha = 0., beta = 0.;
   calculateAlphaBeta(zs, phis, ezs, ephis, status, alpha, beta);
@@ -495,6 +528,13 @@ void DisplacedMuonTriggerPtassignment::globalPositionOfLCT(const CSCCorrelatedLC
   int st = chid.station();
   fitComparatorsLCT(*hCSCComparators.product(), stub, chid, phi_st_layers[st-1], z_st_layers[st-1], perp);
   //gp calculated here can have negative Z!!! later use fabs() to get distance 
+  
+  gp_st_layer1[st-1] = GlobalPoint(GlobalPoint::Cylindrical(perp, phi_st_layers[st-1][0], z_st_layers[st-1][0]));
+  gp_st_layer3[st-1] = GlobalPoint(GlobalPoint::Cylindrical(perp, phi_st_layers[st-1][2], z_st_layers[st-1][2]));
+  gp_st_layer6[st-1] = GlobalPoint(GlobalPoint::Cylindrical(perp, phi_st_layers[st-1][5], z_st_layers[st-1][5]));
+  if (verbose_>=0)
+      std::cout <<"LCT position, chid "<< chid <<" gp eta "<< gp_st_layer3[st-1].eta()<<" phi "<<gp_st_layer3[st-1].phi()<<" perp "<< gp_st_layer3[st-1].perp() << std::endl;
+ /* 
   if (chid.station() == 1){
       gp_st1_layer1 = GlobalPoint(GlobalPoint::Cylindrical(perp, phi_st_layers[st-1][0], z_st_layers[st-1][0]));
       gp_st1 = GlobalPoint(GlobalPoint::Cylindrical(perp, phi_st_layers[st-1][2], z_st_layers[st-1][2]));
@@ -507,15 +547,17 @@ void DisplacedMuonTriggerPtassignment::globalPositionOfLCT(const CSCCorrelatedLC
       gp_st2_layer6 = GlobalPoint(GlobalPoint::Cylindrical(perp, phi_st_layers[st-1][5], z_st_layers[st-1][5]));
       if (verbose_>=0)
       	std::cout <<"LCT position st2 chid "<< chid <<" gp eta "<< gp_st2.eta()<<" phi "<<gp_st2.phi() <<" perp "<< gp_st2.perp() << std::endl;
-  }
-  else if (chid.station() == 3){
+  }else if (chid.station() == 3){
       gp_st3 = GlobalPoint(GlobalPoint::Cylindrical(perp, phi_st_layers[st-1][2], z_st_layers[st-1][2]));
       if (verbose_>=0)
       	std::cout <<"LCT position st3 chid "<< chid <<" gp eta "<< gp_st3.eta()<<" phi "<<gp_st3.phi() <<" perp "<< gp_st3.perp() << std::endl;
-  }
-  else if (verbose_>0) 
-      std::cout <<" not in CSC station 1 , 2 ,3 , chamber id  "<< chid << std::endl;
-  
+  }else if (chid.station() == 4){
+      gp_st4 = GlobalPoint(GlobalPoint::Cylindrical(perp, phi_st_layers[st-1][2], z_st_layers[st-1][2]));
+      if (verbose_>=0)
+      	std::cout <<"LCT position st4 chid "<< chid <<" gp eta "<< gp_st3.eta()<<" phi "<<gp_st3.phi() <<" perp "<< gp_st3.perp() << std::endl;
+  }else if (verbose_>0) 
+      std::cout <<" not in CSC station 1 , 2 ,3 , 4, chamber id  "<< chid << std::endl;
+ */ 
 
 }
 
@@ -585,7 +627,7 @@ float DisplacedMuonTriggerPtassignment::deltadeltaYcalculation(GlobalPoint gp1, 
    float deltay12 = newyst2-newyst1;
    float deltay23 = newyst3-newyst2;
    //std::cout <<" angle in st2 "<< anglea <<" newyst1 "<< newyst1 <<" newyst2 "<< newyst2 << " newyst3 "<< newyst3 << std::endl;
-   int neta = GetEtaPartition(eta);
+   int neta = getEtaPartition(eta);
    
    if (par<0 or par>3 or neta==-1) return -99;
    return (deltay23-PositionEpLUT[par][neta][0]*deltay12);
@@ -619,15 +661,13 @@ float DisplacedMuonTriggerPtassignment::phiMomentum_Xfactor(float phi_CSC, float
 
 bool DisplacedMuonTriggerPtassignment::runPositionbased()
 {
-   if (npar<0 or npar>=4){
+   if (npar<0 or npar>=4 or not(hasStub_st[2])){
         std::cout <<" failed to runPositionbased  npar "<< npar << std::endl;
    	return false;
    }
-   if (verbose_>=0)
-   	std::cout <<" gp1 eta "<< gp_st1.eta() <<" phi "<< gp_st1.phi()<<" perp "<< gp_st1.perp() <<" gp2 eta "<< gp_st2.eta()<<" phi "<< gp_st2.phi()<<" pepr "<< gp_st2.perp() <<" gp3 eta "<< gp_st3.eta() <<" phi "<< gp_st3.phi()<<" perp "<< gp_st3.perp() << std::endl;
-   ddY123 = deltadeltaYcalculation(gp_st1, gp_st2, gp_st3, gp_st2.eta(), npar);
-   deltaY12 = deltaYcalculation(gp_st1, gp_st2); 
-   deltaY23 = -deltaYcalculation(gp_st3, gp_st2); 
+   ddY123 = deltadeltaYcalculation(gp_st_layer3[0], gp_st_layer3[1], gp_st_layer3[2], gp_st_layer3[1].eta(), npar);
+   deltaY12 = deltaYcalculation(gp_st_layer3[0], gp_st_layer3[1]); 
+   deltaY23 = -deltaYcalculation(gp_st_layer3[2], gp_st_layer3[1]); 
    return true;
 }
 
@@ -636,9 +676,7 @@ bool DisplacedMuonTriggerPtassignment::runDirectionbasedGE21()
 {
    if (not (npar<4 and npar>=0 and hasGEMPad_st1 and hasGEMPad_st2)) return false; 
    if (fabs(phi_ge21)>4) return false;//check this because we want to use setPhiGE21() to set phi_ge21 (using 2strips-pad)
-   if (verbose_>=0)
-   	std::cout <<" gp1 eta "<< gp_st1.eta() <<" phi "<< gp_st1.phi()<<" Z "<< gp_st1.z() <<" gp2 eta "<< gp_st2.eta()<<" phi "<< gp_st2.phi()<<" Z "<< gp_st2.z() <<" gp3 eta "<< gp_st3.eta() <<" phi "<< gp_st3.phi()<<" Z "<< gp_st3.z()<<" ge11 phi "<< gp_ge11.phi() <<" z "<< gp_ge11.z()<<" ge21 phi "<< gp_ge21.phi() << " z "<< gp_ge21.z() << std::endl;
-
+   /*
    float xfactor_st1 = xfactor*fabs(gp_ge11.z() - gp_st1.z());
    float xfactor_st2 = xfactor*fabs(gp_ge21.z() - gp_st2.z())/(xfactor*fabs(gp_st1.z() - gp_st2.z())+1);
    float xfactor_st12 = xfactor*fabs(gp_st1.z() - gp_st2.z())/(xfactor*fabs(gp_st1.z() - gp_st2.z())+1);
@@ -648,39 +686,56 @@ bool DisplacedMuonTriggerPtassignment::runDirectionbasedGE21()
    phiM_st2 = phiMomentum_Xfactor(gp_st2.phi(), phi_ge21, xfactor_st2);
    phiM_st12 = phiMomentum_Xfactor(gp_st2.phi(), gp_st1.phi(), xfactor_st12);
    phiM_st23 = phiMomentum_Xfactor(gp_st3.phi(), gp_st2.phi(), xfactor_st23);
-   dPhi_dir_st1_st2 = deltaPhi(phiM_st1, phiM_st2);
-   dPhi_dir_st1_st12 = deltaPhi(phiM_st1, phiM_st12);
-   dPhi_dir_st2_st23 = deltaPhi(phiM_st2, phiM_st23);
-   dPhi_dir_st12_st23 = deltaPhi(phiM_st12, phiM_st23);
+   */
+
+   float xfactor_st1 = xfactor*fabs(gp_ge11.z() - gp_st_layer3[0].z());
+   float xfactor_st2 = xfactor*fabs(gp_ge21.z() - gp_st_layer3[1].z())/(xfactor*fabs(gp_st_layer3[0].z() - gp_st_layer3[1].z())+1);
+   float xfactor_st12 = xfactor*fabs(gp_st_layer3[0].z() - gp_st_layer3[1].z())/(xfactor*fabs(gp_st_layer3[0].z() - gp_st_layer3[1].z())+1);
+   float xfactor_st23 = xfactor*fabs(gp_st_layer3[1].z() - gp_st_layer3[2].z())/(xfactor*fabs(gp_st_layer3[0].z() - gp_st_layer3[2].z())+1);
+   phiM_st1 = phiMomentum_Xfactor(gp_st_layer3[0].phi(), gp_ge11.phi(), xfactor_st1);//
+   phiM_st2 = phiMomentum_Xfactor(gp_st_layer3[1].phi(), phi_ge21, xfactor_st2);
+   phiM_st12 = phiMomentum_Xfactor(gp_st_layer3[1].phi(), gp_st_layer3[0].phi(), xfactor_st12);
+   phiM_st23 = phiMomentum_Xfactor(gp_st_layer3[2].phi(), gp_st_layer3[1].phi(), xfactor_st23);
+   if (verbose_>=0)  std::cout <<"DisplacedMuonTrigger, direction with GE21, meRing "<< meRing <<" xfactor_st1 "<< xfactor_st1 <<" phiM_st1 "<< phiM_st1
+       			<<" xfactor_st2 "<< xfactor_st2 <<" phiM_st2 "<< phiM_st2 << std::endl;
+
+
+   dPhi_dir_st1_st2 = (fabs(phiM_st1)<4 and fabs(phiM_st2)<4)? deltaPhi(phiM_st1, phiM_st2):-9;
+   dPhi_dir_st1_st12 = (fabs(phiM_st1)<4 and fabs(phiM_st12)<4)? deltaPhi(phiM_st1, phiM_st12):-9;
+   dPhi_dir_st2_st23 = (fabs(phiM_st2)<4 and fabs(phiM_st23)<4)? deltaPhi(phiM_st2, phiM_st23):-9;
+   dPhi_dir_st12_st23 = (fabs(phiM_st12)<4 and fabs(phiM_st23)<4)? deltaPhi(phiM_st12, phiM_st23):-9;
    return true;
 }
 
 
 bool DisplacedMuonTriggerPtassignment::runDirectionbasedCSConly() 
 {
+
+   //z_st_layers should be used at sim level, set Z and phi for layer1 and layer6 at sim level, or rebuild constructor?
    if (not ( npar<4 and npar>=0 and ((meRing==1 and hasGEMPad_st1) or meRing==2))) return false; 
    float xfactor_st1 = 0;
    if (meRing==1){
-   	xfactor_st1 = xfactor*fabs(gp_ge11.z() - gp_st1.z());
-   	phiM_st1 = phiMomentum_Xfactor(gp_st1.phi(), gp_ge11.phi(), xfactor_st1);//
+   	xfactor_st1 = xfactor*fabs(gp_ge11.z() - gp_st_layer3[0].z());
+   	phiM_st1 = phiMomentum_Xfactor(gp_st_layer3[0].phi(), gp_ge11.phi(), xfactor_st1);//
    }else if (meRing == 2){
    	//xfactor_st1 = xfactor*fabs(gp_st1_layer1.z() - gp_st1_layer6.z())/(xfactor*fabs(gp_st1.z() - gp_st1_layer6.z())+1);
-   	xfactor_st1 = xfactor*fabs(z_st_layers[0][0] - z_st_layers[0][5])/(xfactor*fabs(gp_st1.z() - z_st_layers[0][5])+1);
+   	xfactor_st1 = xfactor*fabs(z_st_layers[0][0] - z_st_layers[0][5])/(xfactor*fabs(gp_st_layer3[0].z() - z_st_layers[0][5])+1);
    	phiM_st1 = phiMomentum_Xfactor(phi_st_layers[0][5], phi_st_layers[0][0], xfactor_st1);//
    }
-   //z_st_layers should be used at sim level
-   float xfactor_st2 = xfactor*fabs(z_st_layers[1][0] - z_st_layers[1][5])/(xfactor*fabs(gp_st1.z() - z_st_layers[1][5])+1);
-   float xfactor_st12 = xfactor*fabs(gp_st1.z() - gp_st2.z())/(xfactor*fabs(gp_st1.z() - gp_st2.z())+1);
-   float xfactor_st23 = xfactor*fabs(gp_st2.z() - gp_st3.z())/(xfactor*fabs(gp_st1.z() - gp_st3.z())+1);
+   float xfactor_st2 = xfactor*fabs(z_st_layers[1][0] - z_st_layers[1][5])/(xfactor*fabs(gp_st_layer3[0].z() - z_st_layers[1][5])+1);
+   float xfactor_st12 = xfactor*fabs(gp_st_layer3[0].z() - gp_st_layer3[1].z())/(xfactor*fabs(gp_st_layer3[0].z() - gp_st_layer3[1].z())+1);
+   float xfactor_st23 = xfactor*fabs(gp_st_layer3[1].z() - gp_st_layer3[2].z())/(xfactor*fabs(gp_st_layer3[0].z() - gp_st_layer3[2].z())+1);
    phiM_st2 = phiMomentum_Xfactor(phi_st_layers[1][5], phi_st_layers[1][0], xfactor_st2);
-   phiM_st12 = phiMomentum_Xfactor(gp_st2.phi(), gp_st1.phi(), xfactor_st12);
-   phiM_st23 = phiMomentum_Xfactor(gp_st3.phi(), gp_st2.phi(), xfactor_st23);
-   if (verbose_>=0)  std::cout <<"DisplacedMuonTrigger meRing "<< meRing <<" xfactor st1 "<< xfactor_st1 <<" phiM_st1 "<< phiM_st1
-       			<<" xfactor st2 "<< xfactor_st2 <<" phiM_st2 "<< phiM_st2 << std::endl;
-   dPhi_dir_st1_st2 = deltaPhi(phiM_st1, phiM_st2);
-   dPhi_dir_st1_st12 = deltaPhi(phiM_st1, phiM_st12);
-   dPhi_dir_st2_st23 = deltaPhi(phiM_st2, phiM_st23);
-   dPhi_dir_st12_st23 = deltaPhi(phiM_st12, phiM_st23);
+   phiM_st12 = phiMomentum_Xfactor(gp_st_layer3[1].phi(), gp_st_layer3[0].phi(), xfactor_st12);
+   phiM_st23 = phiMomentum_Xfactor(gp_st_layer3[2].phi(), gp_st_layer3[1].phi(), xfactor_st23);
+   //if phi in layer1 and layer6 in station1 and 2 are not set, then here phiM return -9
+   if (verbose_>=0)  std::cout <<"DisplacedMuonTrigger CSConly direction, meRing "<< meRing <<" xfactor_st1 "<< xfactor_st1 <<" phiM_st1 "<< phiM_st1
+       			<<" xfactor_st2 "<< xfactor_st2 <<" phiM_st2 "<< phiM_st2 << std::endl;
+   
+   dPhi_dir_st1_st2 = (fabs(phiM_st1)<4 and fabs(phiM_st2)<4)? deltaPhi(phiM_st1, phiM_st2):-9;
+   dPhi_dir_st1_st12 = (fabs(phiM_st1)<4 and fabs(phiM_st12)<4)? deltaPhi(phiM_st1, phiM_st12):-9;
+   dPhi_dir_st2_st23 = (fabs(phiM_st2)<4 and fabs(phiM_st23)<4)? deltaPhi(phiM_st2, phiM_st23):-9;
+   dPhi_dir_st12_st23 = (fabs(phiM_st12)<4 and fabs(phiM_st23)<4)? deltaPhi(phiM_st12, phiM_st23):-9;
    return true;
 }
 
@@ -692,10 +747,10 @@ float DisplacedMuonTriggerPtassignment::getlocalPhiDirection(int st) const
     //st = 12 : between station1 and station2; st = 23 : between station2 and station3
    bool hasGEMPad1((meRing==1 and hasGEMPad_st1) or meRing==2);
    bool hasGEMPad2((meRing==1 and hasGEMPad_st2) or meRing==2);
-   if (st==1 and hasStub_st1 and hasGEMPad1) return phiM_st1;
-   else if (st==2 and hasStub_st2 and hasGEMPad2) return phiM_st2;
-   else if (st == 12 and hasStub_st1 and hasStub_st2) return phiM_st12;
-   else if (st == 23 and hasStub_st2 and hasStub_st3) return phiM_st23;
+   if (st==1 and hasStub_st[0] and hasGEMPad1) return phiM_st1;
+   else if (st==2 and hasStub_st[1] and hasGEMPad2) return phiM_st2;
+   else if (st == 12 and hasStub_st[0] and hasStub_st[1]) return phiM_st12;
+   else if (st == 23 and hasStub_st[1] and hasStub_st[2]) return phiM_st23;
    else{
    	std::cout <<" error in getlocalPhiDirection, st  "<<st <<" not in range or not not have stub or GEMpad" << std::endl;
 	return -99; 
@@ -706,10 +761,10 @@ float DisplacedMuonTriggerPtassignment::getdeltaPhiDirection(int st1, int st2) c
 {
    bool hasGEMPad1((meRing==1 and hasGEMPad_st1) or meRing==2);
    bool hasGEMPad2((meRing==1 and hasGEMPad_st2) or meRing==2);
-   if (((st1 == 1 and st2 == 2) or (st1 == 1 and st2 == 2)) and hasStub_st1 and hasGEMPad1 and hasStub_st2 and hasGEMPad2) return dPhi_dir_st1_st2;
-   else if (((st1 == 1 and st2 == 12) or (st1 == 12 and st2 == 1)) and hasStub_st1 and hasGEMPad1 and hasStub_st2) return dPhi_dir_st1_st12;
-   else if (((st1 == 2 and st2 == 23) or (st1 == 23 and st2 == 2)) and hasStub_st2 and hasGEMPad2 and hasStub_st3) return dPhi_dir_st2_st23;
-   else if (((st1 == 12 and st2 == 23) or (st1 == 23 and st2 == 12)) and hasStub_st1 and hasStub_st2 and hasStub_st3) return dPhi_dir_st12_st23;
+   if (((st1 == 1 and st2 == 2) or (st1 == 1 and st2 == 2)) and hasStub_st[0] and hasGEMPad1 and hasStub_st[1] and hasGEMPad2) return dPhi_dir_st1_st2;
+   else if (((st1 == 1 and st2 == 12) or (st1 == 12 and st2 == 1)) and hasStub_st[0] and hasGEMPad1 and hasStub_st[1]) return dPhi_dir_st1_st12;
+   else if (((st1 == 2 and st2 == 23) or (st1 == 23 and st2 == 2)) and hasStub_st[1] and hasGEMPad2 and hasStub_st[2]) return dPhi_dir_st2_st23;
+   else if (((st1 == 12 and st2 == 23) or (st1 == 23 and st2 == 12)) and hasStub_st[0] and hasStub_st[1] and hasStub_st[2]) return dPhi_dir_st12_st23;
    else{
    	std::cout <<" error in getdeltaPhiDirection, st1 "<< st1 <<" st2 "<< st2 <<" not in range or not not have stub or GEMpad" << std::endl;
 	return -99;

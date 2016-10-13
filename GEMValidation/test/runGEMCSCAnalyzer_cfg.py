@@ -16,6 +16,7 @@ process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorOp
 process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAlong_cfi')
 
 process.source = cms.Source("PoolSource",
+	#skipEvents=cms.untracked.uint32(15526),
 	fileNames = cms.untracked.vstring('file:out_hlt.test.root'),
 )
 
@@ -72,7 +73,7 @@ doRpc = False
 if doRpc:
   matching.cscLCT.matchAlctRpc = True
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10000) )
 
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 
