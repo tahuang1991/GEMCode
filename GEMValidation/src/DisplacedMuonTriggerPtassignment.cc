@@ -72,6 +72,15 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
       }
     }
   }
+  nstubs = 0;
+  for (int i=0; i<4; i++)
+  	if (hasStub_st[i]){
+	    nstubs++; 
+	    radius_st_ME[i] = gp_st_layer3[i].perp();
+	}
+  
+
+
   //npar>=0 is the flag to do pt assignment
   if (hasStub_st[0] and hasStub_st[1] and hasStub_st[2]){
   	if (not(isEven[0]) and isEven[1] and isEven[2]) npar = 0;
@@ -87,7 +96,23 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
 	    }
     }
   }else
-    npar = -1;
+   
+  npar = -1;
+  if (nstubs >= 3){
+  	//find fitting radius
+     fitTrackRadius(gp_st_layer3, radius_st_ME); 
+  	//reset gp_st_layer3
+     for (int i=0; i<4; i++){
+  	if (not(hasStub_st[i])) continue;
+	float phi = gp_st_layer3[i].phi();
+	float z = gp_st_layer3[i].z();
+	gp_st_layer3[i] = GlobalPoint(GlobalPoint::Cylindrical(radius_st_ME[i], phi, z));
+     }
+  }
+
+  if (hasStub_st[0] and hasStub_st[1])
+	xfactor = (gp_st_layer3[1].perp()/gp_st_layer3[0].perp()-1.0)/fabs(gp_st_layer3[0].z()-gp_st_layer3[1].z());
+
 }
 
 DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const L1CSCTrack& tftrack,
@@ -515,27 +540,41 @@ void DisplacedMuonTriggerPtassignment::fitComparatorsLCT(const CSCComparatorDigi
       if (verbose_>0)
       	std::cout <<"i "<< i <<" fit_z "<< fit_z_layers[i]<< " fit_phi "<< fit_phi_layers[i]<< std::endl;
   }
-  /*
-  fit_z_layer3 = cscChamber->layer(CSCConstants::KEY_CLCT_LAYER)->centerOfStrip(20).z();
-  
-  fit_phi_layer3 = normalizePhi(alpha + beta * fit_z_layer3);
-  
-  if(verbose_>0) {
-    std::cout << "Number of comparator digis used in the fit " << ezs.size() << std::endl;
-    std::cout << "best CSC stub fit phi position (L1Only) " << fit_z_layer3 << " " << fit_phi_layer3 << std::endl;
-  }
 
-  // calculate the z position in L1 and L6
-  float l1_z = cscChamber->layer(1)->centerOfStrip(20).z();
-  float l6_z = cscChamber->layer(6)->centerOfStrip(20).z();
-  fit_z_layer1 = l1_z;
-  fit_z_layer6 = l6_z;
-  fit_phi_layer1 = normalizePhi(alpha + beta * l1_z);
-  fit_phi_layer6 = normalizePhi(alpha + beta * l6_z);
-  */
 }
 
 
+void DisplacedMuonTriggerPtassignment::fitTrackRadius(GlobalPoint* gps, float* radius)
+{
+
+  std::vector<float> gps_r;
+  std::vector<float> gps_z;
+  std::vector<float> gps_er;
+  std::vector<float> gps_ez;
+  std::vector<float> status;
+  for (int i=0; i<4; i++){
+  	if (not(hasStub_st[i])) continue;
+	gps_r.push_back(gps[i].perp());
+	gps_z.push_back(gps[i].z());
+	gps_er.push_back(1.5);//how to set error on r?
+	gps_ez.push_back(0.);
+  
+  }
+  float alpha = 0., beta = 0.;
+  calculateAlphaBeta(gps_z, gps_r, gps_ez, gps_er, status, alpha, beta);
+  for (int i=0; i<4; i++){
+  	if (hasStub_st[i])
+	    radius[i] = alpha + beta*gps[i].z();
+  	else 
+	    radius[i] = 0.0;
+	//if (fabs(radius[i]-gps[i].perp())>2.0) 
+	//    std::cout <<" warning!!! difference bewteen before fitting and after fitting is large "<< std::endl;
+	if (verbose_>=0)
+	    std::cout <<"station "<< i+1 <<" z "<< gps[i].z() <<" radius from gp "<< gps[i].perp()<<" from fit "<< radius[i]<< std::endl;
+  }
+
+
+}
 
 void DisplacedMuonTriggerPtassignment::globalPositionOfLCT(const CSCCorrelatedLCTDigi stub, CSCDetId chid)
 {
@@ -549,30 +588,6 @@ void DisplacedMuonTriggerPtassignment::globalPositionOfLCT(const CSCCorrelatedLC
   gp_st_layer6[st-1] = GlobalPoint(GlobalPoint::Cylindrical(perp, phi_st_layers[st-1][5], z_st_layers[st-1][5]));
   if (verbose_>=0)
       std::cout <<"LCT position, chid "<< chid <<" gp eta "<< gp_st_layer3[st-1].eta()<<" phi "<<gp_st_layer3[st-1].phi()<<" perp "<< gp_st_layer3[st-1].perp() << std::endl;
- /* 
-  if (chid.station() == 1){
-      gp_st1_layer1 = GlobalPoint(GlobalPoint::Cylindrical(perp, phi_st_layers[st-1][0], z_st_layers[st-1][0]));
-      gp_st1 = GlobalPoint(GlobalPoint::Cylindrical(perp, phi_st_layers[st-1][2], z_st_layers[st-1][2]));
-      gp_st1_layer6 = GlobalPoint(GlobalPoint::Cylindrical(perp, phi_st_layers[st-1][5], z_st_layers[st-1][5]));
-      if (verbose_>=0)
-      	std::cout <<"LCT position st1 chid "<< chid <<" gp eta "<< gp_st1.eta()<<" phi "<<gp_st1.phi()<<" perp "<< gp_st1.perp() << std::endl;
-  }else if (chid.station() == 2){
-      gp_st2_layer1 = GlobalPoint(GlobalPoint::Cylindrical(perp, phi_st_layers[st-1][0], z_st_layers[st-1][0]));
-      gp_st2 = GlobalPoint(GlobalPoint::Cylindrical(perp, phi_st_layers[st-1][2], z_st_layers[st-1][2]));
-      gp_st2_layer6 = GlobalPoint(GlobalPoint::Cylindrical(perp, phi_st_layers[st-1][5], z_st_layers[st-1][5]));
-      if (verbose_>=0)
-      	std::cout <<"LCT position st2 chid "<< chid <<" gp eta "<< gp_st2.eta()<<" phi "<<gp_st2.phi() <<" perp "<< gp_st2.perp() << std::endl;
-  }else if (chid.station() == 3){
-      gp_st3 = GlobalPoint(GlobalPoint::Cylindrical(perp, phi_st_layers[st-1][2], z_st_layers[st-1][2]));
-      if (verbose_>=0)
-      	std::cout <<"LCT position st3 chid "<< chid <<" gp eta "<< gp_st3.eta()<<" phi "<<gp_st3.phi() <<" perp "<< gp_st3.perp() << std::endl;
-  }else if (chid.station() == 4){
-      gp_st4 = GlobalPoint(GlobalPoint::Cylindrical(perp, phi_st_layers[st-1][2], z_st_layers[st-1][2]));
-      if (verbose_>=0)
-      	std::cout <<"LCT position st4 chid "<< chid <<" gp eta "<< gp_st3.eta()<<" phi "<<gp_st3.phi() <<" perp "<< gp_st3.perp() << std::endl;
-  }else if (verbose_>0) 
-      std::cout <<" not in CSC station 1 , 2 ,3 , 4, chamber id  "<< chid << std::endl;
- */ 
 
 }
 
@@ -691,17 +706,6 @@ bool DisplacedMuonTriggerPtassignment::runDirectionbasedGE21()
 {
    if (not (npar<4 and npar>=0 and hasGEMPad_st1 and hasGEMPad_st2)) return false; 
    if (fabs(phi_ge21)>4) return false;//check this because we want to use setPhiGE21() to set phi_ge21 (using 2strips-pad)
-   /*
-   float xfactor_st1 = xfactor*fabs(gp_ge11.z() - gp_st1.z());
-   float xfactor_st2 = xfactor*fabs(gp_ge21.z() - gp_st2.z())/(xfactor*fabs(gp_st1.z() - gp_st2.z())+1);
-   float xfactor_st12 = xfactor*fabs(gp_st1.z() - gp_st2.z())/(xfactor*fabs(gp_st1.z() - gp_st2.z())+1);
-   float xfactor_st23 = xfactor*fabs(gp_st2.z() - gp_st3.z())/(xfactor*fabs(gp_st1.z() - gp_st3.z())+1);
-   if (verbose_>0) std::cout <<"DisplacedMuonTrigger meRing "<< meRing <<" xfactor st1 "<< xfactor_st1 <<" xfactor st2 "<< xfactor_st2 << std::endl;
-   phiM_st1 = phiMomentum_Xfactor(gp_st1.phi(), gp_ge11.phi(), xfactor_st1);//
-   phiM_st2 = phiMomentum_Xfactor(gp_st2.phi(), phi_ge21, xfactor_st2);
-   phiM_st12 = phiMomentum_Xfactor(gp_st2.phi(), gp_st1.phi(), xfactor_st12);
-   phiM_st23 = phiMomentum_Xfactor(gp_st3.phi(), gp_st2.phi(), xfactor_st23);
-   */
 
    float xfactor_st1 = xfactor*fabs(gp_ge11.z() - gp_st_layer3[0].z());
    float xfactor_st2 = xfactor*fabs(gp_ge21.z() - gp_st_layer3[1].z())/(xfactor*fabs(gp_st_layer3[0].z() - gp_st_layer3[1].z())+1);
@@ -714,7 +718,7 @@ bool DisplacedMuonTriggerPtassignment::runDirectionbasedGE21()
    if (verbose_>=0)  std::cout <<"DisplacedMuonTrigger, direction with GE21, meRing "<< meRing <<" xfactor_st1 "<< xfactor_st1 <<" phiM_st1 "<< phiM_st1
        			<<" xfactor_st2 "<< xfactor_st2 <<" phiM_st2 "<< phiM_st2 << std::endl;
 
-
+   //make sure both phiM_st1 and phiM_st2 are reasonable, 4 can be changed into M_PI later 
    dPhi_dir_st1_st2 = (fabs(phiM_st1)<4 and fabs(phiM_st2)<4)? deltaPhi(phiM_st1, phiM_st2):-9;
    dPhi_dir_st1_st12 = (fabs(phiM_st1)<4 and fabs(phiM_st12)<4)? deltaPhi(phiM_st1, phiM_st12):-9;
    dPhi_dir_st2_st23 = (fabs(phiM_st2)<4 and fabs(phiM_st23)<4)? deltaPhi(phiM_st2, phiM_st23):-9;
