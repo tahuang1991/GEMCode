@@ -532,11 +532,11 @@ void DisplacedMuonTriggerPtassignment::fitComparatorsLCT(const CSCComparatorDigi
   //perp = perp/phis.size();
   // do a fit to the comparator digis
   float alpha = 0., beta = 0.;
-  calculateAlphaBeta(zs, phis, ezs, ephis, status, alpha, beta);
+  PtassignmentHelper::calculateAlphaBeta(zs, phis, ezs, ephis, status, alpha, beta);
   //std::cout <<" alpha "<< alpha <<" beta "<< beta << std::endl;
   for (int i=0; i<6; i++){
       fit_z_layers[i] = cscChamber->layer(i+1)->centerOfStrip(20).z();
-      fit_phi_layers[i] = normalizePhi(alpha + beta * fit_z_layers[i]);
+      fit_phi_layers[i] = PtassignmentHelper::normalizePhi(alpha + beta * fit_z_layers[i]);
       if (verbose_>0)
       	std::cout <<"i "<< i <<" fit_z "<< fit_z_layers[i]<< " fit_phi "<< fit_phi_layers[i]<< std::endl;
   }
@@ -561,7 +561,7 @@ void DisplacedMuonTriggerPtassignment::fitTrackRadius(GlobalPoint* gps, float* r
   
   }
   float alpha = 0., beta = 0.;
-  calculateAlphaBeta(gps_z, gps_r, gps_ez, gps_er, status, alpha, beta);
+  PtassignmentHelper::calculateAlphaBeta(gps_z, gps_r, gps_ez, gps_er, status, alpha, beta);
   for (int i=0; i<4; i++){
   	if (hasStub_st[i])
 	    radius[i] = alpha + beta*gps[i].z();
@@ -616,26 +616,6 @@ void DisplacedMuonTriggerPtassignment::globalPositionOfGEMPad(const GEMCSCPadDig
 
 
 
-int DisplacedMuonTriggerPtassignment::getEtaPartition(float eta) const
-{
-    int neta=-1;
-    if (fabs(eta)>=1.2 and fabs(eta)<1.4)
-	neta=0;
-    else if (fabs(eta)>=1.4 and fabs(eta)<1.6)
-	neta=1;
-    else if (fabs(eta)>=1.6 and fabs(eta)<1.8)
-	neta=2;
-    else if (fabs(eta)>=1.8 and fabs(eta)<2.0)
-	neta=3;
-    else if (fabs(eta)>=2.0 and fabs(eta)<2.2)
-	neta=4;
-    else if (fabs(eta)>=2.2 and fabs(eta)<2.4)
-	neta=5;
-
-    return neta;
-
-}
-
 float DisplacedMuonTriggerPtassignment::deltaYcalculation(GlobalPoint gp1, GlobalPoint gp2) const
 {
    float anglea = gp2.phi();
@@ -657,10 +637,10 @@ float DisplacedMuonTriggerPtassignment::deltadeltaYcalculation(GlobalPoint gp1, 
    float deltay12 = newyst2-newyst1;
    float deltay23 = newyst3-newyst2;
    //std::cout <<" angle in st2 "<< anglea <<" newyst1 "<< newyst1 <<" newyst2 "<< newyst2 << " newyst3 "<< newyst3 << std::endl;
-   int neta = getEtaPartition(eta);
+   int neta = PtassignmentHelper::GetEtaPartition(eta);
    
    if (par<0 or par>3 or neta==-1) return -99;
-   return (deltay23-PositionEpLUT[par][neta][0]*deltay12);
+   return (deltay23-PtassignmentHelper::PositionEpLUT[par][neta][0]*deltay12);
    
 }
 
