@@ -3,31 +3,30 @@
 
 #include "DataFormats/Math/interface/deltaPhi.h"
 #include "GEMCode/GEMValidation/interface/PtassignmentHelper.h"
-#include "GEMCode/GEMValidation/interface/DisplacedMuonTriggerPtassignment.h"
+//#include "GEMCode/GEMValidation/interface/DisplacedMuonTriggerPtassignment.h"
 #include <iostream>
 #include <math.h>       /* atan */
 
-int GetEtaPartition(float eta ){
-
-    int neta=-1;
-    if (fabs(eta)>=1.2 and fabs(eta)<1.4)
-	neta=0;
-    else if (fabs(eta)>=1.4 and fabs(eta)<1.6)
-	neta=1;
-    else if (fabs(eta)>=1.6 and fabs(eta)<1.8)
-	neta=2;
-    else if (fabs(eta)>=1.8 and fabs(eta)<2.0)
-	neta=3;
-    else if (fabs(eta)>=2.0 and fabs(eta)<2.2)
-	neta=4;
-    //else if (fabs(eta)>=2.2 and fabs(eta)<2.4)
-	//neta=5;
-
-    return neta;
-
+int PtassignmentHelper::GetEtaPartition(float eta)
+{
+  int neta=-1;
+  if (fabs(eta)>=1.2 and fabs(eta)<1.4)
+    neta=0;
+  else if (fabs(eta)>=1.4 and fabs(eta)<1.6)
+    neta=1;
+  else if (fabs(eta)>=1.6 and fabs(eta)<1.8)
+    neta=2;
+  else if (fabs(eta)>=1.8 and fabs(eta)<2.0)
+    neta=3;
+  else if (fabs(eta)>=2.0 and fabs(eta)<2.2)
+    neta=4;
+  else if (fabs(eta)>=2.2 and fabs(eta)<2.4)
+    neta=5;
+  
+  return neta;
 }
 
-float Ptassign_Position(float deltay12, float deltay23, float eta, int par){
+float PtassignmentHelper::Ptassign_Position(float deltay12, float deltay23, float eta, int par){
     int neta = GetEtaPartition(eta);
     if (par<0 or par>3 or neta==-1) return -1;
     
@@ -39,7 +38,7 @@ float Ptassign_Position(float deltay12, float deltay23, float eta, int par){
     return pt;
 }
 
-float deltaYcalculation(GlobalPoint gp1, GlobalPoint gp2){
+float PtassignmentHelper::deltaYcalculation(GlobalPoint gp1, GlobalPoint gp2){
    float anglea = gp2.phi();
    float newyst1 = -gp1.x()*sin(anglea) + gp1.y()*cos(anglea);
    float newyst2 = -gp2.x()*sin(anglea) + gp2.y()*cos(anglea);
@@ -47,7 +46,7 @@ float deltaYcalculation(GlobalPoint gp1, GlobalPoint gp2){
 
 }
 
-float Ptassign_Position_gp(GlobalPoint gp1, GlobalPoint gp2, GlobalPoint gp3, float eta, int par){
+float PtassignmentHelper::Ptassign_Position_gp(GlobalPoint gp1, GlobalPoint gp2, GlobalPoint gp3, float eta, int par){
 
    float anglea = gp2.phi();
    float newyst1 = -gp1.x()*sin(anglea) + gp1.y()*cos(anglea);
@@ -62,8 +61,8 @@ float Ptassign_Position_gp(GlobalPoint gp1, GlobalPoint gp2, GlobalPoint gp3, fl
 }
 
 
-float Ptassign_Direction(float bending_12, float eta, int par){
-    int neta = GetEtaPartition(eta);
+float PtassignmentHelper::Ptassign_Direction(float bending_12, float eta, int par){
+  int neta = GetEtaPartition(eta);
     if (par<0 or par>3 or neta==-1 or fabs(bending_12) > M_PI) return -1;
 
     float pt=(1/fabs(bending_12)+DirectionEpLUT[par][neta][1])/DirectionEpLUT[par][neta][0];
@@ -74,7 +73,7 @@ float Ptassign_Direction(float bending_12, float eta, int par){
 
 
 
-float PhiMomentum(float dphi, float phi_position, int st, bool evenodd){
+float PtassignmentHelper::PhiMomentum(float dphi, float phi_position, int st, bool evenodd){
 	
     //even->0, odd->1
     int cham = (evenodd ? 0:1);
@@ -87,7 +86,7 @@ float PhiMomentum(float dphi, float phi_position, int st, bool evenodd){
 }
 
 
-float PhiMomentum_Radius(float dphi, float phi_position, float radius_csc, float radius_gem){
+float PtassignmentHelper::PhiMomentum_Radius(float dphi, float phi_position, float radius_csc, float radius_gem){
     
      // usually radius_csc>radius_gem
      if (fabs(dphi) > M_PI or fabs(phi_position) > M_PI or radius_csc<radius_gem) return -9;
@@ -111,7 +110,7 @@ float PhiMomentum_Radius(float dphi, float phi_position, float radius_csc, float
 
 //dphi: local bending, phi_position: phi of GEM position, X: "x_factor"
 //X: st1, X=D(GEM,CSC)*x_factor, st2: D(GEM,CSC)*x_factor/(D(ME11,ME21)*x+1)
-float PhiMomentum_Xfactor(float dphi, float phi_position, float X){
+float PtassignmentHelper::PhiMomentum_Xfactor(float dphi, float phi_position, float X){
 
       
      if (fabs(dphi) > M_PI or fabs(phi_position) > M_PI) return -9;
@@ -135,7 +134,7 @@ float PhiMomentum_Xfactor(float dphi, float phi_position, float X){
 
 
 
-float PhiMomentum_Xfactor_V2(float phi_CSC, float phi_GEM, float X){
+float PtassignmentHelper::PhiMomentum_Xfactor_V2(float phi_CSC, float phi_GEM, float X){
 
      if (fabs(phi_CSC) > M_PI or fabs(phi_GEM) > M_PI) return -9;
      float dphi = deltaPhi(phi_CSC,phi_GEM);
@@ -160,7 +159,7 @@ float PhiMomentum_Xfactor_V2(float phi_CSC, float phi_GEM, float X){
 
 
 
-void calculateAlphaBeta(const std::vector<float>& v, 
+void PtassignmentHelper::calculateAlphaBeta(const std::vector<float>& v, 
                         const std::vector<float>& w, 
                         const std::vector<float>& ev, 
                         const std::vector<float>& ew, 
@@ -201,7 +200,7 @@ void calculateAlphaBeta(const std::vector<float>& v,
 
 
 
-float normalizePhi(float phi) { 
+float PtassignmentHelper::normalizePhi(float phi) { 
     float result = phi;
     if(result > float(M_PI)) result -= float(2*M_PI);
     else if (result <= -float(M_PI)) result += float(2*M_PI);

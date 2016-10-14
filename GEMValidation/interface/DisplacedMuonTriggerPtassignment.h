@@ -251,7 +251,6 @@ public:
   
  public:
   //pt assignment 
-  int getEtaPartition(float eta) const;
   float deltaYcalculation(GlobalPoint gp1, GlobalPoint gp2) const;
   float deltadeltaYcalculation(GlobalPoint gp1, GlobalPoint gp2, GlobalPoint gp3, float eta, int par) const;
 
