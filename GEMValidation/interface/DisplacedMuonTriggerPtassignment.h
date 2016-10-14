@@ -172,6 +172,8 @@ public:
   float getdeltaY123() const { return ddY123; }
   float getlocalPhiDirection(int st) const;
   float getdeltaPhiDirection(int st1, int st2) const;
+  float getRadiusSt(int st) const  { return radius_st_ME[st-1]; }
+  float getNStubs() const { return nstubs; }
 
 
   void setRadiusSt(float x, int st) { radius_st_ME[st-1] = x; }
@@ -276,11 +278,12 @@ public:
 
 
   //endcap, direction based
+  int nstubs;
   bool hasStub_st[4] = {false, false, false, false};
   bool isEven[4]={false, false, false, false};
   bool hasGEMPad_st1;
   bool hasGEMPad_st2;
-  float radius_st_ME[4] = {0.0, 0.0, 0.0, 0.0};
+  float radius_st_ME[4] = {-1.0, -1.0, -1.0, -1.0};
   float xfactor;
   int npar;
   int meRing ;

@@ -72,6 +72,15 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
       }
     }
   }
+  nstubs = 0;
+  for (int i=0; i<4; i++)
+  	if (hasStub_st[i]){
+	    nstubs++; 
+	    radius_st_ME[i] = gp_st_layer3[i].perp();
+	}
+  
+
+
   //npar>=0 is the flag to do pt assignment
   if (hasStub_st[0] and hasStub_st[1] and hasStub_st[2]){
   	if (not(isEven[0]) and isEven[1] and isEven[2]) npar = 0;
@@ -87,8 +96,23 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
 	    }
     }
   }else
-    npar = -1;
-  fitTrackRadius(gp_st_layer3, radius_st_ME); 
+   
+  npar = -1;
+  if (nstubs >= 3){
+  	//find fitting radius
+     fitTrackRadius(gp_st_layer3, radius_st_ME); 
+  	//reset gp_st_layer3
+     for (int i=0; i<4; i++){
+  	if (not(hasStub_st[i])) continue;
+	float phi = gp_st_layer3[i].phi();
+	float z = gp_st_layer3[i].z();
+	gp_st_layer3[i] = GlobalPoint(GlobalPoint::Cylindrical(radius_st_ME[i], phi, z));
+     }
+  }
+
+  if (hasStub_st[0] and hasStub_st[1])
+	xfactor = (gp_st_layer3[1].perp()/gp_st_layer3[0].perp()-1.0)/fabs(gp_st_layer3[0].z()-gp_st_layer3[1].z());
+
 }
 
 DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const L1CSCTrack& tftrack,
@@ -543,8 +567,10 @@ void DisplacedMuonTriggerPtassignment::fitTrackRadius(GlobalPoint* gps, float* r
 	    radius[i] = alpha + beta*gps[i].z();
   	else 
 	    radius[i] = 0.0;
+	//if (fabs(radius[i]-gps[i].perp())>2.0) 
+	//    std::cout <<" warning!!! difference bewteen before fitting and after fitting is large "<< std::endl;
 	if (verbose_>=0)
-	    std::cout <<"station "<< i+1 <<" radius from gp "<< gps[i].perp()<<" from fit "<< radius[i]<< std::endl;
+	    std::cout <<"station "<< i+1 <<" z "<< gps[i].z() <<" radius from gp "<< gps[i].perp()<<" from fit "<< radius[i]<< std::endl;
   }
 
 

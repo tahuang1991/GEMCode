@@ -185,6 +185,8 @@ struct MyTrackEff
   Float_t perp_lct_even;
   Bool_t passdphi_odd;
   Bool_t passdphi_even;
+  Float_t fitperp_lct_odd;
+  Float_t fitperp_lct_even;
 
   Int_t wiregroup_odd;
   Int_t wiregroup_even;
@@ -543,6 +545,10 @@ void MyTrackEff::init()
   dphi_lct_even = -9.;
   passdphi_odd = false;
   passdphi_even = false;
+  perp_lct_odd = -1;
+  perp_lct_even = -1;
+  fitperp_lct_odd = -1;
+  fitperp_lct_even = -1;
 
   wiregroup_odd = -1;
   wiregroup_even =-1; 
@@ -932,6 +938,8 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("eta_lct_even", &eta_lct_even);
   t->Branch("perp_lct_odd", &perp_lct_odd);
   t->Branch("perp_lct_even", &perp_lct_even);
+  t->Branch("fitperp_lct_odd", &fitperp_lct_odd);
+  t->Branch("fitperp_lct_even", &fitperp_lct_even);
   t->Branch("dphi_lct_odd", &dphi_lct_odd);
   t->Branch("dphi_lct_even", &dphi_lct_even);
   t->Branch("passdphi_odd", &passdphi_odd);
@@ -1819,7 +1827,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         etrk_[1].bend_lct_odd = bend;
         etrk_[1].phi_lct_odd = gp.phi();
         etrk_[1].eta_lct_odd = gp.eta();
-        etrk_[1].perp_lct_even = gp.perp();
+        etrk_[1].perp_lct_odd = gp.perp();
         etrk_[1].dphi_lct_odd = digi_dphi(lct);
         etrk_[1].bx_lct_odd = digi_bx(lct);
         etrk_[1].hs_lct_odd = digi_channel(lct);
@@ -3171,6 +3179,13 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         gp2_fit=gp_fit_even[6];
         gp3_fit=gp_fit_even[8];
 	npar=0;
+	if (displacedMuonL1Pt.getNParity()==npar and displacedMuonL1Pt.getMeRing()==1){
+		etrk_[1].fitperp_lct_odd = displacedMuonL1Pt.getRadiusSt(1);
+		etrk_[6].fitperp_lct_even = displacedMuonL1Pt.getRadiusSt(2);
+		etrk_[8].fitperp_lct_even = displacedMuonL1Pt.getRadiusSt(3);
+	}else 
+	    std::cout <<"displaced muon pt assignment, npar  "<< displacedMuonL1Pt.getNParity() <<" meRing "<< displacedMuonL1Pt.getMeRing()<<" in ana npar "<< npar <<" ring 1 "<< std::endl; 
+	
      }else if ((etrk_[1].has_lct&1)>0 and (etrk_[6].has_lct&1)>0 and (etrk_[8].has_lct&1)>0){ 
         gp1=gp_lct_odd[1];
         gp2=gp_lct_odd[6];
@@ -3179,6 +3194,12 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         gp2_fit=gp_fit_odd[6];
         gp3_fit=gp_fit_odd[8];
 	npar=1;
+	if (displacedMuonL1Pt.getNParity()==npar and displacedMuonL1Pt.getMeRing()==1){
+		etrk_[1].fitperp_lct_odd = displacedMuonL1Pt.getRadiusSt(1);
+		etrk_[6].fitperp_lct_odd = displacedMuonL1Pt.getRadiusSt(2);
+		etrk_[8].fitperp_lct_odd = displacedMuonL1Pt.getRadiusSt(3);
+	}else 
+	    std::cout <<"displaced muon pt assignment, npar  "<< displacedMuonL1Pt.getNParity() <<" meRing "<< displacedMuonL1Pt.getMeRing()<<" in ana npar "<< npar <<" ring 1 "<< std::endl; 
      }else if ((etrk_[1].has_lct&2)>0 and (etrk_[6].has_lct&2)>0 and (etrk_[8].has_lct&2)>0){ 
         gp1=gp_lct_even[1];
         gp2=gp_lct_even[6];
@@ -3187,6 +3208,12 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         gp2_fit=gp_fit_even[6];
         gp3_fit=gp_fit_even[8];
 	npar=2;
+	if (displacedMuonL1Pt.getNParity()==npar and displacedMuonL1Pt.getMeRing()==1){
+		etrk_[1].fitperp_lct_even = displacedMuonL1Pt.getRadiusSt(1);
+		etrk_[6].fitperp_lct_even = displacedMuonL1Pt.getRadiusSt(2);
+		etrk_[8].fitperp_lct_even = displacedMuonL1Pt.getRadiusSt(3);
+	}else 
+	    std::cout <<"displaced muon pt assignment, npar  "<< displacedMuonL1Pt.getNParity() <<" meRing "<< displacedMuonL1Pt.getMeRing()<<" in ana npar "<< npar <<" ring 1 "<< std::endl; 
      }else if ((etrk_[1].has_lct&2)>0 and (etrk_[6].has_lct&1)>0 and (etrk_[8].has_lct&1)>0){ 
         gp1=gp_lct_even[1];
         gp2=gp_lct_odd[6];
@@ -3195,6 +3222,12 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         gp2_fit=gp_fit_odd[6];
         gp3_fit=gp_fit_odd[8];
 	npar=3;
+	if (displacedMuonL1Pt.getNParity()==npar and displacedMuonL1Pt.getMeRing()==1){
+		etrk_[1].fitperp_lct_even = displacedMuonL1Pt.getRadiusSt(1);
+		etrk_[6].fitperp_lct_odd = displacedMuonL1Pt.getRadiusSt(2);
+		etrk_[8].fitperp_lct_odd = displacedMuonL1Pt.getRadiusSt(3);
+	}else 
+	    std::cout <<"displaced muon pt assignment, npar  "<< displacedMuonL1Pt.getNParity() <<" meRing "<< displacedMuonL1Pt.getMeRing()<<" in ana npar "<< npar <<" ring 1 "<< std::endl; 
      }
      etrk_[0].hasSt1St2St3=true; 
      etrk_[0].npar_lct= npar; 
@@ -3225,6 +3258,12 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         gp2_fit=gp_fit_even[7];
         gp3_fit=gp_fit_even[9];
 	npar=0;
+	if (displacedMuonL1Pt.getNParity()==npar and displacedMuonL1Pt.getMeRing()==2){
+		etrk_[4].fitperp_lct_odd = displacedMuonL1Pt.getRadiusSt(1);
+		etrk_[7].fitperp_lct_even = displacedMuonL1Pt.getRadiusSt(2);
+		etrk_[9].fitperp_lct_even = displacedMuonL1Pt.getRadiusSt(3);
+	}else 
+	    std::cout <<"displaced muon pt assignment, npar  "<< displacedMuonL1Pt.getNParity() <<" meRing "<< displacedMuonL1Pt.getMeRing()<<" in ana npar "<< npar <<" ring 2 "<< std::endl; 
      }else if ((etrk_[4].has_lct&1)>0 and (etrk_[7].has_lct&1)>0 and (etrk_[9].has_lct&1)>0){ 
         gp1=gp_lct_odd[4];
         gp2=gp_lct_odd[7];
@@ -3233,6 +3272,12 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         gp2_fit=gp_fit_odd[7];
         gp3_fit=gp_fit_odd[9];
 	npar=1;
+	if (displacedMuonL1Pt.getNParity()==npar and displacedMuonL1Pt.getMeRing()==2){
+		etrk_[4].fitperp_lct_odd = displacedMuonL1Pt.getRadiusSt(1);
+		etrk_[7].fitperp_lct_odd = displacedMuonL1Pt.getRadiusSt(2);
+		etrk_[9].fitperp_lct_odd = displacedMuonL1Pt.getRadiusSt(3);
+	}else 
+	    std::cout <<"displaced muon pt assignment, npar  "<< displacedMuonL1Pt.getNParity() <<" meRing "<< displacedMuonL1Pt.getMeRing()<<" in ana npar "<< npar <<" ring 2 "<< std::endl; 
      }else if ((etrk_[4].has_lct&2)>0 and (etrk_[7].has_lct&2)>0 and (etrk_[9].has_lct&2)>0){ 
         gp1=gp_lct_even[4];
         gp2=gp_lct_even[7];
@@ -3241,6 +3286,12 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         gp2_fit=gp_fit_even[7];
         gp3_fit=gp_fit_even[9];
 	npar=2;
+	if (displacedMuonL1Pt.getNParity()==npar and displacedMuonL1Pt.getMeRing()==2){
+		etrk_[4].fitperp_lct_even = displacedMuonL1Pt.getRadiusSt(1);
+		etrk_[7].fitperp_lct_even = displacedMuonL1Pt.getRadiusSt(2);
+		etrk_[9].fitperp_lct_even = displacedMuonL1Pt.getRadiusSt(3);
+	}else 
+	    std::cout <<"displaced muon pt assignment, npar  "<< displacedMuonL1Pt.getNParity() <<" meRing "<< displacedMuonL1Pt.getMeRing()<<" in ana npar "<< npar <<" ring 2 "<< std::endl; 
      }else if ((etrk_[4].has_lct&2)>0 and (etrk_[7].has_lct&1)>0 and (etrk_[9].has_lct&1)>0){ 
         gp1=gp_lct_even[4];
         gp2=gp_lct_odd[7];
@@ -3249,6 +3300,12 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         gp2_fit=gp_fit_odd[7];
         gp3_fit=gp_fit_odd[9];
 	npar=3;
+	if (displacedMuonL1Pt.getNParity()==npar and displacedMuonL1Pt.getMeRing()==2){
+		etrk_[4].fitperp_lct_even = displacedMuonL1Pt.getRadiusSt(1);
+		etrk_[7].fitperp_lct_odd = displacedMuonL1Pt.getRadiusSt(2);
+		etrk_[9].fitperp_lct_odd = displacedMuonL1Pt.getRadiusSt(3);
+	}else 
+	    std::cout <<"displaced muon pt assignment, npar  "<< displacedMuonL1Pt.getNParity() <<" meRing "<< displacedMuonL1Pt.getMeRing()<<" in ana npar "<< npar <<" ring 2 "<< std::endl; 
      }
      if (verbose_){
 	std::cout <<"LCT gp1 x "<< gp1.x()<<" y "<< gp1.y() <<" phi "<< gp1.phi()<<" perp "<< gp1.perp() <<" gp2 x "<< gp2.x()<<" y "<< gp2.y()<<" phi "<< gp2.phi()<<" perp "<< gp2.perp() << std::endl;
