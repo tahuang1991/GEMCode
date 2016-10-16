@@ -1501,6 +1501,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       
     }
     
+    std::cout <<"CSCid with simhits "<< id << " nlayer "<< nlayers << std::endl;
     if (nlayers < minNHitsChamberCSCSimHit_) continue;
     GlobalVector ym = match_sh.simHitsMeanMomentum(match_sh.hitsInChamber(d));
     etrk_[st].bending_sh = match_sh.LocalBendingInChamber(d);
@@ -1781,10 +1782,14 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       else etrk_[1].has_lct |= 2;
     }
     
+
     auto lct = match_lct.lctInChamber(d);
     const int bend(LCT_BEND_PATTERN[digi_pattern(lct)]);
     auto gp = match_lct.digiPosition(lct);
 
+    
+    if (csc_simhits.find(d) == csc_simhits.end())
+	std::cout <<"failed to find simhits in CSCid "<< id <<" but find LCT" << lct << std::endl;
     if (odd)
     {
       lct_odd[st] = lct;
@@ -1793,6 +1798,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       etrk_[st].phi_lct_odd = gp.phi();
       etrk_[st].eta_lct_odd = gp.eta();
       etrk_[st].perp_lct_odd = gp.perp();
+      if (fabs(etrk_[st].perp_lct_odd-etrk_[st].perp_cscsh_odd)>5.0) 
+	  std::cout <<"CSCid "<< id <<" perp_cscsh_odd "<< etrk_[st].perp_cscsh_odd<<" perp_lct_odd "<< etrk_[st].perp_lct_odd<<" csc_phi "<< etrk_[st].phi_cscsh_odd<<" phi_lct_odd "<< etrk_[st].phi_lct_odd << std::endl;
+
       etrk_[st].dphi_lct_odd = digi_dphi(lct);
       etrk_[st].bx_lct_odd = digi_bx(lct);
       etrk_[st].hs_lct_odd = digi_channel(lct);
@@ -1809,6 +1817,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       etrk_[st].phi_lct_even = gp.phi();
       etrk_[st].eta_lct_even = gp.eta();
       etrk_[st].perp_lct_even = gp.perp();
+      if (fabs(etrk_[st].perp_lct_even-etrk_[st].perp_cscsh_even)>5.0) 
+	  std::cout <<"CSCid "<< id <<" perp_cscsh_even "<< etrk_[st].perp_cscsh_even <<" perp_lct_even "<< etrk_[st].perp_lct_even <<" csc_phi "<< etrk_[st].phi_cscsh_even <<" phi_lct_even "<< etrk_[st].phi_lct_even << std::endl;
       etrk_[st].dphi_lct_even = digi_dphi(lct);
       etrk_[st].bx_lct_even = digi_bx(lct);
       etrk_[st].hs_lct_even = digi_channel(lct);
@@ -2467,6 +2477,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	if ((etrk_[8].has_csc_sh&2)>0)
 	{
 	    gp3=gp_sh_even[8];
+	    
 	    //xfactor_st23 = xfactor*D32*(R1/R2)
 	    xfactor_st23 = xfactor*(948.46-814.586)/(xfactor*(948.46-615.33)+1);
 	    phiM_st23_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[8].phi_cscsh_even, etrk_[6].phi_cscsh_even, xfactor_st23);
@@ -3051,9 +3062,12 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   if ((etrk_[1].has_csc_sh || etrk_[4].has_csc_sh) and (etrk_[6].has_csc_sh || etrk_[7].has_csc_sh)) {
      if ((etrk_[8].has_csc_sh || etrk_[9].has_csc_sh) || (etrk_[10].has_csc_sh || etrk_[11].has_csc_sh))
      	etrk_[0].hasSt3orSt4_sh=true; 
-  
+     std::cout <<"At SIM level gp1 z "<<gp1.z()<<" perp "<< gp1.perp()<<" gp2 z "<< gp2.z()<<" perp "<< gp2.perp()<<" gp3 z "<< gp3.z()<<" perp "<< gp3.perp()<< std::endl;  
      etrk_[0].npar = npar;
      std::cout <<"GEMCSCAnalyzer npar "<< npar << std::endl;
+     if (displacedMuonL1Pt.getNParity()>=0 and (fabs(displacedMuonL1Pt.getRadiusSt(1)-gp1.perp())>2 or fabs(displacedMuonL1Pt.getRadiusSt(2)-gp2.perp())>2
+		 or fabs(displacedMuonL1Pt.getRadiusSt(3)-gp3.perp())>2))
+	    std::cout <<" warning, difference between fitting and sim is large, module, npar  "<< displacedMuonL1Pt.getNParity()<<" ring "<< displacedMuonL1Pt.getMeRing() << std::endl; 
      if (etrk_[0].meRing == 1 and displacedMuonL1Pt.getNParity()>=0 and displacedMuonL1Pt.runDirectionbased(true)){
      	etrk_[0].phiM_st1_test = displacedMuonL1Pt.getlocalPhiDirection(1); 
      	etrk_[0].phiM_st2_test = displacedMuonL1Pt.getlocalPhiDirection(2); 
@@ -3326,6 +3340,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     	etrk_[0].deltay12_test = displacedMuonL1Pt.getdeltaY12();  
     	etrk_[0].deltay23_test = displacedMuonL1Pt.getdeltaY23();  
     	etrk_[0].deltay123_test = displacedMuonL1Pt.getdeltaY123();  
+
      }
 
 
