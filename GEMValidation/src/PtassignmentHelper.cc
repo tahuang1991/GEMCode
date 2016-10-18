@@ -26,6 +26,15 @@ int PtassignmentHelper::GetEtaPartition(float eta)
   return neta;
 }
 
+
+float PtassignmentHelper::ellipse(float a, float b, float alpha, float x0, float y0, float x, float y)
+{
+  float x1 = x*cos(alpha)-y*sin(alpha)-x0;
+  float y1 = x*sin(alpha)+y*cos(alpha)-y0;
+  return x1*x1/(a*a)+y1*y1/(b*b);
+}
+
+
 float PtassignmentHelper::Ptassign_Position(float deltay12, float deltay23, float eta, int par){
     int neta = GetEtaPartition(eta);
     if (par<0 or par>3 or neta==-1) return -1;

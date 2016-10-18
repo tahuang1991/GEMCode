@@ -368,6 +368,7 @@ struct MyTrackEff
   Float_t dphi_dir_st1_st2_sh, dphi_dir_st1_st2_L1, dphi_dir_st1_st2_L1_csc;
   Float_t dphi_dir_st1_st12_sh,dphi_dir_st2_st23_sh, dphi_dir_st12_st23_sh;
   Float_t dphi_dir_st1_st12_L1,dphi_dir_st2_st23_L1,dphi_dir_st1_st12_L1_csc,dphi_dir_st2_st23_L1_csc, dphi_dir_st12_st23_L1;
+  Bool_t hybrid1;
   //Float_t ptphi_diff_sh_11,ptphi_diff_sh_12,ptphi_diff_sh_21,ptphi_diff_sh_22; 
   Float_t ptphi_diff_sh;
   Float_t deltay12_fit, deltay23_fit;
@@ -507,6 +508,7 @@ void MyTrackEff::init()
   dphi_dir_st1_st12_L1_csc = -9;
   dphi_dir_st2_st23_L1_csc = -9;
   dphi_dir_st12_st23_L1 = -9;
+  hybrid1 = false;
   csc_bending_angle12_gemcsc = -9;
   csc_bending_angle12_xfactor = -9;
   csc_bending_angle12_xfactor_smear0 = -9;
@@ -901,6 +903,7 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("dphi_dir_st12_st23_L1", &dphi_dir_st12_st23_L1);
   t->Branch("dphi_dir_st1_st12_L1_csc", &dphi_dir_st1_st12_L1_csc);
   t->Branch("dphi_dir_st2_st23_L1_csc", &dphi_dir_st2_st23_L1_csc);
+  t->Branch("hybrid1", &hybrid1);
 
   t->Branch("csc_bending_angle12_gemcsc", &csc_bending_angle12_gemcsc);
   t->Branch("csc_bending_angle12_xfactor", &csc_bending_angle12_xfactor);
@@ -2456,10 +2459,10 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         gp1_phi_gauss = CLHEP::RandGauss::shoot(etrk_[1].phi_cscsh_odd, .00026);
         gp2_phi_gauss = CLHEP::RandGauss::shoot(etrk_[6].phi_cscsh_even, .00045);
 	xfactor_sh = (gp2.perp()/gp1.perp()-1.0)/(814.586-615.33);
-	//xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
+	xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
 	xfactor = xfactor_sh;
 	//displacedMuonPt
-	displacedMuonL1Pt.setxfactor(xfactor);
+	//displacedMuonL1Pt.setxfactor(xfactor);
 	displacedMuonL1Pt.setPhiGE21(etrk_[6].phi_2strippad_even);
 	//std::cout <<"gp1 perp "<< gp1.perp() <<" gp2 perp "<< gp2.perp() <<"xfactor "<< xfactor <<" smear "<< xfactor_smear << std::endl;
 	xfactor_st1 = (615.33-567.82)*xfactor;
@@ -2558,9 +2561,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         gp1_phi_gauss = CLHEP::RandGauss::shoot(etrk_[1].phi_cscsh_odd, .00026);
         gp2_phi_gauss = CLHEP::RandGauss::shoot(etrk_[6].phi_cscsh_odd, .00045);
 	xfactor_sh = (gp2.perp()/gp1.perp()-1.0)/(839.386-615.33);
-	//xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
-	xfactor = xfactor_sh;
-	displacedMuonL1Pt.setxfactor(xfactor);
+	xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
+	//xfactor = xfactor_sh;
+	//displacedMuonL1Pt.setxfactor(xfactor);
 	displacedMuonL1Pt.setPhiGE21(etrk_[6].phi_2strippad_odd);
         //xfactor_smear = CLHEP::RandGauss::shoot(xfactor,0.00005);
 	//std::cout <<"gp1 perp "<< gp1.perp() <<" gp2 perp "<< gp2.perp() <<"xfactor "<< xfactor <<" smear "<< xfactor_smear << std::endl;
@@ -2658,9 +2661,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         gp1_phi_gauss = CLHEP::RandGauss::shoot(etrk_[1].phi_cscsh_even, .00026);
         gp2_phi_gauss = CLHEP::RandGauss::shoot(etrk_[6].phi_cscsh_even, .00045);
 	xfactor_sh = (gp2.perp()/gp1.perp()-1.0)/(814.586-586.03);
-	//xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
-	xfactor = xfactor_sh;
-	displacedMuonL1Pt.setxfactor(xfactor);
+	xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
+	//xfactor = xfactor_sh;
+	//displacedMuonL1Pt.setxfactor(xfactor);
 	displacedMuonL1Pt.setPhiGE21(etrk_[6].phi_2strippad_even);
         //xfactor_smear = CLHEP::RandGauss::shoot(xfactor,0.00005);
 	//std::cout <<"gp1 perp "<< gp1.perp() <<" gp2 perp "<< gp2.perp() <<"xfactor "<< xfactor <<" smear "<< xfactor_smear << std::endl;
@@ -2758,9 +2761,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         gp1_phi_gauss = CLHEP::RandGauss::shoot(etrk_[1].phi_cscsh_even, .00026);
         gp2_phi_gauss = CLHEP::RandGauss::shoot(etrk_[6].phi_cscsh_odd, .00045);
 	xfactor_sh = (gp2.perp()/gp1.perp()-1.0)/(839.386-586.03);
-	//xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
-	xfactor = xfactor_sh;
-	displacedMuonL1Pt.setxfactor(xfactor);
+	xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
+	//xfactor = xfactor_sh;
+	//displacedMuonL1Pt.setxfactor(xfactor);
 	displacedMuonL1Pt.setPhiGE21(etrk_[6].phi_2strippad_odd);
 	xfactor_st1 = (586.03-565.32)*xfactor;
 	xfactor_st2 = (839.386-796.792)*xfactor/(xfactor*(839.386-586.03)+1);
@@ -2858,9 +2861,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         gv2=gv_sh_even[7];
 	csc_bending_angle_12=deltaPhi(gv1.phi(), gv2.phi());
 	xfactor_sh = (gp2.perp()/gp1.perp()-1.0)/(814.586-711.186);
-	//xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
-	xfactor = xfactor_sh;
-	displacedMuonL1Pt.setxfactor(xfactor);
+	xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
+	//xfactor = xfactor_sh;
+	//displacedMuonL1Pt.setxfactor(xfactor);
 	xfactor_st1 = (12.7)*xfactor; // check again here
 	xfactor_st2 = (12.7)*xfactor/(xfactor*(814.586-711.186)+1);//check again here
 	xfactor_st12 = (814.586-711.186)*xfactor/(xfactor*(814.586-711.186)+1); //(gp2.perp()-gp1.perp())/gp2.perp()
@@ -2909,9 +2912,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         gv2=gv_sh_odd[7];
 	csc_bending_angle_12=deltaPhi(gv1.phi(), gv2.phi());
 	xfactor_sh = (gp2.perp()/gp1.perp()-1.0)/(839.386-711.186);
-	//xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
-	xfactor = xfactor_sh;
-	displacedMuonL1Pt.setxfactor(xfactor);
+	xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
+	//xfactor = xfactor_sh;
+	//displacedMuonL1Pt.setxfactor(xfactor);
 	xfactor_st1 = (12.7)*xfactor;
 	xfactor_st2 = (12.7)*xfactor/(xfactor*(839.386-711.186)+1);
 	xfactor_st12 = (839.386-711.186)*xfactor/(xfactor*(839.386-711.186)+1); //(gp2.perp()-gp1.perp())/gp2.perp()
@@ -2959,9 +2962,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         gv2=gv_sh_even[7];
 	csc_bending_angle_12=deltaPhi(gv1.phi(), gv2.phi());
 	xfactor_sh = (gp2.perp()/gp1.perp()-1.0)/(814.586-683.786);
-	//xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
-	xfactor = xfactor_sh;
-	displacedMuonL1Pt.setxfactor(xfactor);
+	xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
+	//xfactor = xfactor_sh;
+	//displacedMuonL1Pt.setxfactor(xfactor);
 	xfactor_st1 = (12.7)*xfactor;
 	xfactor_st2 = (12.7)*xfactor/(xfactor*(814.586-683.786)+1);
 	xfactor_st12 = (814.586-683.786)*xfactor/(xfactor*(814.586-683.786)+1); //(gp2.perp()-gp1.perp())/gp2.perp()
@@ -3009,9 +3012,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         gv2=gv_sh_odd[7];
 	csc_bending_angle_12=deltaPhi(gv1.phi(), gv2.phi());
 	xfactor_sh = (gp2.perp()/gp1.perp()-1.0)/(839.386-683.786);
-	//xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
-	xfactor = xfactor_sh;
-	displacedMuonL1Pt.setxfactor(xfactor);
+	xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
+	//xfactor = xfactor_sh;
+	//displacedMuonL1Pt.setxfactor(xfactor);
 	xfactor_st1 = (12.7)*xfactor;
 	xfactor_st2 = (12.7)*xfactor/(xfactor*(839.386-683.786)+1);
 	xfactor_st12 = (839.386-683.786)*xfactor/(xfactor*(839.386-683.786)+1); //(gp2.perp()-gp1.perp())/gp2.perp()
@@ -3340,6 +3343,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     	etrk_[0].deltay12_test = displacedMuonL1Pt.getdeltaY12();  
     	etrk_[0].deltay23_test = displacedMuonL1Pt.getdeltaY23();  
     	etrk_[0].deltay123_test = displacedMuonL1Pt.getdeltaY123();  
+	etrk_[0].hybrid1 = displacedMuonL1Pt.runHybrid(10.0);//check 10GeV cut by hybrid algo
 
      }
 

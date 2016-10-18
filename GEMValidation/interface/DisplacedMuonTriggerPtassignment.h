@@ -144,6 +144,7 @@ public:
   bool runPositionbasedBarrel();  
   bool runDirectionbasedGE21();
   bool runDirectionbasedCSConly();
+  bool runHybrid(float pt) {return checkEllipse(pt, eta_st2, npar, ddY123, dPhi_dir_st1_st2); }
   void setVerbose(int v) { verbose_ = v; }
   int verbose() const { return verbose_; }
 
@@ -271,9 +272,12 @@ public:
                          float* fit_phi_layers, float* fit_z_layers, float& perp); 
   void fitTrackRadius(GlobalPoint* gps, float* radius);
 
+  bool checkEllipse(float pt, float eta, int npar, float x, float y);
+
  private:
   void globalPositionOfLCT(const CSCCorrelatedLCTDigi stub, CSCDetId chid);
   void globalPositionOfGEMPad(const GEMCSCPadDigi gempad, GEMDetId gemid);
+  void globalPositionOfGEMPad(GEMCSCPadDigiContainer gempads, GEMDetId gemid);
 
 
   //endcap, direction based
@@ -284,6 +288,7 @@ public:
   bool hasGEMPad_st2;
   float radius_st_ME[4] = {-1.0, -1.0, -1.0, -1.0};
   float xfactor;
+  float eta_st2;
   int npar;
   int meRing ;
   float eta_st[4] = {-9, -9, -9, -9};
