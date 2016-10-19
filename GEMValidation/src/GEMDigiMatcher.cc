@@ -90,7 +90,11 @@ GEMDigiMatcher::matchDigisToSimTrack(const GEMDigiCollection& digis)
       chamber_to_digis_[ p_id.chamberId().rawId() ].push_back(mydigi);
       superchamber_to_digis_[ superch_id() ].push_back(mydigi);
 
+      //std::cout <<" strip "<< d->strip()<<" 2-strip pad "<<(d->strip()+1)/2 << " bx "<< d->bx() << std::endl;
       detid_to_gemdigis_[id].push_back(*d);
+      GEMCSCPadDigi pad = GEMCSCPadDigi((d->strip()+1)/2, d->bx());
+      if (std::find(detid_to_gempads_2strip_[id].begin(), detid_to_gempads_2strip_[id].end(), pad) == detid_to_gempads_2strip_[id].end())
+      	detid_to_gempads_2strip_[id].push_back(pad);
       chamber_to_gemdigis_[ p_id.chamberId().rawId() ].push_back(*d);
       superchamber_to_gemdigis_[ superch_id() ].push_back(*d);
 

@@ -9,6 +9,7 @@
 
 */
 #include "DataFormats/Math/interface/deltaPhi.h"
+#include "DataFormats/Math/interface/deltaR.h"
 #include "GEMCode/GEMValidation/interface/DisplacedMuonTriggerPtassignment.h"
 #include "GEMCode/GEMValidation/interface/PtassignmentHelper.h"
 
@@ -59,7 +60,7 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
     }
     if (idlcts.second.size()>1 and verbose_>=0) 
 	std::cout <<"more than one LCT  available in chamber id "<< chid <<" LCT size "<< idlcts.second.size()<<std::endl;
-    globalPositionOfLCT(idlcts.second[0], chid);
+    globalPositionOfLCT(idlcts.second, chid);
     if (chid.station() == 1 or chid.station()==2){
       //find GEMPads	    
       for (auto idgempads : detid_pads){
@@ -602,6 +603,40 @@ void DisplacedMuonTriggerPtassignment::globalPositionOfLCT(const CSCCorrelatedLC
 
 }
 
+
+void DisplacedMuonTriggerPtassignment::globalPositionOfLCT(CSCCorrelatedLCTDigiContainer stubs, CSCDetId chid)
+{
+  float dR = 9;
+  int st = chid.station();
+  GlobalPoint gp_ref;
+  bool hasRefStub = false;
+  unsigned int beststub=0;
+  //find closest stub as ref
+  for (int i=st-1; i>0; i--)
+      if (hasStub_st[i-1]){
+  	gp_ref = GlobalPoint(gp_st_layer3[i-1]);
+	hasRefStub = true;
+	break;
+  	}
+  if (hasRefStub){
+        unsigned int istub = -1;
+  	for (auto stub : stubs){
+	    	istub++;
+  		globalPositionOfLCT(stub, chid);
+		//assign higher weight to phi comparison
+    		float dphi = 20.*deltaPhi(gp_st_layer3[st-1].phi(), gp_ref.phi());
+    		float deta = gp_st_layer3[st-1].eta() - gp_ref.eta();
+    		float curr_dr2 = dphi*dphi + deta*deta;
+		if (curr_dr2<dR)
+		    beststub = istub;
+  	}
+   }
+  if (beststub >= stubs.size()) 
+      std::cout <<"error beststub >= stubs.size() , beststub "<< beststub <<" stubs size "<< stubs.size() << std::endl;
+  globalPositionOfLCT(stubs[beststub], chid);
+}
+
+
 void DisplacedMuonTriggerPtassignment::globalPositionOfGEMPad(const GEMCSCPadDigi gempad, GEMDetId gemid)
 {
   GEMDetId ch_id(gemid.region(), gemid.ring(), gemid.station(), gemid.layer(), gemid.chamber(), 0);
@@ -625,43 +660,30 @@ void DisplacedMuonTriggerPtassignment::globalPositionOfGEMPad(const GEMCSCPadDig
 
 }
 
-/*
+
 void DisplacedMuonTriggerPtassignment::globalPositionOfGEMPad(GEMCSCPadDigiContainer gempads, GEMDetId gemid)
 {
   GEMDetId ch_id(gemid.region(), gemid.ring(), gemid.station(), gemid.layer(), gemid.chamber(), 0);
   const GEMChamber* gemChamber(gemGeometry_->chamber(ch_id.rawId()));
   auto gemRoll(gemChamber->etaPartition(gemid.roll()));//any roll
   const int nGEMPads(gemRoll->npads());
-  float dphi_gemcsc = 99;
   int st = gemid.station();
+  if (st==3) st=2;//use CSC station as reference
   for (auto gempad : gempads){
   	if (gempad.pad() > nGEMPads or gempad.pad() < 0){
       		std::cout <<" gempad.pad() is within pad range gempad "<< gempad <<" npad "<< nGEMPads << std::endl;
       		return;
 	}
-	if ( st==1 ){
-  		const LocalPoint lpGEM(gemRoll->centreOfPad(gempad.pad()));
-  		GlobalPoint gp_pad = GlobalPoint(gemRoll->toGlobal(lpGEM));
-		if (hasStub_st[st-1] and fabs(deltaPhi(gp_pad.phi(), gp_st_layer3[st-1]))<dphi_gemcsc ){
-		    gp_ge11 = GlobalPoint(gp_pad);
-		    dphi_gemcsc = fabs(deltaPhi(gp_pad.phi(), gp_st_layer3[st-1]));
-		}
+  	const LocalPoint lpGEM(gemRoll->centreOfPad(gempad.pad()));
+  	GlobalPoint gp_pad = GlobalPoint(gemRoll->toGlobal(lpGEM));
+	if (hasStub_st[st-1] and fabs(deltaPhi(gp_pad.phi(), gp_st_layer3[st-1].phi()))<fabs(dphi_gemcsc_st[st-1]) ){
+		gp_ge11 = GlobalPoint(gp_pad);
+		dphi_gemcsc_st[st-1] = fabs(deltaPhi(gp_pad.phi(), gp_st_layer3[st-1].phi()));
 	}
-	if ( st==2 ){
-    		if (verbose) std::cout << "Strip " << gempad.strip() << std::endl;
-    		float middleStripOfPad = 0;
-    		if (gempad.strip()%2==0)
-      			middleStripOfPad = gempad.strip() - 1.;
-    		else
-      			middleStripOfPad = gempad.strip() + 0.;
-    		if (verbose) std::cout << "middle strip " << middleStripOfPad << std::endl;
-    		LocalPoint gem_lp = getGEMGeometry()->etaPartition(gem_id)->centreOfStrip(middleStripOfPad);
-    		GlobalPoint gem_gp = getGEMGeometry()->idToDet(gem_id)->surface().toGlobal(gem_lp);
-	}//st==3, 2strip pad, by default
   
   }    
 
-}*/
+}
 
 float DisplacedMuonTriggerPtassignment::deltaYcalculation(GlobalPoint gp1, GlobalPoint gp2) const
 {

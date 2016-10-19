@@ -2441,7 +2441,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   float phiM_st2_L1_3 = -9.0;
 
 
-  DisplacedMuonTriggerPtassignment displacedMuonL1Pt(match_lct.allLctsMatched2SimMuon(), match_gd.allGempadsMatch2SimMuon(), match_lct.eventSetup(), match_lct.event()); 
+  DisplacedMuonTriggerPtassignment displacedMuonL1Pt(match_lct.allLctsMatched2SimMuon(), match_gd.allGempadsMatch2SimMuon_2strip(), match_lct.eventSetup(), match_lct.event()); 
   if (displacedMuonL1Pt.getNParity() >= 0)  std::cout <<"DisplacedMuon get npar "<< displacedMuonL1Pt.getNParity()<<" ring "<<displacedMuonL1Pt.getMeRing() << std::endl;
   if (etrk_[1].has_csc_sh>0 and etrk_[6].has_csc_sh>0){
      etrk_[0].meRing =1;
@@ -2463,7 +2463,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	xfactor = xfactor_sh;
 	//displacedMuonPt
 	//displacedMuonL1Pt.setxfactor(xfactor);
-	displacedMuonL1Pt.setPhiGE21(etrk_[6].phi_2strippad_even);
+	//displacedMuonL1Pt.setPhiGEM(etrk_[6].phi_2strippad_even, 2);
+	//std::cout << "displacedMuonL1Pt phi_ge21 "<< displacedMuonL1Pt.getPhiGEM(2)<<" Ana "<< etrk_[6].phi_2strippad_even << std::endl;
 	//std::cout <<"gp1 perp "<< gp1.perp() <<" gp2 perp "<< gp2.perp() <<"xfactor "<< xfactor <<" smear "<< xfactor_smear << std::endl;
 	xfactor_st1 = (615.33-567.82)*xfactor;
 	xfactor_st2 = (814.586-794.29)*xfactor/(xfactor*(814.586-615.33)+1);
@@ -2564,7 +2565,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
 	//xfactor = xfactor_sh;
 	//displacedMuonL1Pt.setxfactor(xfactor);
-	displacedMuonL1Pt.setPhiGE21(etrk_[6].phi_2strippad_odd);
+	//displacedMuonL1Pt.setPhiGEM(etrk_[6].phi_2strippad_odd, 2);
+	//std::cout << "displacedMuonL1Pt phi_ge21 "<< displacedMuonL1Pt.getPhiGEM(2)<<" Ana "<< etrk_[6].phi_2strippad_odd << std::endl;
         //xfactor_smear = CLHEP::RandGauss::shoot(xfactor,0.00005);
 	//std::cout <<"gp1 perp "<< gp1.perp() <<" gp2 perp "<< gp2.perp() <<"xfactor "<< xfactor <<" smear "<< xfactor_smear << std::endl;
 	xfactor_st1 = (615.33-567.82)*xfactor;
@@ -2664,7 +2666,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
 	//xfactor = xfactor_sh;
 	//displacedMuonL1Pt.setxfactor(xfactor);
-	displacedMuonL1Pt.setPhiGE21(etrk_[6].phi_2strippad_even);
+	//displacedMuonL1Pt.setPhiGEM(etrk_[6].phi_2strippad_even, 2);
+	//std::cout << "displacedMuonL1Pt phi_ge21 "<< displacedMuonL1Pt.getPhiGEM(2)<<" Ana "<< etrk_[6].phi_2strippad_even << std::endl;
         //xfactor_smear = CLHEP::RandGauss::shoot(xfactor,0.00005);
 	//std::cout <<"gp1 perp "<< gp1.perp() <<" gp2 perp "<< gp2.perp() <<"xfactor "<< xfactor <<" smear "<< xfactor_smear << std::endl;
 	xfactor_st1 = (586.03-565.32)*xfactor;
@@ -2764,7 +2767,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
 	//xfactor = xfactor_sh;
 	//displacedMuonL1Pt.setxfactor(xfactor);
-	displacedMuonL1Pt.setPhiGE21(etrk_[6].phi_2strippad_odd);
+	//displacedMuonL1Pt.setPhiGEM(etrk_[6].phi_2strippad_odd, 2);
+	//std::cout << "displacedMuonL1Pt phi_ge21 "<< displacedMuonL1Pt.getPhiGEM(2)<<" Ana "<< etrk_[6].phi_2strippad_odd << std::endl;
 	xfactor_st1 = (586.03-565.32)*xfactor;
 	xfactor_st2 = (839.386-796.792)*xfactor/(xfactor*(839.386-586.03)+1);
 	xfactor_st2_csconly = (12.7)*xfactor/(xfactor*(839.386-586.03+2.54*3)+1);

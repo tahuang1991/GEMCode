@@ -174,14 +174,14 @@ public:
   float getlocalPhiDirection(int st) const;
   float getdeltaPhiDirection(int st1, int st2) const;
   float getRadiusSt(int st) const  { return radius_st_ME[st-1]; }
+  float getPhiGEM(int st) const {return phi_gem[st-1]; }
   float getNStubs() const { return nstubs; }
 
 
   void setRadiusSt(float x, int st) { radius_st_ME[st-1] = x; }
   void setNParity(int x) { npar=x; }
   void setxfactor(float x) { xfactor = x; }
-  void setPhiGE11(float x) { phi_ge11 = x; }
-  void setPhiGE21(float x) { phi_ge21 = x; }
+  void setPhiGEM(float x, int st) { phi_gem[st-1] = x; }
   void setPositionPhi(float x, int st, int layer) { phi_st_layers[st-1][layer-1] = x; }
   void setPositionZ(float x, int st, int layer) { z_st_layers[st-1][layer-1] = x; }
 
@@ -276,6 +276,7 @@ public:
 
  private:
   void globalPositionOfLCT(const CSCCorrelatedLCTDigi stub, CSCDetId chid);
+  void globalPositionOfLCT(CSCCorrelatedLCTDigiContainer stubs, CSCDetId chid);
   void globalPositionOfGEMPad(const GEMCSCPadDigi gempad, GEMDetId gemid);
   void globalPositionOfGEMPad(GEMCSCPadDigiContainer gempads, GEMDetId gemid);
 
@@ -292,8 +293,8 @@ public:
   int npar;
   int meRing ;
   float eta_st[4] = {-9, -9, -9, -9};
-  float phi_ge11;
-  float phi_ge21;
+  float phi_gem[2] = {-9, -9};
+  float dphi_gemcsc_st[2] = {-99, -99};
   float phi_st_layers[4][6] = {{-9, -9, -9, -9, -9, -9},
       			       {-9, -9, -9, -9, -9, -9},
       			       {-9, -9, -9, -9, -9, -9},

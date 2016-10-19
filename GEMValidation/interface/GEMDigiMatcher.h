@@ -73,6 +73,7 @@ public:
   const GEMCSCPadDigiContainer& gemCoPadsInSuperChamber(unsigned int) const;
 
   const std::map<unsigned int, GEMCSCPadDigiContainer> allGempadsMatch2SimMuon() const { return detid_to_gempads_; }
+  const std::map<unsigned int, GEMCSCPadDigiContainer> allGempadsMatch2SimMuon_2strip() const { return detid_to_gempads_2strip_; }
   // #layers with digis from this simtrack
   int nLayersWithDigisInSuperChamber(unsigned int) const;
   int nLayersWithPadsInSuperChamber(unsigned int) const;
@@ -133,6 +134,7 @@ private:
   std::map<unsigned int, GEMDigiContainer> superchamber_to_gemdigis_;
 
   std::map<unsigned int, GEMCSCPadDigiContainer> detid_to_gempads_;
+  std::map<unsigned int, GEMCSCPadDigiContainer> detid_to_gempads_2strip_;
   std::map<unsigned int, GEMCSCPadDigiContainer> chamber_to_gempads_;
   std::map<unsigned int, GEMCSCPadDigiContainer> superchamber_to_gempads_;
 
