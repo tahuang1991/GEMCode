@@ -1908,21 +1908,26 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       }
      
 
-      float alpha = 0., beta = 0.;
+      float alpha = -99., beta = 0.;
       PtassignmentHelper::calculateAlphaBeta(zs, phis, ezs, ephis, status,
                          alpha, beta);
-      float alphax = 0., betax = 0.;
+      float alphax = -99., betax = 0.;
       PtassignmentHelper::calculateAlphaBeta(zs, xs, ezs, exs, status,
                          alphax, betax);
-      float alphay = 0., betay = 0.;
+      float alphay = -99., betay = 0.;
       PtassignmentHelper::calculateAlphaBeta(zs, ys, ezs, exs, status,
                          alphay, betay);
+      if (phis.size() < 3 or fabs(alpha)>=99){
+      	std::cout <<"warning, falied to fit comparator digis, cscid "<< id <<",num of digis: "<< phis.size()<<" alpha "<< alpha <<" beta "<< beta << std::endl;
+        alpha = lctgp.phi();
+        beta = 0.0;
+      }
       //ME11. even layer1 581.98; odd layer1 611.38, d=2.2
       //ME12. even layer1 678.706, layer6 691.406; odd layer1 706.106, layer6 718.806, d=2.54
       //ME21. even layer1 809.506; odd layer1 834.306 , d=2.54
       //ME22, even layer1 809.506, layer6 822.206; odd layer1 834.306, layer6 847.006, d=2.54
       //Z(layern) = Z(layer1)+d*(n-1)
-      if(odd and gps.size()>=3){
+      if(odd){
       	if (id.station()==1 and (id.ring()==1 or id.ring()==4)){
       		etrk_[1].phi_layer1_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 1));
       		etrk_[1].phi_layer3_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 3));
@@ -1938,7 +1943,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 		etrk_[st].phiM_fitxyz_odd = atan(betay/betax);
 		gp_fit_odd[st] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
 	//std::cout <<"cscid "<< id <<" ring "<< id.ring() <<" st "<< st <<" alpha "<< alpha <<" beta "<< beta <<" phi layer1 "<< etrk_[st].phi_layer1_fit_odd<<" layer6 "<<etrk_[st].phi_layer6_fit_odd<<" gp x "<< gp_fit_odd[st].x()<<" y "<< gp_fit_odd[st].y() <<std::endl;
-      }else if (gps.size()>=3){
+      }else{
       	if (id.station()==1 and (id.ring()==1 or id.ring() ==4)){
       		etrk_[1].phi_layer1_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 1));
       		etrk_[1].phi_layer3_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 3));
@@ -1953,9 +1958,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 		etrk_[st].phiM_fitxyz_even = atan(betay/betax);
 		gp_fit_even[st] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
 	
-      }else {
-		std::cout <<"gps.size<3!! cscid "<< id <<" ring "<< id.ring() <<" st "<< st <<" alpha "<< alpha <<" beta "<< beta << std::endl;
-	}
+     }
      if (gps.size()>=3 and id.ring()==1 and id.station()==2 and fabs(etrk_[st].phi_layer3_fit_even-etrk_[st].phi_lct_even)>0.3 and fabs(etrk_[st].phi_lct_even)>3 and fabs(etrk_[st].phi_lct_even)<4){
 	  std::cout <<"id "<< id <<" phi from fit "<< etrk_[st].phi_layer3_fit_even <<" phi from simhits "<< etrk_[st].phi_cscsh_even
 	      <<" phi from lct "<< etrk_[st].phi_lct_even << " fitting alpha "<< alpha <<" beta "<<beta <<" zposition "<< match_lct.zpositionOfLayer(d, 3) << std::endl;
@@ -3072,8 +3075,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
      std::cout <<"At SIM level gp1 z "<<gp1.z()<<" perp "<< gp1.perp()<<" gp2 z "<< gp2.z()<<" perp "<< gp2.perp()<<" gp3 z "<< gp3.z()<<" perp "<< gp3.perp()<< std::endl;  
      etrk_[0].npar = npar;
      std::cout <<"GEMCSCAnalyzer npar "<< npar << std::endl;
-     if (displacedMuonL1Pt.getNParity()>=0 and (fabs(displacedMuonL1Pt.getRadiusSt(1)-gp1.perp())>2 or fabs(displacedMuonL1Pt.getRadiusSt(2)-gp2.perp())>2
-		 or fabs(displacedMuonL1Pt.getRadiusSt(3)-gp3.perp())>2))
+     if (displacedMuonL1Pt.getNParity()>=0 and (fabs(displacedMuonL1Pt.getRadiusSt(1)-gp1.perp())>.02*gp1.perp() 
+		 or fabs(displacedMuonL1Pt.getRadiusSt(2)-gp2.perp())>.02*gp2.perp()
+		 or fabs(displacedMuonL1Pt.getRadiusSt(3)-gp3.perp())>.02*gp3.perp()))
 	    std::cout <<" warning, difference between fitting and sim is large, module, npar  "<< displacedMuonL1Pt.getNParity()<<" ring "<< displacedMuonL1Pt.getMeRing() << std::endl; 
      if (etrk_[0].meRing == 1 and displacedMuonL1Pt.getNParity()>=0 and displacedMuonL1Pt.runDirectionbased(true)){
      	etrk_[0].phiM_st1_test = displacedMuonL1Pt.getlocalPhiDirection(1); 
@@ -3360,11 +3364,11 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
      if (displacedMuonL1Pt.getNParity()>=0 and displacedMuonL1Pt.runPositionbased() and etrk_[0].hasSt1St2St3)
      {
 	if (fabs(displacedMuonL1Pt.getdeltaY23()-etrk_[0].deltay23_fit)>.1) 
-	    std::cout <<"difference between module and ana "<< displacedMuonL1Pt.getdeltaY23()-etrk_[0].deltay23_fit << std::endl;
-     	std::cout <<"DisplacedMuon deltay12 "<< displacedMuonL1Pt.getdeltaY12() <<" deltay23 "<< displacedMuonL1Pt.getdeltaY23() <<" ddY123 "<< displacedMuonL1Pt.getdeltaY123() <<" etrk deltay12 "<< etrk_[0].deltay12_fit <<" deltay23 "<< etrk_[0].deltay23_fit << std::endl;
+	    std::cout <<"sim pt "<< etrk_[0].pt<<" difference between module and ana "<< displacedMuonL1Pt.getdeltaY23()-etrk_[0].deltay23_fit << std::endl;
+     	std::cout <<"DisplacedMuon deltay12 "<< displacedMuonL1Pt.getdeltaY12() <<" deltay23 "<< displacedMuonL1Pt.getdeltaY23() <<" ddY123 "<< displacedMuonL1Pt.getdeltaY123() <<" etrk deltay12, sim"<< etrk_[0].deltay12_sim <<" fit "<< etrk_[0].deltay12_fit <<" deltay23,sim "<< etrk_[0].deltay23_sim <<" fit "<< etrk_[0].deltay23_fit << std::endl;
      
      }else if (etrk_[0].hasSt1St2St3){
-    	std::cout <<"GEMCSCAnalyer sim deltay12 "<< etrk_[0].deltay12_sim<<" deltay23 "<< etrk_[0].deltay23_sim << " L1 deltay12 "<< etrk_[0].deltay12_fit <<" deltay23 "<< etrk_[0].deltay23_fit << std::endl; 
+    	std::cout <<"Failed to run DisplacedMuonPtassignment, sim pt "<<  etrk_[0].pt <<" GEMCSCAnalyer sim deltay12 "<< etrk_[0].deltay12_sim<<" deltay23 "<< etrk_[0].deltay23_sim << " L1 deltay12 "<< etrk_[0].deltay12_fit <<" deltay23 "<< etrk_[0].deltay23_fit << std::endl; 
      }
   
 
