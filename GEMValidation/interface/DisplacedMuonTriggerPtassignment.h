@@ -144,7 +144,7 @@ public:
   bool runPositionbasedBarrel();  
   bool runDirectionbasedGE21();
   bool runDirectionbasedCSConly();
-  bool runHybrid(float pt) {return checkEllipse(pt, eta_st2, npar, ddY123, dPhi_dir_st1_st2); }
+  bool runHybrid(float pt, bool useGE21);
   void setVerbose(int v) { verbose_ = v; }
   int verbose() const { return verbose_; }
 
@@ -178,6 +178,7 @@ public:
   float getNStubs() const { return nstubs; }
 
 
+  void setCharge(int x) { charge = x; }
   void setRadiusSt(float x, int st) { radius_st_ME[st-1] = x; }
   void setNParity(int x) { npar=x; }
   void setxfactor(float x) { xfactor = x; }
@@ -282,6 +283,7 @@ public:
 
 
   //endcap, direction based
+  int charge;
   int nstubs;
   bool hasStub_st[4] = {false, false, false, false};
   bool isEven[4]={false, false, false, false};

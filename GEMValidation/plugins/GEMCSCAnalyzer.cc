@@ -369,6 +369,7 @@ struct MyTrackEff
   Float_t dphi_dir_st1_st12_sh,dphi_dir_st2_st23_sh, dphi_dir_st12_st23_sh;
   Float_t dphi_dir_st1_st12_L1,dphi_dir_st2_st23_L1,dphi_dir_st1_st12_L1_csc,dphi_dir_st2_st23_L1_csc, dphi_dir_st12_st23_L1;
   Bool_t hybrid1;
+  Bool_t hybrid1_csc;
   //Float_t ptphi_diff_sh_11,ptphi_diff_sh_12,ptphi_diff_sh_21,ptphi_diff_sh_22; 
   Float_t ptphi_diff_sh;
   Float_t deltay12_fit, deltay23_fit;
@@ -509,6 +510,7 @@ void MyTrackEff::init()
   dphi_dir_st2_st23_L1_csc = -9;
   dphi_dir_st12_st23_L1 = -9;
   hybrid1 = false;
+  hybrid1_csc = false;
   csc_bending_angle12_gemcsc = -9;
   csc_bending_angle12_xfactor = -9;
   csc_bending_angle12_xfactor_smear0 = -9;
@@ -2445,6 +2447,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
 
   DisplacedMuonTriggerPtassignment displacedMuonL1Pt(match_lct.allLctsMatched2SimMuon(), match_gd.allGempadsMatch2SimMuon_2strip(), match_lct.eventSetup(), match_lct.event()); 
+  displacedMuonL1Pt.setCharge(etrk_[0].charge);
   if (displacedMuonL1Pt.getNParity() >= 0)  std::cout <<"DisplacedMuon get npar "<< displacedMuonL1Pt.getNParity()<<" ring "<<displacedMuonL1Pt.getMeRing() << std::endl;
   if (etrk_[1].has_csc_sh>0 and etrk_[6].has_csc_sh>0){
      etrk_[0].meRing =1;
@@ -3069,6 +3072,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
 
   DisplacedMuonTriggerPtassignment displacedMuonL1Pt_sim(gp1, gp2, gp3, gp4, gp_ge11, gp_ge21, npar, match_lct.eventSetup(), match_lct.event()); 
+  displacedMuonL1Pt_sim.setCharge(etrk_[0].charge);
   if ((etrk_[1].has_csc_sh || etrk_[4].has_csc_sh) and (etrk_[6].has_csc_sh || etrk_[7].has_csc_sh)) {
      if ((etrk_[8].has_csc_sh || etrk_[9].has_csc_sh) || (etrk_[10].has_csc_sh || etrk_[11].has_csc_sh))
      	etrk_[0].hasSt3orSt4_sh=true; 
@@ -3351,7 +3355,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     	etrk_[0].deltay12_test = displacedMuonL1Pt.getdeltaY12();  
     	etrk_[0].deltay23_test = displacedMuonL1Pt.getdeltaY23();  
     	etrk_[0].deltay123_test = displacedMuonL1Pt.getdeltaY123();  
-	etrk_[0].hybrid1 = displacedMuonL1Pt.runHybrid(10.0);//check 10GeV cut by hybrid algo
+	etrk_[0].hybrid1 = displacedMuonL1Pt.runHybrid(10.0, true);//check 10GeV cut by hybrid algo
+	etrk_[0].hybrid1_csc = displacedMuonL1Pt.runHybrid(10.0, false);//check 10GeV cut by hybrid algo
 
      }
 

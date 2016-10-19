@@ -829,19 +829,33 @@ bool DisplacedMuonTriggerPtassignment::checkEllipse(float pt, float eta, int npa
    
    int neta = PtassignmentHelper::GetEtaPartition(eta);
    bool pass = false;
-   if (pt>9.9 and pt<10.1 and npar>=0 and npar<=3 and neta<=4 and neta>=2)
+   if (pt>9.9 and pt<10.1 and npar>=0 and npar<=3 and neta>=0 and neta<=6)
       pass = (PtassignmentHelper::ellipse(PtassignmentHelper::HybridDDYAndDeltaPhiLUT[0][npar][neta][0],
 		  			  PtassignmentHelper::HybridDDYAndDeltaPhiLUT[0][npar][neta][1],
 					  PtassignmentHelper::HybridDDYAndDeltaPhiLUT[0][npar][neta][2],
 					  PtassignmentHelper::HybridDDYAndDeltaPhiLUT[0][npar][neta][3],
 					  PtassignmentHelper::HybridDDYAndDeltaPhiLUT[0][npar][neta][4], x, y) <=1);
-   else if(pt>9.9 and pt<10.1 and npar>=0 and npar<=3)//only 10GeV cut
-       pass = true;
    
+   else {
+      std::cout <<"failed to run checkEllipse , pt "<< pt <<" npar "<< npar <<" eta "<< eta <<" neta "<< neta<<" x "<< x << " y "<< y <<std::endl;
+      pass = false;  	
+   }
    return pass;
 
 }
 
+
+
+bool DisplacedMuonTriggerPtassignment::runHybrid(float pt, bool useGE21)
+{
+  
+   bool hasGEMPad1((meRing==1 and hasGEMPad_st1) or meRing==2);
+   bool hasGEMPad2((meRing==1 and hasGEMPad_st2 and useGE21) or meRing==2 or not(useGE21));
+   if (npar>=0 and npar<=3 and hasGEMPad1 and hasGEMPad2)
+   	return checkEllipse(pt, eta_st2, npar, ddY123*charge, dPhi_dir_st1_st2*charge); 
+   else 
+       	return false;
+}
 
 float DisplacedMuonTriggerPtassignment::getlocalPhiDirection(int st) const
 {
