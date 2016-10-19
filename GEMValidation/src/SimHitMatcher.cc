@@ -1114,6 +1114,7 @@ SimHitMatcher::simHitPositionKeyLayer(unsigned int chid) const
         float x_pos_L3 = fit->GetParameter(0) + fit->GetParameter(1) * z_pos_L3;
         float y_pos_L3 = fit2->GetParameter(0) + fit2->GetParameter(1) * z_pos_L3;
         returnValue =  GlobalPoint(x_pos_L3, y_pos_L3, z_pos_L3);
+	//std::cout <<"return gp of keylayer at sim level, id "<<  chamberId <<" z "<< z_pos_L3 <<" perp "<< returnValue.perp()<< std::endl;
       }
       else{
         returnValue = simHitsMeanPosition(hitsInChamber(chid));
@@ -1124,6 +1125,10 @@ SimHitMatcher::simHitPositionKeyLayer(unsigned int chid) const
       delete grr;
     } 
   }
+   
+	//GlobalPoint gptest(simHitsMeanPosition(hitsInChamber(chid)));
+	//std::cout <<"as comparison, gp from MeanPosition, id  "<< chamberId <<" z "<< gptest.z()<<" perp "<< gptest.perp() << std::endl;
+  std::cout <<"final return gp of keylayer at sim level, id "<< chamberId <<" z "<< returnValue.z() <<" perp "<< returnValue.perp()<< std::endl;
   return returnValue;
 }
    
