@@ -117,7 +117,8 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
 	gp_st_layer3[i] = GlobalPoint(GlobalPoint::Cylindrical(radius_st_ME[i], phi, z));
      }
   }
-
+   
+  //second station
   if (hasStub_st[1]) eta_st2 = gp_st_layer3[1].eta();
  
   if (hasStub_st[0] and hasStub_st[1])
@@ -343,6 +344,7 @@ void DisplacedMuonTriggerPtassignment::initVariables()
   muScalesCacheID_ = 0ULL ;
   muPtScaleCacheID_ = 0ULL ;
 
+  eta_st2 = -9;
   hasGEMPad_st1 = false; 
   hasGEMPad_st2 = false; 
   npar = -1;
@@ -829,7 +831,7 @@ bool DisplacedMuonTriggerPtassignment::checkEllipse(float pt, float eta, int npa
    
    int neta = PtassignmentHelper::GetEtaPartition(eta);
    bool pass = false;
-   if (pt>9.9 and pt<10.1 and npar>=0 and npar<=3 and neta>=0 and neta<=6)
+   if (pt>9.9 and pt<10.1 and npar>=0 and npar<=3 and neta>=0 and neta<=5)
       pass = (PtassignmentHelper::ellipse(PtassignmentHelper::HybridDDYAndDeltaPhiLUT[0][npar][neta][0],
 		  			  PtassignmentHelper::HybridDDYAndDeltaPhiLUT[0][npar][neta][1],
 					  PtassignmentHelper::HybridDDYAndDeltaPhiLUT[0][npar][neta][2],
