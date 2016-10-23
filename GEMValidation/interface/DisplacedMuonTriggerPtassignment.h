@@ -163,7 +163,8 @@ public:
 
   int getHalfStrip(const CSCComparatorDigi& digi);
   float getFractionalStrip(const CSCComparatorDigi&d);
-
+  
+  float getTrackEta() const { return eta_st2; }
   int getNParity() const {return npar; } 
   int getMeRing() const {return meRing; } 
   float assignedPositionPt();

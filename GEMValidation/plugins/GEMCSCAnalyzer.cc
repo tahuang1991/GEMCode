@@ -376,7 +376,8 @@ struct MyTrackEff
   Float_t deltay12_lct, deltay23_lct;
   Float_t deltay12_sim, deltay23_sim;
   Float_t deltay12_test, deltay23_test, deltay123_test;
-  Float_t eta_st1_sh, eta_st2_sh;
+  Float_t eta_st2_sh, eta_st2_L1;
+  Int_t npar_L1;
   Float_t pt_position_sh, pt_direction_sh;
   Float_t pt_position, pt_direction_gemcsc, pt_direction_gemcsc_central, pt_direction_xfactor;
   Float_t pt_direction_xfactor_smear0, pt_direction_xfactor_smear1,pt_direction_xfactor_smear2,pt_direction_xfactor_smear3;
@@ -487,7 +488,8 @@ void MyTrackEff::init()
   ptphi_gemsh_odd = -9.0;
 
   meRing = -1;
-  eta_st1_sh = -9;
+  npar_L1 = -1;
+  eta_st2_L1 = -9;
   eta_st2_sh = -9;
   //ptphi_diff_sh_11 = -9;
   //ptphi_diff_sh_12 = -9;
@@ -881,7 +883,9 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("pt_sh_odd", &pt_sh_odd);
   t->Branch("pteta_sh_odd", &pteta_sh_odd);
   t->Branch("ptphi_sh_odd", &ptphi_sh_odd);
-  t->Branch("eta_st1_sh", &eta_st1_sh);
+
+  t->Branch("npar_L1", &npar_L1);
+  t->Branch("eta_st2_L1", &eta_st2_L1);
   t->Branch("eta_st2_sh", &eta_st2_sh);
   t->Branch("ptphi_gemsh_even", &ptphi_gemsh_even);
   t->Branch("ptphi_gemsh_odd", &ptphi_gemsh_odd);
@@ -1505,8 +1509,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       } 
       
     }
-    
-    std::cout <<"CSCid with simhits "<< id << " nlayer "<< nlayers << std::endl;
+    //std::cout <<"CSCid with simhits "<< id << " nlayer "<< nlayers << std::endl;
     if (nlayers < minNHitsChamberCSCSimHit_) continue;
     GlobalVector ym = match_sh.simHitsMeanMomentum(match_sh.hitsInChamber(d));
     etrk_[st].bending_sh = match_sh.LocalBendingInChamber(d);
@@ -3143,8 +3146,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
      etrk_[0].csc_bending_angle12_xfactor_L1_1 = csc_bending_angle12_xfactor_L1_1;
      etrk_[0].csc_bending_angle12_xfactor_L1_2 = csc_bending_angle12_xfactor_L1_2;
      etrk_[0].csc_bending_angle12_xfactor_L1_3 = csc_bending_angle12_xfactor_L1_3;
-     etrk_[0].eta_st1_sh = gp1.eta();
      etrk_[0].eta_st2_sh = gp2.eta();
+     etrk_[0].eta_st2_L1 = displacedMuonL1Pt.getTrackEta();
+     etrk_[0].npar_L1 = displacedMuonL1Pt.getNParity();
      
      //double gv1_phi_gauss = CLHEP::RandGauss::shoot(gv1.phi(), .00055);
      //double gv2_phi_gauss = CLHEP::RandGauss::shoot(gv2.phi(), .00095);
