@@ -370,6 +370,7 @@ struct MyTrackEff
   Float_t dphi_dir_st1_st12_L1,dphi_dir_st2_st23_L1,dphi_dir_st1_st12_L1_csc,dphi_dir_st2_st23_L1_csc, dphi_dir_st12_st23_L1;
   Bool_t hybrid1;
   Bool_t hybrid1_csc;
+  Float_t hybrid_pt;
   //Float_t ptphi_diff_sh_11,ptphi_diff_sh_12,ptphi_diff_sh_21,ptphi_diff_sh_22; 
   Float_t ptphi_diff_sh;
   Float_t deltay12_fit, deltay23_fit;
@@ -513,6 +514,7 @@ void MyTrackEff::init()
   dphi_dir_st12_st23_L1 = -9;
   hybrid1 = false;
   hybrid1_csc = false;
+  hybrid_pt = 0.0;
   csc_bending_angle12_gemcsc = -9;
   csc_bending_angle12_xfactor = -9;
   csc_bending_angle12_xfactor_smear0 = -9;
@@ -910,6 +912,7 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("dphi_dir_st1_st12_L1_csc", &dphi_dir_st1_st12_L1_csc);
   t->Branch("dphi_dir_st2_st23_L1_csc", &dphi_dir_st2_st23_L1_csc);
   t->Branch("hybrid1", &hybrid1);
+  t->Branch("hybrid_pt", &hybrid_pt);
 
   t->Branch("csc_bending_angle12_gemcsc", &csc_bending_angle12_gemcsc);
   t->Branch("csc_bending_angle12_xfactor", &csc_bending_angle12_xfactor);
@@ -1806,7 +1809,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       etrk_[st].phi_lct_odd = gp.phi();
       etrk_[st].eta_lct_odd = gp.eta();
       etrk_[st].perp_lct_odd = gp.perp();
-      if (fabs(etrk_[st].perp_lct_odd-etrk_[st].perp_cscsh_odd)>5.0) 
+      if (fabs(etrk_[st].perp_lct_odd-etrk_[st].perp_cscsh_odd)>5.0 and etrk_[st].perp_cscsh_odd>10.0) 
 	  std::cout <<"CSCid "<< id <<" perp_cscsh_odd "<< etrk_[st].perp_cscsh_odd<<" perp_lct_odd "<< etrk_[st].perp_lct_odd<<" csc_phi "<< etrk_[st].phi_cscsh_odd<<" phi_lct_odd "<< etrk_[st].phi_lct_odd << std::endl;
 
       etrk_[st].dphi_lct_odd = digi_dphi(lct);
@@ -1825,7 +1828,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       etrk_[st].phi_lct_even = gp.phi();
       etrk_[st].eta_lct_even = gp.eta();
       etrk_[st].perp_lct_even = gp.perp();
-      if (fabs(etrk_[st].perp_lct_even-etrk_[st].perp_cscsh_even)>5.0) 
+      if (fabs(etrk_[st].perp_lct_even-etrk_[st].perp_cscsh_even)>5.0 and etrk_[st].perp_cscsh_even>10.0) 
 	  std::cout <<"CSCid "<< id <<" perp_cscsh_even "<< etrk_[st].perp_cscsh_even <<" perp_lct_even "<< etrk_[st].perp_lct_even <<" csc_phi "<< etrk_[st].phi_cscsh_even <<" phi_lct_even "<< etrk_[st].phi_lct_even << std::endl;
       etrk_[st].dphi_lct_even = digi_dphi(lct);
       etrk_[st].bx_lct_even = digi_bx(lct);
@@ -3361,7 +3364,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     	etrk_[0].deltay123_test = displacedMuonL1Pt.getdeltaY123();  
 	etrk_[0].hybrid1 = displacedMuonL1Pt.runHybrid(10.0, true);//check 10GeV cut by hybrid algo
 	etrk_[0].hybrid1_csc = displacedMuonL1Pt.runHybrid(10.0, false);//check 10GeV cut by hybrid algo
-
+	displacedMuonL1Pt.runHybrid(true);
+	etrk_[0].hybrid_pt = float(displacedMuonL1Pt.getHybridPt()); 
      }
 
 

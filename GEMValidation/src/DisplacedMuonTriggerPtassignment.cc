@@ -364,6 +364,7 @@ void DisplacedMuonTriggerPtassignment::initVariables()
   dPhi_dir_st2_st23 = -9;
   dPhi_dir_st12_st23 = -9;
 
+  hybrid_pt = 0.0;
   /// barrel
   has_stub_mb1 = false;
   has_stub_mb2 = false; 
@@ -847,15 +848,21 @@ bool DisplacedMuonTriggerPtassignment::checkEllipse(float pt, float eta, int npa
    
    int neta = PtassignmentHelper::GetEtaPartition(eta);
    bool pass = false;
-   if (pt>9.9 and pt<10.1 and npar>=0 and npar<=3 and neta>=0 and neta<=5)
-      pass = (PtassignmentHelper::ellipse(PtassignmentHelper::HybridDDYAndDeltaPhiLUT[0][npar][neta][0],
-		  			  PtassignmentHelper::HybridDDYAndDeltaPhiLUT[0][npar][neta][1],
-					  PtassignmentHelper::HybridDDYAndDeltaPhiLUT[0][npar][neta][2],
-					  PtassignmentHelper::HybridDDYAndDeltaPhiLUT[0][npar][neta][3],
-					  PtassignmentHelper::HybridDDYAndDeltaPhiLUT[0][npar][neta][4], x, y) <=1);
+   int npt = -1; 
+   
+   for (int i=0; i<PtassignmentHelper::NPt; i++){
+       if (pt >= PtassignmentHelper::PtBins[i])
+	   npt= i;
+   }
+   if (npt>=0 and npar>=0 and npar<=3 and neta>=0 and neta<=5)
+      pass = (PtassignmentHelper::ellipse(PtassignmentHelper::HybridDDYAndDeltaPhiLUT[npt][npar][neta][0],
+		  			  PtassignmentHelper::HybridDDYAndDeltaPhiLUT[npt][npar][neta][1],
+					  PtassignmentHelper::HybridDDYAndDeltaPhiLUT[npt][npar][neta][2],
+					  PtassignmentHelper::HybridDDYAndDeltaPhiLUT[npt][npar][neta][3],
+					  PtassignmentHelper::HybridDDYAndDeltaPhiLUT[npt][npar][neta][4], x, y) <=1);
    
    else {
-      std::cout <<"failed to run checkEllipse , pt "<< pt <<" npar "<< npar <<" eta "<< eta <<" neta "<< neta<<" x "<< x << " y "<< y <<std::endl;
+      std::cout <<"failed to run checkEllipse , pt "<< pt<<" npt "<<npt <<" npar "<< npar <<" eta "<< eta <<" neta "<< neta<<" x "<< x << " y "<< y <<std::endl;
       pass = false;  	
    }
    return pass;
@@ -877,6 +884,24 @@ bool DisplacedMuonTriggerPtassignment::runHybrid(float pt, bool useGE21)
    	return checkEllipse(pt, eta_st2, npar, ddY123*charge, dPhi_dir_st1_st2*charge); 
    else 
        	return false;
+}
+
+void DisplacedMuonTriggerPtassignment::runHybrid(bool useGE21)
+{
+  
+   //firstly to run through position-based and direction-based
+   hybrid_pt = 0.0;
+   runPositionbased();
+   if (useGE21)
+   	runDirectionbasedGE21();
+   else 
+ 	runDirectionbasedCSConly();      
+   if (npar>=0 and npar<=3){
+   	for (int i=0; i<PtassignmentHelper::NPt; i++){
+		if (checkEllipse(PtassignmentHelper::PtBins[i], eta_st2, npar, ddY123*charge, dPhi_dir_st1_st2*charge))
+		    hybrid_pt = PtassignmentHelper::PtBins[i];
+	}
+   }
 }
 
 float DisplacedMuonTriggerPtassignment::getlocalPhiDirection(int st) const
