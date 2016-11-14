@@ -145,6 +145,7 @@ public:
   bool runDirectionbasedGE21();
   bool runDirectionbasedCSConly();
   bool runHybrid(float pt, bool useGE21);
+  void runHybrid(bool useGE21);
   void setVerbose(int v) { verbose_ = v; }
   int verbose() const { return verbose_; }
 
@@ -167,6 +168,7 @@ public:
   float getTrackEta() const { return eta_st2; }
   int getNParity() const {return npar; } 
   int getMeRing() const {return meRing; } 
+  int getHybridPt() const {return hybrid_pt; }
   float assignedPositionPt();
   float assignedDirectionPt();
   float getdeltaY12() const { return deltaY12; }
@@ -325,6 +327,8 @@ public:
   float dPhi_dir_st1_st12;
   float dPhi_dir_st2_st23;
   float dPhi_dir_st12_st23;
+
+  int hybrid_pt;
 
   const CSCCorrelatedLCTDigiContainer lcts;
   const CSCDetIdContainer cscids;
