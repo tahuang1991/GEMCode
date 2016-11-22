@@ -132,25 +132,10 @@ public:
   DisplacedMuonTriggerPtassignment(const DisplacedMuonTriggerPtassignment&) = delete;
   DisplacedMuonTriggerPtassignment& operator=(const DisplacedMuonTriggerPtassignment&) = delete;
 
-  //const edm::ParameterSet& conf() const {return conf_;}
-  //const edm::Event& event() const {return ev_;}
-  //const edm::EventSetup& eventSetup() const {return es_;}
-
-  bool runPositionbased();
-  bool runDirectionbased(bool useGE21){
-    if (useGE21 and meRing==1) return runDirectionbasedGE21();
-    else return runDirectionbasedCSConly();
-  }
-  bool runPositionbasedBarrel();
-  bool runDirectionbasedGE21();
-  bool runDirectionbasedCSConly();
-  bool runHybrid(float pt, bool useGE21);
-  void runHybrid(bool useGE21);
   void setVerbose(int v) { verbose_ = v; }
   int verbose() const { return verbose_; }
 
-
-  /// geometry ?? should we used geometry
+  // muon geometry
   void setGEMGeometry(const GEMGeometry *geom) {gemGeometry_ = geom;}
   void setRPCGeometry(const RPCGeometry *geom) {rpcGeometry_ = geom;}
   void setME0Geometry(const ME0Geometry *geom) {me0Geometry_ = geom;}
@@ -162,6 +147,16 @@ public:
   const CSCGeometry* getCSCGeometry() const {return cscGeometry_;}
   const DTGeometry* getDTGeometry() const {return dtGeometry_;}
 
+  // pT assignment algorithms
+  bool runPositionbased();
+  bool runDirectionbased(bool useGE21);
+  bool runPositionbasedBarrel();
+  bool runDirectionbasedGE21();
+  bool runDirectionbasedCSConly();
+  bool runHybrid(float pt, bool useGE21);
+  void runHybrid(bool useGE21);
+
+  // helper functions
   int getHalfStrip(const CSCComparatorDigi& digi);
   float getFractionalStrip(const CSCComparatorDigi&d);
 
@@ -203,58 +198,6 @@ public:
                                       const GEMCSCPadDigiId& oldPad,
                                       const GEMCSCPadDigiId& newPad,
                                       int bxref) const;
- private:
-
-  // should use geometry
-  bool hasGEMGeometry_;
-  bool hasRPCGeometry_;
-  bool hasME0Geometry_;
-  bool hasCSCGeometry_;
-  bool hasDTGeometry_;
-
-  //edm::ParameterSet simTrackPSet_;
-  const CSCGeometry* cscGeometry_;
-  const RPCGeometry* rpcGeometry_;
-  const GEMGeometry* gemGeometry_;
-  const ME0Geometry* me0Geometry_;
-  const DTGeometry* dtGeometry_;
-
-  //const edm::ParameterSet& conf_;
-
-  const edm::Event& ev_;
-  const edm::EventSetup& es_;
-
-  void initVariables();
-  void setupGeometry(const edm::EventSetup& es);
-  void setupTriggerScales(const edm::EventSetup& es);
-  int verbose_;
-  unsigned int region_;
-
-
-
-  //edm::ESHandle<MagneticField> magfield_;
-  //edm::ESHandle<Propagator> propagator_;
-  //edm::ESHandle<Propagator> propagatorOpposite_;
-  edm::ESHandle<CSCGeometry> csc_geom_;
-  edm::ESHandle<RPCGeometry> rpc_geom_;
-  edm::ESHandle<GEMGeometry> gem_geom_;
-  edm::ESHandle<ME0Geometry> me0_geom_;
-  edm::ESHandle<DTGeometry> dt_geom_;
-
-  //extra collection to get better CSC positions
-  edm::Handle< CSCComparatorDigiCollection > hCSCComparators;
-
-  // trigger scale
-  bool hasMuScales_;
-  bool hasMuPtScale_;
-
-  unsigned long long  muScalesCacheID_;
-  unsigned long long  muPtScaleCacheID_;
-
-  edm::ESHandle< L1MuTriggerScales > muScales_;
-  edm::ESHandle< L1MuTriggerPtScale > muPtScale_;
-
- public:
   //pt assignment
   float deltaYcalculation(GlobalPoint gp1, GlobalPoint gp2) const;
   float deltadeltaYcalculation(GlobalPoint gp1, GlobalPoint gp2, GlobalPoint gp3, float eta, int par) const;
@@ -279,6 +222,53 @@ public:
   bool checkEllipse(float pt, float eta, int npar, float x, float y);
 
  private:
+
+  // setup functions
+  void initVariables();
+  void setupGeometry(const edm::EventSetup& es);
+  void setupTriggerScales(const edm::EventSetup& es);
+
+  // geometry members
+  bool hasGEMGeometry_;
+  bool hasRPCGeometry_;
+  bool hasME0Geometry_;
+  bool hasCSCGeometry_;
+  bool hasDTGeometry_;
+
+  const CSCGeometry* cscGeometry_;
+  const RPCGeometry* rpcGeometry_;
+  const GEMGeometry* gemGeometry_;
+  const ME0Geometry* me0Geometry_;
+  const DTGeometry* dtGeometry_;
+
+  const edm::Event& ev_;
+  const edm::EventSetup& es_;
+
+  int verbose_;
+  unsigned int region_;
+
+  //edm::ESHandle<MagneticField> magfield_;
+  //edm::ESHandle<Propagator> propagator_;
+  //edm::ESHandle<Propagator> propagatorOpposite_;
+  edm::ESHandle<CSCGeometry> csc_geom_;
+  edm::ESHandle<RPCGeometry> rpc_geom_;
+  edm::ESHandle<GEMGeometry> gem_geom_;
+  edm::ESHandle<ME0Geometry> me0_geom_;
+  edm::ESHandle<DTGeometry> dt_geom_;
+
+  //extra collection to get better CSC positions
+  edm::Handle< CSCComparatorDigiCollection > hCSCComparators;
+
+  // trigger scale
+  bool hasMuScales_;
+  bool hasMuPtScale_;
+
+  unsigned long long  muScalesCacheID_;
+  unsigned long long  muPtScaleCacheID_;
+
+  edm::ESHandle< L1MuTriggerScales > muScales_;
+  edm::ESHandle< L1MuTriggerPtScale > muPtScale_;
+
   void globalPositionOfLCT(const CSCCorrelatedLCTDigi stub, CSCDetId chid);
   void globalPositionOfLCT(CSCCorrelatedLCTDigiContainer stubs, CSCDetId chid);
   void globalPositionOfGEMPad(const GEMCSCPadDigi gempad, GEMDetId gemid);
