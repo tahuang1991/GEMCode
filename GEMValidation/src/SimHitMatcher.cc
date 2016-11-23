@@ -1128,7 +1128,7 @@ SimHitMatcher::simHitPositionKeyLayer(unsigned int chid) const
    
 	//GlobalPoint gptest(simHitsMeanPosition(hitsInChamber(chid)));
 	//std::cout <<"as comparison, gp from MeanPosition, id  "<< chamberId <<" z "<< gptest.z()<<" perp "<< gptest.perp() << std::endl;
-  std::cout <<"final return gp of keylayer at sim level, id "<< chamberId <<" z "<< returnValue.z() <<" perp "<< returnValue.perp()<< std::endl;
+  	//std::cout <<"final return gp of keylayer at sim level, id "<< chamberId <<" z "<< returnValue.z() <<" perp "<< returnValue.perp() <<" eta "<< returnValue.eta()<<" phi "<< returnValue.phi() << std::endl;
   return returnValue;
 }
    
