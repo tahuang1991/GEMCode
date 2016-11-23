@@ -168,7 +168,9 @@ public:
   float getTrackEta() const { return eta_st2; }
   int getNParity() const {return npar; } 
   int getMeRing() const {return meRing; } 
-  int getHybridPt() const {return hybrid_pt; }
+  float getPositionPt() const {return position_pt; }
+  float getDirectionPt() const {return direction_pt; }
+  float getHybridPt() const {return hybrid_pt; }
   float assignedPositionPt();
   float assignedDirectionPt();
   float getdeltaY12() const { return deltaY12; }
@@ -276,7 +278,6 @@ public:
                          float* fit_phi_layers, float* fit_z_layers, float& perp); 
   void fitTrackRadius(GlobalPoint* gps, float* radius);
 
-  bool checkEllipse(float pt, float eta, int npar, float x, float y);
 
  private:
   void globalPositionOfLCT(const CSCCorrelatedLCTDigi stub, CSCDetId chid);
@@ -328,7 +329,9 @@ public:
   float dPhi_dir_st2_st23;
   float dPhi_dir_st12_st23;
 
-  int hybrid_pt;
+  float position_pt;
+  float direction_pt;
+  float hybrid_pt;
 
   const CSCCorrelatedLCTDigiContainer lcts;
   const CSCDetIdContainer cscids;
