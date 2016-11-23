@@ -161,11 +161,13 @@ public:
   float getFractionalStrip(const CSCComparatorDigi&d);
 
   float getTrackEta() const { return eta_st2; }
-  int getNParity() const {return npar; }
-  int getMeRing() const {return meRing; }
-  int getHybridPt() const {return hybrid_pt; }
-  float assignedPositionPt() const {return position_pt; }
-  float assignedDirectionPt() const {return direction_pt; }
+  int getNParity() const {return npar; } 
+  int getMeRing() const {return meRing; } 
+  float getPositionPt() const {return position_pt; }
+  float getDirectionPt() const {return direction_pt; }
+  float getHybridPt() const {return hybrid_pt; }
+  float assignedPositionPt();
+  float assignedDirectionPt();
   float getdeltaY12() const { return deltaY12; }
   float getdeltaY23() const { return deltaY23; }
   float getdeltaY123() const { return ddY123; }
@@ -201,7 +203,6 @@ public:
   //pt assignment
   float deltaYcalculation(GlobalPoint gp1, GlobalPoint gp2) const;
   float deltadeltaYcalculation(GlobalPoint gp1, GlobalPoint gp2, GlobalPoint gp3, float eta, int par) const;
-
   //float PhiMomentum(float dphi, float phi_position, int st, bool evenodd);
   //float PhiMomentum_Radius(float dphi, float phi_position, float radius_csc, float radius_gem);
   //float PhiMomentum_Xfactor(float dphi, float phi_position, float xfactor);
@@ -210,16 +211,16 @@ public:
   //
   //r3);//?
   float phiMomentum_Xfactor(float phi_CSC, float phi_GEM, float xfactor) const;
-  //void fitComparatorsLCT(const CSCComparatorDigiCollection&, const CSCCorrelatedLCTDigi& tp,
- //	                          CSCDetId chid, float& fit_phi_layer1, float& fit_phi_layer3, float& fit_phi_layer6,
-  //				  float& fit_z_layer1, float& fit_z_layer3, float& fit_z_layer6, float& perp);
-  void fitComparatorsLCT(const CSCComparatorDigiCollection&,
-                         const CSCCorrelatedLCTDigi& tp,
-                         CSCDetId chid,
-                         float* fit_phi_layers, float* fit_z_layers, float& perp);
+  //void fitComparatorsLCT(const CSCComparatorDigiCollection&, const CSCCorrelatedLCTDigi& tp, 
+ //	                          CSCDetId chid, float& fit_phi_layer1, float& fit_phi_layer3, float& fit_phi_layer6, 
+  //				  float& fit_z_layer1, float& fit_z_layer3, float& fit_z_layer6, float& perp); 
+  void fitComparatorsLCT(const CSCComparatorDigiCollection&, 
+                         const CSCCorrelatedLCTDigi& tp, 
+                         CSCDetId chid, 
+                         float* fit_phi_layers, float* fit_z_layers, float& perp); 
   void fitTrackRadius(GlobalPoint* gps, float* radius);
 
-  bool checkEllipse(float pt, float eta, int npar, float x, float y);
+
 
  private:
 
@@ -268,6 +269,7 @@ public:
 
   edm::ESHandle< L1MuTriggerScales > muScales_;
   edm::ESHandle< L1MuTriggerPtScale > muPtScale_;
+
 
   void globalPositionOfLCT(const CSCCorrelatedLCTDigi stub, CSCDetId chid);
   void globalPositionOfLCT(CSCCorrelatedLCTDigiContainer stubs, CSCDetId chid);
