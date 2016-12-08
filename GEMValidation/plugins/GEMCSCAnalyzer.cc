@@ -2140,12 +2140,15 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       auto pads = match_gd.padsInChamber(id_tmp.rawId());
       if(pads.size() == 0) continue;
       //std::cout <<"matched GEMPad id "<< id_tmp << " Pad "<< digi_channel(pads.at(0)) << std::endl;
+	GlobalPoint keygp = match_sh.simHitsMeanPosition(match_sh.hitsInChamber(id_tmp.rawId()));
+        auto bestgem_dg_and_gp = match_gd.digiInGEMClosestToCSC(pads, keygp);
       if (odd)
       {
+        best_pad_odd[st] = bestgem_dg_and_gp.second;
         etrk_[st].has_gem_pad |= 1;
         etrk_[st].chamber_odd |= 1;
-        etrk_[st].pad_odd = digi_channel(pads.at(0));
-        etrk_[st].hsfromgem_odd = match_gd.extrapolateHsfromGEMPad( d, digi_channel(pads.at(0)));
+        etrk_[st].pad_odd = digi_channel(bestgem_dg_and_gp.first);
+        etrk_[st].hsfromgem_odd = match_gd.extrapolateHsfromGEMPad( d, digi_channel(bestgem_dg_and_gp.first));
         etrk_[st].phi_pad_odd = best_pad_odd[st].phi();
         etrk_[st].eta_pad_odd = best_pad_odd[st].eta();
         if (is_valid(lct_odd[st]))
@@ -2159,10 +2162,11 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     	}
       else
       {
+        best_pad_even[st] = bestgem_dg_and_gp.second;
       	etrk_[st].has_gem_pad |= 2;
         etrk_[st].chamber_even |= 1;
-        etrk_[st].pad_even = digi_channel(pads.at(0));
-        etrk_[st].hsfromgem_even = match_gd.extrapolateHsfromGEMPad( d, digi_channel(pads.at(0)));
+        etrk_[st].pad_even = digi_channel(bestgem_dg_and_gp.first);
+        etrk_[st].hsfromgem_even = match_gd.extrapolateHsfromGEMPad( d, digi_channel(bestgem_dg_and_gp.first));
         etrk_[st].phi_pad_even = best_pad_even[st].phi();
         etrk_[st].eta_pad_even = best_pad_even[st].eta();
         if (is_valid(lct_even[st]))
@@ -2224,35 +2228,41 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       GEMDetId id_tmp(id.region(), id.ring(), id.station(), layer, id.chamber(), 0);
       auto pads = match_gd.padsInChamber(id_tmp.rawId());
       if(pads.size() == 0) continue;
+	GlobalPoint keygp = match_sh.simHitsMeanPosition(match_sh.hitsInChamber(id_tmp.rawId()));
+        auto bestgem_dg_and_gp = match_gd.digiInGEMClosestToCSC(pads, keygp);
       
       if (odd)
       {
+        best_pad_odd[st] = bestgem_dg_and_gp.second;
       	etrk_[st].has_gem_pad |= 1;
       	etrk_[st].chamber_odd |= 1;
-      	etrk_[st].pad_odd = digi_channel(pads.at(0));
+        etrk_[st].pad_odd = digi_channel(bestgem_dg_and_gp.first);
+        etrk_[st].hsfromgem_odd = match_gd.extrapolateHsfromGEMPad( d, digi_channel(bestgem_dg_and_gp.first));
+        etrk_[st].phi_pad_odd = best_pad_odd[st].phi();
+        etrk_[st].eta_pad_odd = best_pad_odd[st].eta();
       	if (is_valid(lct_odd[st]))
       	{
         	auto gem_dg_and_gp = match_gd.digiInGEMClosestToCSC(pads, gp_lct_odd[st]);
         	best_pad_odd[st] = gem_dg_and_gp.second;
         	etrk_[st].bx_pad_odd = digi_bx(gem_dg_and_gp.first);
-        	etrk_[st].phi_pad_odd = best_pad_odd[st].phi();
-        	etrk_[st].eta_pad_odd = best_pad_odd[st].eta();
         	etrk_[st].dphi_pad_odd = deltaPhi(etrk_[st].phi_lct_odd, etrk_[st].phi_pad_odd);
         	etrk_[st].deta_pad_odd = etrk_[st].eta_lct_odd - etrk_[st].eta_pad_odd;
       	}
     	}
       else
       {
+        best_pad_even[st] = bestgem_dg_and_gp.second;
       	etrk_[st].has_gem_pad |= 2;
       	etrk_[st].chamber_even |= 1;
-      	etrk_[st].pad_even = digi_channel(pads.at(0));
+        etrk_[st].pad_even = digi_channel(bestgem_dg_and_gp.first);
+        etrk_[st].hsfromgem_even = match_gd.extrapolateHsfromGEMPad( d, digi_channel(bestgem_dg_and_gp.first));
+        etrk_[st].phi_pad_even = best_pad_even[st].phi();
+        etrk_[st].eta_pad_even = best_pad_even[st].eta();
       	if (is_valid(lct_even[st]))
       	{
         	auto gem_dg_and_gp = match_gd.digiInGEMClosestToCSC(pads, gp_lct_even[st]);
         	best_pad_even[st] = gem_dg_and_gp.second;
         	etrk_[st].bx_pad_even = digi_bx(gem_dg_and_gp.first);
-        	etrk_[st].phi_pad_even = best_pad_even[st].phi();
-        	etrk_[st].eta_pad_even = best_pad_even[st].eta();
         	etrk_[st].dphi_pad_even = deltaPhi(etrk_[st].phi_lct_even, etrk_[st].phi_pad_even);
         	etrk_[st].deta_pad_even = etrk_[st].eta_lct_even - etrk_[st].eta_pad_even;
       	}
