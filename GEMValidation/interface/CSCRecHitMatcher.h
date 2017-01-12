@@ -24,14 +24,14 @@ class SimHitMatcher;
 class CSCRecHitMatcher : public BaseMatcher
 {
 public:
-  
+
   typedef std::vector<CSCRecHit2D> CSCRecHit2DContainer;
   typedef std::vector<CSCSegment> CSCSegmentContainer;
-  
-  CSCRecHitMatcher(SimHitMatcher& sh, 
-                   edm::EDGetTokenT<CSCRecHit2DCollection>& cscRecHit2DInput_, 
+
+  CSCRecHitMatcher(SimHitMatcher& sh,
+                   edm::EDGetTokenT<CSCRecHit2DCollection>& cscRecHit2DInput_,
                    edm::EDGetTokenT<CSCSegmentCollection>& cscSegmentInput_);
-  
+
   ~CSCRecHitMatcher() {}
 
   // layer detIds with CSCRecHit2D
@@ -65,6 +65,8 @@ public:
   int nCSCSegmentsInChamber(unsigned int) const;
 
   CSCSegment bestCSCSegment(unsigned int);
+
+  GlobalPoint globalPoint(const CSCSegment&) const;
 
 private:
 
