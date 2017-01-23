@@ -238,6 +238,16 @@ struct MyTrackEff
   Char_t bx_pad_even;
   Float_t phi_pad_odd;
   Float_t phi_pad_even;
+  Float_t eta_pad_odd;
+  Float_t eta_pad_even;
+
+  Float_t dphi_pad_odd;
+  Float_t dphi_pad_even;
+  Float_t deta_pad_odd;
+  Float_t deta_pad_even;
+  Float_t dphi_pad_fit_odd;
+  Float_t dphi_pad_fit_even;
+
   Float_t phi_1strippad_odd;
   Float_t phi_1strippad_even;
   Float_t phi_2strippad_odd;
@@ -246,13 +256,22 @@ struct MyTrackEff
   Float_t phi_4strippad_even;
   Float_t phi_8strippad_odd;
   Float_t phi_8strippad_even;
-  Float_t eta_pad_odd;
-  Float_t eta_pad_even;
-
-  Float_t dphi_pad_odd;
-  Float_t dphi_pad_even;
-  Float_t deta_pad_odd;
-  Float_t deta_pad_even;
+  Float_t dphi_1strippad_odd;
+  Float_t dphi_1strippad_even;
+  Float_t dphi_2strippad_odd;
+  Float_t dphi_2strippad_even;
+  Float_t dphi_4strippad_odd;
+  Float_t dphi_4strippad_even;
+  Float_t dphi_8strippad_odd;
+  Float_t dphi_8strippad_even;
+  Float_t dphi_1strippad_fit_odd;
+  Float_t dphi_1strippad_fit_even;
+  Float_t dphi_2strippad_fit_odd;
+  Float_t dphi_2strippad_fit_even;
+  Float_t dphi_4strippad_fit_odd;
+  Float_t dphi_4strippad_fit_even;
+  Float_t dphi_8strippad_fit_odd;
+  Float_t dphi_8strippad_fit_even;
 
   Int_t quality_odd;
   Int_t quality_even;
@@ -359,16 +378,10 @@ struct MyTrackEff
   Float_t phiM_st1_test, phiM_st2_test, phiM_st12_test, phiM_st23_test;
   Float_t pt_sh_even,pt_sh_odd,ptphi_sh_even,ptphi_sh_odd,pteta_sh_even,pteta_sh_odd;
   Float_t ptphi_gemsh_odd, ptphi_gemsh_even;
-  Float_t csc_bending_angle12_gemcsc;
-  Float_t csc_bending_angle12_xfactor,csc_bending_angle12_xfactor_smear1,csc_bending_angle12_xfactor_smear2,csc_bending_angle12_xfactor_smear0;
-  Float_t csc_bending_angle12_xfactor_smear3; 
-  Float_t csc_bending_angle12_xfactor_L1_1, csc_bending_angle12_xfactor_L1_2, csc_bending_angle12_xfactor_L1_3;
-  Float_t dphi_position_st1_st2_sh,dphi_position_st2_st3_sh;
-  Float_t dphi_position_st1_st2_L1,dphi_position_st2_st3_L1;
   Float_t dphi_dir_st1_st2_sh, dphi_dir_st1_st2_L1, dphi_dir_st1_st2_L1_csc;
   Float_t dphi_dir_st1_st12_sh,dphi_dir_st2_st23_sh, dphi_dir_st12_st23_sh;
   Float_t dphi_dir_st1_st12_L1,dphi_dir_st2_st23_L1,dphi_dir_st1_st12_L1_csc,dphi_dir_st2_st23_L1_csc, dphi_dir_st12_st23_L1;
-  Float_t hybrid_pt, position_pt, direction_ge21_pt, direction_noge21_pt;
+  Float_t hybrid_pt, hybrid_noge21_pt, position_pt, direction_ge21_pt, direction_noge21_pt;
   //Float_t ptphi_diff_sh_11,ptphi_diff_sh_12,ptphi_diff_sh_21,ptphi_diff_sh_22; 
   Float_t ptphi_diff_sh;
   Float_t deltay12_fit, deltay23_fit;
@@ -490,15 +503,7 @@ void MyTrackEff::init()
   npar_L1 = -1;
   eta_st2_L1 = -9;
   eta_st2_sh = -9;
-  //ptphi_diff_sh_11 = -9;
-  //ptphi_diff_sh_12 = -9;
-  //ptphi_diff_sh_21 = -9;
-  //ptphi_diff_sh_22 = -9;
   ptphi_diff_sh = -9;
-  dphi_position_st1_st2_sh = -9;
-  dphi_position_st2_st3_sh = -9;
-  dphi_position_st1_st2_L1 = -9;
-  dphi_position_st2_st3_L1 = -9;
   dphi_dir_st1_st2_sh = -9;
   dphi_dir_st1_st2_L1 = -9;
   dphi_dir_st1_st2_L1_csc = -9;
@@ -511,9 +516,11 @@ void MyTrackEff::init()
   dphi_dir_st2_st23_L1_csc = -9;
   dphi_dir_st12_st23_L1 = -9;
   hybrid_pt = 0.0;
+  hybrid_noge21_pt = 0.0;
   position_pt = 0.0;
   direction_noge21_pt = 0.0;
   direction_ge21_pt = 0.0;
+  /*
   csc_bending_angle12_gemcsc = -9;
   csc_bending_angle12_xfactor = -9;
   csc_bending_angle12_xfactor_smear0 = -9;
@@ -523,6 +530,7 @@ void MyTrackEff::init()
   csc_bending_angle12_xfactor_L1_1 = -9;
   csc_bending_angle12_xfactor_L1_2 = -9;
   csc_bending_angle12_xfactor_L1_3 = -9;
+  */
 
   phi_layer1_fit_even =-9.0;
   phi_layer1_fit_odd =-9.0;
@@ -634,6 +642,15 @@ void MyTrackEff::init()
   bx_pad_even = -9;
   phi_pad_odd = -9.;
   phi_pad_even = -9.;
+  eta_pad_odd = -9.;
+  eta_pad_even = -9.;
+  dphi_pad_odd = -9.;
+  dphi_pad_even = -9.;
+  dphi_pad_fit_odd = -9.;
+  dphi_pad_fit_even = -9.;
+  deta_pad_odd = -9.;
+  deta_pad_even = -9.;
+
   phi_1strippad_odd = -9.0;
   phi_1strippad_even = -9.0;
   phi_2strippad_odd = -9.0;
@@ -642,12 +659,22 @@ void MyTrackEff::init()
   phi_4strippad_even = -9.0;
   phi_8strippad_odd = -9.0;
   phi_8strippad_even = -9.0;
-  eta_pad_odd = -9.;
-  eta_pad_even = -9.;
-  dphi_pad_odd = -9.;
-  dphi_pad_even = -9.;
-  deta_pad_odd = -9.;
-  deta_pad_even = -9.;
+  dphi_1strippad_odd = -9.0;
+  dphi_1strippad_even = -9.0;
+  dphi_2strippad_odd = -9.0;
+  dphi_2strippad_even = -9.0;
+  dphi_4strippad_odd = -9.0;
+  dphi_4strippad_even = -9.0;
+  dphi_8strippad_odd = -9.0;
+  dphi_8strippad_even = -9.0;
+  dphi_1strippad_fit_odd = -9.0;
+  dphi_1strippad_fit_even = -9.0;
+  dphi_2strippad_fit_odd = -9.0;
+  dphi_2strippad_fit_even = -9.0;
+  dphi_4strippad_fit_odd = -9.0;
+  dphi_4strippad_fit_even = -9.0;
+  dphi_8strippad_fit_odd = -9.0;
+  dphi_8strippad_fit_even = -9.0;
 
   bx_rpcstrip_odd = -9;
   bx_rpcstrip_even = -9;
@@ -890,15 +917,7 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("eta_st2_sh", &eta_st2_sh);
   t->Branch("ptphi_gemsh_even", &ptphi_gemsh_even);
   t->Branch("ptphi_gemsh_odd", &ptphi_gemsh_odd);
-  //t->Branch("ptphi_diff_sh_11", &ptphi_diff_sh_11);
-  //t->Branch("ptphi_diff_sh_12", &ptphi_diff_sh_12);
-  //t->Branch("ptphi_diff_sh_21", &ptphi_diff_sh_21);
-  //t->Branch("ptphi_diff_sh_22", &ptphi_diff_sh_22);
   t->Branch("ptphi_diff_sh", &ptphi_diff_sh);
-  t->Branch("dphi_position_st1_st2_sh", &dphi_position_st1_st2_sh);
-  t->Branch("dphi_position_st2_st3_sh", &dphi_position_st2_st3_sh);
-  t->Branch("dphi_position_st1_st2_L1", &dphi_position_st1_st2_L1);
-  t->Branch("dphi_position_st2_st3_L1", &dphi_position_st2_st3_L1);
   t->Branch("dphi_dir_st1_st2_sh", &dphi_dir_st1_st2_sh);
   t->Branch("dphi_dir_st1_st2_L1", &dphi_dir_st1_st2_L1);
   t->Branch("dphi_dir_st1_st2_L1_csc", &dphi_dir_st1_st2_L1_csc);
@@ -914,7 +933,9 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("direction_noge21_pt", &direction_noge21_pt);
   t->Branch("direction_ge21_pt", &direction_ge21_pt);
   t->Branch("hybrid_pt", &hybrid_pt);
-
+  t->Branch("hybrid_noge21_pt", &hybrid_noge21_pt);
+  
+  /*
   t->Branch("csc_bending_angle12_gemcsc", &csc_bending_angle12_gemcsc);
   t->Branch("csc_bending_angle12_xfactor", &csc_bending_angle12_xfactor);
   t->Branch("csc_bending_angle12_xfactor_smear0", &csc_bending_angle12_xfactor_smear0);
@@ -924,6 +945,7 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("csc_bending_angle12_xfactor_L1_1", &csc_bending_angle12_xfactor_L1_1);
   t->Branch("csc_bending_angle12_xfactor_L1_2", &csc_bending_angle12_xfactor_L1_2);
   t->Branch("csc_bending_angle12_xfactor_L1_3", &csc_bending_angle12_xfactor_L1_3);
+  */
 
   t->Branch("phi_layer1_fit_even", &phi_layer1_fit_even);
   t->Branch("phi_layer1_fit_odd", &phi_layer1_fit_odd);
@@ -1034,6 +1056,15 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("bx_pad_even", &bx_pad_even);
   t->Branch("phi_pad_odd", &phi_pad_odd);
   t->Branch("phi_pad_even", &phi_pad_even);
+  t->Branch("eta_pad_odd", &eta_pad_odd);
+  t->Branch("eta_pad_even", &eta_pad_even);
+  t->Branch("dphi_pad_odd", &dphi_pad_odd);
+  t->Branch("dphi_pad_even", &dphi_pad_even);
+  t->Branch("dphi_pad_fit_odd", &dphi_pad_fit_odd);
+  t->Branch("dphi_pad_fit_even", &dphi_pad_fit_even);
+  t->Branch("deta_pad_odd", &deta_pad_odd);
+  t->Branch("deta_pad_even", &deta_pad_even);
+
   t->Branch("phi_1strippad_odd", &phi_1strippad_odd);
   t->Branch("phi_1strippad_even", &phi_1strippad_even);
   t->Branch("phi_2strippad_odd", &phi_2strippad_odd);
@@ -1042,12 +1073,22 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("phi_4strippad_even", &phi_4strippad_even);
   t->Branch("phi_8strippad_odd", &phi_8strippad_odd);
   t->Branch("phi_8strippad_even", &phi_8strippad_even);
-  t->Branch("eta_pad_odd", &eta_pad_odd);
-  t->Branch("eta_pad_even", &eta_pad_even);
-  t->Branch("dphi_pad_odd", &dphi_pad_odd);
-  t->Branch("dphi_pad_even", &dphi_pad_even);
-  t->Branch("deta_pad_odd", &deta_pad_odd);
-  t->Branch("deta_pad_even", &deta_pad_even);
+  t->Branch("dphi_1strippad_odd", &dphi_1strippad_odd);
+  t->Branch("dphi_1strippad_even", &dphi_1strippad_even);
+  t->Branch("dphi_2strippad_odd", &dphi_2strippad_odd);
+  t->Branch("dphi_2strippad_even", &dphi_2strippad_even);
+  t->Branch("dphi_4strippad_odd", &dphi_4strippad_odd);
+  t->Branch("dphi_4strippad_even", &dphi_4strippad_even);
+  t->Branch("dphi_8strippad_odd", &dphi_8strippad_odd);
+  t->Branch("dphi_8strippad_even", &dphi_8strippad_even);
+  t->Branch("dphi_1strippad_fit_odd", &dphi_1strippad_fit_odd);
+  t->Branch("dphi_1strippad_fit_even", &dphi_1strippad_fit_even);
+  t->Branch("dphi_2strippad_fit_odd", &dphi_2strippad_fit_odd);
+  t->Branch("dphi_2strippad_fit_even", &dphi_2strippad_fit_even);
+  t->Branch("dphi_4strippad_fit_odd", &dphi_4strippad_fit_odd);
+  t->Branch("dphi_4strippad_fit_even", &dphi_4strippad_fit_even);
+  t->Branch("dphi_8strippad_fit_odd", &dphi_8strippad_fit_odd);
+  t->Branch("dphi_8strippad_fit_even", &dphi_8strippad_fit_even);
 
   t->Branch("bx_rpcstrip_odd", &bx_rpcstrip_odd);
   t->Branch("bx_rpcstrip_even", &bx_rpcstrip_even);
@@ -1648,6 +1689,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     if (stations_to_use_.count(st) == 0) continue;
 
     const int nlayers(match_cd.nLayersWithStripInChamber(d));
+    //std::cout <<"CSC strip digi, CSCid "<< id <<" nlayer "<< nlayers << std::endl;
     if (nlayers < minNHitsChamberCSCStripDigi_) continue;
 
     const bool odd(id.chamber()%2==1);
@@ -1675,6 +1717,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     if (stations_to_use_.count(st) == 0) continue;
 
     const int nlayers(match_cd.nLayersWithWireInChamber(d));
+    //std::cout <<"CSC wire digi, CSCid "<< id <<" nlayer "<< nlayers << std::endl;
     if (nlayers < minNHitsChamberCSCWireDigi_) continue;
 
     const bool odd(id.chamber()%2==1);
@@ -1704,6 +1747,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     const bool odd(id.chamber()%2==1);
     auto clct = match_lct.clctInChamber(d);
 
+    //std::cout <<"CSC CLCT, CSCid "<< id <<" clct "<< clct << std::endl;
     if (odd) etrk_[st].halfstrip_odd = digi_channel(clct);
     else etrk_[st].halfstrip_even = digi_channel(clct);
 
@@ -1736,6 +1780,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     const bool odd(id.chamber()%2==1);
     auto alct = match_lct.alctInChamber(d);
 
+    //std::cout <<"CSC ALCT, CSCid "<< id <<" alct "<< alct << std::endl;
     if (odd) etrk_[st].wiregroup_odd = digi_channel(alct);
     else etrk_[st].wiregroup_even = digi_channel(alct);
 
@@ -1799,7 +1844,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     const int bend(LCT_BEND_PATTERN[digi_pattern(lct)]);
     auto gp = match_lct.digiPosition(lct);
 
-    
+    //std::cout <<"CSC LCT, CSCid "<< id <<" lct "<< lct <<" gp eta "<< gp.eta()<<" phi "<< gp.phi() <<" perp "<< gp.perp()<<std::endl;
     if (csc_simhits.find(d) == csc_simhits.end())
 	std::cout <<"failed to find simhits in CSCid "<< id <<" but find LCT" << lct << std::endl;
     if (odd)
@@ -2028,7 +2073,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       	if (odd and etrk_[st_csc].phi_cscsh_odd>-9){
 	    etrk_[st].dphi_sh_odd = deltaPhi(etrk_[st_csc].phi_cscsh_odd, keygp.phi());// here should we use st or st_csc?
     	    etrk_[st].dphipositionpt_gemsh_odd = deltaPhi(keygp.phi(),etrk_[st_csc].ptphi_sh_odd);
-          phi_m =  PtassignmentHelper::PhiMomentum_Radius(etrk_[st].dphi_sh_odd, etrk_[st].phi_gemsh_odd, etrk_[st_csc].perp_cscsh_odd, etrk_[st].perp_gemsh_odd);
+            phi_m =  PtassignmentHelper::PhiMomentum_Radius(etrk_[st].dphi_sh_odd, etrk_[st].phi_gemsh_odd, etrk_[st_csc].perp_cscsh_odd, etrk_[st].perp_gemsh_odd);
 	    etrk_[st].phiM_gemcsc_odd = phi_m;
 	    //std::cout <<"dphi(M,P) "<< deltaPhi(etrk_[st].phi_gemsh_odd, gv_sh_odd[st_csc].phi())<<" momentum phi from simhits "<< gv_sh_odd[st_csc].phi() <<" phi from gem-csc "<< phi_m << std::endl;
 	}
@@ -2139,7 +2184,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       GEMDetId id_tmp(id.region(), id.ring(), id.station(), layer, id.chamber(), 0);
       auto pads = match_gd.padsInChamber(id_tmp.rawId());
       if(pads.size() == 0) continue;
-      //std::cout <<"matched GEMPad id "<< id_tmp << " Pad "<< digi_channel(pads.at(0)) << std::endl;
+
 	GlobalPoint keygp = match_sh.simHitsMeanPosition(match_sh.hitsInChamber(id_tmp.rawId()));
         auto bestgem_dg_and_gp = match_gd.digiInGEMClosestToCSC(pads, keygp);
       if (odd)
@@ -2151,12 +2196,16 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         etrk_[st].hsfromgem_odd = match_gd.extrapolateHsfromGEMPad( d, digi_channel(bestgem_dg_and_gp.first));
         etrk_[st].phi_pad_odd = best_pad_odd[st].phi();
         etrk_[st].eta_pad_odd = best_pad_odd[st].eta();
+	//question: ME1a is not included here
         if (is_valid(lct_odd[st]))
         {
         	auto gem_dg_and_gp = match_gd.digiInGEMClosestToCSC(pads, gp_lct_odd[st]);
         	best_pad_odd[st] = gem_dg_and_gp.second;
         	etrk_[st].bx_pad_odd = digi_bx(gem_dg_and_gp.first);
         	etrk_[st].dphi_pad_odd = deltaPhi(etrk_[st].phi_lct_odd, etrk_[st].phi_pad_odd);
+        	etrk_[st].dphi_pad_fit_odd = deltaPhi(etrk_[st].phi_layer3_fit_odd, etrk_[st].phi_pad_odd);
+		//std::cout <<"GEMid "<< id << std::endl;
+		//std::cout <<"GEM sim phi "<< keygp.phi() <<" pad phi "<< etrk_[st].phi_pad_odd <<" phi_lct "<< etrk_[st].phi_lct_odd <<" phi_fit_lct "<< etrk_[st].phi_layer3_fit_odd<< std::endl;
         	etrk_[st].deta_pad_odd = etrk_[st].eta_lct_odd - etrk_[st].eta_pad_odd;
       	}
     	}
@@ -2175,6 +2224,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         	best_pad_even[st] = gem_dg_and_gp.second;
         	etrk_[st].bx_pad_even = digi_bx(gem_dg_and_gp.first);
         	etrk_[st].dphi_pad_even = deltaPhi(etrk_[st].phi_lct_even, etrk_[st].phi_pad_even);
+        	etrk_[st].dphi_pad_fit_even = deltaPhi(etrk_[st].phi_layer3_fit_even, etrk_[st].phi_pad_even);
+		//std::cout <<"GEMid "<< id << std::endl;
+		//std::cout <<"GEM sim phi "<< keygp.phi() <<" pad phi "<< etrk_[st].phi_pad_even <<" phi_lct "<< etrk_[st].phi_lct_even <<" phi_fit_lct "<< etrk_[st].phi_layer3_fit_even<< std::endl;
         	etrk_[st].deta_pad_even = etrk_[st].eta_lct_even - etrk_[st].eta_pad_even;
       	}
     	}
@@ -2193,7 +2245,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
     const int stations(detIdToMEStation(MEStation,id.ring()));
     int st;
-    if (stations==2 or stations==3) st=1;
+    if (stations==2 or stations==3) st=1;//ME1a,ME1b->ME11
     else continue;
     
     if (stations_to_use_.count(st) == 0) continue;
@@ -2246,6 +2298,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         	best_pad_odd[st] = gem_dg_and_gp.second;
         	etrk_[st].bx_pad_odd = digi_bx(gem_dg_and_gp.first);
         	etrk_[st].dphi_pad_odd = deltaPhi(etrk_[st].phi_lct_odd, etrk_[st].phi_pad_odd);
+        	etrk_[st].dphi_pad_fit_odd = deltaPhi(etrk_[st].phi_layer3_fit_odd, etrk_[st].phi_pad_odd);
         	etrk_[st].deta_pad_odd = etrk_[st].eta_lct_odd - etrk_[st].eta_pad_odd;
       	}
     	}
@@ -2264,6 +2317,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         	best_pad_even[st] = gem_dg_and_gp.second;
         	etrk_[st].bx_pad_even = digi_bx(gem_dg_and_gp.first);
         	etrk_[st].dphi_pad_even = deltaPhi(etrk_[st].phi_lct_even, etrk_[st].phi_pad_even);
+        	etrk_[st].dphi_pad_fit_even = deltaPhi(etrk_[st].phi_layer3_fit_even, etrk_[st].phi_pad_even);
         	etrk_[st].deta_pad_even = etrk_[st].eta_lct_even - etrk_[st].eta_pad_even;
       	}
     	}
@@ -2303,33 +2357,142 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     }
   }
  
-  //for GE21, different phi segmentation 
-  for (auto d: match_gd.detIdsDigi(GEMType::GEM_ME21)){
-      auto detId = GEMDetId(d);
-      const int st(detIdToMEStation(2,1));
-      if(verbose_) std::cout << "GEMId " << detId << std::endl;
-      double firstPositionPad1 = match_gd.positionPad1InDetId(d).front().phi();
-      double firstPositionPad2 = match_gd.positionPad2InDetId(d).front().phi();
-      double firstPositionPad4 = match_gd.positionPad4InDetId(d).front().phi();
-      double firstPositionPad8 = match_gd.positionPad8InDetId(d).front().phi();
-      if(verbose_) {
-        std::cout << "firstPositionPad1 " << firstPositionPad1 << std::endl;
-        std::cout << "firstPositionPad2 " << firstPositionPad2 << std::endl;
-        std::cout << "firstPositionPad4 " << firstPositionPad4 << std::endl;
-        std::cout << "firstPositionPad8 " << firstPositionPad8 << std::endl;  
-      }
-      bool odd(detId.chamber()%2==1);
-      if (odd){
-	  etrk_[st].phi_1strippad_odd = firstPositionPad1;
-	  etrk_[st].phi_2strippad_odd = firstPositionPad2;
-	  etrk_[st].phi_4strippad_odd = firstPositionPad4;
-	  etrk_[st].phi_8strippad_odd = firstPositionPad8;
-      }else{
-	  etrk_[st].phi_1strippad_even = firstPositionPad1;
-	  etrk_[st].phi_2strippad_even = firstPositionPad2;
-	  etrk_[st].phi_4strippad_even = firstPositionPad4;
-	  etrk_[st].phi_8strippad_even = firstPositionPad8;
-      }
+  //for GE11 and GE21, different phi segmenta 
+  // GEM digis and pads in superchambers
+  for(auto d: match_gd.detIdsDigi())
+  {
+    GEMDetId id(d);
+    int MEStation;//MEStation==1,also fill ME11
+    if (id.station() == 3) MEStation = 2;
+    else if (id.station() == 2) continue;
+    else MEStation = id.station();
+
+    const int st(detIdToMEStation(MEStation,id.ring()));
+    bool odd(id.chamber()%2==1);
+    auto GPsPad1 = match_gd.positionPad1InDetId(d);
+    auto GPsPad2 = match_gd.positionPad2InDetId(d);
+    auto GPsPad4 = match_gd.positionPad4InDetId(d);
+    auto GPsPad8 = match_gd.positionPad8InDetId(d);
+    GEMDetId id_tmp(id.region(), id.ring(), id.station(), id.layer(), id.chamber(), 0);
+    if (GPsPad1.size()==0 or match_sh.hitsInSuperChamber(id_tmp.rawId()).size()==0) continue;
+    float dphi1 = 99;
+    float dphi2 = 99;
+    float dphi4 = 99;
+    float dphi8 = 99;
+
+    float lct_phi = -9;
+    float lct_fit_phi = -9;
+    float phi_pad = -9;
+    float phi_gemsh = -9;
+    if (odd ){
+	if (is_valid(lct_odd[st])){
+	    lct_phi = etrk_[st].phi_lct_odd;
+	    lct_fit_phi = etrk_[st].phi_layer3_fit_odd;
+	}
+	phi_pad = etrk_[st].phi_pad_odd;
+	phi_gemsh = etrk_[st].phi_gemsh_odd;
+    }else {
+	if (is_valid(lct_even[st])){
+	    lct_phi = etrk_[st].phi_lct_even;
+	    lct_fit_phi = etrk_[st].phi_layer3_fit_even;
+	}
+	phi_pad = etrk_[st].phi_pad_odd;
+	phi_gemsh = etrk_[st].phi_gemsh_even;
+    }
+    GlobalPoint gp1, gp2, gp4, gp8;
+    //std::cout <<"GEM sim phi "<< keygp.phi() <<" 1strippad phi "<< GPsPad1.front().phi()<<" 2strippad phi "<< GPsPad2.front().phi()<<" 4strippad phi "<< GPsPad4.front().phi() <<" 8strippad phi "<< GPsPad8.front().phi() << std::endl;
+    for (auto gp : GPsPad1){
+    	if (fabs(gp.phi()-phi_gemsh) < dphi1){
+	    dphi1 = fabs(gp.phi() - phi_gemsh);
+	    gp1 = GlobalPoint(gp);
+	}
+    }
+    for (auto gp : GPsPad2){
+    	if (fabs(gp.phi()-phi_gemsh) < dphi2){
+	    dphi2 = fabs(gp.phi() - phi_gemsh);
+	    gp2 = GlobalPoint(gp);
+	}
+    }
+    for (auto gp : GPsPad4){
+    	if (fabs(gp.phi()-phi_gemsh) < dphi4){
+	    dphi4 = fabs(gp.phi() - phi_gemsh);
+	    gp4 = GlobalPoint(gp);
+	}
+    }
+    for (auto gp : GPsPad8){
+    	if (fabs(gp.phi()-phi_gemsh) < dphi8){
+	    dphi8 = fabs(gp.phi() - phi_gemsh);
+	    gp8 = GlobalPoint(gp);
+	}
+    }
+    if (odd){
+ 	    etrk_[st].phi_1strippad_odd = gp1.phi();
+ 	    etrk_[st].phi_2strippad_odd = gp2.phi();
+ 	    etrk_[st].phi_4strippad_odd = gp4.phi();
+ 	    etrk_[st].phi_8strippad_odd = gp8.phi();
+      	    if (is_valid(lct_odd[st])){
+	    	etrk_[st].dphi_1strippad_odd = deltaPhi(etrk_[st].phi_lct_odd, gp1.phi());
+	    	etrk_[st].dphi_1strippad_fit_odd = deltaPhi(etrk_[st].phi_layer3_fit_odd, gp1.phi());
+	    	etrk_[st].dphi_2strippad_odd = deltaPhi(etrk_[st].phi_lct_odd, gp2.phi());
+	    	etrk_[st].dphi_2strippad_fit_odd = deltaPhi(etrk_[st].phi_layer3_fit_odd, gp2.phi());
+	    	etrk_[st].dphi_4strippad_odd = deltaPhi(etrk_[st].phi_lct_odd, gp4.phi());
+	    	etrk_[st].dphi_4strippad_fit_odd = deltaPhi(etrk_[st].phi_layer3_fit_odd, gp4.phi());
+	    	etrk_[st].dphi_8strippad_odd = deltaPhi(etrk_[st].phi_lct_odd, gp8.phi());
+	    	etrk_[st].dphi_8strippad_fit_odd = deltaPhi(etrk_[st].phi_layer3_fit_odd, gp8.phi());
+	    }
+    }else{
+ 	    etrk_[st].phi_1strippad_even = gp1.phi();
+ 	    etrk_[st].phi_2strippad_even = gp2.phi();
+ 	    etrk_[st].phi_4strippad_even = gp4.phi();
+ 	    etrk_[st].phi_8strippad_even = gp8.phi();
+      	    if (is_valid(lct_even[st])){
+	    	etrk_[st].dphi_1strippad_even = deltaPhi(etrk_[st].phi_lct_even, gp1.phi());
+	    	etrk_[st].dphi_1strippad_fit_even = deltaPhi(etrk_[st].phi_layer3_fit_even, gp1.phi());
+	    	etrk_[st].dphi_2strippad_even = deltaPhi(etrk_[st].phi_lct_even, gp2.phi());
+	    	etrk_[st].dphi_2strippad_fit_even = deltaPhi(etrk_[st].phi_layer3_fit_even, gp2.phi());
+	    	etrk_[st].dphi_4strippad_even = deltaPhi(etrk_[st].phi_lct_even, gp4.phi());
+	    	etrk_[st].dphi_4strippad_fit_even = deltaPhi(etrk_[st].phi_layer3_fit_even, gp4.phi());
+	    	etrk_[st].dphi_8strippad_even = deltaPhi(etrk_[st].phi_lct_even, gp8.phi());
+	    	etrk_[st].dphi_8strippad_fit_even = deltaPhi(etrk_[st].phi_layer3_fit_even, gp8.phi());
+	    }
+    }
+    if (odd and MEStation == 1){
+ 	    etrk_[1].phi_1strippad_odd = gp1.phi();
+ 	    etrk_[1].phi_2strippad_odd = gp2.phi();
+ 	    etrk_[1].phi_4strippad_odd = gp4.phi();
+ 	    etrk_[1].phi_8strippad_odd = gp8.phi();
+      	    if (is_valid(lct_odd[1])){
+	    	etrk_[1].dphi_1strippad_odd = deltaPhi(etrk_[1].phi_lct_odd, gp1.phi());
+	    	etrk_[1].dphi_1strippad_fit_odd = deltaPhi(etrk_[1].phi_layer3_fit_odd, gp1.phi());
+	    	etrk_[1].dphi_2strippad_odd = deltaPhi(etrk_[1].phi_lct_odd, gp2.phi());
+	    	etrk_[1].dphi_2strippad_fit_odd = deltaPhi(etrk_[1].phi_layer3_fit_odd, gp2.phi());
+	    	etrk_[1].dphi_4strippad_odd = deltaPhi(etrk_[1].phi_lct_odd, gp4.phi());
+	    	etrk_[1].dphi_4strippad_fit_odd = deltaPhi(etrk_[1].phi_layer3_fit_odd, gp4.phi());
+	    	etrk_[1].dphi_8strippad_odd = deltaPhi(etrk_[1].phi_lct_odd, gp8.phi());
+	    	etrk_[1].dphi_8strippad_fit_odd = deltaPhi(etrk_[1].phi_layer3_fit_odd, gp8.phi());
+	    }
+    }else if (MEStation == 1){
+ 	    etrk_[1].phi_1strippad_even = gp1.phi();
+ 	    etrk_[1].phi_2strippad_even = gp2.phi();
+ 	    etrk_[1].phi_4strippad_even = gp4.phi();
+ 	    etrk_[1].phi_8strippad_even = gp8.phi();
+      	    if (is_valid(lct_even[1])){
+	    	etrk_[1].dphi_1strippad_even = deltaPhi(etrk_[1].phi_lct_even, gp1.phi());
+	    	etrk_[1].dphi_1strippad_fit_even = deltaPhi(etrk_[1].phi_layer3_fit_even, gp1.phi());
+	    	etrk_[1].dphi_2strippad_even = deltaPhi(etrk_[1].phi_lct_even, gp2.phi());
+	    	etrk_[1].dphi_2strippad_fit_even = deltaPhi(etrk_[1].phi_layer3_fit_even, gp2.phi());
+	    	etrk_[1].dphi_4strippad_even = deltaPhi(etrk_[1].phi_lct_even, gp4.phi());
+	    	etrk_[1].dphi_4strippad_fit_even = deltaPhi(etrk_[1].phi_layer3_fit_even, gp4.phi());
+	    	etrk_[1].dphi_8strippad_even = deltaPhi(etrk_[1].phi_lct_even, gp8.phi());
+	    	etrk_[1].dphi_8strippad_fit_even = deltaPhi(etrk_[1].phi_layer3_fit_even, gp8.phi());
+	    }
+    }
+
+
+    std::cout <<"GEM id "<< id << std::endl;	
+    std::cout <<" final GEM sim phi "<< phi_gemsh <<" 1strippad "<< gp1.phi()<<" 2strippad "<< gp2.phi()<<" 4strippad "<< gp4.phi()<<" 8strippad "<< gp8.phi() <<" pad phi "<< phi_pad <<" lct phi "<< lct_phi <<" lct fit phi "<< lct_fit_phi << std::endl; 
+	 
+
   }
 
 
@@ -2404,68 +2567,6 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
   GlobalPoint gp1,gp2, gp3, gp4, gp_ge11, gp_ge21;
   GlobalVector gv1,gv2;
-  int npar=-1;
-  float csc_bending_angle_12=-9;
-  float csc_bending_angle12_gemcsc = -9;
-  float csc_bending_angle12_xfactor = -9;
-  float csc_bending_angle12_xfactor_smear1 = -9;
-  float csc_bending_angle12_xfactor_smear2 = -9;
-  float csc_bending_angle12_xfactor_smear3 = -9;
-  float csc_bending_angle12_xfactor_smear0 = -9;
-  float csc_bending_angle12_xfactor_L1_1 = -9;
-  float csc_bending_angle12_xfactor_L1_2 = -9;
-  float csc_bending_angle12_xfactor_L1_3 = -9;
-  float dphi_dir_st12_st23_sh = -9;
-  float dphi_dir_st12_st23_L1 = -9;
-  float dphi_position_st1_st2_sh = -9;
-  float dphi_position_st2_st3_sh = -9;
-  float dphi_position_st1_st2_L1 = -9;
-  float dphi_position_st2_st3_L1 = -9;
-  //float dphiME11 = -9;
-  //float dphiME21 = -9;
-  //float dphiME11_gauss = -9;
-  //float dphiME21_gauss = -9;
-  //float z_st_layers[4][6] = {0.0};
-  //float phi_st_layers[4][6] = {0.0};
-  float gp1_phi_gauss = -9;
-  float gp2_phi_gauss = -9;
-  float	gem1_phi_gauss = -9;
-  float gem2_phi_gauss = -9;
-
-//x_factor = (R(ME21)/R(ME11)-1)/D(ME11, ME21)
-//X: st1, X=D(GEM,CSC)*x_factor, st2: D(GEM,CSC)*x_factor/(D(ME11,ME21)*x+1)
-  float xfactor = 0.0;
-  float xfactor_st1 = 0.0;
-  float xfactor_st2 = 0.0;
-  float xfactor_st2_csconly = 0.0;
-  float xfactor_st12 = 0.0;
-  float xfactor_st23 = 0.0;
-  float xfactor_sh = 0.0;
-  float phiM_st1_sh = -9.0;
-  float phiM_st2_sh = -9.0;
-  float phiM_st1_smear0 = -9.0;
-  float phiM_st2_smear0 = -9.0;
-  float phiM_st1_smear1 = -9.0;
-  float phiM_st2_smear1 = -9.0;
-  float phiM_st1_smear2 = -9.0;
-  float phiM_st2_smear2 = -9.0;
-  float phiM_st1_smear3 = -9.0;
-  float phiM_st2_smear3 = -9.0;
-  float phiM_st12_sh = -9.0;
-  float phiM_st23_sh = -9.0;
-  float phiM_st12_L1 = -9.0;
-  float phiM_st23_L1 = -9.0;
-  float phiM_st1_L1_1 = -9.0;
-  float phiM_st2_L1_1 = -9.0;
-  float phiM_st1_L1_2 = -9.0;
-  float phiM_st2_L1_2 = -9.0;
-  float phiM_st1_L1_3 = -9.0;
-  float phiM_st2_L1_3 = -9.0;
-
-
-  DisplacedMuonTriggerPtassignment displacedMuonL1Pt(match_lct.allLctsMatched2SimMuon(), match_gd.allGempadsMatch2SimMuon_2strip(), match_lct.eventSetup(), match_lct.event()); 
-  displacedMuonL1Pt.setCharge(etrk_[0].charge);
-  if (displacedMuonL1Pt.getNParity() >= 0)  std::cout <<"DisplacedMuon get npar "<< displacedMuonL1Pt.getNParity()<<" ring "<<displacedMuonL1Pt.getMeRing() << std::endl;
   if (etrk_[1].has_csc_sh>0 and etrk_[6].has_csc_sh>0){
      etrk_[0].meRing =1;
      if ((etrk_[1].has_csc_sh&1)>0 and (etrk_[6].has_csc_sh&2)>0){
@@ -2475,102 +2576,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         gv2=gv_sh_even[6];
 	gp_ge11 = gp_gemsh_odd[1];
 	gp_ge21 = gp_gemsh_even[6];
-	csc_bending_angle_12=deltaPhi(gv1.phi(), gv2.phi());
-        gem1_phi_gauss = CLHEP::RandGauss::shoot(etrk_[1].phi_gemsh_odd, .00021);
-        gem2_phi_gauss = CLHEP::RandGauss::shoot(etrk_[6].phi_gemsh_even, .00021);
-	//std::cout <<"GE21 phi from gemsh "<< etrk_[6].phi_gemsh_even <<" 1strippad "<< etrk_[6].phi_1strippad_even <<" 2strippad "<< etrk_[6].phi_2strippad_even <<" 4strippad "<< etrk_[6].phi_4strippad_even <<" 8strippad "<< etrk_[6].phi_8strippad_even <<std::endl;
-        gp1_phi_gauss = CLHEP::RandGauss::shoot(etrk_[1].phi_cscsh_odd, .00026);
-        gp2_phi_gauss = CLHEP::RandGauss::shoot(etrk_[6].phi_cscsh_even, .00045);
-	xfactor_sh = (gp2.perp()/gp1.perp()-1.0)/(814.586-615.33);
-	xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
-	xfactor = xfactor_sh;
-	//displacedMuonPt
-	//displacedMuonL1Pt.setxfactor(xfactor);
-	//displacedMuonL1Pt.setPhiGEM(etrk_[6].phi_2strippad_even, 2);
-	//std::cout << "displacedMuonL1Pt phi_ge21 "<< displacedMuonL1Pt.getPhiGEM(2)<<" Ana "<< etrk_[6].phi_2strippad_even << std::endl;
-	//std::cout <<"gp1 perp "<< gp1.perp() <<" gp2 perp "<< gp2.perp() <<"xfactor "<< xfactor <<" smear "<< xfactor_smear << std::endl;
-	xfactor_st1 = (615.33-567.82)*xfactor;
-	xfactor_st2 = (814.586-794.29)*xfactor/(xfactor*(814.586-615.33)+1);
-	xfactor_st2_csconly = (12.7)*xfactor/(xfactor*(814.586-615.33+2.54*3)+1);
-	xfactor_st12 = xfactor*(814.586-615.33)/(xfactor*(814.586-615.33)+1);
-	phiM_st12_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_even, etrk_[1].phi_cscsh_odd, xfactor_st12);
-	phiM_st12_L1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_layer3_fit_even, etrk_[1].phi_layer3_fit_odd, xfactor_st12);
-	dphi_position_st1_st2_sh = deltaPhi(etrk_[1].phi_cscsh_odd, etrk_[6].phi_cscsh_even);
-	if (etrk_[1].phi_layer3_fit_odd>-9 and etrk_[6].phi_layer3_fit_even>-9)
-		dphi_position_st1_st2_L1 = deltaPhi(etrk_[1].phi_layer3_fit_odd, etrk_[6].phi_layer3_fit_even);
-	npar=0;
-	//std::cout <<"Simlevel napr "<< npar <<" ME11 CSC phi "<< etrk_[1].phi_cscsh_odd <<" ME21 CSC phi "<< etrk_[6].phi_cscsh_even <<" phiM_st12_sh "<< phiM_st12_sh << std::endl;
-	//std::cout <<"Digilevel napr "<< npar <<" ME11 CSC phi "<< etrk_[1].phi_layer3_fit_odd <<" ME21 CSC phi "<< etrk_[6].phi_layer3_fit_even <<" phiM_st12_L1 "<< phiM_st12_L1 << std::endl;
 	if ((etrk_[8].has_csc_sh&2)>0)
-	{
 	    gp3=gp_sh_even[8];
-	    
-	    //xfactor_st23 = xfactor*D32*(R1/R2)
-	    xfactor_st23 = xfactor*(948.46-814.586)/(xfactor*(948.46-615.33)+1);
-	    phiM_st23_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[8].phi_cscsh_even, etrk_[6].phi_cscsh_even, xfactor_st23);
-	    phiM_st23_L1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[8].phi_layer3_fit_even, etrk_[6].phi_layer3_fit_even, xfactor_st23);
-	    if (phiM_st12_sh>-9 and phiM_st23_sh>-9)
-		dphi_dir_st12_st23_sh = deltaPhi(phiM_st12_sh, phiM_st23_sh);
-	    if (phiM_st12_L1>-9 and phiM_st23_L1>-9)
-		dphi_dir_st12_st23_L1 = deltaPhi(phiM_st12_L1, phiM_st23_L1);
-	    dphi_position_st1_st2_sh = deltaPhi(etrk_[6].phi_cscsh_even, etrk_[8].phi_cscsh_even);
-	    if (etrk_[6].phi_layer3_fit_even>-9 and etrk_[8].phi_layer3_fit_even>-9)
-		dphi_position_st1_st2_L1 = deltaPhi(etrk_[6].phi_layer3_fit_even, etrk_[8].phi_layer3_fit_even);
-	    //std::cout <<" npar "<< npar <<" xfactor from st1 st2 "<< xfactor_sh*gp1.perp() <<" from st2 st3 "<<  (gp3.perp()-gp2.perp())/(948.46-814.586)<<std::endl; 
-	}
-	if (etrk_[1].dphi_sh_odd>-9 and etrk_[6].dphi_sh_even>-9)
-	{
-	    //dphiME11 = etrk_[1].dphi_sh_odd;
-	    //dphiME21 = etrk_[6].dphi_sh_even;
-    	    //dphiME11_gauss = CLHEP::RandGauss::shoot(dphiME11, .0005);
-     	    //dphiME21_gauss = CLHEP::RandGauss::shoot(dphiME21, .0005);
-	    phiM_st1_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[1].phi_cscsh_odd, etrk_[1].phi_gemsh_odd, xfactor_st1);
-	    phiM_st2_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_even, etrk_[6].phi_gemsh_even, xfactor_st2);
-	    phiM_st1_smear0 = PtassignmentHelper::PhiMomentum_Xfactor_V2(gp1_phi_gauss, etrk_[1].phi_gemsh_odd, xfactor_st1);
-	    phiM_st2_smear0 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_even, etrk_[6].phi_gemsh_even, xfactor_st2);
-	    phiM_st1_smear1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(gp1_phi_gauss, gem1_phi_gauss, xfactor_st1);
-	    phiM_st2_smear1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_even, etrk_[6].phi_gemsh_even, xfactor_st2);
-	    phiM_st1_smear2 = PtassignmentHelper::PhiMomentum_Xfactor_V2(gp1_phi_gauss, gem1_phi_gauss, xfactor_st1);
-	    phiM_st2_smear2 = PtassignmentHelper::PhiMomentum_Xfactor_V2(gp2_phi_gauss, etrk_[6].phi_gemsh_even, xfactor_st2);
-	    phiM_st1_smear3 = PtassignmentHelper::PhiMomentum_Xfactor_V2(gp1_phi_gauss, gem1_phi_gauss, xfactor_st1);
-	    phiM_st2_smear3 = PtassignmentHelper::PhiMomentum_Xfactor_V2(gp2_phi_gauss, gem2_phi_gauss, xfactor_st2);
-
-	    phiM_st1_L1_1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[1].phi_layer3_fit_odd, etrk_[1].phi_pad_odd, xfactor_st1);
-	    phiM_st2_L1_1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_layer6_fit_even, etrk_[6].phi_layer1_fit_even, xfactor_st2_csconly);
-	    phiM_st1_L1_2 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[1].phi_layer3_fit_odd, etrk_[1].phi_pad_odd, xfactor_st1);
-	    phiM_st2_L1_2 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_layer3_fit_even, etrk_[6].phi_2strippad_even, xfactor_st2);
-	    phiM_st1_L1_3 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[1].phi_layer3_fit_odd, etrk_[1].phi_pad_odd, xfactor_st1);
-	    phiM_st2_L1_3 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_layer3_fit_even, etrk_[6].phi_4strippad_even, xfactor_st2);
-	    if (phiM_st1_sh>-9 and phiM_st2_sh>-9){
-		csc_bending_angle12_xfactor = deltaPhi(phiM_st1_sh,phiM_st2_sh);
-		csc_bending_angle12_xfactor_smear0 = deltaPhi(phiM_st1_smear0,phiM_st2_smear0);
-		csc_bending_angle12_xfactor_smear1 = deltaPhi(phiM_st1_smear1,phiM_st2_smear1);
-		csc_bending_angle12_xfactor_smear2 = deltaPhi(phiM_st1_smear2,phiM_st2_smear2);
-		csc_bending_angle12_xfactor_smear3 = deltaPhi(phiM_st1_smear3,phiM_st2_smear3);
-		if (phiM_st12_sh>-9)
-		    etrk_[0].dphi_dir_st1_st12_sh = deltaPhi(phiM_st1_sh, phiM_st12_sh);
-		if (phiM_st23_sh>-9)
-		    etrk_[0].dphi_dir_st2_st23_sh = deltaPhi(phiM_st2_sh, phiM_st23_sh);
-	    }
-	    if (phiM_st1_L1_1>-9 and phiM_st2_L1_1>-9){
-	    	csc_bending_angle12_xfactor_L1_1 = deltaPhi(phiM_st1_L1_1,phiM_st2_L1_1);
-		if (phiM_st12_L1>-9)
-		    etrk_[0].dphi_dir_st1_st12_L1_csc = deltaPhi(phiM_st1_L1_1, phiM_st12_L1);
-		if (phiM_st23_L1>-9)
-		    etrk_[0].dphi_dir_st2_st23_L1_csc = deltaPhi(phiM_st2_L1_1, phiM_st23_L1);
-	    }
-	    if (phiM_st1_L1_2>-9 and phiM_st2_L1_2>-9){
-		csc_bending_angle12_xfactor_L1_2 = deltaPhi(phiM_st1_L1_2,phiM_st2_L1_2);
-		csc_bending_angle12_xfactor_L1_3 = deltaPhi(phiM_st1_L1_3,phiM_st2_L1_3);
-		if (phiM_st12_L1>-9)
-		    etrk_[0].dphi_dir_st1_st12_L1 = deltaPhi(phiM_st1_L1_2, phiM_st12_L1);
-		if (phiM_st23_L1>-9)
-		    etrk_[0].dphi_dir_st2_st23_L1 = deltaPhi(phiM_st2_L1_2, phiM_st23_L1);
-	    }
-
-	    if (etrk_[1].phiM_gemcsc_odd>-9 and etrk_[6].phiM_gemcsc_even>-9)
-     	    	csc_bending_angle12_gemcsc = deltaPhi(etrk_[1].phiM_gemcsc_odd, etrk_[6].phiM_gemcsc_even);
-	}
      }else if ((etrk_[1].has_csc_sh&1)>0 and (etrk_[6].has_csc_sh&1)>0 ){ 
         gp1=gp_sh_odd[1];
         gp2=gp_sh_odd[6];
@@ -2578,100 +2585,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         gv2=gv_sh_odd[6];
 	gp_ge11 = gp_gemsh_odd[1];
 	gp_ge21 = gp_gemsh_odd[6];
-	csc_bending_angle_12=deltaPhi(gv1.phi(), gv2.phi());
-        gem1_phi_gauss = CLHEP::RandGauss::shoot(etrk_[1].phi_gemsh_odd, .00021);
-        gem2_phi_gauss = CLHEP::RandGauss::shoot(etrk_[6].phi_gemsh_odd, .00021);
-	//std::cout <<"GE21 phi from gemsh "<< etrk_[6].phi_gemsh_odd <<" 1strippad "<< etrk_[6].phi_1strippad_odd <<" 2strippad "<< etrk_[6].phi_2strippad_odd <<" 4strippad "<< etrk_[6].phi_4strippad_odd <<" 8strippad "<< etrk_[6].phi_8strippad_odd <<std::endl;
-        gp1_phi_gauss = CLHEP::RandGauss::shoot(etrk_[1].phi_cscsh_odd, .00026);
-        gp2_phi_gauss = CLHEP::RandGauss::shoot(etrk_[6].phi_cscsh_odd, .00045);
-	xfactor_sh = (gp2.perp()/gp1.perp()-1.0)/(839.386-615.33);
-	xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
-	//xfactor = xfactor_sh;
-	//displacedMuonL1Pt.setxfactor(xfactor);
-	//displacedMuonL1Pt.setPhiGEM(etrk_[6].phi_2strippad_odd, 2);
-	//std::cout << "displacedMuonL1Pt phi_ge21 "<< displacedMuonL1Pt.getPhiGEM(2)<<" Ana "<< etrk_[6].phi_2strippad_odd << std::endl;
-        //xfactor_smear = CLHEP::RandGauss::shoot(xfactor,0.00005);
-	//std::cout <<"gp1 perp "<< gp1.perp() <<" gp2 perp "<< gp2.perp() <<"xfactor "<< xfactor <<" smear "<< xfactor_smear << std::endl;
-	xfactor_st1 = (615.33-567.82)*xfactor;
-	xfactor_st2 = (839.386-796.792)*xfactor/(xfactor*(839.386-615.33)+1);
-	xfactor_st2_csconly = (12.7)*xfactor/(xfactor*(839.386-615.33+2.54*3)+1);
-	xfactor_st12 = (839.386-615.33)*xfactor/(xfactor*(839.386-615.33)+1);
-	phiM_st12_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_odd, etrk_[1].phi_cscsh_odd, xfactor_st12);
-	phiM_st12_L1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_layer3_fit_odd, etrk_[1].phi_layer3_fit_odd, xfactor_st12);
-	dphi_position_st1_st2_sh = deltaPhi(etrk_[1].phi_cscsh_odd, etrk_[6].phi_cscsh_odd);
-	if (etrk_[1].phi_layer3_fit_odd>-9 and etrk_[6].phi_layer3_fit_odd>-9)
-		dphi_position_st1_st2_L1 = deltaPhi(etrk_[1].phi_layer3_fit_odd, etrk_[6].phi_layer3_fit_odd);
-	npar=1;
-	//std::cout <<"Simlevel napr "<< npar <<" ME11 CSC phi "<< etrk_[1].phi_cscsh_odd <<" ME21 CSC phi "<< etrk_[6].phi_cscsh_odd <<" phiM_st12_sh "<< phiM_st12_sh << std::endl;
-	//std::cout <<"Digilevel napr "<< npar <<" ME11 CSC phi "<< etrk_[1].phi_layer3_fit_odd <<" ME21 CSC phi "<< etrk_[6].phi_layer3_fit_odd <<" phiM_st12_L1 "<< phiM_st12_L1 << std::endl;
 	if ((etrk_[8].has_csc_sh&1)>0)
-	{
 	    gp3=gp_sh_odd[8];
-	    //xfactor_st23 = xfactor*D32*(R1/R2)
-	    xfactor_st23 = xfactor*(923.661-839.386)/(xfactor*(923.661-615.33)+1);
-	    phiM_st23_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[8].phi_cscsh_odd, etrk_[6].phi_cscsh_odd, xfactor_st23);
-	    phiM_st23_L1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[8].phi_layer3_fit_odd, etrk_[6].phi_layer3_fit_odd, xfactor_st23);
-	    if (phiM_st12_sh>-9 and phiM_st23_sh>-9)
-		dphi_dir_st12_st23_sh = deltaPhi(phiM_st12_sh, phiM_st23_sh);
-	    if (phiM_st12_L1>-9 and phiM_st23_L1>-9)
-		dphi_dir_st12_st23_L1 = deltaPhi(phiM_st12_L1, phiM_st23_L1);
-	    dphi_position_st1_st2_sh = deltaPhi(etrk_[6].phi_cscsh_odd, etrk_[8].phi_cscsh_odd);
-	    if (etrk_[6].phi_layer3_fit_odd>-9 and etrk_[8].phi_layer3_fit_odd>-9)
-		dphi_position_st1_st2_L1 = deltaPhi(etrk_[6].phi_layer3_fit_odd, etrk_[8].phi_layer3_fit_odd);
-	    //std::cout <<" npar "<< npar <<" xfactor from st1 st2 "<< xfactor_sh*gp1.perp() <<" from st2 st3 "<<  (gp3.perp()-gp2.perp())/(923.661-839.386)<<std::endl; 
-	 }
-	if (etrk_[1].dphi_sh_odd>-9 and etrk_[6].dphi_sh_odd>-9)
-	{
-	    //dphiME11 = etrk_[1].dphi_sh_odd;
-	    //dphiME21 = etrk_[6].dphi_sh_odd;
-    	    //dphiME11_gauss = CLHEP::RandGauss::shoot(dphiME11, .0005);
-     	    //dphiME21_gauss = CLHEP::RandGauss::shoot(dphiME21, .0005);
-	    phiM_st1_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[1].phi_cscsh_odd, etrk_[1].phi_gemsh_odd, xfactor_st1);
-	    phiM_st2_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_odd, etrk_[6].phi_gemsh_odd, xfactor_st2);
-	    phiM_st1_smear0 = PtassignmentHelper::PhiMomentum_Xfactor_V2(gp1_phi_gauss, etrk_[1].phi_gemsh_odd, xfactor_st1);
-	    phiM_st2_smear0 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_odd, etrk_[6].phi_gemsh_odd, xfactor_st2);
-	    phiM_st1_smear1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(gp1_phi_gauss, gem1_phi_gauss, xfactor_st1);
-	    phiM_st2_smear1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_odd, etrk_[6].phi_gemsh_odd, xfactor_st2);
-	    phiM_st1_smear2 = PtassignmentHelper::PhiMomentum_Xfactor_V2(gp1_phi_gauss, gem1_phi_gauss, xfactor_st1);
-	    phiM_st2_smear2 = PtassignmentHelper::PhiMomentum_Xfactor_V2(gp2_phi_gauss, etrk_[6].phi_gemsh_odd, xfactor_st2);
-	    phiM_st1_smear3 = PtassignmentHelper::PhiMomentum_Xfactor_V2(gp1_phi_gauss, gem1_phi_gauss, xfactor_st1);
-	    phiM_st2_smear3 = PtassignmentHelper::PhiMomentum_Xfactor_V2(gp2_phi_gauss, gem2_phi_gauss, xfactor_st2);
-	    phiM_st1_L1_1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[1].phi_layer3_fit_odd, etrk_[1].phi_pad_odd, xfactor_st1);
-	    phiM_st2_L1_1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_layer6_fit_odd, etrk_[6].phi_layer1_fit_odd, xfactor_st2_csconly);
-	    phiM_st1_L1_2 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[1].phi_layer3_fit_odd, etrk_[1].phi_pad_odd, xfactor_st1);
-	    phiM_st2_L1_2 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_layer3_fit_odd, etrk_[6].phi_2strippad_odd, xfactor_st2);
-	    phiM_st1_L1_3 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[1].phi_layer3_fit_odd, etrk_[1].phi_pad_odd, xfactor_st1);
-	    phiM_st2_L1_3 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_layer3_fit_odd, etrk_[6].phi_4strippad_odd, xfactor_st2);
-	    if (phiM_st1_sh>-9 and phiM_st2_sh>-9){
-		csc_bending_angle12_xfactor = deltaPhi(phiM_st1_sh,phiM_st2_sh);
-		csc_bending_angle12_xfactor_smear0 = deltaPhi(phiM_st1_smear0,phiM_st2_smear0);
-		csc_bending_angle12_xfactor_smear1 = deltaPhi(phiM_st1_smear1,phiM_st2_smear1);
-		csc_bending_angle12_xfactor_smear2 = deltaPhi(phiM_st1_smear2,phiM_st2_smear2);
-		csc_bending_angle12_xfactor_smear3 = deltaPhi(phiM_st1_smear3,phiM_st2_smear3);
-		if (phiM_st12_sh>-9)
-		    etrk_[0].dphi_dir_st1_st12_sh = deltaPhi(phiM_st1_sh, phiM_st12_sh);
-		if (phiM_st23_sh>-9)
-		    etrk_[0].dphi_dir_st2_st23_sh = deltaPhi(phiM_st2_sh, phiM_st23_sh);
-	    }
-	    if (phiM_st1_L1_1>-9 and phiM_st2_L1_1>-9){
-	    	csc_bending_angle12_xfactor_L1_1 = deltaPhi(phiM_st1_L1_1,phiM_st2_L1_1);
-		if (phiM_st12_L1>-9)
-		    etrk_[0].dphi_dir_st1_st12_L1_csc = deltaPhi(phiM_st1_L1_1, phiM_st12_L1);
-		if (phiM_st23_L1>-9)
-		    etrk_[0].dphi_dir_st2_st23_L1_csc = deltaPhi(phiM_st2_L1_1, phiM_st23_L1);
-	    }
-	    if (phiM_st1_L1_2>-9 and phiM_st2_L1_2>-9){
-		csc_bending_angle12_xfactor_L1_2 = deltaPhi(phiM_st1_L1_2,phiM_st2_L1_2);
-		csc_bending_angle12_xfactor_L1_3 = deltaPhi(phiM_st1_L1_3,phiM_st2_L1_3);
-		if (phiM_st12_L1>-9)
-		    etrk_[0].dphi_dir_st1_st12_L1 = deltaPhi(phiM_st1_L1_2, phiM_st12_L1);
-		if (phiM_st23_L1>-9)
-		    etrk_[0].dphi_dir_st2_st23_L1 = deltaPhi(phiM_st2_L1_2, phiM_st23_L1);
-	    }
-
-	    if (etrk_[1].phiM_gemcsc_odd>-9 and etrk_[6].phiM_gemcsc_odd>-9)
-     	    	csc_bending_angle12_gemcsc = deltaPhi(etrk_[1].phiM_gemcsc_odd, etrk_[6].phiM_gemcsc_odd);
-	}
      }else if ((etrk_[1].has_csc_sh&2)>0 and (etrk_[6].has_csc_sh&2)>0 ){ 
         gp1=gp_sh_even[1];
         gp2=gp_sh_even[6];
@@ -2679,100 +2594,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         gv2=gv_sh_even[6];
 	gp_ge11 = gp_gemsh_even[1];
 	gp_ge21 = gp_gemsh_even[6];
-	csc_bending_angle_12=deltaPhi(gv1.phi(), gv2.phi());
-        gem1_phi_gauss = CLHEP::RandGauss::shoot(etrk_[1].phi_gemsh_even, .00021);
-        gem2_phi_gauss = CLHEP::RandGauss::shoot(etrk_[6].phi_gemsh_even, .00021);
-	//std::cout <<"GE21 phi from gemsh "<< etrk_[6].phi_gemsh_even <<" 1strippad "<< etrk_[6].phi_1strippad_even <<" 2strippad "<< etrk_[6].phi_2strippad_even <<" 4strippad "<< etrk_[6].phi_4strippad_even <<" 8strippad "<< etrk_[6].phi_8strippad_even <<std::endl;
-        gp1_phi_gauss = CLHEP::RandGauss::shoot(etrk_[1].phi_cscsh_even, .00026);
-        gp2_phi_gauss = CLHEP::RandGauss::shoot(etrk_[6].phi_cscsh_even, .00045);
-	xfactor_sh = (gp2.perp()/gp1.perp()-1.0)/(814.586-586.03);
-	xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
-	//xfactor = xfactor_sh;
-	//displacedMuonL1Pt.setxfactor(xfactor);
-	//displacedMuonL1Pt.setPhiGEM(etrk_[6].phi_2strippad_even, 2);
-	//std::cout << "displacedMuonL1Pt phi_ge21 "<< displacedMuonL1Pt.getPhiGEM(2)<<" Ana "<< etrk_[6].phi_2strippad_even << std::endl;
-        //xfactor_smear = CLHEP::RandGauss::shoot(xfactor,0.00005);
-	//std::cout <<"gp1 perp "<< gp1.perp() <<" gp2 perp "<< gp2.perp() <<"xfactor "<< xfactor <<" smear "<< xfactor_smear << std::endl;
-	xfactor_st1 = (586.03-565.32)*xfactor;
-	xfactor_st2 = (814.586-794.29)*xfactor/(xfactor*(814.586-586.03)+1);
-	xfactor_st2_csconly = (12.7)*xfactor/(xfactor*(814.586-586.03+2.54*3)+1);
-	xfactor_st12 = xfactor*(814.586-586.03)/(xfactor*(814.586-586.03)+1);
-	phiM_st12_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_even, etrk_[1].phi_cscsh_even, xfactor_st12);
-	phiM_st12_L1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_layer3_fit_even, etrk_[1].phi_layer3_fit_even, xfactor_st12);
-	dphi_position_st1_st2_sh = deltaPhi(etrk_[1].phi_cscsh_even, etrk_[6].phi_cscsh_even);
-	if (etrk_[1].phi_layer3_fit_even>-9 and etrk_[6].phi_layer3_fit_even>-9)
-		dphi_position_st1_st2_L1 = deltaPhi(etrk_[1].phi_layer3_fit_even, etrk_[6].phi_layer3_fit_even);
-	npar=2;
-	//std::cout <<"Simlevel napr "<< npar <<" ME11 CSC phi "<< etrk_[1].phi_cscsh_even <<" ME21 CSC phi "<< etrk_[6].phi_cscsh_even <<" phiM_st12_sh "<< phiM_st12_sh << std::endl;
-	//std::cout <<"Digilevel napr "<< npar <<" ME11 CSC phi "<< etrk_[1].phi_layer3_fit_even <<" ME21 CSC phi "<< etrk_[6].phi_layer3_fit_even <<" phiM_st12_L1 "<< phiM_st12_L1 << std::endl;
 	if ((etrk_[8].has_csc_sh&2)>0)
-	{
 	    gp3=gp_sh_even[8];
-	    //xfactor_st23 = xfactor*D32*(R1/R2)
-	    xfactor_st23 = xfactor*(948.461-814.586)/(xfactor*(948.461-586.03)+1);
-	    phiM_st23_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[8].phi_cscsh_even, etrk_[6].phi_cscsh_even, xfactor_st23);
-	    phiM_st23_L1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[8].phi_layer3_fit_even, etrk_[6].phi_layer3_fit_even, xfactor_st23);
-	    if (phiM_st12_sh>-9 and phiM_st23_sh>-9)
-		dphi_dir_st12_st23_sh = deltaPhi(phiM_st12_sh, phiM_st23_sh);
-	    if (phiM_st12_L1>-9 and phiM_st23_L1>-9)
-		dphi_dir_st12_st23_L1 = deltaPhi(phiM_st12_L1, phiM_st23_L1);
-	    dphi_position_st1_st2_sh = deltaPhi(etrk_[6].phi_cscsh_even, etrk_[8].phi_cscsh_even);
-	    if (etrk_[6].phi_layer3_fit_even>-9 and etrk_[8].phi_layer3_fit_even>-9)
-		dphi_position_st1_st2_L1 = deltaPhi(etrk_[6].phi_layer3_fit_even, etrk_[8].phi_layer3_fit_even);
-	    //std::cout <<" npar "<< npar <<" xfactor from st1 st2 "<< xfactor_sh*gp1.perp() <<" from st2 st3 "<<  (gp3.perp()-gp2.perp())/(948.461-814.586)<<std::endl; 
-	 }
-	if (etrk_[1].dphi_sh_even>-9 and etrk_[6].dphi_sh_even>-9)
-	{
-	    //dphiME11 = etrk_[1].dphi_sh_even;
-	    //dphiME21 = etrk_[6].dphi_sh_even;
-    	    //dphiME11_gauss = CLHEP::RandGauss::shoot(dphiME11, .0005);
-     	    //dphiME21_gauss = CLHEP::RandGauss::shoot(dphiME21, .0005);
-	    phiM_st1_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[1].phi_cscsh_even, etrk_[1].phi_gemsh_even, xfactor_st1);
-	    phiM_st2_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_even, etrk_[6].phi_gemsh_even, xfactor_st2);
-	    phiM_st1_smear0 = PtassignmentHelper::PhiMomentum_Xfactor_V2(gp1_phi_gauss, etrk_[1].phi_gemsh_even, xfactor_st1);
-	    phiM_st2_smear0 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_even, etrk_[6].phi_gemsh_even, xfactor_st2);
-	    phiM_st1_smear1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(gp1_phi_gauss, gem1_phi_gauss, xfactor_st1);
-	    phiM_st2_smear1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_even, etrk_[6].phi_gemsh_even, xfactor_st2);
-	    phiM_st1_smear2 = PtassignmentHelper::PhiMomentum_Xfactor_V2(gp1_phi_gauss, gem1_phi_gauss, xfactor_st1);
-	    phiM_st2_smear2 = PtassignmentHelper::PhiMomentum_Xfactor_V2(gp2_phi_gauss, etrk_[6].phi_gemsh_even, xfactor_st2);
-	    phiM_st1_smear3 = PtassignmentHelper::PhiMomentum_Xfactor_V2(gp1_phi_gauss, gem1_phi_gauss, xfactor_st1);
-	    phiM_st2_smear3 = PtassignmentHelper::PhiMomentum_Xfactor_V2(gp2_phi_gauss, gem2_phi_gauss, xfactor_st2);
-	    phiM_st1_L1_1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[1].phi_layer3_fit_even, etrk_[1].phi_pad_even, xfactor_st1);
-	    phiM_st2_L1_1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_layer6_fit_even, etrk_[6].phi_layer1_fit_even, xfactor_st2_csconly);
-	    phiM_st1_L1_2 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[1].phi_layer3_fit_even, etrk_[1].phi_pad_even, xfactor_st1);
-	    phiM_st2_L1_2 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_layer3_fit_even, etrk_[6].phi_2strippad_even, xfactor_st2);
-	    phiM_st1_L1_3 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[1].phi_layer3_fit_even, etrk_[1].phi_pad_even, xfactor_st1);
-	    phiM_st2_L1_3 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_layer3_fit_even, etrk_[6].phi_4strippad_even, xfactor_st2);
-	    if (phiM_st1_sh>-9 and phiM_st2_sh>-9){
-		csc_bending_angle12_xfactor = deltaPhi(phiM_st1_sh,phiM_st2_sh);
-		csc_bending_angle12_xfactor_smear0 = deltaPhi(phiM_st1_smear0,phiM_st2_smear0);
-		csc_bending_angle12_xfactor_smear1 = deltaPhi(phiM_st1_smear1,phiM_st2_smear1);
-		csc_bending_angle12_xfactor_smear2 = deltaPhi(phiM_st1_smear2,phiM_st2_smear2);
-		csc_bending_angle12_xfactor_smear3 = deltaPhi(phiM_st1_smear3,phiM_st2_smear3);
-		if (phiM_st12_sh>-9)
-		    etrk_[0].dphi_dir_st1_st12_sh = deltaPhi(phiM_st1_sh, phiM_st12_sh);
-		if (phiM_st23_sh>-9)
-		    etrk_[0].dphi_dir_st2_st23_sh = deltaPhi(phiM_st2_sh, phiM_st23_sh);
-	    }
-	    if (phiM_st1_L1_1>-9 and phiM_st2_L1_1>-9){
-	    	csc_bending_angle12_xfactor_L1_1 = deltaPhi(phiM_st1_L1_1,phiM_st2_L1_1);
-		if (phiM_st12_L1>-9)
-		    etrk_[0].dphi_dir_st1_st12_L1_csc = deltaPhi(phiM_st1_L1_1, phiM_st12_L1);
-		if (phiM_st23_L1>-9)
-		    etrk_[0].dphi_dir_st2_st23_L1_csc = deltaPhi(phiM_st2_L1_1, phiM_st23_L1);
-	    }
-	    if (phiM_st1_L1_2>-9 and phiM_st2_L1_2>-9){
-		csc_bending_angle12_xfactor_L1_2 = deltaPhi(phiM_st1_L1_2,phiM_st2_L1_2);
-		csc_bending_angle12_xfactor_L1_3 = deltaPhi(phiM_st1_L1_3,phiM_st2_L1_3);
-		if (phiM_st12_L1>-9)
-		    etrk_[0].dphi_dir_st1_st12_L1 = deltaPhi(phiM_st1_L1_2, phiM_st12_L1);
-		if (phiM_st23_L1>-9)
-		    etrk_[0].dphi_dir_st2_st23_L1 = deltaPhi(phiM_st2_L1_2, phiM_st23_L1);
-	    }
-
-	    if (etrk_[1].phiM_gemcsc_even>-9 and etrk_[6].phiM_gemcsc_even>-9)
-     	    	csc_bending_angle12_gemcsc = deltaPhi(etrk_[1].phiM_gemcsc_even, etrk_[6].phiM_gemcsc_even);
-	}
      }else if ((etrk_[1].has_csc_sh&2)>0 and (etrk_[6].has_csc_sh&1)>0 ){ 
         gp1=gp_sh_even[1];
         gp2=gp_sh_odd[6];
@@ -2780,104 +2603,10 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         gv2=gv_sh_odd[6];
 	gp_ge11 = gp_gemsh_even[1];
 	gp_ge21 = gp_gemsh_odd[6];
-	csc_bending_angle_12=deltaPhi(gv1.phi(), gv2.phi());
-        gem1_phi_gauss = CLHEP::RandGauss::shoot(etrk_[1].phi_gemsh_even, .00021);
-        gem2_phi_gauss = CLHEP::RandGauss::shoot(etrk_[6].phi_gemsh_odd, .00021);
-	//std::cout <<"GE21 phi from gemsh "<< etrk_[6].phi_gemsh_odd <<" 1strippad "<< etrk_[6].phi_1strippad_odd <<" 2strippad "<< etrk_[6].phi_2strippad_odd <<" 4strippad "<< etrk_[6].phi_4strippad_odd <<" 8strippad "<< etrk_[6].phi_8strippad_odd <<std::endl;
-        gp1_phi_gauss = CLHEP::RandGauss::shoot(etrk_[1].phi_cscsh_even, .00026);
-        gp2_phi_gauss = CLHEP::RandGauss::shoot(etrk_[6].phi_cscsh_odd, .00045);
-	xfactor_sh = (gp2.perp()/gp1.perp()-1.0)/(839.386-586.03);
-	xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
-	//xfactor = xfactor_sh;
-	//displacedMuonL1Pt.setxfactor(xfactor);
-	//displacedMuonL1Pt.setPhiGEM(etrk_[6].phi_2strippad_odd, 2);
-	//std::cout << "displacedMuonL1Pt phi_ge21 "<< displacedMuonL1Pt.getPhiGEM(2)<<" Ana "<< etrk_[6].phi_2strippad_odd << std::endl;
-	xfactor_st1 = (586.03-565.32)*xfactor;
-	xfactor_st2 = (839.386-796.792)*xfactor/(xfactor*(839.386-586.03)+1);
-	xfactor_st2_csconly = (12.7)*xfactor/(xfactor*(839.386-586.03+2.54*3)+1);
-	xfactor_st12 = (839.386-586.03)*xfactor/(xfactor*(839.386-586.03)+1); //(gp2.perp()-gp1.perp())/gp2.perp()
-	phiM_st12_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_odd, etrk_[1].phi_cscsh_even, xfactor_st12);
-	phiM_st12_L1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_layer3_fit_odd, etrk_[1].phi_layer3_fit_even, xfactor_st12);
-	dphi_position_st1_st2_sh = deltaPhi(etrk_[1].phi_cscsh_even, etrk_[6].phi_cscsh_odd);
-	if (etrk_[1].phi_layer3_fit_even>-9 and etrk_[6].phi_layer3_fit_odd>-9)
-		dphi_position_st1_st2_L1 = deltaPhi(etrk_[1].phi_layer3_fit_even, etrk_[6].phi_layer3_fit_odd);
-	//std::cout <<"gp1 perp "<< gp1.perp() <<" gp2 perp "<< gp2.perp() <<"xfactor "<< xfactor <<" smear "<< xfactor_smear <<" xfactor_st1 "<< xfactor_st1 <<" xfactor_st2 "<< xfactor_st2 << std::endl;
-	npar=3;
-	//std::cout <<"Simlevel napr "<< npar <<" ME11 CSC phi "<< etrk_[1].phi_cscsh_even <<" ME21 CSC phi "<< etrk_[6].phi_cscsh_odd <<" phiM_st12_sh "<< phiM_st12_sh << std::endl;
-	//std::cout <<"Digilevel napr "<< npar <<" ME11 CSC phi "<< etrk_[1].phi_layer3_fit_even <<" ME21 CSC phi "<< etrk_[6].phi_layer3_fit_odd <<" phiM_st12_L1 "<< phiM_st12_L1 << std::endl;
 	if ((etrk_[8].has_csc_sh&1)>0)
-	{
 	    gp3=gp_sh_odd[8];
-	    //xfactor_st23 = xfactor*D32*(R1/R2)
-	    xfactor_st23 = xfactor*(923.661-839.386)/(xfactor*(923.661-586.03)+1);
-	    phiM_st23_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[8].phi_cscsh_odd, etrk_[6].phi_cscsh_odd, xfactor_st23);
-	    phiM_st23_L1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[8].phi_layer3_fit_odd, etrk_[6].phi_layer3_fit_odd, xfactor_st23);
-	    if (phiM_st12_sh>-9 and phiM_st23_sh>-9)
-		dphi_dir_st12_st23_sh = deltaPhi(phiM_st12_sh, phiM_st23_sh);
-	    if (phiM_st12_L1>-9 and phiM_st23_L1>-9)
-		dphi_dir_st12_st23_L1 = deltaPhi(phiM_st12_L1, phiM_st23_L1);
-	    dphi_position_st1_st2_sh = deltaPhi(etrk_[6].phi_cscsh_odd, etrk_[8].phi_cscsh_odd);
-	    if (etrk_[6].phi_layer3_fit_odd>-9 and etrk_[8].phi_layer3_fit_odd>-9)
-		dphi_position_st1_st2_L1 = deltaPhi(etrk_[6].phi_layer3_fit_odd, etrk_[8].phi_layer3_fit_odd);
-	    //std::cout <<" npar "<< npar <<" xfactor from st1 st2 "<< xfactor_sh*gp1.perp() <<" from st2 st3 "<<  (gp3.perp()-gp2.perp())/(923.661-839.386)<<std::endl; 
-	 }
-	if (etrk_[1].dphi_sh_even>-9 and etrk_[6].dphi_sh_odd>-9)
-	{
-	    //dphiME11 = etrk_[1].dphi_sh_even;
-	    //dphiME21 = etrk_[6].dphi_sh_odd;
-    	    //dphiME11_gauss = CLHEP::RandGauss::shoot(dphiME11, .0005);//0.00055
-     	    //dphiME21_gauss = CLHEP::RandGauss::shoot(dphiME21, .0005);//0.00095
-	    phiM_st1_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[1].phi_cscsh_even, etrk_[1].phi_gemsh_even, xfactor_st1);
-	    phiM_st2_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_odd, etrk_[6].phi_gemsh_odd, xfactor_st2);
-	    phiM_st1_smear0 = PtassignmentHelper::PhiMomentum_Xfactor_V2(gp1_phi_gauss, etrk_[1].phi_gemsh_even, xfactor_st1);
-	    phiM_st2_smear0 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_odd, etrk_[6].phi_gemsh_odd, xfactor_st2);
-	    phiM_st1_smear1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(gp1_phi_gauss, gem1_phi_gauss, xfactor_st1);
-	    phiM_st2_smear1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_cscsh_odd, etrk_[6].phi_gemsh_odd, xfactor_st2);
-	    phiM_st1_smear2 = PtassignmentHelper::PhiMomentum_Xfactor_V2(gp1_phi_gauss, gem1_phi_gauss, xfactor_st1);
-	    phiM_st2_smear2 = PtassignmentHelper::PhiMomentum_Xfactor_V2(gp2_phi_gauss, etrk_[6].phi_gemsh_odd, xfactor_st2);
-	    phiM_st1_smear3 = PtassignmentHelper::PhiMomentum_Xfactor_V2(gp1_phi_gauss, gem1_phi_gauss, xfactor_st1);
-	    phiM_st2_smear3 = PtassignmentHelper::PhiMomentum_Xfactor_V2(gp2_phi_gauss, gem2_phi_gauss, xfactor_st2);
-	    phiM_st1_L1_1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[1].phi_layer3_fit_even, etrk_[1].phi_pad_even, xfactor_st1);
-	    phiM_st2_L1_1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_layer6_fit_odd, etrk_[6].phi_layer1_fit_odd, xfactor_st2_csconly);
-	    phiM_st1_L1_2 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[1].phi_layer3_fit_even, etrk_[1].phi_pad_even, xfactor_st1);
-	    phiM_st2_L1_2 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_layer3_fit_odd, etrk_[6].phi_2strippad_odd, xfactor_st2);
-	    phiM_st1_L1_3 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[1].phi_layer3_fit_even, etrk_[1].phi_pad_even, xfactor_st1);
-	    phiM_st2_L1_3 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[6].phi_layer3_fit_odd, etrk_[6].phi_4strippad_odd, xfactor_st2);
-	    if (phiM_st1_sh>-9 and phiM_st2_sh>-9){
-		csc_bending_angle12_xfactor = deltaPhi(phiM_st1_sh,phiM_st2_sh);
-		csc_bending_angle12_xfactor_smear0 = deltaPhi(phiM_st1_smear0, phiM_st2_smear0);
-		csc_bending_angle12_xfactor_smear1 = deltaPhi(phiM_st1_smear1, phiM_st2_smear1);
-		csc_bending_angle12_xfactor_smear2 = deltaPhi(phiM_st1_smear2, phiM_st2_smear2);
-		csc_bending_angle12_xfactor_smear3 = deltaPhi(phiM_st1_smear3, phiM_st2_smear3);
-		if (phiM_st12_sh>-9)
-		    etrk_[0].dphi_dir_st1_st12_sh = deltaPhi(phiM_st1_sh, phiM_st12_sh);
-		if (phiM_st23_sh>-9)
-		    etrk_[0].dphi_dir_st2_st23_sh = deltaPhi(phiM_st2_sh, phiM_st23_sh);
-	    }
-	    if (phiM_st1_L1_1>-9 and phiM_st2_L1_1>-9){
-	    	csc_bending_angle12_xfactor_L1_1 = deltaPhi(phiM_st1_L1_1,phiM_st2_L1_1);
-		if (phiM_st12_L1>-9)
-		    etrk_[0].dphi_dir_st1_st12_L1_csc = deltaPhi(phiM_st1_L1_1, phiM_st12_L1);
-		if (phiM_st23_L1>-9)
-		    etrk_[0].dphi_dir_st2_st23_L1_csc = deltaPhi(phiM_st2_L1_1, phiM_st23_L1);
-	    }
-	    if (phiM_st1_L1_2>-9 and phiM_st2_L1_2>-9){
-		csc_bending_angle12_xfactor_L1_2 = deltaPhi(phiM_st1_L1_2,phiM_st2_L1_2);
-		csc_bending_angle12_xfactor_L1_3 = deltaPhi(phiM_st1_L1_3,phiM_st2_L1_3);
-		if (phiM_st12_L1>-9)
-		    etrk_[0].dphi_dir_st1_st12_L1 = deltaPhi(phiM_st1_L1_2, phiM_st12_L1);
-		if (phiM_st23_L1>-9)
-		    etrk_[0].dphi_dir_st2_st23_L1 = deltaPhi(phiM_st2_L1_2, phiM_st23_L1);
-	    }
-
-	    if (etrk_[1].phiM_gemcsc_even>-9 and etrk_[6].phiM_gemcsc_odd>-9)
-     	    	csc_bending_angle12_gemcsc = deltaPhi(etrk_[1].phiM_gemcsc_even, etrk_[6].phiM_gemcsc_odd);
-	}
      }
-    //std::cout <<" pt "<< etrk_[0].pt <<" high eta region npar "<< npar<<" eta_st2 "<< gp2.eta() <<" csc bending angle12 "<< csc_bending_angle_12<<" xfactor-sh "<< xfactor_sh<<" xfactor "<< xfactor <<" csc_bending_angle12_xfactor "<< csc_bending_angle12_xfactor << std::endl;
-    //std::cout <<"phiM_st1_sh "<< phiM_st1_sh <<" phiM_st12_sh "<< phiM_st12_sh<<" phiM_st2_sh "<< phiM_st2_sh <<" phiM_st23_sh "<< phiM_st23_sh<< std::endl;
-  } 
-
+  }
      //low eta region , ME12, ME22
   if (etrk_[4].has_csc_sh>0 and etrk_[7].has_csc_sh>0){
      etrk_[0].meRing =2;
@@ -2886,216 +2615,43 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         gp2=gp_sh_even[7];
         gv1=gv_sh_odd[4];
         gv2=gv_sh_even[7];
-	csc_bending_angle_12=deltaPhi(gv1.phi(), gv2.phi());
-	xfactor_sh = (gp2.perp()/gp1.perp()-1.0)/(814.586-711.186);
-	xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
-	//xfactor = xfactor_sh;
-	//displacedMuonL1Pt.setxfactor(xfactor);
-	xfactor_st1 = (12.7)*xfactor; // check again here
-	xfactor_st2 = (12.7)*xfactor/(xfactor*(814.586-711.186)+1);//check again here
-	xfactor_st12 = (814.586-711.186)*xfactor/(xfactor*(814.586-711.186)+1); //(gp2.perp()-gp1.perp())/gp2.perp()
-	phiM_st12_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[7].phi_cscsh_even, etrk_[4].phi_cscsh_odd, xfactor_st12);
-	phiM_st12_L1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[7].phi_layer3_fit_even, etrk_[4].phi_layer3_fit_odd, xfactor_st12);
-	npar=0;
 	if ((etrk_[9].has_csc_sh&2)>0)
-	{
  	    gp3=gp_sh_even[9];
-	    //xfactor_st23 = xfactor*D32*(R1/R2)
-	    xfactor_st23 = xfactor*(948.461-814.586)/(xfactor*(948.461-711.186)+1);
-	    phiM_st23_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[9].phi_cscsh_even, etrk_[7].phi_cscsh_even, xfactor_st23);
-	    phiM_st23_L1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[9].phi_layer3_fit_even, etrk_[7].phi_layer3_fit_even, xfactor_st23);
-	    if (phiM_st12_sh>-9 and phiM_st23_sh>-9)
-		dphi_dir_st12_st23_sh = deltaPhi(phiM_st12_sh, phiM_st23_sh);
-	    if (phiM_st12_L1>-9 and phiM_st23_L1>-9)
-		dphi_dir_st12_st23_L1 = deltaPhi(phiM_st12_L1, phiM_st23_L1);
-	    //std::cout <<" npar "<< npar <<" xfactor from st1 st2 "<< xfactor_sh*gp1.perp() <<" from st2 st3 "<<  (gp3.perp()-gp2.perp())/(948.461-814.586)<<std::endl; 
-	 }
-	if (etrk_[4].phi_layer1_sh_odd>-9  and etrk_[4].phi_layer6_sh_odd>-9 and etrk_[7].phi_layer1_sh_even>-9  and etrk_[7].phi_layer6_sh_even>-9){
-	    phiM_st1_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[4].phi_layer6_sh_odd, etrk_[4].phi_layer1_sh_odd, xfactor_st1);
-	    phiM_st2_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[7].phi_layer6_sh_even, etrk_[7].phi_layer1_sh_even, xfactor_st2);
-	    phiM_st1_L1_2 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[4].phi_layer6_fit_odd, etrk_[4].phi_layer1_fit_odd, xfactor_st1);
-	    phiM_st2_L1_2 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[7].phi_layer6_fit_even, etrk_[7].phi_layer1_fit_even, xfactor_st2);
-	    if (phiM_st1_sh>-9 and phiM_st2_sh>-9){
-		csc_bending_angle12_xfactor = deltaPhi(phiM_st1_sh,phiM_st2_sh);
-		if (phiM_st12_sh>-9)
-		    etrk_[0].dphi_dir_st1_st12_sh = deltaPhi(phiM_st1_sh, phiM_st12_sh);
-		if (phiM_st23_sh>-9)
-		    etrk_[0].dphi_dir_st2_st23_sh = deltaPhi(phiM_st2_sh, phiM_st23_sh);
-	    }
-	    if (phiM_st1_L1_2>-9 and phiM_st2_L1_2>-9){
-		csc_bending_angle12_xfactor_L1_2 = deltaPhi(phiM_st1_L1_2,phiM_st2_L1_2);
-		csc_bending_angle12_xfactor_L1_1 = deltaPhi(etrk_[4].phiM_fitxyz_odd, etrk_[7].phiM_fitxyz_even);
-		if (phiM_st12_L1>-9)
-		    etrk_[0].dphi_dir_st1_st12_L1 = deltaPhi(phiM_st1_L1_2, phiM_st12_L1);
-		if (phiM_st23_L1>-9)
-		    etrk_[0].dphi_dir_st2_st23_L1 = deltaPhi(phiM_st2_L1_2, phiM_st23_L1);
-	    }
-	    
-	}
      }else if ((etrk_[4].has_csc_sh&1)>0 and (etrk_[7].has_csc_sh&1)>0){
         gp1=gp_sh_odd[4];
         gp2=gp_sh_odd[7];
         gv1=gv_sh_odd[4];
         gv2=gv_sh_odd[7];
-	csc_bending_angle_12=deltaPhi(gv1.phi(), gv2.phi());
-	xfactor_sh = (gp2.perp()/gp1.perp()-1.0)/(839.386-711.186);
-	xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
-	//xfactor = xfactor_sh;
-	//displacedMuonL1Pt.setxfactor(xfactor);
-	xfactor_st1 = (12.7)*xfactor;
-	xfactor_st2 = (12.7)*xfactor/(xfactor*(839.386-711.186)+1);
-	xfactor_st12 = (839.386-711.186)*xfactor/(xfactor*(839.386-711.186)+1); //(gp2.perp()-gp1.perp())/gp2.perp()
-	phiM_st12_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[7].phi_cscsh_odd, etrk_[4].phi_cscsh_odd, xfactor_st12);
-	phiM_st12_L1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[7].phi_layer3_fit_odd, etrk_[4].phi_layer3_fit_odd, xfactor_st12);
-	npar=1;
 	if ((etrk_[9].has_csc_sh&1)>0)
-	{
 	    gp3=gp_sh_odd[9];
-	    //xfactor_st23 = xfactor*D32*(R1/R2)
-	    xfactor_st23 = xfactor*(923.661-839.386)/(xfactor*(923.661-711.186)+1);
-	    phiM_st23_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[9].phi_cscsh_odd, etrk_[7].phi_cscsh_odd, xfactor_st23);
-	    phiM_st23_L1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[9].phi_layer3_fit_odd, etrk_[7].phi_layer3_fit_odd, xfactor_st23);
-	    if (phiM_st12_sh>-9 and phiM_st23_sh>-9)
-		dphi_dir_st12_st23_sh = deltaPhi(phiM_st12_sh, phiM_st23_sh);
-	    if (phiM_st12_L1>-9 and phiM_st23_L1>-9)
-		dphi_dir_st12_st23_L1 = deltaPhi(phiM_st12_L1, phiM_st23_L1);
-	    //std::cout <<" npar "<< npar <<" xfactor from st1 st2 "<< xfactor_sh*gp1.perp() <<" from st2 st3 "<<  (gp3.perp()-gp2.perp())/(923.661-839.386)<<std::endl; 
-	 }
-	if (etrk_[4].phi_layer1_sh_odd>-9  and etrk_[4].phi_layer6_sh_odd>-9 and etrk_[7].phi_layer1_sh_odd>-9  and etrk_[7].phi_layer6_sh_odd>-9){
-	    phiM_st1_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[4].phi_layer6_sh_odd, etrk_[4].phi_layer1_sh_odd, xfactor_st1);
-	    phiM_st2_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[7].phi_layer6_sh_odd, etrk_[7].phi_layer1_sh_odd, xfactor_st2);
-	    phiM_st1_L1_2 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[4].phi_layer6_fit_odd, etrk_[4].phi_layer1_fit_odd, xfactor_st1);
-	    phiM_st2_L1_2 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[7].phi_layer6_fit_odd, etrk_[7].phi_layer1_fit_odd, xfactor_st2);
-	    if (phiM_st1_sh>-9 and phiM_st2_sh>-9){
-		csc_bending_angle12_xfactor = deltaPhi(phiM_st1_sh,phiM_st2_sh);
-		if (phiM_st12_sh>-9)
-		    etrk_[0].dphi_dir_st1_st12_sh = deltaPhi(phiM_st1_sh, phiM_st12_sh);
-		if (phiM_st23_sh>-9)
-		    etrk_[0].dphi_dir_st2_st23_sh = deltaPhi(phiM_st2_sh, phiM_st23_sh);
-	    }
-	    if (phiM_st1_L1_2>-9 and phiM_st2_L1_2>-9){
-		csc_bending_angle12_xfactor_L1_2 = deltaPhi(phiM_st1_L1_2,phiM_st2_L1_2);
-		csc_bending_angle12_xfactor_L1_1 = deltaPhi(etrk_[4].phiM_fitxyz_odd, etrk_[7].phiM_fitxyz_odd);
-		if (phiM_st12_L1>-9)
-		    etrk_[0].dphi_dir_st1_st12_L1 = deltaPhi(phiM_st1_L1_2, phiM_st12_L1);
-		if (phiM_st23_L1>-9)
-		    etrk_[0].dphi_dir_st2_st23_L1 = deltaPhi(phiM_st2_L1_2, phiM_st23_L1);
-	    }
-	}
      }else if ((etrk_[4].has_csc_sh&2)>0 and (etrk_[7].has_csc_sh&2)>0){
         gp1=gp_sh_even[4];
         gp2=gp_sh_even[7];
         gv1=gv_sh_even[4];
         gv2=gv_sh_even[7];
-	csc_bending_angle_12=deltaPhi(gv1.phi(), gv2.phi());
-	xfactor_sh = (gp2.perp()/gp1.perp()-1.0)/(814.586-683.786);
-	xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
-	//xfactor = xfactor_sh;
-	//displacedMuonL1Pt.setxfactor(xfactor);
-	xfactor_st1 = (12.7)*xfactor;
-	xfactor_st2 = (12.7)*xfactor/(xfactor*(814.586-683.786)+1);
-	xfactor_st12 = (814.586-683.786)*xfactor/(xfactor*(814.586-683.786)+1); //(gp2.perp()-gp1.perp())/gp2.perp()
-	phiM_st12_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[7].phi_cscsh_even, etrk_[4].phi_cscsh_even, xfactor_st12);
-	phiM_st12_L1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[7].phi_layer3_fit_even, etrk_[4].phi_layer3_fit_even, xfactor_st12);
-	npar=2;
 	if ((etrk_[9].has_csc_sh&2)>0)
-	{
 	    gp3=gp_sh_even[9];
-	    //xfactor_st23 = xfactor*D32*(R1/R2)
-	    xfactor_st23 = xfactor*(948.461-814.586)/(xfactor*(948.461-683.786)+1);
-	    phiM_st23_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[9].phi_cscsh_even, etrk_[7].phi_cscsh_even, xfactor_st23);
-	    phiM_st23_L1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[9].phi_layer3_fit_even, etrk_[7].phi_layer3_fit_even, xfactor_st23);
-	    if (phiM_st12_sh>-9 and phiM_st23_sh>-9)
-		dphi_dir_st12_st23_sh = deltaPhi(phiM_st12_sh, phiM_st23_sh);
-	    if (phiM_st12_L1>-9 and phiM_st23_L1>-9)
-		dphi_dir_st12_st23_L1 = deltaPhi(phiM_st12_L1, phiM_st23_L1);
-	    //std::cout <<" npar "<< npar <<" xfactor from st1 st2 "<< xfactor*gp1.perp() <<" from st2 st3 "<<  (gp3.perp()-gp2.perp())/(948.461-814.586)<<std::endl; 
-	 }
-	if (etrk_[4].phi_layer1_sh_even>-9  and etrk_[4].phi_layer6_sh_even>-9 and etrk_[7].phi_layer1_sh_even>-9  and etrk_[7].phi_layer6_sh_even>-9){
-	    phiM_st1_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[4].phi_layer6_sh_even, etrk_[4].phi_layer1_sh_even, xfactor_st1);
-	    phiM_st2_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[7].phi_layer6_sh_even, etrk_[7].phi_layer1_sh_even, xfactor_st2);
-	    phiM_st1_L1_2 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[4].phi_layer6_fit_even, etrk_[4].phi_layer1_fit_even, xfactor_st1);
-	    phiM_st2_L1_2 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[7].phi_layer6_fit_even, etrk_[7].phi_layer1_fit_even, xfactor_st2);
-	    if (phiM_st1_sh>-9 and phiM_st2_sh>-9){
-		csc_bending_angle12_xfactor = deltaPhi(phiM_st1_sh,phiM_st2_sh);
-		if (phiM_st12_sh>-9)
-		    etrk_[0].dphi_dir_st1_st12_sh = deltaPhi(phiM_st1_sh, phiM_st12_sh);
-		if (phiM_st23_sh>-9)
-		    etrk_[0].dphi_dir_st2_st23_sh = deltaPhi(phiM_st2_sh, phiM_st23_sh);
-	    }
-	    if (phiM_st1_L1_2>-9 and phiM_st2_L1_2>-9){
-		csc_bending_angle12_xfactor_L1_2 = deltaPhi(phiM_st1_L1_2,phiM_st2_L1_2);
-		csc_bending_angle12_xfactor_L1_1 = deltaPhi(etrk_[4].phiM_fitxyz_even, etrk_[7].phiM_fitxyz_even);
-		if (phiM_st12_L1>-9)
-		    etrk_[0].dphi_dir_st1_st12_L1 = deltaPhi(phiM_st1_L1_2, phiM_st12_L1);
-		if (phiM_st23_L1>-9)
-		    etrk_[0].dphi_dir_st2_st23_L1 = deltaPhi(phiM_st2_L1_2, phiM_st23_L1);
-	    }
-	}
      }else if ((etrk_[4].has_csc_sh&2)>0 and (etrk_[7].has_csc_sh&1)>0){
         gp1=gp_sh_even[4];
         gp2=gp_sh_odd[7];
         gv1=gv_sh_even[4];
         gv2=gv_sh_odd[7];
-	csc_bending_angle_12=deltaPhi(gv1.phi(), gv2.phi());
-	xfactor_sh = (gp2.perp()/gp1.perp()-1.0)/(839.386-683.786);
-	xfactor = CLHEP::RandGauss::shoot(xfactor_sh,xfactor_sh*0.02);
-	//xfactor = xfactor_sh;
-	//displacedMuonL1Pt.setxfactor(xfactor);
-	xfactor_st1 = (12.7)*xfactor;
-	xfactor_st2 = (12.7)*xfactor/(xfactor*(839.386-683.786)+1);
-	xfactor_st12 = (839.386-683.786)*xfactor/(xfactor*(839.386-683.786)+1); //(gp2.perp()-gp1.perp())/gp2.perp()
-	phiM_st12_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[7].phi_cscsh_odd, etrk_[4].phi_cscsh_even, xfactor_st12);
-	phiM_st12_L1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[7].phi_layer3_fit_odd, etrk_[4].phi_layer3_fit_even, xfactor_st12);
-	npar=3;
 	if ((etrk_[9].has_csc_sh&1)>0)
-	{
 	    gp3=gp_sh_odd[9];
-	    //xfactor_st23 = xfactor*D32*(R1/R2)
-	    xfactor_st23 = xfactor*(923.661-839.386)/(xfactor*(923.661-683.786)+1);
-	    phiM_st23_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[9].phi_cscsh_odd, etrk_[7].phi_cscsh_odd, xfactor_st23);
-	    phiM_st23_L1 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[9].phi_layer3_fit_odd, etrk_[7].phi_layer3_fit_odd, xfactor_st23);
-	    if (phiM_st12_sh>-9 and phiM_st23_sh>-9)
-		dphi_dir_st12_st23_sh = deltaPhi(phiM_st12_sh, phiM_st23_sh);
-	    if (phiM_st12_L1>-9 and phiM_st23_L1>-9)
-		dphi_dir_st12_st23_L1 = deltaPhi(phiM_st12_L1, phiM_st23_L1);
-	    //std::cout <<" npar "<< npar <<" xfactor from st1 st2 "<< xfactor_sh*gp1.perp() <<" from st2 st3 "<<  (gp3.perp()-gp2.perp())/(923.661-839.386)<<std::endl; 
-	}
-	if (etrk_[4].phi_layer1_sh_even>-9  and etrk_[4].phi_layer6_sh_even>-9 and etrk_[7].phi_layer1_sh_odd>-9  and etrk_[7].phi_layer6_sh_odd>-9){
-	    phiM_st1_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[4].phi_layer6_sh_even, etrk_[4].phi_layer1_sh_even, xfactor_st1);
-	    phiM_st2_sh = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[7].phi_layer6_sh_odd, etrk_[7].phi_layer1_sh_odd, xfactor_st2);
-	    phiM_st1_L1_2 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[4].phi_layer6_fit_even, etrk_[4].phi_layer1_fit_even, xfactor_st1);
-	    phiM_st2_L1_2 = PtassignmentHelper::PhiMomentum_Xfactor_V2(etrk_[7].phi_layer6_fit_odd, etrk_[7].phi_layer1_fit_odd, xfactor_st2);
-	    if (phiM_st1_sh>-9 and phiM_st2_sh>-9){
-		csc_bending_angle12_xfactor = deltaPhi(phiM_st1_sh,phiM_st2_sh);
-		if (phiM_st12_sh>-9)
-		    etrk_[0].dphi_dir_st1_st12_sh = deltaPhi(phiM_st1_sh, phiM_st12_sh);
-		if (phiM_st23_sh>-9)
-		    etrk_[0].dphi_dir_st2_st23_sh = deltaPhi(phiM_st2_sh, phiM_st23_sh);
-	    }
-	    if (phiM_st1_L1_2>-9 and phiM_st2_L1_2>-9){	
-		csc_bending_angle12_xfactor_L1_2 = deltaPhi(phiM_st1_L1_2,phiM_st2_L1_2);
-		csc_bending_angle12_xfactor_L1_1 = deltaPhi(etrk_[4].phiM_fitxyz_even, etrk_[7].phiM_fitxyz_odd);
-		if (phiM_st12_L1>-9)
-		    etrk_[0].dphi_dir_st1_st12_L1 = deltaPhi(phiM_st1_L1_2, phiM_st12_L1);
-		if (phiM_st23_L1>-9)
-		    etrk_[0].dphi_dir_st2_st23_L1 = deltaPhi(phiM_st2_L1_2, phiM_st23_L1);
-	    }
-	}
      }
-     //std::cout <<"low eta region npar "<< npar <<" eta_st2 "<< gp2.eta() <<" csc bending angle12 "<< csc_bending_angle_12<<" xfactor1 "<< xfactor_st1<<" xfactor2 "<< xfactor_st2 <<" phiM_st1_sh "<< phiM_st1_sh <<" phiM_st2_sh "<< phiM_st1_sh <<" csc_bending_angle12_xfactor "<< csc_bending_angle12_xfactor <<" phiM_st1_smear3 "<< phiM_st1_smear3 <<" phiM_st2_smear3 "<< phiM_st2_smear3<<" csc_bending_angle12_xfactor_smear3 "<< csc_bending_angle12_xfactor_smear3 << std::endl;
   }
 
 
+  DisplacedMuonTriggerPtassignment displacedMuonL1Pt(match_lct.allLctsMatched2SimMuon(), match_gd.allGempadsMatch2SimMuon_2strip(), match_lct.eventSetup(), match_lct.event()); 
+  displacedMuonL1Pt.setCharge(etrk_[0].charge);
+  if (displacedMuonL1Pt.getNParity() >= 0)  std::cout <<"DisplacedMuon get npar "<< displacedMuonL1Pt.getNParity()<<" ring "<<displacedMuonL1Pt.getMeRing() << std::endl;
 
+  int npar =displacedMuonL1Pt.getNParity(); 
   DisplacedMuonTriggerPtassignment displacedMuonL1Pt_sim(gp1, gp2, gp3, gp4, gp_ge11, gp_ge21, npar, match_lct.eventSetup(), match_lct.event()); 
   displacedMuonL1Pt_sim.setCharge(etrk_[0].charge);
   if ((etrk_[1].has_csc_sh || etrk_[4].has_csc_sh) and (etrk_[6].has_csc_sh || etrk_[7].has_csc_sh)) {
      if ((etrk_[8].has_csc_sh || etrk_[9].has_csc_sh) || (etrk_[10].has_csc_sh || etrk_[11].has_csc_sh))
      	etrk_[0].hasSt3orSt4_sh=true; 
-     //std::cout <<"At SIM level gp1 z "<<gp1.z()<<" perp "<< gp1.perp()<<" gp2 z "<< gp2.z()<<" perp "<< gp2.perp()<<" gp3 z "<< gp3.z()<<" perp "<< gp3.perp()<< std::endl;  
-     etrk_[0].npar = npar;
-     std::cout <<"GEMCSCAnalyzer npar "<< npar << std::endl;
      if (displacedMuonL1Pt.getNParity()>=0 and (fabs(displacedMuonL1Pt.getRadiusSt(1)-gp1.perp())>.02*gp1.perp() 
 		 or fabs(displacedMuonL1Pt.getRadiusSt(2)-gp2.perp())>.02*gp2.perp()
 		 or fabs(displacedMuonL1Pt.getRadiusSt(3)-gp3.perp())>.02*gp3.perp()))
@@ -3131,89 +2687,19 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	etrk_[0].direction_noge21_pt = displacedMuonL1Pt.getDirectionPt();
      }
 
-     etrk_[0].pt_direction_sh=PtassignmentHelper::Ptassign_Direction(csc_bending_angle_12, gp2.eta(), npar);  
-     etrk_[0].ptphi_diff_sh = csc_bending_angle_12;
-
-
-     etrk_[0].phiM_st1_sh = phiM_st1_sh;
-     etrk_[0].phiM_st2_sh = phiM_st2_sh;
-     etrk_[0].phiM_st12_sh = phiM_st12_sh;
-     etrk_[0].phiM_st23_sh = phiM_st23_sh;
-     etrk_[0].phiM_st12_L1 = phiM_st12_L1;
-     etrk_[0].phiM_st23_L1 = phiM_st23_L1;
-     etrk_[0].phiM_st1_L1_1 = phiM_st1_L1_1;
-     etrk_[0].phiM_st2_L1_1 = phiM_st2_L1_1;
-     etrk_[0].phiM_st1_L1_2 = phiM_st1_L1_2;
-     etrk_[0].phiM_st2_L1_2 = phiM_st2_L1_2;
-     etrk_[0].phiM_st1_L1_3 = phiM_st1_L1_3;
-     etrk_[0].phiM_st2_L1_3 = phiM_st2_L1_3;
-     etrk_[0].dphi_dir_st12_st23_sh = dphi_dir_st12_st23_sh;
-     etrk_[0].dphi_dir_st12_st23_L1 = dphi_dir_st12_st23_L1;
-     etrk_[0].dphi_position_st1_st2_sh = dphi_position_st1_st2_sh;
-     etrk_[0].dphi_position_st2_st3_sh = dphi_position_st2_st3_sh;
-     etrk_[0].dphi_position_st1_st2_L1 = dphi_position_st1_st2_L1;
-     etrk_[0].dphi_position_st2_st3_L1 = dphi_position_st2_st3_L1;
-
-     etrk_[0].csc_bending_angle12_gemcsc = csc_bending_angle12_gemcsc;
-     etrk_[0].csc_bending_angle12_xfactor = csc_bending_angle12_xfactor;
-     etrk_[0].csc_bending_angle12_xfactor_smear0 = csc_bending_angle12_xfactor_smear0;
-     etrk_[0].csc_bending_angle12_xfactor_smear1 = csc_bending_angle12_xfactor_smear1;
-     etrk_[0].csc_bending_angle12_xfactor_smear2 = csc_bending_angle12_xfactor_smear2;
-     etrk_[0].csc_bending_angle12_xfactor_smear3 = csc_bending_angle12_xfactor_smear3;
-     etrk_[0].csc_bending_angle12_xfactor_L1_1 = csc_bending_angle12_xfactor_L1_1;
-     etrk_[0].csc_bending_angle12_xfactor_L1_2 = csc_bending_angle12_xfactor_L1_2;
-     etrk_[0].csc_bending_angle12_xfactor_L1_3 = csc_bending_angle12_xfactor_L1_3;
-     etrk_[0].eta_st2_sh = gp2.eta();
+     //etrk_[0].pt_direction_sh=PtassignmentHelper::Ptassign_Direction(csc_bending_angle_12, gp2.eta(), npar);  
      etrk_[0].eta_st2_L1 = displacedMuonL1Pt.getTrackEta();
      etrk_[0].npar_L1 = displacedMuonL1Pt.getNParity();
-     
-     //double gv1_phi_gauss = CLHEP::RandGauss::shoot(gv1.phi(), .00055);
-     //double gv2_phi_gauss = CLHEP::RandGauss::shoot(gv2.phi(), .00095);
-     GlobalPoint gp1_smeared( GlobalPoint::Cylindrical(gp1.perp(), gp1_phi_gauss, gp1.z()) );
-     GlobalPoint gp2_smeared( GlobalPoint::Cylindrical(gp2.perp(), gp2_phi_gauss, gp2.z()) );
-
-     etrk_[0].pt_direction_gemcsc=PtassignmentHelper::Ptassign_Direction(csc_bending_angle12_gemcsc, gp2.eta(), npar);  
-     etrk_[0].pt_direction_xfactor=PtassignmentHelper::Ptassign_Direction(csc_bending_angle12_xfactor, gp2.eta(), npar);  
-     etrk_[0].pt_direction_xfactor_smear0=PtassignmentHelper::Ptassign_Direction(csc_bending_angle12_xfactor_smear0, gp2.eta(), npar);  
-     etrk_[0].pt_direction_xfactor_smear1=PtassignmentHelper::Ptassign_Direction(csc_bending_angle12_xfactor_smear1, gp2.eta(), npar);  
-     etrk_[0].pt_direction_xfactor_smear2=PtassignmentHelper::Ptassign_Direction(csc_bending_angle12_xfactor_smear2, gp2.eta(), npar);  
-     etrk_[0].pt_direction_xfactor_smear3=PtassignmentHelper::Ptassign_Direction(csc_bending_angle12_xfactor_smear3, gp2.eta(), npar);  
-     etrk_[0].pt_direction_xfactor_L1_1=PtassignmentHelper::Ptassign_Direction(csc_bending_angle12_xfactor_L1_1, gp2.eta(), npar);  
-     etrk_[0].pt_direction_xfactor_L1_2=PtassignmentHelper::Ptassign_Direction(csc_bending_angle12_xfactor_L1_2, gp2.eta(), npar);  
-     if (verbose_)
-     	std::cout <<" pt direction sh "<< etrk_[0].pt_direction_sh <<" pt_direction_gemcsc "<<etrk_[0].pt_direction_gemcsc <<" pt_direction_xfactor "<< etrk_[0].pt_direction_xfactor <<" xfactor smear0 "<< etrk_[0].pt_direction_xfactor_smear0<<" xfactor smear1 "<< etrk_[0].pt_direction_xfactor_smear1<<" xfactro smear2 "<< etrk_[0].pt_direction_xfactor_smear2<<" L1 1 "<< etrk_[0].pt_direction_xfactor_L1_1 <<" L1 2 "<< etrk_[0].pt_direction_xfactor_L1_2 << std::endl;
-
      if (etrk_[8].has_csc_sh || etrk_[9].has_csc_sh){
-        double gp3_phi_gauss = CLHEP::RandGauss::shoot(gp3.phi(), .00075);
-        GlobalPoint gp3_smeared( GlobalPoint::Cylindrical(gp3.perp(), gp3_phi_gauss, gp3.z()) );
      	etrk_[0].deltay12_sim = PtassignmentHelper::deltaYcalculation(gp1, gp2); 
      	etrk_[0].deltay23_sim = -PtassignmentHelper::deltaYcalculation(gp3, gp2); 
 	etrk_[0].pt_position_sh=PtassignmentHelper::Ptassign_Position_gp(gp1, gp2, gp3, gp2.eta(), npar); //t.momentum().eta() 
-	etrk_[0].pt_position_smeared=PtassignmentHelper::Ptassign_Position_gp(gp1_smeared, gp2_smeared, gp3_smeared, gp2_smeared.eta(), npar); //t.momentum().eta() 
-	//if (verbose_){
+	if (verbose_){
 		std::cout <<"GEMCSCAnalyer sim gp1 x"<< gp1.x()<<" y "<< gp1.y() <<" gp2 x "<< gp2.x()<<" y "<< gp2.y()<<" phi "<< gp2.phi()<< std::endl;
 		std::cout <<"at Sim deltay12 "<<  etrk_[0].deltay12_sim<<" deltay23 "<<  etrk_[0].deltay23_sim << std::endl;
-	//}
+	}
      }
 
-
-     if (fabs(csc_bending_angle12_xfactor_L1_2)<4)
-     //if ((fabs(etrk_[0].dphi_dir_st2_st23_L1)>.3 and fabs(etrk_[0].dphi_dir_st2_st23_L1)<1) || (fabs(etrk_[0].dphi_dir_st1_st12_L1)>0.3 and fabs(etrk_[0].dphi_dir_st1_st12_L1)<1))
-     {
-     	std::cout <<"npar "<< npar<<" pt "<< etrk_[0].pt <<" eta_st2 "<< gp2.eta() <<" xfactor1 "<< xfactor_st1<<" xfactor2 "<< xfactor_st2 <<" phiM_st1_sh "<< phiM_st1_sh <<" phiM_st2_sh "<< phiM_st2_sh <<" phiM_st1_L1_2 "<< phiM_st1_L1_2 <<" phiM_st2_L1_2 "<< phiM_st2_L1_2<< std::endl;
-	std::cout <<" dphi_dir_st1_st12_L1 "<< etrk_[0].dphi_dir_st1_st12_L1 <<" dphi_dir_st2_st23_L1 "<< etrk_[0].dphi_dir_st2_st23_L1 << " phiM_st12_sh  "<< phiM_st12_sh <<" phiM_st12_L1 "<< phiM_st12_L1 <<" phiM_st23_sh "<< phiM_st23_sh <<" phiM_st23_L1 "<< phiM_st23_L1 << std::endl;
-     if (etrk_[0].meRing == 1 and displacedMuonL1Pt.getNParity()>=0 and displacedMuonL1Pt.runDirectionbased(true))
-	   std::cout<<"DisplacedMuon with GE21,  phiM_st1 " << displacedMuonL1Pt.getlocalPhiDirection(1)<<" phiM_st2 "<< displacedMuonL1Pt.getlocalPhiDirection(2) <<" phiM_st12 " << displacedMuonL1Pt.getlocalPhiDirection(12) <<" phiM_st23 "<< displacedMuonL1Pt.getlocalPhiDirection(23) <<" dphi_dir_st1_st2_L1 "<< displacedMuonL1Pt.getdeltaPhiDirection(1, 2) <<" direction pt "<< displacedMuonL1Pt.getDirectionPt() << std::endl;
-     if (displacedMuonL1Pt.getNParity()>=0 and displacedMuonL1Pt.runDirectionbased(false))
-	   std::cout<<"DisplacedMuon, No GE21,  phiM_st1 " << displacedMuonL1Pt.getlocalPhiDirection(1)<<" phiM_st2 "<< displacedMuonL1Pt.getlocalPhiDirection(2) <<" phiM_st12 " << displacedMuonL1Pt.getlocalPhiDirection(12) <<" phiM_st23 "<< displacedMuonL1Pt.getlocalPhiDirection(23) <<" dphi_dir_st1_st2_L1 "<< displacedMuonL1Pt.getdeltaPhiDirection(1, 2) <<" direction pt "<< displacedMuonL1Pt.getDirectionPt() << std::endl;
-     }
-
-      
-     //if (etrk_[0].meRing == 1 and displacedMuonL1Pt_sim.getNParity()>=0 and displacedMuonL1Pt_sim.runDirectionbased(true))
-	  // std::cout<<"DisplacedMuon with GE21, SIM, phiM_st1 " << displacedMuonL1Pt_sim.getlocalPhiDirection(1)<<" phiM_st2 "<< displacedMuonL1Pt_sim.getlocalPhiDirection(2) <<" phiM_st12 " << displacedMuonL1Pt_sim.getlocalPhiDirection(12) <<" phiM_st23 "<< displacedMuonL1Pt_sim.getlocalPhiDirection(23) << std::endl;
-     //should set phi and z in layer1 and layer6 in staion 1 and 2
-     //if (displacedMuonL1Pt_sim.getNParity()>=0 and displacedMuonL1Pt_sim.runDirectionbased(false))
-	//   std::cout<<"DisplacedMuon, No GE21, SIM, phiM_st1 " << displacedMuonL1Pt_sim.getlocalPhiDirection(1)<<" phiM_st2 "<< displacedMuonL1Pt_sim.getlocalPhiDirection(2) <<" phiM_st12 " << displacedMuonL1Pt_sim.getlocalPhiDirection(12) <<" phiM_st23 "<< displacedMuonL1Pt_sim.getlocalPhiDirection(23) << std::endl;
   } 
   
 
@@ -3380,7 +2866,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	std::cout <<"DisplacedMuon L1, Position based deltay12 "<< etrk_[0].deltay12_test <<" deltay23 "<< etrk_[0].deltay23_test <<" deltay123 "<< etrk_[0].deltay123_test<<" position pt "<< etrk_[0].position_pt << std::endl;
 	displacedMuonL1Pt.runHybrid(true);
 	etrk_[0].hybrid_pt = float(displacedMuonL1Pt.getHybridPt()); 
-	std::cout <<"simpt "<< etrk_[0].pt <<" eta "<< etrk_[0].eta <<" npar "<< etrk_[0].npar_L1 <<" hybrid pt "<< etrk_[0].hybrid_pt << std::endl;
+	displacedMuonL1Pt.runHybrid(false);
+	etrk_[0].hybrid_noge21_pt = float(displacedMuonL1Pt.getHybridPt()); 
+	std::cout <<"simpt "<< etrk_[0].pt <<" eta "<< etrk_[0].eta <<" npar "<< etrk_[0].npar_L1 <<" hybrid pt "<< etrk_[0].hybrid_pt <<" hybrid pt(NOGE21) "<< etrk_[0].hybrid_noge21_pt << std::endl;
      }
 
 
@@ -3393,7 +2881,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
      {
 	if (fabs(displacedMuonL1Pt.getdeltaY23()-etrk_[0].deltay23_fit)>.1) 
 	    std::cout <<"sim pt "<< etrk_[0].pt<<" difference between module and ana "<< displacedMuonL1Pt.getdeltaY23()-etrk_[0].deltay23_fit << std::endl;
-     	std::cout <<"DisplacedMuon deltay12 "<< displacedMuonL1Pt.getdeltaY12() <<" deltay23 "<< displacedMuonL1Pt.getdeltaY23() <<" ddY123 "<< displacedMuonL1Pt.getdeltaY123() <<" etrk deltay12, sim"<< etrk_[0].deltay12_sim <<" fit "<< etrk_[0].deltay12_fit <<" deltay23,sim "<< etrk_[0].deltay23_sim <<" fit "<< etrk_[0].deltay23_fit << std::endl;
+     	std::cout <<"DisplacedMuon deltay12 "<< displacedMuonL1Pt.getdeltaY12() <<" deltay23 "<< displacedMuonL1Pt.getdeltaY23() <<" ddY123 "<< displacedMuonL1Pt.getdeltaY123() <<" etrk deltay12, sim "<< etrk_[0].deltay12_sim <<" fit "<< etrk_[0].deltay12_fit <<" deltay23,sim "<< etrk_[0].deltay23_sim <<" fit "<< etrk_[0].deltay23_fit << std::endl;
      
      }else if (etrk_[0].hasSt1St2St3){
     	std::cout <<"Failed to run DisplacedMuonPtassignment, sim pt "<<  etrk_[0].pt <<" GEMCSCAnalyer sim deltay12 "<< etrk_[0].deltay12_sim<<" deltay23 "<< etrk_[0].deltay23_sim << " L1 deltay12 "<< etrk_[0].deltay12_fit <<" deltay23 "<< etrk_[0].deltay23_fit << std::endl; 

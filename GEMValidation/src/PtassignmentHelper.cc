@@ -31,6 +31,7 @@ float PtassignmentHelper::ellipse(float a, float b, float alpha, float x0, float
 {
   float x1 = x*cos(alpha)-y*sin(alpha)-x0;
   float y1 = x*sin(alpha)+y*cos(alpha)-y0;
+  //std::cout <<"ellipse a "<< a <<" b "<<  b << " x0 "<< x0 <<" y0 "<< y0 << " x "<< x<<" y "<< " value "<< x1*x1/(a*a)+y1*y1/(b*b)<< std::endl;
   return x1*x1/(a*a)+y1*y1/(b*b);
 }
 
