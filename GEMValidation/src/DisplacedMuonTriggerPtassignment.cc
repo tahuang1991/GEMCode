@@ -774,9 +774,9 @@ bool DisplacedMuonTriggerPtassignment::runPositionbased()
    if (npar>=0 and npar<=3){
         position_pt = 0.5;
    	int neta = PtassignmentHelper::GetEtaPartition(eta_st2);
-   	for (int i=0; i<PtassignmentHelper::NPt; i++){
+   	for (int i=0; i<PtassignmentHelper::NPt2; i++){
 		if (fabs(ddY123) <= PtassignmentHelper::PositionbasedDDYLUT[i][neta][npar])
-		    position_pt = float(PtassignmentHelper::PtBins[i]);
+		    position_pt = float(PtassignmentHelper::PtBins2[i]);
 		else
 		    break;
 		if (verbose_>0)
@@ -834,9 +834,9 @@ bool DisplacedMuonTriggerPtassignment::runDirectionbasedGE21()
    if (npar>=0 and npar<=3){
         direction_pt = 0.5;
    	int neta = PtassignmentHelper::GetEtaPartition(eta_st2);
-   	for (int i=0; i<PtassignmentHelper::NPt; i++){
+   	for (int i=0; i<PtassignmentHelper::NPt2; i++){
 		if (fabs(dPhi_dir_st1_st2) <= PtassignmentHelper::DirectionbasedDeltaPhiLUT[i][neta][npar])
-		    direction_pt = float(PtassignmentHelper::PtBins[i]);
+		    direction_pt = float(PtassignmentHelper::PtBins2[i]);
 		else 
 		    break;
 		if (verbose_>0)
@@ -880,9 +880,9 @@ bool DisplacedMuonTriggerPtassignment::runDirectionbasedCSConly()
    if (npar>=0 and npar<=3){
         direction_pt = 0.5;
    	int neta = PtassignmentHelper::GetEtaPartition(eta_st2);
-   	for (int i=0; i<PtassignmentHelper::NPt; i++){
+   	for (int i=0; i<PtassignmentHelper::NPt2; i++){
 		if (fabs(dPhi_dir_st1_st2) <= PtassignmentHelper::DirectionbasedDeltaPhiME21CSConlyLUT[i][neta][npar])
-		    direction_pt = float(PtassignmentHelper::PtBins[i]);
+		    direction_pt = float(PtassignmentHelper::PtBins2[i]);
 		else
 		    break;
 	}
