@@ -885,6 +885,8 @@ bool DisplacedMuonTriggerPtassignment::runDirectionbasedCSConly()
 		    direction_pt = float(PtassignmentHelper::PtBins2[i]);
 		else
 		    break;
+		if (verbose_>0)
+		    std::cout <<"eta "<< eta_st2 <<" neta "<< neta <<" npar "<< npar <<" fabs dphi "<< fabs(dPhi_dir_st1_st2) <<" cut "<< PtassignmentHelper::DirectionbasedDeltaPhiME21CSConlyLUT[i][neta][npar] <<" direction pt "<< direction_pt<<std::endl;
 	}
 
    }
