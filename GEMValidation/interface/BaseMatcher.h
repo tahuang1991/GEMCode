@@ -14,7 +14,6 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Framework/interface/ESHandle.h"
-#include "FWCore/Framework/interface/ConsumesCollector.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/Utilities/interface/InputTag.h"
 
@@ -33,17 +32,15 @@
 #include "Geometry/DTGeometry/interface/DTGeometry.h"
 
 #include "GEMCode/GEMValidation/interface/Helpers.h"
+//#include "GEMCode/GEMValidation/interface/CSCStubPatterns.h"
 
 class BaseMatcher
 {
 public:
   
 
-  BaseMatcher(const SimTrack& t, 
-              const SimVertex& v,
-              const edm::ParameterSet& ps, 
-              const edm::Event& ev, 
-              const edm::EventSetup& es);
+  BaseMatcher(const SimTrack& t, const SimVertex& v,
+      const edm::ParameterSet& ps, const edm::Event& ev, const edm::EventSetup& es);
 
   ~BaseMatcher();
 

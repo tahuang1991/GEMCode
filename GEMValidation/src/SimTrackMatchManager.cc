@@ -5,7 +5,7 @@ SimTrackMatchManager::SimTrackMatchManager(const SimTrack& t,
                                            const edm::ParameterSet& ps, 
                                            const edm::Event& ev, 
                                            const edm::EventSetup& es, 
-                                           edm::EDGetTokenT<reco::GenParticleCollection>& inputToken_,
+                                           edm::EDGetTokenT<reco::GenParticleCollection>& genParticleInput_,
                                            edm::EDGetTokenT<edm::SimVertexContainer>& simVertexInput_,
                                            edm::EDGetTokenT<edm::SimTrackContainer>& simTrackInput_,
                                            edm::EDGetTokenT<edm::PSimHitContainer>& gemSimHitInput_,
@@ -48,8 +48,8 @@ SimTrackMatchManager::SimTrackMatchManager(const SimTrack& t,
                                            edm::EDGetTokenT<reco::TrackCollection>& recoTrackInputLabel_,
                                            edm::EDGetTokenT<reco::RecoChargedCandidateCollection>& recoChargedCandidateInputLabel_)
 : 
- //genMuons_(t, v, ps, ev, es)
-  simhits_(t, v, ps, ev, es, simVertexInput_, simTrackInput_, 
+  genMuons_(t, v, ps, ev, es, genParticleInput_)
+  ,simhits_(t, v, ps, ev, es, simVertexInput_, simTrackInput_, 
            gemSimHitInput_, cscSimHitInput_, 
            rpcSimHitInput_, me0SimHitInput_, dtSimHitInput_)
   , gem_digis_(simhits_, gemDigiInput_, gemPadDigiInput_, gemCoPadDigiInput_)
@@ -70,7 +70,8 @@ SimTrackMatchManager::SimTrackMatchManager(const SimTrack& t,
   , dt_rechits_(simhits_, 
                 dtRecHit1DPairInput_, dtRecSegment2DInput_, 
                 dtRecSegment4DInput_)
-  //, l1_tracks_(csc_stubs_, dt_digis_, rpc_digis_)
+  , l1_tracks_(csc_stubs_, dt_digis_, rpc_digis_, 
+	  	cscTfTrackInputLabel_, cscTfCandInputLabel_)
   , l1_tf_tracks_(simhits_, cscTfTrackInputLabel_)
   , l1_tf_cands_(simhits_, 
                  cscTfCandInputLabel_, dtTfCandInputLabel_, 

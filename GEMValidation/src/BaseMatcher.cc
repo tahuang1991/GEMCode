@@ -6,11 +6,8 @@
 #include "GEMCode/GEMValidation/interface/Helpers.h"
 
 
-BaseMatcher::BaseMatcher(const SimTrack& t, 
-                         const SimVertex& v,
-                         const edm::ParameterSet& ps, 
-                         const edm::Event& ev, 
-                         const edm::EventSetup& es)
+BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
+      const edm::ParameterSet& ps, const edm::Event& ev, const edm::EventSetup& es)
 : trk_(t), vtx_(v), conf_(ps), ev_(ev), es_(es), verbose_(0)
 {
   // list of CSC chamber type numbers to use
@@ -72,7 +69,7 @@ BaseMatcher::BaseMatcher(const SimTrack& t,
     gemGeometry_ = &*gem_geom_;
   } catch (edm::eventsetup::NoProxyException<GEMGeometry>& e) {
     hasGEMGeometry_ = false;
-    LogDebug("BaseMatcher") << "+++ Info: GEM geometry is unavailable. +++\n";
+    std::cout << "+++ Info: GEM geometry is unavailable. +++\n";
   }
 
   try {
@@ -80,7 +77,7 @@ BaseMatcher::BaseMatcher(const SimTrack& t,
     me0Geometry_ = &*me0_geom_;
   } catch (edm::eventsetup::NoProxyException<ME0Geometry>& e) {
     hasME0Geometry_ = false;
-    LogDebug("BaseMatcher") << "+++ Info: ME0 geometry is unavailable. +++\n";
+    std::cout << "+++ Info: ME0 geometry is unavailable. +++\n";
   }
 
   try {
@@ -88,7 +85,7 @@ BaseMatcher::BaseMatcher(const SimTrack& t,
     cscGeometry_ = &*csc_geom_;
   } catch (edm::eventsetup::NoProxyException<CSCGeometry>& e) {
     hasCSCGeometry_ = false;
-    LogDebug("BaseMatcher") << "+++ Info: CSC geometry is unavailable. +++\n";
+    std::cout << "+++ Info: CSC geometry is unavailable. +++\n";
   }
 
   try {
@@ -96,7 +93,7 @@ BaseMatcher::BaseMatcher(const SimTrack& t,
     rpcGeometry_ = &*rpc_geom_;
   } catch (edm::eventsetup::NoProxyException<RPCGeometry>& e) {
     hasRPCGeometry_ = false;
-    LogDebug("BaseMatcher") << "+++ Info: RPC geometry is unavailable. +++\n";
+    std::cout << "+++ Info: RPC geometry is unavailable. +++\n";
   }
 
   try {
@@ -104,7 +101,7 @@ BaseMatcher::BaseMatcher(const SimTrack& t,
     dtGeometry_ = &*dt_geom_;
   } catch (edm::eventsetup::NoProxyException<DTGeometry>& e) {
     hasDTGeometry_ = false;
-    LogDebug("BaseMatcher") << "+++ Info: DT geometry is unavailable. +++\n";
+    std::cout << "+++ Info: DT geometry is unavailable. +++\n";
   }
 
   simTrackPSet_ = conf().getParameter<edm::ParameterSet>("simTrack");

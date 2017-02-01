@@ -21,11 +21,27 @@ class L1TrackFinderTrackMatcher : public BaseMatcher
   void init();
   
   void matchCSCTfTrackToSimTrack(const L1CSCTrackCollection&);
+  void matchDTTfTrackToSimTrack(const L1CSCTrackCollection&);
+  void matchRPCTfTrackToSimTrack(const L1CSCTrackCollection&);
+
+  std::vector<edm::InputTag> dtTfTrackInputLabel_;
+  std::vector<edm::InputTag> rpcTfTrackInputLabel_;
 
   int verboseCscTfTrack_;
+  int verboseDtTfTrack_;
+  int verboseRpcTfTrack_;
+
   bool runCscTfTrack_;
+  bool runDtTfTrack_;
+  bool runRpcTfTrack_;
+
   int minBXCscTfTrack_;
+  int minBXDtTfTrack_;
+  int minBXRpcTfTrack_;
+
   int maxBXCscTfTrack_;
+  int maxBXDtTfTrack_;
+  int maxBXRpcTfTrack_;
 
   L1CSCTrackCollection matchedTfTracks_;
 };

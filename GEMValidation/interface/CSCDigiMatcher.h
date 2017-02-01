@@ -18,8 +18,12 @@
 #include <set>
 #include <tuple>
 
-typedef std::vector<CSCComparatorDigi> CSCStripDigiContainer;
+typedef std::vector<CSCComparatorDigi> CSCComparatorDigiContainer;
 typedef std::vector<CSCWireDigi> CSCWireDigiContainer;
+typedef std::vector<std::pair<unsigned int, CSCComparatorDigi> > 
+  CSCComparatorDigiDetIdContainer;
+typedef std::vector<std::pair<unsigned int, CSCWireDigi> > 
+  CSCWireDigiDetIdContainer;
 
 class SimHitMatcher;
 
@@ -27,7 +31,7 @@ class CSCDigiMatcher : public DigiMatcher
 {
 public:
 
-  CSCDigiMatcher(SimHitMatcher& sh, 
+  CSCDigiMatcher(SimHitMatcher& sh,
                  edm::EDGetTokenT<CSCComparatorDigiCollection>& cscComparatorDigiInput_, 
                  edm::EDGetTokenT<CSCWireDigiCollection>& cscWireDigiInput_);
   
@@ -51,8 +55,8 @@ public:
   const DigiContainer& wireDigisInChamber(unsigned int) const;
 
   /// CSC strip digis from a particular layer or chamber
-  const CSCStripDigiContainer& cscStripDigisInDetId(unsigned int) const;
-  const CSCStripDigiContainer& cscStripDigisInChamber(unsigned int) const;
+  const CSCComparatorDigiContainer& cscComparatorDigisInDetId(unsigned int) const;
+  const CSCComparatorDigiContainer& cscComparatorDigisInChamber(unsigned int) const;
 
   /// CSC wire digis from a particular layer or chamber
   const CSCWireDigiContainer& cscWireDigisInDetId(unsigned int) const;
@@ -76,6 +80,17 @@ public:
   std::set<int> stripsInChamber(unsigned int, int max_gap_to_fill = 0) const;
   std::set<int> wiregroupsInChamber(unsigned int, int max_gap_to_fill = 0) const;
 
+  // return the halfstrip for a given comparator digi
+  // the detid is the Id for the layer where the digi is at
+  // halfstrip starts at 0!
+  int getHalfStrip(const CSCComparatorDigi&) const;
+
+  // returns the fractional strip of a halfstrip
+  // to be used in the function CSCLayerGeometry::intersectionOfStripAndWire()
+  // note that LCT's HS starts from 0, but in geometry strips start from 1
+  float getFractionalStrip(const CSCComparatorDigi&) const;
+
+  
 private:
 
   void matchStripsToSimTrack(const CSCComparatorDigiCollection& comparators);
@@ -83,6 +98,7 @@ private:
 
   std::set<unsigned int> selectDetIds(const Id2DigiContainer &digis, int csc_type) const;
   
+
   int minBXCSCComp_, maxBXCSCComp_;
   int minBXCSCWire_, maxBXCSCWire_;
 
@@ -95,8 +111,8 @@ private:
   Id2DigiContainer detid_to_wires_;
   Id2DigiContainer chamber_to_wires_;
 
-  std::map<unsigned int, CSCStripDigiContainer> detid_to_cschalfstrips_;
-  std::map<unsigned int, CSCStripDigiContainer> chamber_to_cschalfstrips_;
+  std::map<unsigned int, CSCComparatorDigiContainer> detid_to_cschalfstrips_;
+  std::map<unsigned int, CSCComparatorDigiContainer> chamber_to_cschalfstrips_;
 
   std::map<unsigned int, CSCWireDigiContainer> detid_to_cscwires_;
   std::map<unsigned int, CSCWireDigiContainer> chamber_to_cscwires_;
@@ -107,7 +123,7 @@ private:
   bool runStrip_;
   bool runWG_;
 
-  CSCStripDigiContainer no_csc_strips_;
+  CSCComparatorDigiContainer no_csc_strips_;
   CSCWireDigiContainer no_csc_wires_;
 };
 

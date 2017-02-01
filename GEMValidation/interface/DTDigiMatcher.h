@@ -60,6 +60,7 @@ private:
 
   std::set<unsigned int> selectDetIds(const std::map<unsigned int, DTDigiContainer>&, int) const;
 
+
   bool verboseDigi_;
   bool runDTDigi_;
   int minBXDT_, maxBXDT_;

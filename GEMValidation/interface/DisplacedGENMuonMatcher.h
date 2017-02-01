@@ -23,11 +23,8 @@ class DisplacedGENMuonMatcher : public BaseMatcher
 {
 public:
   
-  DisplacedGENMuonMatcher(const SimTrack& t, 
-                          const SimVertex& v,
-                          const edm::ParameterSet& ps, 
-                          const edm::Event& ev, 
-                          const edm::EventSetup& es,
+  DisplacedGENMuonMatcher(const SimTrack& t, const SimVertex& v,
+      const edm::ParameterSet& ps, const edm::Event& ev, const edm::EventSetup& es,
                           edm::EDGetTokenT<reco::GenParticleCollection>& inputToken_);
   
   ~DisplacedGENMuonMatcher();
@@ -38,13 +35,21 @@ public:
 
   int darkBosonIndex() const {return darkBosonIndex_;}
   int genMuonIndex() const {return genMuonIndex_;}
+  bool checkRunOK() const {return runOK_;}
 
   double darkBosonDeltaR() const {return genGd0Gd1_m;}
   double darkBosonInvM() const {return genGd0Gd1_dR;}
+  double matchedGenMudxy() const {return matchedGenMu_dxy;}
+  double matchedGenMudR() const {return matchedGenMu_dR;}
+
+  void testprint() const ;
 
 private:
 
   void init();
+
+  int verbose_;
+  bool run_;
  
   void matchDisplacedGENMuonMatcherToSimTrack(const reco::GenParticleCollection& genParticles);
 
@@ -53,10 +58,6 @@ private:
   double phiHeavyCorr(double pt, double eta, double phi, double q);
   double invariantMass(const reco::Candidate* p1, const reco::Candidate* p2);
 
-  Int_t run;   // run number   | these three numbers required to extract event
-  Int_t lumi;  // lumi number  | from sample (data or MC) and examine it in   
-  Int_t event; // event number | event display                                
-  
   Float_t beamSpot_x;
   Float_t beamSpot_y;
   Float_t beamSpot_z;
@@ -124,14 +125,16 @@ private:
   Float_t genGd0Gd1_m;
   Float_t genGd0Gd1_dR;
 
+  Float_t matchedGenMu_dR;
+  Float_t matchedGenMu_dxy;
+
   const reco::GenParticle* matchedGENMuon_;
   std::vector<const reco::GenParticle*> matchedGENMuons_;
   const reco::GenParticle* matchedDarkBoson_;
 
+  bool runOK_;
   int darkBosonIndex_;
   int genMuonIndex_;
-
-  edm::Handle<reco::GenParticleCollection> genParticles;
 };
 
 #endif
