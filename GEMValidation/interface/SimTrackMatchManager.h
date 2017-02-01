@@ -26,7 +26,7 @@
 #include "GEMCode/GEMValidation/interface/DTDigiMatcher.h"
 #include "GEMCode/GEMValidation/interface/DTStubMatcher.h"
 #include "GEMCode/GEMValidation/interface/DTRecHitMatcher.h"
-//#include "GEMCode/GEMValidation/interface/L1TrackMatcher.h"
+#include "GEMCode/GEMValidation/interface/L1TrackMatcher.h"
 #include "GEMCode/GEMValidation/interface/L1TrackFinderTrackMatcher.h"
 #include "GEMCode/GEMValidation/interface/L1TrackFinderCandidateMatcher.h"
 #include "GEMCode/GEMValidation/interface/L1GlobalMuonTriggerMatcher.h"
@@ -41,7 +41,7 @@ public:
                        const edm::ParameterSet& ps, 
                        const edm::Event& ev, 
                        const edm::EventSetup& es,
-                       edm::EDGetTokenT<reco::GenParticleCollection>& inputToken_,
+                       edm::EDGetTokenT<reco::GenParticleCollection>& genParticleInput_,
                        edm::EDGetTokenT<edm::SimVertexContainer>& simVertexInput_,
                        edm::EDGetTokenT<edm::SimTrackContainer>& simTrackInput_,
                        edm::EDGetTokenT<edm::PSimHitContainer>& gemSimHitInput_,
@@ -87,7 +87,7 @@ public:
   
   ~SimTrackMatchManager();
 
-  //const DisplacedGENMuonMatcher& genMuons() const {return genMuons_;}
+  const DisplacedGENMuonMatcher& genMuons() const {return genMuons_;}
   const SimHitMatcher& simhits() const {return simhits_;}
   const GEMDigiMatcher& gemDigis() const {return gem_digis_;}
   const GEMRecHitMatcher& gemRecHits() const {return gem_rechits_;}
@@ -101,7 +101,7 @@ public:
   const DTDigiMatcher& dtDigis() const {return dt_digis_;}
   const DTStubMatcher& dtStubs() const {return dt_stubs_;}
   const DTRecHitMatcher& dtRecHits() const {return dt_rechits_;} 
-  //  const L1TrackMatcher& l1Tracks() const {return l1_tracks_;}
+  const L1TrackMatcher& l1Tracks() const {return l1_tracks_;}
   const L1TrackFinderTrackMatcher& l1TfTracks() const {return l1_tf_tracks_;}
   const L1TrackFinderCandidateMatcher& l1TfCands() const {return l1_tf_cands_;}
   const L1GlobalMuonTriggerMatcher& l1GMTCands() const {return l1_gmt_cands_;}
@@ -109,7 +109,7 @@ public:
   
 private:
 
-  //DisplacedGENMuonMatcher genMuons_;
+  DisplacedGENMuonMatcher genMuons_;
   SimHitMatcher simhits_;
   GEMDigiMatcher gem_digis_;
   GEMRecHitMatcher gem_rechits_;
@@ -123,7 +123,7 @@ private:
   DTDigiMatcher dt_digis_;
   DTStubMatcher dt_stubs_;
   DTRecHitMatcher dt_rechits_; 
-  //L1TrackMatcher l1_tracks_;
+  L1TrackMatcher l1_tracks_;
   L1TrackFinderTrackMatcher l1_tf_tracks_;
   L1TrackFinderCandidateMatcher l1_tf_cands_;
   L1GlobalMuonTriggerMatcher l1_gmt_cands_;

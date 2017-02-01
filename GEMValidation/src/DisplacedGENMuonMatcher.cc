@@ -1,16 +1,19 @@
 #include "GEMCode/GEMValidation/interface/DisplacedGENMuonMatcher.h"
 
-DisplacedGENMuonMatcher::DisplacedGENMuonMatcher(const SimTrack& t, 
-                                                 const SimVertex& v,
-                                                 const edm::ParameterSet& ps, 
-                                                 const edm::Event& ev, 
-                                                 const edm::EventSetup& es,
+DisplacedGENMuonMatcher::DisplacedGENMuonMatcher(const SimTrack& t, const SimVertex& v,
+      						 const edm::ParameterSet& ps, const edm::Event& ev, const edm::EventSetup& es,
                                                  edm::EDGetTokenT<reco::GenParticleCollection>& inputToken_)
   : BaseMatcher(t, v, ps, ev, es)
 {
-  ev.getByToken(inputToken_, genParticles);
-  matchDisplacedGENMuonMatcherToSimTrack(*genParticles.product());
   //  if(gemvalidation::getByToken("genParticles", genParticles, event())) return;//
+  auto displacedGenMu_= conf().getParameter<edm::ParameterSet>("displacedGenMu");
+  verbose_ = displacedGenMu_.getParameter<int>("verbose");
+  run_ = displacedGenMu_.getParameter<bool>("run");
+
+  edm::Handle<reco::GenParticleCollection> genParticles;
+  runOK_ = false;
+  if(gemvalidation::getByToken(inputToken_, genParticles, event()) and run_) matchDisplacedGENMuonMatcherToSimTrack(*genParticles.product());
+
 }
 
 DisplacedGENMuonMatcher::~DisplacedGENMuonMatcher()
@@ -23,10 +26,8 @@ DisplacedGENMuonMatcher::matchDisplacedGENMuonMatcherToSimTrack(const reco::GenP
 {
   double eq = 0.000001;
 
-  bool verbose = false;
-
   // edm::Handle<reco::BeamSpot> beamSpot;
-  // match_sh.event().getByToken("offlineBeamSpot",beamSpot);
+  // match_sh.event().getByLabel("offlineBeamSpot",beamSpot);
   beamSpot_x = 0;//beamSpot->position().x();
   beamSpot_y = 0;//beamSpot->position().y();
   beamSpot_z = 0;//beamSpot->position().z();
@@ -44,9 +45,9 @@ DisplacedGENMuonMatcher::matchDisplacedGENMuonMatcherToSimTrack(const reco::GenP
   for(reco::GenParticleCollection::const_iterator iGenParticle = genParticles.begin();  iGenParticle != genParticles.end();  ++iGenParticle) {
     counterGenParticle++;
     // Check if gen particle is muon (pdgId = +/-13) and stable (status = 1)
-    //    if (verbose) std::cout << counterGenParticle << " " << iGenParticle->status() << " " << iGenParticle->pdgId() << " " << iGenParticle->vx() << " " << iGenParticle->vy() << " " << iGenParticle->vz() << std::endl;
+    //    if (verbose_) std::cout << counterGenParticle << " " << iGenParticle->status() << " " << iGenParticle->pdgId() << " " << iGenParticle->vx() << " " << iGenParticle->vy() << " " << iGenParticle->vz() << std::endl;
     if ( fabs( iGenParticle->pdgId() ) == 13 and iGenParticle->status() == 1 ) {
-      if (verbose) std::cout << "Muon " << counterGenParticle << " " << iGenParticle->status() << " " << iGenParticle->pdgId() << " " << iGenParticle->vx() << " " << iGenParticle->vy() << " " << iGenParticle->vz() << std::endl;
+      if (verbose_) std::cout << "Muon " << counterGenParticle << " " << iGenParticle->status() << " " << iGenParticle->pdgId() << " " << iGenParticle->vx() << " " << iGenParticle->vy() << " " << iGenParticle->vz() << std::endl;
       // Mother of the muon can be muon. Find the last muon in this chain: genMuonCand
       // Example: a1 -> mu+ (status = 3) mu- (status = 3)
       //          mu- (status = 3) -> mu- (status = 2) -> mu- (status = 1)
@@ -74,27 +75,27 @@ DisplacedGENMuonMatcher::matchDisplacedGENMuonMatcherToSimTrack(const reco::GenP
       }
     }
     // Check if gen particle is
-    if (    ( iGenParticle->status() == 22 and iGenParticle->pdgId() == 25 ) // decaying (status = 3) SM Higgs (pdgId = 25)
-	    || ( iGenParticle->status() == 22 and iGenParticle->pdgId() == 35 ) // decaying (status = 3) CP-even Higgs (pdgId = 35)
+    if (    ( iGenParticle->status() == 3 and iGenParticle->pdgId() == 25 ) // decaying (status = 3) SM Higgs (pdgId = 25)
+	    || ( iGenParticle->status() == 3 and iGenParticle->pdgId() == 35 ) // decaying (status = 3) CP-even Higgs (pdgId = 35)
 	    ) {
-      if (iGenParticle->pdgId() == 25) if (verbose) std::cout << "SM Higgs ";
-      if (iGenParticle->pdgId() == 35) if (verbose) std::cout << "CP-even Higgs ";
-      if (verbose) std::cout << counterGenParticle << " " << iGenParticle->status() << " " << iGenParticle->pdgId() << " " << iGenParticle->vx() << " " << iGenParticle->vy() << " " << iGenParticle->vz() << std::endl;    
+      if (iGenParticle->pdgId() == 25) if (verbose_) std::cout << "SM Higgs ";
+      if (iGenParticle->pdgId() == 35) if (verbose_) std::cout << "CP-even Higgs ";
+      if (verbose_) std::cout << counterGenParticle << " " << iGenParticle->status() << " " << iGenParticle->pdgId() << " " << iGenParticle->vx() << " " << iGenParticle->vy() << " " << iGenParticle->vz() << std::endl;    
       genH.push_back(&(*iGenParticle)); // Store the Higgs into vector
     }
     // Check if gen particle is
-    if (    ( iGenParticle->status() == 22 and iGenParticle->pdgId() == 36      ) // decaying (status = 3) CP-odd Higgs (pdgId = 36)
-	    || ( iGenParticle->status() == 22 and iGenParticle->pdgId() == 3000022 ) // decaying (status = 3) gamma_Dark (pdgId = 3000022)
+    if (    ( iGenParticle->status() == 3 and iGenParticle->pdgId() == 36      ) // decaying (status = 3) CP-odd Higgs (pdgId = 36)
+	    || ( iGenParticle->status() == 3 and iGenParticle->pdgId() == 3000022 ) // decaying (status = 3) gamma_Dark (pdgId = 3000022)
 	    //         || ( iGenParticle->status() == 2 and iGenParticle->pdgId() == 443   ) // decaying (status = 2) J/psi (pdgId = 443)
 	    ) {
-      if (iGenParticle->pdgId() == 36) if (verbose) std::cout << "SM Higgs ";
-      if (iGenParticle->pdgId() == 3000022) if (verbose) std::cout << "CP-even Higgs ";
-      if (verbose) std::cout << counterGenParticle << " " << iGenParticle->status() << " " << iGenParticle->pdgId() << " " << iGenParticle->vx() << " " << iGenParticle->vy() << " " << iGenParticle->vz() << std::endl;   
+      if (iGenParticle->pdgId() == 36) if (verbose_) std::cout << "SM Higgs ";
+      if (iGenParticle->pdgId() == 3000022) if (verbose_) std::cout << "CP-even Higgs ";
+      if (verbose_) std::cout << counterGenParticle << " " << iGenParticle->status() << " " << iGenParticle->pdgId() << " " << iGenParticle->vx() << " " << iGenParticle->vy() << " " << iGenParticle->vz() << std::endl;   
       genGd_unsorted.push_back(&(*iGenParticle));
     }
     // Check if gen particle is gluon 
-    if (iGenParticle->status() == 22 and iGenParticle->pdgId() == 21){
-      if (verbose) std::cout << "Gluon " << counterGenParticle << " " << iGenParticle->status() << " " << iGenParticle->pdgId() << " " << iGenParticle->vx() << " " << iGenParticle->vy() << " " << iGenParticle->vz() << std::endl;    
+    if (iGenParticle->status() == 3 and iGenParticle->pdgId() == 21){
+      if (verbose_) std::cout << "Gluon " << counterGenParticle << " " << iGenParticle->status() << " " << iGenParticle->pdgId() << " " << iGenParticle->vx() << " " << iGenParticle->vy() << " " << iGenParticle->vz() << std::endl;    
       genGlu_unsorted.push_back(&(*iGenParticle));
     }
   }
@@ -111,7 +112,7 @@ DisplacedGENMuonMatcher::matchDisplacedGENMuonMatcherToSimTrack(const reco::GenP
     genH_vy  = genH[0]->vy() - beamSpot_y;
     genH_vz  = genH[0]->vz() - beamSpot_z;
   } else {
-    if (verbose) std::cout << "WARNING! genH.size() != 1" << std::endl;
+    if (verbose_) std::cout << "WARNING! genH.size() != 1" << std::endl;
   }
   bool sortGammaDark(false);
   if (sortGammaDark) {
@@ -153,7 +154,7 @@ DisplacedGENMuonMatcher::matchDisplacedGENMuonMatcherToSimTrack(const reco::GenP
       genGd_vz[i]  = genGd[i]->vz() - beamSpot_z;
     }
   } else {
-    if (verbose) std::cout << "WARNING! genGd.size() < 2" << std::endl;
+    if (verbose_) std::cout << "WARNING! genGd.size() < 2" << std::endl;
   }
   if ( genGlu.size() >= 2 ) {    
     for (int i=0; i<2; ++i){
@@ -166,7 +167,7 @@ DisplacedGENMuonMatcher::matchDisplacedGENMuonMatcherToSimTrack(const reco::GenP
       genGlu_phi[i] = genGlu[i]->phi();
     }
   } else {
-    if (verbose) std::cout << "WARNING! genGlu.size() < 2" << std::endl;
+    if (verbose_) std::cout << "WARNING! genGlu.size() < 2" << std::endl;
   }
   // Group muons with the same mother
   std::vector< std::vector<const reco::GenParticle*> > genMuonGroupsUnsorted;
@@ -194,7 +195,7 @@ DisplacedGENMuonMatcher::matchDisplacedGENMuonMatcherToSimTrack(const reco::GenP
     genMuonMothersTMP1 = genMuonMothersTMP2;
     nMuonGroup++;
   }
-  
+
   // Sort muon groups to match order of genGd vector
   std::vector< std::vector<const reco::GenParticle*> > genMuonGroups;
   std::vector<const reco::Candidate*> genMuonGroupsMothers;
@@ -212,13 +213,11 @@ DisplacedGENMuonMatcher::matchDisplacedGENMuonMatcherToSimTrack(const reco::GenP
       genMuonGroups.push_back( genMuonGroupsUnsorted[nMuGroup] );
       genMuonGroupsMothers.push_back( genMuonGroupsUnsortedMothers[nMuGroup] );
     } else {
-      if (verbose) std::cout << "Error! Muon group has no matched boson A" << std::endl;
+      if (verbose_) std::cout << "Error! Muon group has no matched boson A" << std::endl;
     }
   }
   
-  genGd0Gd1_m = invariantMass(genGd[0],genGd[1]);
-  genGd0Gd1_dR = reco::deltaR(genGd_eta[0], genGd_phi[0], genGd_eta[1], genGd_phi[1]);
-  int minDeltaR(99);
+  float minDeltaR = 99.0;
   int index1=-99;
   int index2=-99;
   if ( genMuonGroups.size() == 2 and genMuonGroups[0].size() == 2 and genMuonGroups[1].size() == 2 ) {
@@ -252,10 +251,18 @@ DisplacedGENMuonMatcher::matchDisplacedGENMuonMatcherToSimTrack(const reco::GenP
     }
   }
 
-  //  verbose = true;
-  if (verbose){
+  if (index1 == -99 or index2 == -99 ){
+        if (verbose_) std::cout <<" failed to find matched dark boson or matched gen muon " << std::endl;
+      	runOK_ = false;
+  	return; 
+  }
+  if (verbose_) std::cout <<" Find matched dark boson and matched gen muon index1 "<< index1 << " index2 "<< index2 << std::endl;
+  runOK_ = true;
+
+  if (verbose_){
     for (int i=0; i<2; ++i){ 
       for (int j=0; j<2; ++j){
+	if (i==index1 and j==index2) std::cout <<"=======  this is gen Mu matched to sim Mu ======= "<< std::endl;
 	std::cout << "genGdMu_pt_" << i << j << ": " << genGdMu_pt[i][j] << std::endl;
 	std::cout << "genGdMu_eta_" << i << j << ": " << genGdMu_eta[i][j] << std::endl;
 	std::cout << "genGdMu_phi_" << i << j << ": " << genGdMu_phi[i][j] << std::endl;
@@ -266,9 +273,17 @@ DisplacedGENMuonMatcher::matchDisplacedGENMuonMatcherToSimTrack(const reco::GenP
     std::cout << "genGd0Gd1_m " << genGd0Gd1_m << std::endl;
     std::cout << "genGd0Gd1_dR " << genGd0Gd1_dR << std::endl;
   }
+
+  genGd0Gd1_m = invariantMass(genGd[0],genGd[1]);
+  genGd0Gd1_dR = reco::deltaR(genGd_eta[0], genGd_phi[0], genGd_eta[1], genGd_phi[1]);
   darkBosonIndex_ = index1;
   genMuonIndex_ = index2;
   matchedGENMuon_ = genMuonGroups[index1][index2];
+  matchedGenMu_dR = reco::deltaR(genGdMu_eta[index1][index2], genGdMu_phi[index1][index2], trk().momentum().eta(), trk().momentum().phi());
+
+  matchedGenMu_dxy = dxy(genGdMu_px[index1][index2], genGdMu_py[index1][index2], genGdMu_vx[index1][index2], genGdMu_vy[index1][index2], genGdMu_pt[index1][index2]);
+  //matchedGenMu_dxy = dxy(matchedGENMuon_->px(), matchedGENMuon_->py(), matchedGENMuon_->vx(), matchedGENMuon_->vy(), matchedGENMuon_->pt());
+
   matchedGENMuons_.clear();
   matchedGENMuons_.push_back(genMuonGroups[index1][0]);
   matchedGENMuons_.push_back(genMuonGroups[index1][1]);
@@ -301,4 +316,11 @@ DisplacedGENMuonMatcher::invariantMass(const reco::Candidate* p1, const reco::Ca
                (p1->px() + p2->px())*(p1->px() + p2->px()) -
                (p1->py() + p2->py())*(p1->py() + p2->py()) -
                (p1->pz() + p2->pz())*(p1->pz() + p2->pz()) );
+}
+
+
+void DisplacedGENMuonMatcher::testprint() const {
+
+	std::cout <<"here is a test for displacedGenMuon matcher "<< std::endl;
+
 }

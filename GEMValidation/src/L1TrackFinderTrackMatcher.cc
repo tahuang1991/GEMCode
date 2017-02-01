@@ -1,26 +1,59 @@
 #include "GEMCode/GEMValidation/interface/L1TrackFinderTrackMatcher.h"
 
 L1TrackFinderTrackMatcher::L1TrackFinderTrackMatcher(SimHitMatcher& sh,
-                                                     edm::EDGetTokenT<L1CSCTrackCollection> &cscTfTrackInputLabel_ 
-                                                     )
-  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
+                                                     edm::EDGetTokenT<L1CSCTrackCollection> &cscTfTrackInputLabel_)
+: BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
 {
   auto cscTfTrack = conf().getParameter<edm::ParameterSet>("cscTfTrack");
+  auto dtTfTrack = conf().getParameter<edm::ParameterSet>("dtTfTrack");
+  auto rpcTfTrack = conf().getParameter<edm::ParameterSet>("rpcTfTrack");
+
+  dtTfTrackInputLabel_ = dtTfTrack.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  rpcTfTrackInputLabel_ = rpcTfTrack.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  
   verboseCscTfTrack_ = cscTfTrack.getParameter<int>("verbose");
+  verboseDtTfTrack_ = dtTfTrack.getParameter<int>("verbose");
+  verboseRpcTfTrack_ = rpcTfTrack.getParameter<int>("verbose");
+
   runCscTfTrack_ = cscTfTrack.getParameter<bool>("run");
+  runDtTfTrack_ = dtTfTrack.getParameter<bool>("run");
+  runRpcTfTrack_ = rpcTfTrack.getParameter<bool>("run");
+
   minBXCscTfTrack_ = cscTfTrack.getParameter<int>("minBX");
+  minBXDtTfTrack_ = dtTfTrack.getParameter<int>("minBX");
+  minBXRpcTfTrack_ = rpcTfTrack.getParameter<int>("minBX");
+
   maxBXCscTfTrack_ = cscTfTrack.getParameter<int>("maxBX");
+  maxBXDtTfTrack_ = dtTfTrack.getParameter<int>("maxBX");
+  maxBXRpcTfTrack_ = rpcTfTrack.getParameter<int>("maxBX");
 
   edm::Handle<L1CSCTrackCollection> hCscTfTrack;
-  if (gemvalidation::getByToken(cscTfTrackInputLabel_, hCscTfTrack, event())) if (runCscTfTrack_) matchCSCTfTrackToSimTrack(*hCscTfTrack.product());
+  if (runCscTfTrack_) if (gemvalidation::getByToken(cscTfTrackInputLabel_, hCscTfTrack, event())) matchCSCTfTrackToSimTrack(*hCscTfTrack.product());
+
+  /*
+  edm::Handle<L1CSCTrackCollection> hDtTfTrack;
+  if (runDtTfTrack_) if (gemvalidation::getByToken(dtTfTrackInputLabel_, hDtTfTrack, event())) matchDTTfTrackToSimTrack(*hDtTfTrack.product());
+
+  edm::Handle<L1CSCTrackCollection> hRpcTfTrack;
+  if (runRpcTfTrack_) if (gemvalidation::getByToken(rpcTfTrackInputLabel_, hRpcTfTrack, event())) matchRPCTfTrackToSimTrack(*hRpcTfTrack.product());
+   */
+  init();
 }
 
 L1TrackFinderTrackMatcher::~L1TrackFinderTrackMatcher()
 {}
 
 void 
+L1TrackFinderTrackMatcher::init()
+{
+
+}
+
+void 
 L1TrackFinderTrackMatcher::matchCSCTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
 {
+
+  return;
   for (auto trk : tracks) {
     auto tfTrack(trk.first);
     std::cout << "Stubs in CSCTF Track" << std::endl;
@@ -137,3 +170,12 @@ L1TrackFinderTrackMatcher::matchCSCTfTrackToSimTrack(const L1CSCTrackCollection&
       const CSCCorrelated
   */
 }
+
+void 
+L1TrackFinderTrackMatcher::matchDTTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
+{}
+
+void 
+L1TrackFinderTrackMatcher::matchRPCTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
+{}
+

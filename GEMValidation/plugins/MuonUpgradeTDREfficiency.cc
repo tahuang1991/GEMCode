@@ -997,10 +997,7 @@ void MuonUpgradeTDREfficiency::analyzeTrackEff(SimTrackMatchManager& match, int 
   for(auto d: match_sh.superChamberIdsGEM())
   {
     GEMDetId id(d);
-    int MEStation;
-    if (id.station() == 3) MEStation = 2;
-    else if (id.station() == 2) continue;
-    else MEStation = id.station();
+    int MEStation = id.station();
 
     const int st(detIdToMEStation(MEStation,id.ring()));
     if (stations_to_use_.count(st) == 0) continue;
@@ -1057,10 +1054,7 @@ void MuonUpgradeTDREfficiency::analyzeTrackEff(SimTrackMatchManager& match, int 
   for(auto d: match_gd.superChamberIdsDigi())
   {
     GEMDetId id(d);
-    int MEStation;
-    if (id.station() == 3) MEStation = 2;
-    else if (id.station() == 2) continue;
-    else MEStation = id.station();
+    int MEStation = id.station();
 
     const int st(detIdToMEStation(MEStation,id.ring()));
     if (stations_to_use_.count(st) == 0) continue;
@@ -1133,10 +1127,7 @@ void MuonUpgradeTDREfficiency::analyzeTrackEff(SimTrackMatchManager& match, int 
   for(auto d: match_gd.superChamberIdsDigi())
   {
     GEMDetId id(d);
-    int MEStation;
-    if (id.station() == 3) MEStation = 2;
-    else if (id.station() == 2) continue;
-    else MEStation = id.station();
+    int MEStation = id.station();
 
     const int stations(detIdToMEStation(MEStation,id.ring()));
     int st;
@@ -1282,10 +1273,7 @@ void MuonUpgradeTDREfficiency::analyzeTrackEff(SimTrackMatchManager& match, int 
   for(auto d: match_sh.superChamberIdsGEM())
   {
     GEMDetId id(d);
-    int MEStation;
-    if (id.station() == 3) MEStation = 2;
-    else if (id.station() == 2) continue;
-    else MEStation = id.station();
+    int MEStation = id.station();
 
     const int st(detIdToMEStation(MEStation,id.ring()));
     if (stations_to_use_.count(st) == 0) continue;
@@ -1329,10 +1317,7 @@ void MuonUpgradeTDREfficiency::analyzeTrackEff(SimTrackMatchManager& match, int 
   for(auto d: match_gd.superChamberIdsDigi())
   {
     GEMDetId id(d);
-    int MEStation;
-    if (id.station() == 3) MEStation = 2;
-    else if (id.station() == 2) continue;
-    else MEStation = id.station();
+    int MEStation = id.station();
     
     const int st(detIdToMEStation(MEStation,id.ring()));
     if (stations_to_use_.count(st) == 0) continue;
@@ -1353,10 +1338,7 @@ void MuonUpgradeTDREfficiency::analyzeTrackEff(SimTrackMatchManager& match, int 
   for (auto d: match_gd.superChamberIdsCoPad())
   {
     GEMDetId id(d);
-    int MEStation;
-    if (id.station() == 3) MEStation = 2;
-    else if (id.station() == 2) continue;
-    else MEStation = id.station();
+    int MEStation = id.station();
     
     const int st(detIdToMEStation(MEStation,id.ring()));
     if (stations_to_use_.count(st) == 0) continue;

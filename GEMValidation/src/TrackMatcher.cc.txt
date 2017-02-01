@@ -1,54 +1,62 @@
-#include "GEMCode/GEMValidation/interface/L1TrackMatcher.h"
-#include "DataFormats/Math/interface/deltaR.h"
-#include "DataFormats/Math/interface/deltaPhi.h"
-
+#include "GEMCode/GEMValidation/interface/TrackMatcher.h"
+#include "GEMCode/GEMValidation/interface/Helpers.h"
 #include "TLorentzVector.h"
 #include <map>
 
-L1TrackMatcher::L1TrackMatcher(CSCStubMatcher& csc, 
-                               DTDigiMatcher& dt, 
-                               RPCDigiMatcher& rpc,
-                               edm::EDGetTokenT<L1CSCTrackCollection> &cscTfTrackInputLabel_, 
-                               edm::EDGetTokenT<L1MuRegionalCandCollection> &cscTfCandInputLabel_)
-  : BaseMatcher(csc.trk(), csc.vtx(), csc.conf(), csc.event(), csc.eventSetup())
-, csc_stub_matcher_(&csc)
-, dt_digi_matcher_(&dt)
-, rpc_digi_matcher_(&rpc)                 
+TrackMatcher::TrackMatcher(SimHitMatcher& sh, CSCDigiMatcher& csc_dg, 
+                           GEMDigiMatcher& gem_dg, RPCDigiMatcher& rpc_dg, 
+                           CSCStubMatcher& csc_st)
+: CSCStubMatcher(sh, csc_dg, gem_dg, rpc_dg)
+, sh_matcher_(&sh)
+, gem_digi_matcher_(&gem_dg)
+, csc_digi_matcher_(&csc_dg)
+, rpc_digi_matcher_(&rpc_dg)                 
 {
   auto tfTrack = conf().getParameter<edm::ParameterSet>("cscTfTrack");
+  cscTfTrackInputLabel_ = tfTrack.getParameter<edm::InputTag>("input");
   minBXTFTrack_ = tfTrack.getParameter<int>("minBX");
   maxBXTFTrack_ = tfTrack.getParameter<int>("minBX");
   verboseTFTrack_ = tfTrack.getParameter<int>("verbose");
   deltaRTFTrack_ = tfTrack.getParameter<double>("deltaR");
+  runTFTrack_ = tfTrack.getParameter<bool>("run");
   
   auto tfCand = conf().getParameter<edm::ParameterSet>("cscTfCand");
+  // cscTfCandInputLabel_ = tfCand.getParameter<edm::InputTag>("input");
   minBXTFCand_ = tfCand.getParameter<int>("minBX");
   maxBXTFCand_ = tfCand.getParameter<int>("minBX");
   verboseTFCand_ = tfCand.getParameter<int>("verbose");
   deltaRTFCand_ = tfCand.getParameter<double>("deltaR");
   
-  // auto gmtRegCand = conf().getParameter<edm::ParameterSet>("gmtRegCand");
-  // minBXGMTRegCand_ = gmtRegCand.getParameter<int>("minBX");
-  // maxBXGMTRegCand_ = gmtRegCand.getParameter<int>("minBX");
-  // verboseGMTRegCand_ = gmtRegCand.getParameter<int>("verbose");
-  // deltaRGMTRegCand_ = gmtRegCand.getParameter<double>("deltaR");
+  auto gmtRegCand = conf().getParameter<edm::ParameterSet>("gmtRegCandCSC");
+  // gmtRegCandInputLabel_ = gmtRegCand.getParameter<edm::InputTag>("input");
+  minBXGMTRegCand_ = gmtRegCand.getParameter<int>("minBX");
+  maxBXGMTRegCand_ = gmtRegCand.getParameter<int>("minBX");
+  verboseGMTRegCand_ = gmtRegCand.getParameter<int>("verbose");
+  deltaRGMTRegCand_ = gmtRegCand.getParameter<double>("deltaR");
   
-  // auto gmtCand = conf().getParameter<edm::ParameterSet>("gmtCand");
-  // minBXGMTCand_ = gmtCand.getParameter<int>("minBX");
-  // maxBXGMTCand_ = gmtCand.getParameter<int>("minBX");
-  // verboseGMTCand_ = gmtCand.getParameter<int>("verbose");
-  // deltaRGMTCand_ = gmtCand.getParameter<double>("deltaR");
+  auto gmtCand = conf().getParameter<edm::ParameterSet>("gmtCand");
+  //  gmtCandInputLabel_ = gmtCand.getParameter<edm::InputTag>("input");
+  minBXGMTCand_ = gmtCand.getParameter<int>("minBX");
+  maxBXGMTCand_ = gmtCand.getParameter<int>("minBX");
+  verboseGMTCand_ = gmtCand.getParameter<int>("verbose");
+  deltaRGMTCand_ = gmtCand.getParameter<double>("deltaR");
   
-  // auto l1Extra = conf().getParameter<edm::ParameterSet>("l1Extra");
-  // minBXL1Extra_ = l1Extra.getParameter<int>("minBX");
-  // maxBXL1Extra_ = l1Extra.getParameter<int>("minBX");
-  // verboseL1Extra_ = l1Extra.getParameter<int>("verbose");
-  // deltaRL1Extra_ = l1Extra.getParameter<double>("deltaR");
+  auto l1Extra = conf().getParameter<edm::ParameterSet>("l1ExtraMuonParticle");
+  // l1ExtraInputLabel_ = l1Extra.getParameter<edm::InputTag>("input");
+  minBXL1Extra_ = l1Extra.getParameter<int>("minBX");
+  maxBXL1Extra_ = l1Extra.getParameter<int>("minBX");
+  verboseL1Extra_ = l1Extra.getParameter<int>("verbose");
+  deltaRL1Extra_ = l1Extra.getParameter<double>("deltaR");
 
   CSCTFSPset_ = conf().getParameter<edm::ParameterSet>("sectorProcessor");
   ptLUTset_ = CSCTFSPset_.getParameter<edm::ParameterSet>("PTLUT");
   srLUTset_ = CSCTFSPset_.getParameter<edm::ParameterSet>("SRLUT");
   
+  simPt = trk().momentum().pt();
+  simEta = trk().momentum().eta();
+  simPhi = trk().momentum().phi();
+  simE = trk().momentum().E();
+  simCharge = trk().charge();
   hasMuScales_ = true;
   hasMuPtScale_ = true;
 
@@ -57,72 +65,16 @@ L1TrackMatcher::L1TrackMatcher(CSCStubMatcher& csc,
   //  CSCSectorReceiverLUT* srLUTs_[5][6][2];
   dtrc_ = nullptr;
 
-  //std::cout<<" L1TrackMatcher constructor" <<std::endl;
+  //std::cout<<" TrackMatcher constructor" <<std::endl;
   clear();
   init();
-
-  try {
-    eventSetup().get<L1MuTriggerScalesRcd>().get(muScalesHd_);
-    muScales_ = &*muScalesHd_;
-  } catch (edm::eventsetup::NoProxyException<L1MuTriggerScalesRcd>& e) {
-    hasMuScales_ = false;
-    LogDebug("L1TrackMatcher") << "+++ Info: L1MuTriggerScalesRcd is unavailable. +++\n";
-  }
-
-  try {
-    eventSetup().get<L1MuTriggerPtScaleRcd>().get(muPtScaleHd_);
-    muPtScale_ = &*muPtScaleHd_;
-  } catch (edm::eventsetup::NoProxyException<L1MuTriggerPtScaleRcd>& e) {
-    hasMuPtScale_ = false;
-    LogDebug("L1TrackMatcher") << "+++ Info: L1MuTriggerPtScaleRcd is unavailable. +++\n";
-  }
-
-  if (ptLUT_) delete ptLUT_;
-  ptLUT_ = new CSCTFPtLUT(ptLUTset_, muScalesHd_.product(), muPtScaleHd_.product());
-
-  /*// Sector Processor and Receiver
-  for(int e=0; e<2; e++) {
-    for (int s=0; s<6; s++){
-      my_SPs_[e][s] = new CSCTFSectorProcessor(e+1, s+1, CSCTFSPset_, true, muScalesHd_.product(), muPtScaleHd_.product());
-      my_SPs_[e][s]->initialize(eventSetup());
-    }
-  }*/
-
- const bool TMB07(true);  
-  for(int endcap = 1; endcap<=2; endcap++) {
-    for(int sector=1; sector<=6; sector++) {
-      for(int station=1,fpga=0; station<=4 && fpga<5; station++) {
-        if(station==1) for(int subSector=0; subSector<2; subSector++)
-          srLUTs_[fpga++][sector-1][endcap-1] = new CSCSectorReceiverLUT(endcap, sector, subSector+1, station, srLUTset_, TMB07);
-        else
-          srLUTs_[fpga++][sector-1][endcap-1] = new CSCSectorReceiverLUT(endcap, sector, 0, station, srLUTset_, TMB07);
-      }
-    }
-  }
-
-  dtrc_ = new CSCTFDTReceiver();
-  
-  propagateSimTrack();
-  propagationInterStation();
-
-  // tracks produced by TF
-  edm::Handle<L1CSCTrackCollection> hl1Tracks;
-  if (gemvalidation::getByToken(cscTfTrackInputLabel_,hl1Tracks, event())) matchTfTrackToSimTrack(*hl1Tracks.product());
-  
-  // L1 muon candidates after CSC sorter
-  edm::Handle<L1MuRegionalCandCollection> hl1TfCands;
-  if (gemvalidation::getByToken(cscTfCandInputLabel_, hl1TfCands, event())) matchTfCandToSimTrack(*hl1TfCands.product());
-  
-  // // L1 muon candidates
-  // edm::Handle<l1extra::L1MuonParticleCollection> l1Particles;
-  // if (gemvalidation::getByToken(l1ExtraInputLabel_, l1Particles, event())) matchL1MuonParticleToSimTrack(*l1Particles.product());
 }
 
-L1TrackMatcher::~L1TrackMatcher() 
+TrackMatcher::~TrackMatcher() 
 {
  // if(ptLUT_) delete ptLUT_;
  // ptLUT_ = nullptr;
-    //std::cout<<" L1TrackMatcher destructor" <<std::endl;
+    //std::cout<<" TrackMatcher destructor" <<std::endl;
   delete ptLUT_;
   ptLUT_ = nullptr;
 
@@ -159,34 +111,87 @@ L1TrackMatcher::~L1TrackMatcher()
 }
 
 void 
-L1TrackMatcher::clear()
+TrackMatcher::clear()
 {
   tfTracks_.clear();
   tfCands_.clear();
-  // gmtRegCands_.clear();
-  // gmtCands_.clear();
-  // l1Extras_.clear();
+  gmtRegCands_.clear();
+  gmtCands_.clear();
+  l1Extras_.clear();
 }
 
 void 
-L1TrackMatcher::init()
+TrackMatcher::init()
 {  
+  try {
+    eventSetup().get<L1MuTriggerScalesRcd>().get(muScalesHd_);
+    muScales_ = &*muScalesHd_;
+  } catch (edm::eventsetup::NoProxyException<L1MuTriggerScalesRcd>& e) {
+    hasMuScales_ = false;
+    LogDebug("TrackMatcher") << "+++ Info: L1MuTriggerScalesRcd is unavailable. +++\n";
+  }
+
+  try {
+    eventSetup().get<L1MuTriggerPtScaleRcd>().get(muPtScaleHd_);
+    muPtScale_ = &*muPtScaleHd_;
+  } catch (edm::eventsetup::NoProxyException<L1MuTriggerPtScaleRcd>& e) {
+    hasMuPtScale_ = false;
+    LogDebug("TrackMatcher") << "+++ Info: L1MuTriggerPtScaleRcd is unavailable. +++\n";
+  }
+
+  if (ptLUT_) delete ptLUT_;
+  ptLUT_ = new CSCTFPtLUT(ptLUTset_, muScalesHd_.product(), muPtScaleHd_.product());
+
+  /*// Sector Processor and Receiver
+  for(int e=0; e<2; e++) {
+    for (int s=0; s<6; s++){
+      my_SPs_[e][s] = new CSCTFSectorProcessor(e+1, s+1, CSCTFSPset_, true, muScalesHd_.product(), muPtScaleHd_.product());
+      my_SPs_[e][s]->initialize(eventSetup());
+    }
+  }*/
+
+ const bool TMB07(true);  
+  for(int endcap = 1; endcap<=2; endcap++) {
+    for(int sector=1; sector<=6; sector++) {
+      for(int station=1,fpga=0; station<=4 && fpga<5; station++) {
+        if(station==1) for(int subSector=0; subSector<2; subSector++)
+          srLUTs_[fpga++][sector-1][endcap-1] = new CSCSectorReceiverLUT(endcap, sector, subSector+1, station, srLUTset_, TMB07);
+        else
+          srLUTs_[fpga++][sector-1][endcap-1] = new CSCSectorReceiverLUT(endcap, sector, 0, station, srLUTset_, TMB07);
+      }
+    }
+  }
+
+  dtrc_ = new CSCTFDTReceiver();
+  
+  propagateSimTrack();
+  propagationInterStation();
+
+  // tracks produced by TF
+  edm::Handle<L1CSCTrackCollection> hl1Tracks;
+  if (runTFTrack_) {
+    event().getByToken(cscTfTrackInputLabel_,hl1Tracks);
+    matchTfTrackToSimTrack(*hl1Tracks.product());
+  }
+  
+  /*
+  // L1 muon candidates after CSC sorter
+  edm::Handle<L1MuRegionalCandCollection> hl1TfCands;
+  event().getByToken(cscTfCandInputLabel_, hl1TfCands);
+  matchTfCandToSimTrack(*hl1TfCands.product());
+
+  // L1 muon candidates
+  edm::Handle<l1extra::L1MuonParticleCollection> l1_particles;
+  event().getByToken(l1ExtraInputLabel_, l1_particles);
+  matchL1MuonParticleToSimTrack(*l1_particles.product());
+  */
 }
 
-
 void 
-L1TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
+TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
 {
-  const float simPt = trk().momentum().pt();
-  const float simEta = trk().momentum().eta();
-  const float simPhi = trk().momentum().phi();
-  const float simE = trk().momentum().E();
-  const float simCharge = trk().charge();
-  
   for (auto trk = tracks.begin(); trk != tracks.end(); trk++) {
-     verboseTFTrack_ = 0;
     TFTrack *track = new TFTrack(&trk->first,&trk->second);
-    //track->init(ptLUT_, muScalesHd_, muPtScaleHd_);
     track->init(muScalesHd_, muPtScaleHd_);
     
     float dR = 10.0;
@@ -196,8 +201,8 @@ L1TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
     
     if (simEta*track->eta() < 0) continue;
     // calculate the deltaR using the simhits in the 2nd CSC station -- reference station
-    auto p(rpc_digi_matcher_->simHitMatcher()->chamberIdsCSC(CSC_ME21));  
-    auto pp(rpc_digi_matcher_->simHitMatcher()->chamberIdsCSC(CSC_ME22));  
+    auto p(sh_matcher_->chamberIdsCSC(CSC_ME21));  
+    auto pp(sh_matcher_->chamberIdsCSC(CSC_ME22));  
     p.insert(pp.begin(),pp.end());
 
     TLorentzVector simmuon;
@@ -207,35 +212,35 @@ L1TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
     
     if (p.size()!=0) {
       if (verboseTFTrack_ > 1) std::cout << CSCDetId(*p.begin()) << std::endl;  
-      auto hits(rpc_digi_matcher_->simHitMatcher()->hitsInChamber(*p.begin()));
-      auto gp(rpc_digi_matcher_->simHitMatcher()->simHitsMeanPosition(hits));
+      auto hits(sh_matcher_->hitsInChamber(*p.begin()));
+      auto gp(sh_matcher_->simHitsMeanPosition(hits));
       if (verboseTFTrack_ > 1) std::cout << gp << std::endl;
       // simmuon.SetPtEtaPhiM(simPt, gp.eta(), gp.phi(), 1.057);
     }
     
-    //propagate simtrack to station2
-    float phi_cor = phiHeavyCorr(simPt, simEta, simPhi, simCharge); 
-    simmuon.SetPtEtaPhiM(simPt, simEta, phi_cor, 0.1057);
-    dR = simmuon.DeltaR(templ1muon);
-    
-   // auto lcts2(lctsInStation(2));
-   //  auto lcts3(lctsInStation(3));
-   //  lcts2.insert(lcts2.end(),lcts3.begin(),lcts3.end());
+   //propagate simtrack to station2
+   float phi_cor = phiHeavyCorr(simPt, simEta, simPhi, simCharge); 
+   simmuon.SetPtEtaPhiM(simPt, simEta, phi_cor, 0.1057);
+   dR = simmuon.DeltaR(templ1muon);
+   /*  auto lcts2(lctsInStation(2));
+    auto lcts3(lctsInStation(3));
+    lcts2.insert(lcts2.end(),lcts3.begin(),lcts3.end());
 
-   //  if (lcts2.size() != 0) {
+    if (lcts2.size() != 0) {
     
-   // 	TLorentzVector simmuon;
-   //      for (auto stub : lcts2)
-   //      {
-   // 	    if (verboseTFTrack_ > 1)   std::cout <<"stubs in st2,3 "<< stub << std::endl;
-   // 	    auto EtaPhi(intersectionEtaPhi(digi_id(stub), digi_wg(stub), digi_channel(stub)));
-   //          //simmuon.SetPtEtaPhiE(simPt, simEta, simPhi, simE);
-   //          simmuon.SetPtEtaPhiE(simPt, EtaPhi.first, EtaPhi.second, simE);
-   // 	    if (simmuon.DeltaR(templ1muon) < dR)  dR = simmuon.DeltaR(templ1muon);
-   // 	}
+	TLorentzVector simmuon;
+        for (auto stub : lcts2)
+        {
+	    if (verboseTFTrack_ > 1)   std::cout <<"stubs in st2,3 "<< stub << std::endl;
+	    auto EtaPhi(intersectionEtaPhi(digi_id(stub), digi_wg(stub), digi_channel(stub)));
+            //simmuon.SetPtEtaPhiE(simPt, simEta, simPhi, simE);
+            simmuon.SetPtEtaPhiE(simPt, EtaPhi.first, EtaPhi.second, simE);
+	    if (simmuon.DeltaR(templ1muon) < dR)  dR = simmuon.DeltaR(templ1muon);
+	}
     
-   //  }
-   //  else continue;//if no stubs available in station2,or 3 that can match to simtrack, then continue;???
+    }
+    else continue;//if no stubs available in station2,or 3 that can match to simtrack, then continue;???
+     */
 
     if (verboseTFTrack_ > 1) std::cout << "----------------------------------------------------------" << std::endl;
     
@@ -243,11 +248,11 @@ L1TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
     track->setDR(dR);
 
     // debugging
-    if (track->nStubs()==0)
+    /*if (track->nStubs()==0)
     {
         std::cout << "nstubs == 0" << std::endl;
 	verboseTFTrack_ = 2;
-    }
+    }*/
     //debug
     //if (!(track->hasStubEndcap(1) and track->hasStubEndcap(2)) and track->dr()< deltaRTFTrack_)
    // {
@@ -279,38 +284,38 @@ L1TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
         auto lct(*digiIt);
         // check for valid stubs
         if (!(lct.isValid())) continue;
-	//  track.addTriggerDigi(&lct);
-	//  track.addTriggerDigiId(id);
+      //  track.addTriggerDigi(&lct);
+      //  track.addTriggerDigiId(id);
 	auto EtaPhi(intersectionEtaPhi(id, lct.getKeyWG(), lct.getStrip()));
         track->addTriggerEtaPhi(EtaPhi);
         track->addTriggerStub(buildTrackStub(lct, id));
-        if (verboseTFTrack_ > 1 ) { 
-	  //    auto EtaPhi(intersectionEtaPhi(id, lct.getKeyWG(), lct.getStrip()));
+        if (verboseTFTrack_ > 1 ){
+	//    auto EtaPhi(intersectionEtaPhi(id, lct.getKeyWG(), lct.getStrip()));
           std::cout << "\t\tLCT" << digiIt-range.first<<" eta:"<< EtaPhi.first
-		    <<" phi:"<< EtaPhi.second << ": " << lct << std::endl;
+	      <<" phi:"<< EtaPhi.second << ": " << lct << std::endl;
         }
       }
     }
-    
+
     //check the dR of simtrack and tftrack
     if (track->dr() < deltaRTFTrack_) {
       tfTracks_.push_back(track);
       if (verboseTFTrack_) std::cout<<" dR(sim, L1) is ok "<<" deltaRTFTrack"<< deltaRTFTrack_ <<" real dr"<<track->dr()<< std::endl;
     }
-    
+
   }
   int i=0;
   for (auto tftrk : tfTracks_)
-    {
-      if (verboseTFTrack_)  std::cout<<" track that can match to simtrack "<< i << " track pt " << tftrk->pt() <<" track eta " << tftrk->eta()
-				     <<" nstubs:"<< tftrk->nStubs()<<" dr:" << tftrk->dr() <<std::endl;
-      i++;
-    }  
+  {
+   if (verboseTFTrack_)  std::cout<<" track that can match to simtrack "<< i << " track pt " << tftrk->pt() <<" track eta " << tftrk->eta()
+                                  <<" nstubs:"<< tftrk->nStubs()<<" dr:" << tftrk->dr() <<std::endl;
+   i++;
+  }
+  
 }
 
-
 void 
-L1TrackMatcher::matchTfCandToSimTrack(const L1MuRegionalCandCollection& tracks)
+TrackMatcher::matchTfCandToSimTrack(const L1MuRegionalCandCollection& tracks)
 {
   for (auto trk = tracks.begin(); trk != tracks.end(); trk++) {
     TFCand track(&*trk);
@@ -331,35 +336,23 @@ L1TrackMatcher::matchTfCandToSimTrack(const L1MuRegionalCandCollection& tracks)
   }
 }
 
+void 
+TrackMatcher::matchGmtRegCandToSimTrack(const L1MuRegionalCand& tracks)
+{
+}
 
-// void 
-// L1TrackMatcher::matchGmtRegCandToSimTrack(const L1MuRegionalCandCollection& tracks)
-// {
-// }
+void 
+TrackMatcher::matchGmtCandToSimTrack(const L1MuGMTExtendedCand& tracks)
+{
+}
 
-
-// void 
-// L1TrackMatcher::matchGmtCandToSimTrack(const L1MuGMTExtendedCandCollection& tracks)
-// {
-// }
-
-
-// void 
-// L1TrackMatcher::matchL1MuonParticleToSimTrack(const l1extra::L1MuonParticleCollection& muons)
-// {
-//   // implement this function Jose!
-
-//   for(auto& muon: muons) {
-//     std::cout<<" L1 Muon Particle pT: "<<muon.pt()
-//              <<", eta: "<<muon.eta()
-//              <<", charge: "<<muon.charge()
-//              <<", phi: "<<muon.phi()<<std::endl;  
-//   }
-// }
-
+void 
+TrackMatcher::matchL1MuonParticleToSimTrack(const l1extra::L1MuonParticleCollection& tracks)
+{
+}
 
 TFTrack* 
-L1TrackMatcher::bestTFTrack(bool sortPtFirst) const
+TrackMatcher::bestTFTrack(bool sortPtFirst) const
 {
   //return 0;
   
@@ -421,7 +414,7 @@ L1TrackMatcher::bestTFTrack(bool sortPtFirst) const
 
 
 TFCand* 
-L1TrackMatcher::bestTFCand(bool sortPtFirst) const
+TrackMatcher::bestTFCand(bool sortPtFirst) const
 {
   /*
     if (cands.size()==0) return NULL;
@@ -475,58 +468,54 @@ OB    if (maxI==99) return NULL;
   return 0;
 }
 
+GMTRegCand* 
+TrackMatcher::bestGMTRegCand(bool sortPtFirst) const
+{
+  // first sort by Pt inside the cone (if sortPtFirst), then sort by DR
+  if (gmtRegCands_.size()==0) return nullptr;
+  const double ptBase(sortPtFirst ? 1000. : 0.);
+  unsigned maxI = 99;
+  double maxRank = -999999.;
+  for (unsigned i=0; i<gmtRegCands_.size(); i++) {
+    // quality criterium to sort the GMT Regional candidates
+    const double rank(ptBase*gmtRegCands_.at(i)->pt() + 1./(0.01 + gmtRegCands_.at(i)->dr()));
+    if (rank > maxRank) { 
+      maxRank = rank; 
+      maxI = i;
+    }
+  }
+  if (maxI==99) return nullptr;
+  return gmtRegCands_.at(maxI);
+}
 
-// GMTRegCand* 
-// L1TrackMatcher::bestGMTRegCand(bool sortPtFirst) const
-// {
-//   // first sort by Pt inside the cone (if sortPtFirst), then sort by DR
-//   if (gmtRegCands_.size()==0) return nullptr;
-//   const double ptBase(sortPtFirst ? 1000. : 0.);
-//   unsigned maxI = 99;
-//   double maxRank = -999999.;
-//   for (unsigned i=0; i<gmtRegCands_.size(); i++) {
-//     // quality criterium to sort the GMT Regional candidates
-//     const double rank(ptBase*gmtRegCands_.at(i)->pt() + 1./(0.01 + gmtRegCands_.at(i)->dr()));
-//     if (rank > maxRank) { 
-//       maxRank = rank; 
-//       maxI = i;
-//     }
-//   }
-//   if (maxI==99) return nullptr;
-//   return gmtRegCands_.at(maxI);
-// }
+GMTCand* 
+TrackMatcher::bestGMTCand(bool sortPtFirst) const
+{
+  // first sort by Pt inside the cone (if sortPtFirst), then sort by DR
+  if (gmtCands_.size()==0) return nullptr;
+  const double ptBase(sortPtFirst ? 1000. : 0.);
+  unsigned maxI = 99;
+  double maxRank = -999999.;
+  for (unsigned i=0; i<gmtCands_.size(); i++) {
+    // quality criterium to sort the GMT candidates
+    const double rank(ptBase*gmtCands_.at(i)->pt() + 1./(0.01 + gmtCands_.at(i)->dr()));
+    if (rank > maxRank) { 
+      maxRank = rank; 
+      maxI = i;
+    }
+  }
+  if (maxI==99) return nullptr;
+  return gmtCands_.at(maxI);
+}
 
-
-// GMTCand* 
-// L1TrackMatcher::bestGMTCand(bool sortPtFirst) const
-// {
-//   // first sort by Pt inside the cone (if sortPtFirst), then sort by DR
-//   if (gmtCands_.size()==0) return nullptr;
-//   const double ptBase(sortPtFirst ? 1000. : 0.);
-//   unsigned maxI = 99;
-//   double maxRank = -999999.;
-//   for (unsigned i=0; i<gmtCands_.size(); i++) {
-//     // quality criterium to sort the GMT candidates
-//     const double rank(ptBase*gmtCands_.at(i)->pt() + 1./(0.01 + gmtCands_.at(i)->dr()));
-//     if (rank > maxRank) { 
-//       maxRank = rank; 
-//       maxI = i;
-//     }
-//   }
-//   if (maxI==99) return nullptr;
-//   return gmtCands_.at(maxI);
-// }
-
-
-// L1Extra* 
-// L1TrackMatcher::bestL1Extra(bool sortPtFirst) const
-// {
-//   return 0;
-// }
-
+L1Extra* 
+TrackMatcher::bestL1Extra(bool sortPtFirst) const
+{
+  return 0;
+}
 
 csctf::TrackStub 
-L1TrackMatcher::buildTrackStub(const CSCCorrelatedLCTDigi &d, CSCDetId id)
+TrackMatcher::buildTrackStub(const CSCCorrelatedLCTDigi &d, CSCDetId id)
 {
   const unsigned fpga((id.station() == 1) ? CSCTriggerNumbering::triggerSubSectorFromLabels(id) - 1 : id.station());
   CSCSectorReceiverLUT* srLUT = srLUTs_[fpga][id.triggerSector()-1][id.endcap()-1];
@@ -538,10 +527,58 @@ L1TrackMatcher::buildTrackStub(const CSCCorrelatedLCTDigi &d, CSCDetId id)
 
   return csctf::TrackStub(d, id, gblPhi.global_phi, gblEta.global_eta);
 }
+/*
+bool TrackMatcher::passDPhicut_TFTrack(int st) const 
+{
 
+  if (tfTracks().size() == 0)  return true;
+
+  //std::cout <<"TFTracks size() " << tfTracks().size() << std::endl;
+  auto GEMdPhi( st==1 ? ME11GEMdPhi : ME21GEMdPhi);
+  //std::cout <<" sizeof(GEMdPhi) "  << sizeof(GEMdPhi[][]) <<" sizeof(GEMdPhi[0])" << sizeof(GEMdPhi[0]) << std::endl;
+  //std::cout <<" sizeof(ME11GEMdPhi) "  << sizeof(ME11GEMdPhi) <<" sizeof(GEMdPhi[0])" << sizeof(ME11GEMdPhi[0]) << std::endl;
+  //std::cout <<" sizeof(ME21GEMdPhi) "  << sizeof(ME21GEMdPhi) <<" sizeof(GEMdPhi[0])" << sizeof(ME21GEMdPhi[0]) << std::endl;
+  auto besttrack(bestTFTrack());
+  unsigned int lct_n = besttrack->digiInME(st,1);
+  if (lct_n == 999 and st==1)
+      lct_n = besttrack->digiInME(st, 4);
+  if (lct_n == 999) return true;
+  
+  auto lct((besttrack->getTriggerDigis()).at(lct_n));
+  auto id((besttrack->getTriggerDigisIds()).at(lct_n));
+  //std::cout <<" id " << id << " LCT " << (*lct) << std::endl;
+  double dphi = lct->getGEMDPhi();
+  double pt= besttrack->pt();
+  bool is_odd(id.chamber()%2==1);
+  bool pass = false;
+  unsigned int LUTsize = (st==1)? sizeof(ME11GEMdPhi)/sizeof(ME11GEMdPhi[0]) :sizeof(ME21GEMdPhi)/sizeof(ME21GEMdPhi[0]);
+  unsigned int sign = besttrack->chargesign();
+  bool smalldphi = ((is_odd and fabs(dphi)<GEMdPhi[LUTsize-2][1]) || (!is_odd and fabs(dphi)<GEMdPhi[LUTsize-2][2]));
+  if (fabs(dphi) < 99 and ((sign == 1 and dphi < 0) || (sign == 0 and dphi > 0) || smalldphi)){
+   for (unsigned int b = 0; b < LUTsize; b++)
+   {
+       //std::cout <<"  b " << " odd " << GEMdPhi[b][1]  <<" even " << GEMdPhi[b][2] << std::endl;
+	if (double(pt) >= GEMdPhi[b][0])
+	{
+		
+	    if ((is_odd && GEMdPhi[b][1] > fabs(dphi)) ||
+		(!is_odd && GEMdPhi[b][2] > fabs(dphi)))
+		    pass = true;
+	    else    pass = false;
+	}
+    }
+  }
+  //else if (dphi <= -99) pass = false;
+  else pass = false;
+  if (st==2 and pt>=15 and ((is_odd and fabs(dphi)<GEMdPhi[4][1]) || (!is_odd and fabs(dphi)<GEMdPhi[4][2]))) pass = true;
+
+   return pass;
+
+}
+*/
 
 std::pair<float, float> 
-L1TrackMatcher::intersectionEtaPhi(CSCDetId id, int wg, int hs)
+TrackMatcher::intersectionEtaPhi(CSCDetId id, int wg, int hs)
 {
   const CSCDetId layerId(id.endcap(), id.station(), id.ring(), id.chamber(), CSCConstants::KEY_CLCT_LAYER);
   const CSCLayer* csclayer(getCSCGeometry()->layer(layerId));
@@ -560,10 +597,11 @@ L1TrackMatcher::intersectionEtaPhi(CSCDetId id, int wg, int hs)
 }
 
 
-void 
-L1TrackMatcher::propagateSimTrack()
+
+
+void TrackMatcher::propagateSimTrack()
 {
-   int endcap = (trk().momentum().eta()>0? 1 : 2);
+   int endcap = (simEta>0? 1 : 2);
    int ring = 1;
  //  auto it_odd(simTrackPropagateGPs_odd_.begin());
   for (int st=1; st<5; st++)
@@ -595,11 +633,12 @@ L1TrackMatcher::propagateSimTrack()
 } 
 
 
-GlobalPoint 
-L1TrackMatcher::propagationInterStation(int firstSt, int SecondSt, bool odd)
+
+
+GlobalPoint TrackMatcher::propagationInterStation(int firstSt, int SecondSt, bool odd)
 {
 
-  for (auto d: rpc_digi_matcher_->simHitMatcher()->chamberIdsCSC(0))
+  for (auto d: sh_matcher_->chamberIdsCSC(0))
   {
     CSCDetId id(d);
     int chamber(odd ? 1:2);
@@ -608,7 +647,7 @@ L1TrackMatcher::propagationInterStation(int firstSt, int SecondSt, bool odd)
     const GlobalPoint gpAtSecondSt = csclayer->centerOfWireGroup(10);
     if (id.station()==firstSt)
     {
-        const auto& hits = rpc_digi_matcher_->simHitMatcher()->hitsInChamber(d);
+        const auto& hits = sh_matcher_->hitsInChamber(d);
 	if (hits.size()==0) continue;
 	//pick up one hit to do propagation
 	auto onehit(hits.at(0));
@@ -627,8 +666,7 @@ L1TrackMatcher::propagationInterStation(int firstSt, int SecondSt, bool odd)
 }
 
  
-void 
-L1TrackMatcher::propagationInterStation()
+void TrackMatcher::propagationInterStation()
 {
 
   //auto p(propagationInterStation(1,2, true));
@@ -640,5 +678,5 @@ L1TrackMatcher::propagationInterStation()
   interStatPropagation_even_[12] = propagationInterStation(1,2,false);
   interStatPropagation_even_[23] = propagationInterStation(2,3,false);
   interStatPropagation_even_[13] = propagationInterStation(1,3,false);
-}
 
+}
