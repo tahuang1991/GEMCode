@@ -17,7 +17,7 @@ class L1TrackFinderCandidateMatcher : public BaseMatcher
                                 edm::EDGetTokenT<L1MuRegionalCandCollection>& rpcfTfCandInputLabel_, 
                                 edm::EDGetTokenT<L1MuRegionalCandCollection>& rpcbTfCandInputLabel_);
   /// destructor
-  ~L1TrackFinderCandidateMatcher() {}
+  ~L1TrackFinderCandidateMatcher();
   
  private:
   
@@ -28,11 +28,6 @@ class L1TrackFinderCandidateMatcher : public BaseMatcher
   void matchDTTfCandToSimTrack(const L1MuRegionalCandCollection&); 
   void matchRPCfTfCandToSimTrack(const L1MuRegionalCandCollection&); 
   void matchRPCbTfCandToSimTrack(const L1MuRegionalCandCollection&); 
-
-  edm::EDGetTokenT<L1MuRegionalCandCollection> cscTfCandInputLabel_; 
-  edm::EDGetTokenT<L1MuRegionalCandCollection> dtTfCandInputLabel_; 
-  edm::EDGetTokenT<L1MuRegionalCandCollection> rpcfTfCandInputLabel_; 
-  edm::EDGetTokenT<L1MuRegionalCandCollection> rpcbTfCandInputLabel_; 
 
   int verboseCscTfCand_;
   int verboseDtTfCand_;

@@ -35,10 +35,7 @@ public:
   typedef std::pair<unsigned int, const GEMPadDigi*> GEMPadBX;
   typedef std::vector<GEMPadBX> GEMPadsBX;
 
-  CSCStubMatcher(SimHitMatcher& sh, 
-                 CSCDigiMatcher& dg, 
-                 GEMDigiMatcher& gem_dg, 
-                 RPCDigiMatcher& rpc_dg,
+  CSCStubMatcher(SimHitMatcher& sh, CSCDigiMatcher& dg, GEMDigiMatcher& gem_dg, RPCDigiMatcher& rpc_dg,
                  edm::EDGetTokenT<CSCCLCTDigiCollection>& clctInputs_, 
                  edm::EDGetTokenT<CSCALCTDigiCollection>& alctInputs_, 
                  edm::EDGetTokenT<CSCCorrelatedLCTDigiCollection>& lctInputs_, 
@@ -89,6 +86,29 @@ public:
   const CSCCorrelatedLCTDigiContainer& cscLctsInChamber(unsigned int) const;
   const CSCCorrelatedLCTDigiContainer& cscMplctsInChamber(unsigned int) const;
 
+  ///return all lcts matched to simmuon
+  std::map<unsigned int, CSCCorrelatedLCTDigiContainer> allLctsMatched2SimMuon() const { return chamber_to_cscLcts_; }
+  /// best matching from a particular crossed chamber
+  CSCCLCTDigi bestCscClctInChamber(unsigned int) const;
+  CSCALCTDigi bestCscAlctInChamber(unsigned int) const;
+  CSCCorrelatedLCTDigi bestCscLctInChamber(unsigned int) const;
+  CSCCorrelatedLCTDigi bestCscMplctInChamber(unsigned int) const;
+
+  // get matching comparator digis for a given stub in a chamber
+  CSCComparatorDigiDetIdContainer 
+    matchingComparatorDigisLCT(unsigned int, const CSCCorrelatedLCTDigi&) const;
+  CSCWireDigiDetIdContainer 
+    matchingWireDigisLCT(unsigned int, const CSCCorrelatedLCTDigi&) const;
+   
+  //get global position of matching comparator digi in each layer
+  void positionsOfComparatorInLCT(unsigned int, const CSCCorrelatedLCTDigi&, std::vector<GlobalPoint>&) const;
+  //z position of  certain layer
+  float zpositionOfLayer(unsigned int detid, int layer) const;
+
+  // check if comp digis belongs to CLCT pattern
+  bool comparatorInCLCTPattern(int keyStrip, int pattern, int layer, int halfstrip) const;
+  int* patternCLCT(int pattern, int layer) const;
+
   const DigiContainer lctsInStation(int) const;
   /// How many CSC chambers with matching stubs of some minimal quality did this SimTrack hit?
   int nChambersWithCLCT(int min_quality = 0) const;
@@ -97,7 +117,17 @@ public:
   int nChambersWithMPLCT(int min_quality = 0) const;
 
   bool checkStubInChamber(CSCDetId id, CSCCorrelatedLCTDigi lct) const;
+  bool wasStubMatchedInChamber(CSCDetId id, CSCCorrelatedLCTDigi lct) const;
 
+  // get the position of an LCT in global coordinates
+  GlobalPoint getGlobalPosition(unsigned int rawId, const CSCCorrelatedLCTDigi& lct) const;
+
+  // get the fractional strip for an LCT that can be used in the geometry
+  float getFractionalStrip(const CSCCorrelatedLCTDigi& lct) const;
+  
+  // get the bending angle from the pattern number and bending bit
+  float getAverageBendingLCT(unsigned int rawId, const CSCCorrelatedLCTDigi& lct) const;
+  
 private:
 
   void matchCLCTsToSimTrack(const CSCCLCTDigiCollection&);
@@ -145,8 +175,10 @@ private:
 
   bool addGhostLCTs_;
   bool addGhostMPLCTs_;
-  bool matchAlctGem_;
-  bool matchClctGem_;
+  bool matchAlctGemME11_;
+  bool matchAlctGemME21_;
+  bool matchClctGemME11_;
+  bool matchClctGemME21_;
   bool matchAlctRpc_;
   bool matchClctRpc_;
   bool hsFromSimHitMean_;
@@ -175,6 +207,7 @@ private:
   CSCCLCTDigiContainer no_csc_clcts_;
   CSCALCTDigiContainer no_csc_alcts_;
   CSCCorrelatedLCTDigiContainer no_csc_lcts_;
+  CSCCorrelatedLCTDigiContainer no_csc_mplcts_;
 };
 
 

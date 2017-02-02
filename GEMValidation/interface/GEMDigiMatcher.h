@@ -17,6 +17,7 @@
 #include <vector>
 #include <map>
 #include <set>
+#include <unordered_set>
 
 typedef std::vector<GEMDigi> GEMDigiContainer;
 typedef std::vector<GEMPadDigi> GEMPadDigiContainer;
@@ -28,7 +29,7 @@ class GEMDigiMatcher : public DigiMatcher
 {
 public:
 
-  GEMDigiMatcher(SimHitMatcher& sh, 
+  GEMDigiMatcher(SimHitMatcher& sh,
                  edm::EDGetTokenT<GEMDigiCollection>& gemDigiInput_, 
                  edm::EDGetTokenT<GEMPadDigiCollection>& gemPadDigiInput_, 
                  edm::EDGetTokenT<GEMCoPadDigiCollection>& gemCoPadDigiInput_);
@@ -38,6 +39,7 @@ public:
   // partition GEM detIds with digis
   std::set<unsigned int> detIdsDigi(int gem_type = GEM_ALL) const;
   std::set<unsigned int> detIdsPad(int gem_type = GEM_ALL) const;
+  //std::set<unsigned int> detIdsCoPad(int gem_type = GEM_ALL) const;
 
   // chamber detIds with digis
   std::set<unsigned int> chamberIdsDigi(int gem_type = GEM_ALL) const;
@@ -57,6 +59,7 @@ public:
   const DigiContainer& padsInDetId(unsigned int) const;
   const DigiContainer& padsInChamber(unsigned int) const;
   const DigiContainer& padsInSuperChamber(unsigned int) const;
+  //const DigiContainer& copadsInDetId(unsigned int) const;
 
   // GEM co-pads from a particular partition or superchamber
   const DigiContainer& coPadsInSuperChamber(unsigned int) const;
@@ -74,6 +77,8 @@ public:
   // GEM co-pads from a particular partition or superchamber
   const GEMCoPadDigiContainer& gemCoPadsInSuperChamber(unsigned int) const;
 
+  const std::map<unsigned int, GEMPadDigiContainer> allGempadsMatch2SimMuon() const { return detid_to_gempads_; }
+  const std::map<unsigned int, GEMPadDigiContainer> allGempadsMatch2SimMuon_2strip() const { return detid_to_gempads_2strip_; }
   // #layers with digis from this simtrack
   int nLayersWithDigisInSuperChamber(unsigned int) const;
   int nLayersWithPadsInSuperChamber(unsigned int) const;
@@ -93,6 +98,14 @@ public:
   std::set<int> partitionNumbers() const;
   std::set<int> partitionNumbersWithCoPads() const;
 
+  std::vector<GlobalPoint> positionPad1InDetId(unsigned int) const;
+  std::vector<GlobalPoint> positionPad2InDetId(unsigned int) const;
+  std::vector<GlobalPoint> positionPad4InDetId(unsigned int) const;
+  std::vector<GlobalPoint> positionPad8InDetId(unsigned int) const;
+
+  GlobalPoint getGlobalPointDigi(unsigned int rawId, const GEMDigi& d) const;
+  GlobalPoint getGlobalPointPad(unsigned int rawId, const GEMPadDigi& tp) const;
+
 private:
 
   void matchDigisToSimTrack(const GEMDigiCollection&);
@@ -101,6 +114,7 @@ private:
 
   std::set<unsigned int> selectDetIds(const Id2DigiContainer &, int) const;
   
+
   int minBXGEMDigi_, maxBXGEMDigi_;
   int minBXGEMPad_, maxBXGEMPad_;
   int minBXGEMCoPad_, maxBXGEMCoPad_;
@@ -122,9 +136,11 @@ private:
   std::map<unsigned int, GEMDigiContainer> superchamber_to_gemdigis_;
 
   std::map<unsigned int, GEMPadDigiContainer> detid_to_gempads_;
+  std::map<unsigned int, GEMPadDigiContainer> detid_to_gempads_2strip_;
   std::map<unsigned int, GEMPadDigiContainer> chamber_to_gempads_;
   std::map<unsigned int, GEMPadDigiContainer> superchamber_to_gempads_;
 
+  //std::map<unsigned int, DigiContainer> detid_to_copads_;
   std::map<unsigned int, GEMCoPadDigiContainer> superchamber_to_gemcopads_;
 
   bool verboseDigi_;

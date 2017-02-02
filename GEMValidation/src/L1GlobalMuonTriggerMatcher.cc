@@ -12,7 +12,7 @@ L1GlobalMuonTriggerMatcher::L1GlobalMuonTriggerMatcher(SimHitMatcher& sh,
                                                        edm::EDGetTokenT<L1MuGMTCandCollection> &gmtCandInputLabel_,
                                                        edm::EDGetTokenT<l1extra::L1MuonParticleCollection> &l1ExtraMuonInputLabel_
                                                        )
-  : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
+: BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
 , simhit_matcher_(&sh)
 {
   auto gmtRegCandCSC = conf().getParameter<edm::ParameterSet>("gmtRegCandCSC");
@@ -21,6 +21,7 @@ L1GlobalMuonTriggerMatcher::L1GlobalMuonTriggerMatcher(SimHitMatcher& sh,
   auto gmtRegCandRPCb = conf().getParameter<edm::ParameterSet>("gmtRegCandRPCb");
   auto gmtCand = conf().getParameter<edm::ParameterSet>("gmtCand");
   auto l1ExtraMuonParticle = conf().getParameter<edm::ParameterSet>("l1ExtraMuonParticle");
+
 
   verboseGmtRegCandCSC_ = gmtRegCandCSC.getParameter<int>("verbose");
   verboseGmtRegCandDT_ = gmtRegCandDT.getParameter<int>("verbose");
@@ -74,10 +75,22 @@ L1GlobalMuonTriggerMatcher::L1GlobalMuonTriggerMatcher(SimHitMatcher& sh,
 
   edm::Handle<l1extra::L1MuonParticleCollection> hL1ExtraMuonParticle;
   if (gemvalidation::getByToken(l1ExtraMuonInputLabel_, hL1ExtraMuonParticle, event())) if (runL1ExtraMuon_) matchL1ExtraMuonParticleToSimTrack(*hL1ExtraMuonParticle.product());
+  init();
 }
 
 L1GlobalMuonTriggerMatcher::~L1GlobalMuonTriggerMatcher()
 {}
+
+
+void 
+L1GlobalMuonTriggerMatcher::clear()
+{}
+
+
+void 
+L1GlobalMuonTriggerMatcher::init()
+{
+}
 
 void 
 L1GlobalMuonTriggerMatcher::matchRegionalCandCSCToSimTrack(const L1MuRegionalCandCollection& cands)
@@ -85,9 +98,9 @@ L1GlobalMuonTriggerMatcher::matchRegionalCandCSCToSimTrack(const L1MuRegionalCan
   if (verboseGmtRegCandCSC_) cout << "Match SimTrack to CSC GMTCands" << endl;
   int i=0;
   for (auto& cand: cands) {
-    const float dR(deltaR(trk().momentum().eta(), trk().momentum().phi(), cand.etaValue(), normalizedPhi((float)cand.phiValue())));
+    const float dR(deltaR(trk().momentum().eta(), trk().momentum().phi(), cand.etaValue(), normalizedPhi(cand.phiValue())));
     if (verboseGmtRegCandCSC_) {
-      cout << i+1 << ": pT = " << cand.ptValue() << ", eta = " << cand.etaValue() <<  ", phi = " << normalizedPhi((float)cand.phiValue())
+      cout << i+1 << ": pT = " << cand.ptValue() << ", eta = " << cand.etaValue() <<  ", phi = " << normalizedPhi(cand.phiValue())
 	   << ", bx = " << cand.bx() << ", charge = " << cand.chargeValue() << ", quality = " << cand.quality() << endl;
       cout << "\tDeltaR = " << dR << endl;
     }
@@ -106,9 +119,9 @@ L1GlobalMuonTriggerMatcher::matchRegionalCandDTToSimTrack(const L1MuRegionalCand
   if (verboseGmtRegCandDT_) cout << "Match SimTrack to DT GMTCands" << endl;
   int i=0;
   for (auto& cand: cands) {
-    const float dR(deltaR(trk().momentum().eta(), trk().momentum().phi(), cand.etaValue(), normalizedPhi((float)cand.phiValue())));
+    const float dR(deltaR(trk().momentum().eta(), trk().momentum().phi(), cand.etaValue(), normalizedPhi(cand.phiValue())));
     if (verboseGmtRegCandDT_) {
-      cout << i+1 << ": pT = " << cand.ptValue() << ", eta = " << cand.etaValue() <<  ", phi = " << normalizedPhi((float)cand.phiValue())
+      cout << i+1 << ": pT = " << cand.ptValue() << ", eta = " << cand.etaValue() <<  ", phi = " << normalizedPhi(cand.phiValue())
 	   << ", bx = " << cand.bx() << ", charge = " << cand.chargeValue() << ", quality = " << cand.quality() << endl;
       cout << "\tDeltaR = " << dR << endl;
     }
@@ -127,9 +140,9 @@ L1GlobalMuonTriggerMatcher::matchRegionalCandRPCbToSimTrack(const L1MuRegionalCa
   if (verboseGmtRegCandRPCb_) cout << "Match SimTrack to RPCb GMTCands" << endl;
   int i=0;
   for (auto& cand: cands) {
-    const float dR(deltaR(trk().momentum().eta(), trk().momentum().phi(), cand.etaValue(), normalizedPhi((float)cand.phiValue())));
+    const float dR(deltaR(trk().momentum().eta(), trk().momentum().phi(), cand.etaValue(), normalizedPhi(cand.phiValue())));
     if (verboseGmtRegCandRPCb_) {
-      cout << i+1 << ": pT = " << cand.ptValue() << ", eta = " << cand.etaValue() <<  ", phi = " << normalizedPhi((float)cand.phiValue())
+      cout << i+1 << ": pT = " << cand.ptValue() << ", eta = " << cand.etaValue() <<  ", phi = " << normalizedPhi(cand.phiValue())
 	   << ", bx = " << cand.bx() << ", charge = " << cand.chargeValue() << ", quality = " << cand.quality() << endl;
       cout << "\tDeltaR = " << dR << endl;   
     }
@@ -148,9 +161,9 @@ L1GlobalMuonTriggerMatcher::matchRegionalCandRPCfToSimTrack(const L1MuRegionalCa
   if (verboseGmtRegCandRPCf_) cout << "Match SimTrack to RPCf GMTCands" << endl;
   int i=0;
   for (auto& cand: cands) {
-    const float dR(deltaR(trk().momentum().eta(), trk().momentum().phi(), cand.etaValue(), normalizedPhi((float)cand.phiValue())));
+    const float dR(deltaR(trk().momentum().eta(), trk().momentum().phi(), cand.etaValue(), normalizedPhi(cand.phiValue())));
     if (verboseGmtRegCandRPCf_) {
-      cout << i+1 << ": pT = " << cand.ptValue() << ", eta = " << cand.etaValue() <<  ", phi = " << normalizedPhi((float)cand.phiValue())
+      cout << i+1 << ": pT = " << cand.ptValue() << ", eta = " << cand.etaValue() <<  ", phi = " << normalizedPhi(cand.phiValue())
 	   << ", bx = " << cand.bx() << ", charge = " << cand.chargeValue() << ", quality = " << cand.quality() << endl;
       cout << "\tDeltaR = " << dR << endl;
     }
@@ -169,9 +182,9 @@ L1GlobalMuonTriggerMatcher::matchGMTCandToSimTrack(const L1MuGMTCandCollection& 
   if (verboseGmtCand_) cout << "Match SimTrack to GMTCands" << endl;
   int i=0;
   for (auto& cand: cands) {
-    const float dR(deltaR(trk().momentum().eta(), trk().momentum().phi(), cand.etaValue(), normalizedPhi((float)cand.phiValue())));
+    const float dR(deltaR(trk().momentum().eta(), trk().momentum().phi(), cand.etaValue(), normalizedPhi(cand.phiValue())));
     if (verboseGmtCand_) {
-      cout << i+1 << ": pT = " << cand.ptValue() << ", eta = " << cand.etaValue() <<  ", phi = " << normalizedPhi((float)cand.phiValue())
+      cout << i+1 << ": pT = " << cand.ptValue() << ", eta = " << cand.etaValue() <<  ", phi = " << normalizedPhi(cand.phiValue())
 	   << ", bx = " << cand.bx() << ", charge = " << cand.charge() << ", quality = " << cand.quality() << endl;    
       cout << "\tDeltaR = " << dR << endl;
     }
@@ -193,7 +206,7 @@ L1GlobalMuonTriggerMatcher::matchL1ExtraMuonParticleToSimTrack(const l1extra::L1
     if (verboseL1ExtraMuon_) {
       cout << i+1 << ": pT = " << muon.pt() << ", eta = " << muon.eta() <<  ", phi = " << muon.phi()
 	   << ", bx = " << muon.bx() << ", charge = " << muon.charge() << endl;    
-      //cout << "\tDeltaR = " << deltaR(trk().momentum().eta(), trk().momentum().phi(), muon.eta(), normalizedPhi((float)muon.phi())) << endl;
+      //cout << "\tDeltaR = " << deltaR(trk().momentum().eta(), trk().momentum().phi(), muon.eta(), normalizedPhi(muon.phi())) << endl;
       cout << "\tAssociated GMT " << gmt << endl;
     }
 
@@ -212,7 +225,7 @@ L1GlobalMuonTriggerMatcher::matchL1ExtraMuonParticleToSimTrack(const l1extra::L1
       if (q.size()!=0) {
 	auto hits(simhit_matcher_->hitsInChamber(*q.begin()));
 	auto gp(simhit_matcher_->simHitsMeanPosition(hits));
-	dRhit = deltaR(muon.eta(), muon.phi(), gp.eta(), normalizedPhi((float)gp.phi()));
+	dRhit = deltaR(float(muon.eta()), float(muon.phi()), float(gp.eta()), float(normalizedPhi(float(gp.phi()))));
 	if (verboseL1ExtraMuon_>1) {
 	  std::cout << "DTChamberId " << DTChamberId(*q.begin()) << std::endl;  
 	  std::cout << "\t" << gp << std::endl;
@@ -235,7 +248,7 @@ L1GlobalMuonTriggerMatcher::matchL1ExtraMuonParticleToSimTrack(const l1extra::L1
       if (p.size()!=0) {
 	auto hits(simhit_matcher_->hitsInChamber(*p.begin()));
 	auto gp(simhit_matcher_->simHitsMeanPosition(hits));
-	dRhit = deltaR(muon.eta(), muon.phi(), gp.eta(), normalizedPhi((float)gp.phi()));
+	dRhit = deltaR(float(muon.eta()), float(muon.phi()), float(gp.eta()), float(normalizedPhi(float(gp.phi()))));
 	if (verboseL1ExtraMuon_>1) {
 	  std::cout << "CSCDetId " << CSCDetId(*p.begin()) << std::endl;  
 	  std::cout << "\t" << gp << std::endl;

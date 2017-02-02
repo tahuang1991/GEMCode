@@ -8,7 +8,7 @@ GEMDigiMatcher::GEMDigiMatcher(SimHitMatcher& sh,
                                edm::EDGetTokenT<GEMDigiCollection> &gemDigiInput_, 
                                edm::EDGetTokenT<GEMPadDigiCollection> &gemPadDigiInput_, 
                                edm::EDGetTokenT<GEMCoPadDigiCollection> &gemCoPadDigiInput_)
-  : DigiMatcher(sh)
+: DigiMatcher(sh)
 {
   auto gemDigi_= conf().getParameter<edm::ParameterSet>("gemStripDigi");
   minBXGEMDigi_ = gemDigi_.getParameter<int>("minBX");
@@ -28,7 +28,6 @@ GEMDigiMatcher::GEMDigiMatcher(SimHitMatcher& sh,
   maxBXGEMCoPad_ = gemCoPad_.getParameter<int>("maxBX");
   verboseCoPad_ = gemCoPad_.getParameter<int>("verbose");
   runGEMCoPad_ = gemCoPad_.getParameter<bool>("run");
-
   if (hasGEMGeometry_) {
     edm::Handle<GEMDigiCollection> gem_digis;
     if (gemvalidation::getByToken(gemDigiInput_, gem_digis, event())) if (runGEMDigi_) matchDigisToSimTrack(*gem_digis.product());
@@ -47,13 +46,12 @@ GEMDigiMatcher::~GEMDigiMatcher() {}
 void
 GEMDigiMatcher::matchDigisToSimTrack(const GEMDigiCollection& digis)
 {
+  if (verboseDigi_) cout << "Matching simtrack to GEM digis" << endl;
   auto det_ids = simhit_matcher_->detIdsGEM();
   for (auto id: det_ids)
   {
     GEMDetId p_id(id);
     GEMDetId superch_id(p_id.region(), p_id.ring(), p_id.station(), 0, p_id.chamber(), 0);
-    std::cout << "ch " << p_id << " chid " << superch_id << std::endl; 
-
     auto hit_strips = simhit_matcher_->hitStripsInDetId(id, matchDeltaStrip_);
     if (verboseDigi_)
     {
@@ -67,19 +65,23 @@ GEMDigiMatcher::matchDigisToSimTrack(const GEMDigiCollection& digis)
 
     for (auto d = digis_in_det.first; d != digis_in_det.second; ++d)
     {
-      if (verboseDigi_) cout<<"gdigi "<<p_id<<" "<<*d<<endl;
+      if (verboseDigi_) cout<<"GEMDigi "<<p_id<<" "<<*d<<endl;
       // check that the digi is within BX range
       if (d->bx() < minBXGEMDigi_ || d->bx() > maxBXGEMDigi_) continue;
       // check that it matches a strip that was hit by SimHits from our track
       if (hit_strips.find(d->strip()) == hit_strips.end()) continue;
-      if (verboseDigi_) cout<<"oki"<<endl;
+      if (verboseDigi_) cout<<"...was matched!"<<endl;
 
       auto mydigi = make_digi(id, d->strip(), d->bx(), GEM_STRIP);
       detid_to_digis_[id].push_back(mydigi);
       chamber_to_digis_[ p_id.chamberId().rawId() ].push_back(mydigi);
       superchamber_to_digis_[ superch_id() ].push_back(mydigi);
 
+      //std::cout <<" strip "<< d->strip()<<" 2-strip pad "<<(d->strip()+1)/2 << " bx "<< d->bx() << std::endl;
       detid_to_gemdigis_[id].push_back(*d);
+      GEMPadDigi pad = GEMPadDigi((d->strip()+1)/2, d->bx());
+      if (std::find(detid_to_gempads_2strip_[id].begin(), detid_to_gempads_2strip_[id].end(), pad) == detid_to_gempads_2strip_[id].end())
+      	detid_to_gempads_2strip_[id].push_back(pad);
       chamber_to_gemdigis_[ p_id.chamberId().rawId() ].push_back(*d);
       superchamber_to_gemdigis_[ superch_id() ].push_back(*d);
       cout<<"oki2"<<endl;
@@ -118,7 +120,6 @@ GEMDigiMatcher::matchPadsToSimTrack(const GEMPadDigiCollection& pads)
       // check that it matches a pad that was hit by SimHits from our track
       if (hit_pads.find(pad->pad()) == hit_pads.end()) continue;
       if (verbosePad_) cout<<"chp2"<<endl;
-
       auto mydigi = make_digi(id, pad->pad(), pad->bx(), GEM_PAD);
       detid_to_pads_[id].push_back(mydigi);
       chamber_to_pads_[ p_id.chamberId().rawId() ].push_back(mydigi);
@@ -135,7 +136,6 @@ GEMDigiMatcher::matchPadsToSimTrack(const GEMPadDigiCollection& pads)
 void
 GEMDigiMatcher::matchCoPadsToSimTrack(const GEMCoPadDigiCollection& co_pads)
 {
-  
   auto det_ids = simhit_matcher_->detIdsGEMCoincidences();
   for (auto id: det_ids)
   {
@@ -154,15 +154,19 @@ GEMDigiMatcher::matchCoPadsToSimTrack(const GEMCoPadDigiCollection& co_pads)
 
     for (auto pad = co_pads_in_det.first; pad != co_pads_in_det.second; ++pad)
     {
+      if (verbosePad_) cout<<"CoPad: chp "<<*pad<<endl;
       // check that the pad BX is within the range
-      if (pad->first().bx() < minBXGEMCoPad_ || 
-          pad->first().bx() > maxBXGEMCoPad_ ||
-          pad->second().bx() < minBXGEMCoPad_ || 
-          pad->second().bx() > maxBXGEMCoPad_) continue;
+      if (pad->bx(1) < minBXGEMCoPad_ || pad->bx(1) > maxBXGEMCoPad_) continue;
+      if (verboseCoPad_) cout<<"CoPad: chp1 "<<*pad<<endl;
+      // check that it matches a pad that was hit by SimHits from our track
+      if (hit_co_pads.find(pad->pad(1)) == hit_co_pads.end()) continue;
+      if (verboseCoPad_) cout<<"CoPad: chp2 "<<*pad<<endl;
       // check that it matches a coincidence pad that was hit by SimHits from our track
-      if (hit_co_pads.find(pad->first().pad()) == hit_co_pads.end() or 
-          hit_co_pads.find(pad->second().pad()) == hit_co_pads.end()) continue;
-      
+
+      auto mydigi = make_digi(id, pad->pad(1), pad->bx(1), GEM_COPAD);
+      //detid_to_copads_[id].push_back(mydigi);
+      superchamber_to_copads_[ superch_id() ].push_back(mydigi);
+
       superchamber_to_gemcopads_[ superch_id() ].push_back(*pad);
     }
   }
@@ -515,3 +519,132 @@ GEMDigiMatcher::extrapolateHsfromGEMStrip(unsigned int id, int gemstrip) const
   return result;
 }
 
+std::vector<GlobalPoint> 
+GEMDigiMatcher::positionPad1InDetId(unsigned int id) const
+{
+  std::vector<GlobalPoint> result;
+  bool verbose = false;
+  GEMDetId gem_id(id);
+  if (verbose) std::cout << "In function positionPad2InDetId gem_id " << gem_id << std::endl;
+  for (auto p: gemDigisInDetId(id)){
+    LocalPoint gem_lp = getGEMGeometry()->etaPartition(gem_id)->centreOfStrip(p.strip());
+    GlobalPoint gem_gp = getGEMGeometry()->idToDet(gem_id)->surface().toGlobal(gem_lp);
+    // check if GP is already in container
+    if (std::find(result.begin(), result.end(), gem_gp) == result.end()) result.push_back(gem_gp);
+  }
+  return result;
+}
+
+std::vector<GlobalPoint> 
+GEMDigiMatcher::positionPad2InDetId(unsigned int id) const
+{
+  bool verbose = false;
+  std::vector<GlobalPoint> result;
+  GEMDetId gem_id(id);
+  if (verbose) std::cout << "In function positionPad2InDetId gem_id " << gem_id << std::endl;
+  for (auto p: gemDigisInDetId(id)){
+    if (verbose) std::cout << "Strip " << p.strip() << std::endl;
+    float middleStripOfPad = 0;
+    if (p.strip()%2==0){
+      middleStripOfPad = p.strip() - 1.;
+    }
+    else{
+      middleStripOfPad = p.strip() + 0.;
+    }
+    if (verbose) std::cout << "middle strip " << middleStripOfPad << std::endl;
+    LocalPoint gem_lp = getGEMGeometry()->etaPartition(gem_id)->centreOfStrip(middleStripOfPad);
+    GlobalPoint gem_gp = getGEMGeometry()->idToDet(gem_id)->surface().toGlobal(gem_lp);
+    if (std::find(result.begin(), result.end(), gem_gp) == result.end()) result.push_back(gem_gp);
+  }
+  return result;
+}
+
+std::vector<GlobalPoint> 
+GEMDigiMatcher::positionPad4InDetId(unsigned int id) const
+{
+  bool verbose = false;
+  std::vector<GlobalPoint> result;
+  GEMDetId gem_id(id);
+  if (verbose) std::cout << "In function positionPad4InDetId gem_id " << gem_id << std::endl;
+  for (auto p: gemDigisInDetId(id)){
+    if (verbose) std::cout << "Strip " << p.strip() << std::endl;
+    float middleStripOfPad = 0;
+    if (p.strip()%4==0){
+      middleStripOfPad = p.strip() - 2.;
+    }
+    else if (p.strip()%4==3){
+      middleStripOfPad = p.strip() - 1.;
+    }
+    else if (p.strip()%4==2){
+      middleStripOfPad = p.strip() + 0.;
+    }
+    else{
+      middleStripOfPad = p.strip() + 1.;
+    }
+    if (verbose) std::cout << "middle strip " << middleStripOfPad << std::endl;
+    LocalPoint gem_lp = getGEMGeometry()->etaPartition(gem_id)->centreOfStrip(middleStripOfPad);
+    GlobalPoint gem_gp = getGEMGeometry()->idToDet(gem_id)->surface().toGlobal(gem_lp);
+    if (std::find(result.begin(), result.end(), gem_gp) == result.end()) result.push_back(gem_gp);
+  }
+  return result;
+}
+
+std::vector<GlobalPoint> 
+GEMDigiMatcher::positionPad8InDetId(unsigned int id) const
+{
+  bool verbose = false;
+  std::vector<GlobalPoint> result;
+  GEMDetId gem_id(id);
+  if (verbose) std::cout << "In function positionPad8InDetId gem_id " << gem_id << std::endl;
+  for (auto p: gemDigisInDetId(id)){
+    if (verbose) std::cout << "Strip " << p.strip() << std::endl;
+    float middleStripOfPad = 0;
+    if (p.strip()%8==0){
+      middleStripOfPad = p.strip() - 4.;
+    }
+    else if (p.strip()%8==7){
+      middleStripOfPad = p.strip() - 3.;
+    }
+    else if (p.strip()%8==6){
+      middleStripOfPad = p.strip() - 2.;
+    }
+    else if (p.strip()%8==5){
+      middleStripOfPad = p.strip() - 1.;
+    }
+    else if (p.strip()%8==4){
+      middleStripOfPad = p.strip() + 0.;
+    }
+    else if (p.strip()%8==3){
+      middleStripOfPad = p.strip() + 1.;
+    }
+    else if (p.strip()%8==2){
+      middleStripOfPad = p.strip() + 2.;
+    }
+    else{
+      middleStripOfPad = p.strip() + 3.;
+    }
+    if (verbose) std::cout << "middle strip " << middleStripOfPad << std::endl;
+    LocalPoint gem_lp = getGEMGeometry()->etaPartition(gem_id)->centreOfStrip(middleStripOfPad);
+    GlobalPoint gem_gp = getGEMGeometry()->idToDet(gem_id)->surface().toGlobal(gem_lp);
+    if (std::find(result.begin(), result.end(), gem_gp) == result.end()) result.push_back(gem_gp);
+  }
+  return result;
+}
+
+GlobalPoint 
+GEMDigiMatcher::getGlobalPointDigi(unsigned int rawId, const GEMDigi& d) const
+{
+  GEMDetId gem_id(rawId);
+  LocalPoint gem_lp = getGEMGeometry()->etaPartition(gem_id)->centreOfStrip(d.strip());
+  GlobalPoint gem_gp = getGEMGeometry()->idToDet(gem_id)->surface().toGlobal(gem_lp);
+  return gem_gp;
+}
+
+GlobalPoint 
+GEMDigiMatcher::getGlobalPointPad(unsigned int rawId, const GEMPadDigi& tp) const
+{
+  GEMDetId gem_id(rawId);
+  LocalPoint gem_lp = getGEMGeometry()->etaPartition(gem_id)->centreOfPad(tp.pad());
+  GlobalPoint gem_gp = getGEMGeometry()->idToDet(gem_id)->surface().toGlobal(gem_lp);
+  return gem_gp;
+}

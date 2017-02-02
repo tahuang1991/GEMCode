@@ -5,10 +5,10 @@ using namespace std;
 using namespace matching;
 
 
-CSCDigiMatcher::CSCDigiMatcher(SimHitMatcher& sh, 
+CSCDigiMatcher::CSCDigiMatcher(SimHitMatcher& sh,
                                edm::EDGetTokenT<CSCComparatorDigiCollection>& cscComparatorDigiInput_, 
                                edm::EDGetTokenT<CSCWireDigiCollection>& cscWireDigiInput_)
-  : DigiMatcher(sh)
+: DigiMatcher(sh)
 {
   auto cscWireDigi_ = conf().getParameter<edm::ParameterSet>("cscWireDigi");
   verboseWG_ = cscWireDigi_.getParameter<int>("verbose");
@@ -64,10 +64,10 @@ CSCDigiMatcher::matchStripsToSimTrack(const CSCComparatorDigiCollection& compara
       int strip = c->getStrip(); // strips are counted from 1
       // check that it matches a strip that was hit by SimHits from our track
       if (hit_strips.find(strip) == hit_strips.end()) continue;
-      if (verboseStrip_) cout<<"oki"<<endl;
+      if (verboseStrip_) cout<<"\toki"<<endl;
 
       // get half-strip, counting from 1
-      int half_strip = 2*strip - 1 + c->getComparator();
+      int half_strip = getHalfStrip(*c) + 1;
 
       auto mydigi = make_digi(id, half_strip, c->getTimeBin(), CSC_STRIP);
       detid_to_halfstrips_[id].push_back(mydigi);
@@ -195,16 +195,16 @@ CSCDigiMatcher::wireDigisInChamber(unsigned int detid) const
 }
 
 
-const CSCStripDigiContainer&
-CSCDigiMatcher::cscStripDigisInDetId(unsigned int detid) const
+const CSCComparatorDigiContainer&
+CSCDigiMatcher::cscComparatorDigisInDetId(unsigned int detid) const
 {
   if (detid_to_cschalfstrips_.find(detid) == detid_to_cschalfstrips_.end()) return no_csc_strips_;
   return detid_to_cschalfstrips_.at(detid);
 }
 
 
-const CSCStripDigiContainer&
-CSCDigiMatcher::cscStripDigisInChamber(unsigned int detid) const
+const CSCComparatorDigiContainer&
+CSCDigiMatcher::cscComparatorDigisInChamber(unsigned int detid) const
 {
   if (chamber_to_cschalfstrips_.find(detid) == chamber_to_cschalfstrips_.end()) return no_csc_strips_;
   return chamber_to_cschalfstrips_.at(detid);
@@ -358,4 +358,22 @@ CSCDigiMatcher::wiregroupsInChamber(unsigned int detid, int max_gap_to_fill) con
     }
   }
   return result;
+}
+
+int 
+CSCDigiMatcher::getHalfStrip(const CSCComparatorDigi&d) const
+{
+  // Here, getStrip returns the strip number of a comparator digi
+  // getComparator returns 0 or 1 depending on whether most of the charge is on the first
+  // or second half of the readout strip
+  // This definition is consistent with the one used in
+  // the function CSCCLCTData::add() in EventFilter/CSCRawToDigi
+  // The halfstrip counts from 0!
+  return 2*(d.getStrip()-1) + d.getComparator();
+}
+
+float 
+CSCDigiMatcher::getFractionalStrip(const CSCComparatorDigi&d) const
+{
+  return d.getStrip() + d.getComparator()/2. - 3/4.;
 }

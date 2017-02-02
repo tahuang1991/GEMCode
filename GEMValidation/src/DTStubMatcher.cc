@@ -6,7 +6,7 @@ using namespace std;
 #include "DataFormats/MuonDetId/interface/DTWireId.h"
 
 DTStubMatcher::DTStubMatcher(SimHitMatcher& sh, edm::EDGetTokenT<DTLocalTriggerCollection>& input_)
-  : DigiMatcher(sh)
+: DigiMatcher(sh)
 {
   auto dtStub_= conf().getParameter<edm::ParameterSet>("dtLocalTrigger");
   minBX_ = dtStub_.getParameter<int>("minBX");

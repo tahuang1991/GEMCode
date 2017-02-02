@@ -1,15 +1,18 @@
 #include "GEMCode/GEMValidation/interface/SimHitMatcher.h"
+#include "DataFormats/Math/interface/deltaPhi.h"
+
+#include "TF1.h"
+#include "TGraph.h"
+#include "TFitResult.h"
+
 #include <algorithm>
 #include <iomanip>
 
 using namespace std;
 
 
-SimHitMatcher::SimHitMatcher(const SimTrack& t, 
-                             const SimVertex& v,
-                             const edm::ParameterSet& ps, 
-                             const edm::Event& ev, 
-                             const edm::EventSetup& es,
+SimHitMatcher::SimHitMatcher(const SimTrack& t, const SimVertex& v,
+      			     const edm::ParameterSet& ps, const edm::Event& ev, const edm::EventSetup& es,
                              edm::EDGetTokenT<edm::SimVertexContainer>& simVertexInput_,
                              edm::EDGetTokenT<edm::SimTrackContainer>& simTrackInput_,
                              edm::EDGetTokenT<edm::PSimHitContainer>& gemSimHitInput_,
@@ -17,10 +20,10 @@ SimHitMatcher::SimHitMatcher(const SimTrack& t,
                              edm::EDGetTokenT<edm::PSimHitContainer>& rpcSimHitInput_,
                              edm::EDGetTokenT<edm::PSimHitContainer>& me0SimHitInput_,
                              edm::EDGetTokenT<edm::PSimHitContainer>& dtSimHitInput_
-                             
-                             )
-  : BaseMatcher(t, v, ps, ev, es)
+      			)
+: BaseMatcher(t, v, ps, ev, es)
 {
+
   auto gemSimHit_ = conf().getParameter<edm::ParameterSet>("gemSimHit");
   verboseGEM_ = gemSimHit_.getParameter<int>("verbose");
   simMuOnlyGEM_ = gemSimHit_.getParameter<bool>("simMuOnly");
@@ -50,6 +53,8 @@ SimHitMatcher::SimHitMatcher(const SimTrack& t,
   simMuOnlyDT_ = dtSimHit_.getParameter<bool>("simMuOnly");
   discardEleHitsDT_ = dtSimHit_.getParameter<bool>("discardEleHits");
   runDTSimHit_ = dtSimHit_.getParameter<bool>("run");
+
+  //simInputLabel_ = conf().getUntrackedParameter<std::string>("simInputLabel", "g4SimHits");
 
   event().getByToken(simTrackInput_, sim_tracks);
   event().getByToken(simVertexInput_, sim_vertices);
@@ -126,9 +131,9 @@ SimHitMatcher::SimHitMatcher(const SimTrack& t,
             auto& gem_simhits = hitsInDetId(id);
             auto gem_simhits_gp = simHitsMeanPosition(gem_simhits);
             cout<<"cchid "<<GEMDetId(id)<<": nHits "<<gem_simhits.size()<<" phi "<<gem_simhits_gp.phi()<<" nCh "<< gem_chamber_to_hits_[id].size()<<endl;
-            auto strips = hitStripsInDetId(id);
-            cout<<"nStrip "<<strips.size()<<endl;
-            cout<<"strips : "; std::copy(strips.begin(), strips.end(), ostream_iterator<int>(cout, " ")); cout<<endl;
+            // auto strips = hitStripsInDetId(id);
+            // cout<<"nStrip "<<strips.size()<<endl;
+            // cout<<"strips : "; std::copy(strips.begin(), strips.end(), ostream_iterator<int>(cout, " ")); cout<<endl;
           }
           auto gem_sch_ids = superChamberIdsGEM();
           for (auto id: gem_sch_ids) {
@@ -236,6 +241,8 @@ SimHitMatcher::SimHitMatcher(const SimTrack& t,
 SimHitMatcher::~SimHitMatcher() {}
 
 
+
+
 std::vector<unsigned int>
 SimHitMatcher::getIdsOfSimTrackShower(unsigned int initial_trk_id,
     const edm::SimTrackContainer & sim_tracks, const edm::SimVertexContainer & sim_vertices)
@@ -287,6 +294,14 @@ SimHitMatcher::matchCSCSimHitsToSimTrack(std::vector<unsigned int> track_ids, co
       if (simMuOnlyCSC_ && std::abs(pdgid) != 13) continue;
       // discard electron hits in the CSC chambers
       if (discardEleHitsCSC_ && pdgid == 11) continue;
+      LocalPoint lp = h.entryPoint();
+      GlobalPoint gp;
+      if (gemvalidation::is_csc(h.detUnitId()))
+       {
+     	 gp = getCSCGeometry()->idToDet(h.detUnitId())->surface().toGlobal(lp);
+	 if (verboseCSC_) std::cout <<" csc id "<< CSCDetId(h.detUnitId()) <<" x "<< gp.x()<<" y "<< gp.y() <<" z "<< gp.z()<< std::endl;
+       }
+	
       csc_detid_to_hits_[ h.detUnitId() ].push_back(h);
       csc_hits_.push_back(h);
       CSCDetId layer_id( h.detUnitId() );
@@ -308,7 +323,6 @@ SimHitMatcher::matchRPCSimHitsToSimTrack(std::vector<unsigned int> track_ids, co
       if (simMuOnlyRPC_ && std::abs(pdgid) != 13) continue;
       // discard electron hits in the RPC chambers
       if (discardEleHitsRPC_ && pdgid == 11) continue;
-
       rpc_detid_to_hits_[ h.detUnitId() ].push_back(h);
       rpc_hits_.push_back(h);
       RPCDetId layer_id( h.detUnitId() );
@@ -330,10 +344,11 @@ SimHitMatcher::matchGEMSimHitsToSimTrack(std::vector<unsigned int> track_ids, co
       if (simMuOnlyGEM_ && std::abs(pdgid) != 13) continue;
       // discard electron hits in the GEM chambers
       if (discardEleHitsGEM_ && pdgid == 11) continue;
+      
+      GEMDetId p_id( h.detUnitId() );
 
       gem_detid_to_hits_[ h.detUnitId() ].push_back(h);
       gem_hits_.push_back(h);
-      GEMDetId p_id( h.detUnitId() );
       gem_chamber_to_hits_[ p_id.chamberId().rawId() ].push_back(h);
       GEMDetId superch_id(p_id.region(), p_id.ring(), p_id.station(), 0, p_id.chamber(), 0);
       gem_superchamber_to_hits_[ superch_id() ].push_back(h);
@@ -832,6 +847,37 @@ SimHitMatcher::nLayersWithHitsInSuperChamber(unsigned int detid) const
   return layers_with_hits.size();
 }
 
+
+bool 
+SimHitMatcher::hitStationGEM(int st, int nlayers) const
+{
+  int nst=0;
+  for(auto ddt: chamberIdsGEM()) {
+
+    const GEMDetId id(ddt);
+    if (id.station()!=st) continue;
+        
+    const int nl(nLayersWithHitsInSuperChamber(id.rawId()));
+    if (nl < nlayers) continue; 
+    ++nst;    
+  }
+  return nst;
+}
+
+
+bool 
+SimHitMatcher::hitStationRPC(int st) const
+{
+  int nst=0;
+  for(auto ddt: chamberIdsRPC()) {
+    const RPCDetId id(ddt);
+    if (id.station()!=st) continue;    
+    ++nst;    
+  }
+  return nst;
+}
+
+
 bool 
 SimHitMatcher::hitStationCSC(int st, int nlayers) const
 {
@@ -903,6 +949,20 @@ SimHitMatcher::nStationsDT(int nsuperlayers, int nlayers) const
 	  hitStationDT(3, nsuperlayers, nlayers) + hitStationDT(4,nsuperlayers, nlayers));
 }
 
+
+int 
+SimHitMatcher::nStationsRPC() const
+{
+  return (hitStationRPC(1) + hitStationRPC(2) + hitStationRPC(3) + hitStationRPC(4));
+}
+
+
+int 
+SimHitMatcher::nStationsGEM(int nlayers) const
+{
+  return (hitStationGEM(1, nlayers) + hitStationGEM(3, nlayers));
+}
+
 int 
 SimHitMatcher::nCellsWithHitsInLayerDT(unsigned int detid) const
 {
@@ -972,13 +1032,14 @@ SimHitMatcher::simHitsMeanPosition(const edm::PSimHitContainer& sim_hits) const
     {
       gp = getGEMGeometry()->idToDet(h.detUnitId())->surface().toGlobal(lp);
     }
-    if ( gemvalidation::is_me0(h.detUnitId()) )
+    else if ( gemvalidation::is_me0(h.detUnitId()) )
     {
       gp = getME0Geometry()->idToDet(h.detUnitId())->surface().toGlobal(lp);
     }
     else if (gemvalidation::is_csc(h.detUnitId()))
     {
       gp = getCSCGeometry()->idToDet(h.detUnitId())->surface().toGlobal(lp);
+      //std::cout <<"In simHitsMeanPosition localPoint "<< lp<<" gloablPoint "<< gp  << std::endl;
     }
     else if (gemvalidation::is_rpc(h.detUnitId()))
     {
@@ -998,6 +1059,79 @@ SimHitMatcher::simHitsMeanPosition(const edm::PSimHitContainer& sim_hits) const
   return GlobalPoint(sumx/n, sumy/n, sumz/n);
 }
 
+GlobalPoint
+SimHitMatcher::simHitPositionKeyLayer(unsigned int chid) const
+{
+  /*
+    1. Return the (average) position of the keylayer simhit if available
+    2. Return the fitted position of the simhit in the keylayer if fit good
+    3. Return average position of the simhits in the chamber if all else fails
+  */
+  const CSCDetId chamberId(chid);
+  const CSCDetId keyLayerId(chamberId.endcap(), chamberId.station(),
+                            chamberId.ring(), chamberId.chamber(), 3);
+  GlobalPoint returnValue;
+  
+  const edm::PSimHitContainer keyLayerIdHits(hitsInDetId(keyLayerId.rawId()));
+  if (keyLayerIdHits.size()!=0) returnValue = simHitsMeanPosition(keyLayerIdHits);
+  else{
+    // check if the chamber has hits at all
+    if (hitsInChamber(chid).size()==0) returnValue = GlobalPoint();
+    else if (hitsInChamber(chid).size()==1) returnValue = simHitsMeanPosition(hitsInChamber(chid));
+    else {
+      std::vector<float> zs; 
+      std::vector<float> xs;
+      std::vector<float> ys;
+
+      // add the positions of all hits in a chamber
+      for (int l=1; l<=6; l++){
+        CSCDetId l_id(chamberId.endcap(), chamberId.station(), 
+                      chamberId.ring(), chamberId.chamber(), l);
+        for (auto p: hitsInDetId(l_id.rawId())) {
+          LocalPoint lp = p.entryPoint();
+          GlobalPoint gp = getCSCGeometry()->idToDet(p.detUnitId())->surface().toGlobal(lp);
+          zs.push_back(gp.z());
+          xs.push_back(gp.x());
+          ys.push_back(gp.y());
+        }
+      }
+      // fit a straight line through the hits (bending is negligible
+      float zmin;
+      float zmax;
+      if (zs.front() < zs.back())  { zmin = zs.front(); zmax = zs.back();  }
+      else                         { zmin = zs.back();  zmax = zs.front(); }
+      
+      TF1* fit = new TF1("fit","pol1",zmin,zmax); 
+      TGraph* gr = new TGraph(zs.size(),&(zs[0]),&(xs[0]));
+      TFitResultPtr r = gr->Fit(fit,"RQ"); 
+
+      TF1* fit2 = new TF1("fit2","pol1",zmin,zmax); 
+      TGraph* grr = new TGraph(zs.size(),&(zs[0]),&(ys[0]));
+      TFitResultPtr rr = grr->Fit(fit2,"RQ"); 
+
+      if (r->Status()==0 and rr->Status()==0){    
+        float z_pos_L3 = getCSCGeometry()->layer(keyLayerId)->centerOfStrip(20).z();
+        float x_pos_L3 = fit->GetParameter(0) + fit->GetParameter(1) * z_pos_L3;
+        float y_pos_L3 = fit2->GetParameter(0) + fit2->GetParameter(1) * z_pos_L3;
+        returnValue =  GlobalPoint(x_pos_L3, y_pos_L3, z_pos_L3);
+	//std::cout <<"return gp of keylayer at sim level, id "<<  chamberId <<" z "<< z_pos_L3 <<" perp "<< returnValue.perp()<< std::endl;
+      }
+      else{
+        returnValue = simHitsMeanPosition(hitsInChamber(chid));
+      }
+      delete fit;
+      delete fit2;
+      delete gr;
+      delete grr;
+    } 
+  }
+   
+	//GlobalPoint gptest(simHitsMeanPosition(hitsInChamber(chid)));
+	//std::cout <<"as comparison, gp from MeanPosition, id  "<< chamberId <<" z "<< gptest.z()<<" perp "<< gptest.perp() << std::endl;
+  	//std::cout <<"final return gp of keylayer at sim level, id "<< chamberId <<" z "<< returnValue.z() <<" perp "<< returnValue.perp() <<" eta "<< returnValue.eta()<<" phi "<< returnValue.phi() << std::endl;
+  return returnValue;
+}
+   
 
 GlobalVector
 SimHitMatcher::simHitsMeanMomentum(const edm::PSimHitContainer& sim_hits) const
@@ -1015,7 +1149,7 @@ SimHitMatcher::simHitsMeanMomentum(const edm::PSimHitContainer& sim_hits) const
     {
       gv = getGEMGeometry()->idToDet(h.detUnitId())->surface().toGlobal(lv);
     }
-    if ( gemvalidation::is_me0(h.detUnitId()) )
+    else if ( gemvalidation::is_me0(h.detUnitId()) )
     {
       gv = getME0Geometry()->idToDet(h.detUnitId())->surface().toGlobal(lv);
     }
@@ -1040,6 +1174,37 @@ SimHitMatcher::simHitsMeanMomentum(const edm::PSimHitContainer& sim_hits) const
   if (n == 0) return GlobalVector();
   return GlobalVector(sumx/n, sumy/n, sumz/n);
 }
+
+
+float
+SimHitMatcher::simHitsGEMCentralPosition(const edm::PSimHitContainer& sim_hits) const
+{
+  if (sim_hits.empty()) return -0.0; // point "zero"
+
+  float central = -0.0;
+  size_t n = 0;
+  for (auto& h: sim_hits)
+  {
+    LocalPoint lp( 0., 0., 0. );//local central
+    GlobalPoint gp;
+    if ( gemvalidation::is_gem(h.detUnitId()) )
+    {
+      gp = getGEMGeometry()->idToDet(h.detUnitId())->surface().toGlobal(lp);
+    }
+    else if ( gemvalidation::is_me0(h.detUnitId()) )
+    {
+      gp = getME0Geometry()->idToDet(h.detUnitId())->surface().toGlobal(lp);
+    }
+    else continue;
+    central = gp.perp();
+    //std::cout <<" GEMid "<< GEMDetId(h.detUnitId()) <<"cenral gp perp "<< gp.perp()<<" x "<< gp.x()<<" y "<< gp.y() <<" z "<< gp.z() <<std::endl;
+    if (n>=1) std::cout <<"warning! find more than one simhits in GEM chamber " << std::endl;
+    ++n;
+  }
+
+  return central;
+}
+
 
 
 
@@ -1092,9 +1257,10 @@ SimHitMatcher::LocalBendingInChamber(unsigned int detid) const
 	if (hits6.size()==0) std::cerr <<" no hits in layer6, cant not find global phi of hits " << std::endl;
 	GlobalPoint gp6 = simHitsMeanPosition(hitsInDetId(cscid6.rawId()));	
 	phi_layer6 = gp6.phi();
+
   }
 	//std::cout <<" phi1 "<< phi_layer1 <<" phi6 " << phi_layer6 << std::endl;
-	return phi_layer6-phi_layer1;
+	return deltaPhi(phi_layer6,phi_layer1);
 }
 
 
@@ -1114,7 +1280,7 @@ SimHitMatcher::simHitsMeanStrip(const edm::PSimHitContainer& sim_hits) const
     {
       s = getGEMGeometry()->etaPartition(d)->strip(lp);
     }
-    if ( gemvalidation::is_me0(d) )
+    else if ( gemvalidation::is_me0(d) )
     {
       s = getME0Geometry()->etaPartition(d)->strip(lp);
     }

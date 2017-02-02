@@ -77,7 +77,7 @@
 #include "CondFormats/DataRecord/interface/L1MuTriggerScalesRcd.h"
 #include <L1Trigger/CSCCommonTrigger/interface/CSCConstants.h>
 #include <L1Trigger/CSCTrackFinder/interface/CSCTFPtLUT.h>
-#include "GEMCode/GEMValidation/plugins/CSCStubPatterns.h"
+#include "GEMCode/GEMValidation/interface/CSCStubPatterns.h"
 
 #include "DataFormats/CSCDigi/interface/CSCComparatorDigiCollection.h"
 #include "DataFormats/CSCDigi/interface/CSCWireDigiCollection.h"
@@ -1188,7 +1188,7 @@ DisplacedL1MuFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup)
           //int index = i;
           // chambers need to be compatible
           if (gem_id.region() == csc_st2.zendcap() and
-              gem_id.station() == 3 and 
+              gem_id.station() == 2 and 
               csc_st2.chamber() == gem_id.chamber() and
               csc_st2.ring() == 1) {
             std::cout << "Investigate GE21 chamber " << gem_id << std::endl;
