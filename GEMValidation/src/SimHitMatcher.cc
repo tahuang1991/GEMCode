@@ -1105,12 +1105,7 @@ SimHitMatcher::simHitPositionKeyLayer(unsigned int chid) const
         }
       }
       // fit a straight line through the hits (bending is negligible
-      float zmin;
-      float zmax;
-      if (zs.front() < zs.back())  { zmin = zs.front(); zmax = zs.back();  }
-      else                         { zmin = zs.back();  zmax = zs.front(); }
-      
-      //std::cout <<"size "<<zs.size()<<" xs[0] "<< xs[0] <<" ys[0] "<< ys[0]<<" zs[0] "<< zs[0] <<" zmin "<< zmin <<" zmax "<< zmax << std::endl;
+      //std::cout <<"size "<<zs.size()<<" xs[0] "<< xs[0] <<" ys[0] "<< ys[0]<<" zs[0] "<< zs[0] << std::endl;
       float alphax = -99., betax = 0.;
       PtassignmentHelper::calculateAlphaBeta(zs, xs, ezs, exs, status,
      		     alphax, betax);

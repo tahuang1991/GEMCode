@@ -12,6 +12,7 @@
 #include "DataFormats/Math/interface/deltaR.h"
 #include "GEMCode/GEMValidation/interface/DisplacedMuonTriggerPtassignment.h"
 #include "GEMCode/GEMValidation/interface/PtassignmentHelper.h"
+#include "GEMCode/GEMValidation/interface/CSCStubPatterns.h"
 
 
 //endcap, we need LCTs and associated cscid, gempads and associated gemid, and all gemometry
