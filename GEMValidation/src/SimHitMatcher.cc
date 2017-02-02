@@ -1,4 +1,5 @@
 #include "GEMCode/GEMValidation/interface/SimHitMatcher.h"
+#include "GEMCode/GEMValidation/interface/PtassignmentHelper.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
 
 #include "TF1.h"
@@ -1069,26 +1070,38 @@ SimHitMatcher::simHitPositionKeyLayer(unsigned int chid) const
   GlobalPoint returnValue;
   
   const edm::PSimHitContainer keyLayerIdHits(hitsInDetId(keyLayerId.rawId()));
+  //std::cout <<"CSC id "<< chamberId <<" keyLayerIdHits size "<< keyLayerIdHits.size() << " hitsInChamber "<< hitsInChamber(chid).size()<< std::endl;
   if (keyLayerIdHits.size()!=0) returnValue = simHitsMeanPosition(keyLayerIdHits);
   else{
     // check if the chamber has hits at all
     if (hitsInChamber(chid).size()==0) returnValue = GlobalPoint();
+    //else if (hitsInChamber(chid).size()>=1) returnValue = simHitsMeanPosition(hitsInChamber(chid));
     else if (hitsInChamber(chid).size()==1) returnValue = simHitsMeanPosition(hitsInChamber(chid));
     else {
       std::vector<float> zs; 
       std::vector<float> xs;
       std::vector<float> ys;
+      std::vector<float> ezs; 
+      std::vector<float> exs;
+      std::vector<float> eys;
+      std::vector<float> status;
 
       // add the positions of all hits in a chamber
       for (int l=1; l<=6; l++){
         CSCDetId l_id(chamberId.endcap(), chamberId.station(), 
                       chamberId.ring(), chamberId.chamber(), l);
         for (auto p: hitsInDetId(l_id.rawId())) {
+	  //std::cout <<"layerId "<< l_id;
           LocalPoint lp = p.entryPoint();
+	  //std::cout <<" localPoint (x,y): "<<lp.x()<<" "<< lp.y();
           GlobalPoint gp = getCSCGeometry()->idToDet(p.detUnitId())->surface().toGlobal(lp);
+	 // std::cout <<" gp (x,y,z) "<< gp.x()<<" "<< gp.y()<<" "<< gp.z()<< std::endl;
           zs.push_back(gp.z());
           xs.push_back(gp.x());
           ys.push_back(gp.y());
+	  ezs.push_back(0);
+	  exs.push_back(0);
+	  eys.push_back(0);
         }
       }
       // fit a straight line through the hits (bending is negligible
@@ -1097,34 +1110,29 @@ SimHitMatcher::simHitPositionKeyLayer(unsigned int chid) const
       if (zs.front() < zs.back())  { zmin = zs.front(); zmax = zs.back();  }
       else                         { zmin = zs.back();  zmax = zs.front(); }
       
-      TF1* fit = new TF1("fit","pol1",zmin,zmax); 
-      TGraph* gr = new TGraph(zs.size(),&(zs[0]),&(xs[0]));
-      TFitResultPtr r = gr->Fit(fit,"RQ"); 
-
-      TF1* fit2 = new TF1("fit2","pol1",zmin,zmax); 
-      TGraph* grr = new TGraph(zs.size(),&(zs[0]),&(ys[0]));
-      TFitResultPtr rr = grr->Fit(fit2,"RQ"); 
-
-      if (r->Status()==0 and rr->Status()==0){    
+      //std::cout <<"size "<<zs.size()<<" xs[0] "<< xs[0] <<" ys[0] "<< ys[0]<<" zs[0] "<< zs[0] <<" zmin "<< zmin <<" zmax "<< zmax << std::endl;
+      float alphax = -99., betax = 0.;
+      PtassignmentHelper::calculateAlphaBeta(zs, xs, ezs, exs, status,
+     		     alphax, betax);
+      float alphay = -99., betay = 0.;
+      PtassignmentHelper::calculateAlphaBeta(zs, ys, ezs, exs, status,
+    		     alphay, betay);
+      if(std::abs(betax)>0.0 and std::abs(betay)>0.0){    
         float z_pos_L3 = getCSCGeometry()->layer(keyLayerId)->centerOfStrip(20).z();
-        float x_pos_L3 = fit->GetParameter(0) + fit->GetParameter(1) * z_pos_L3;
-        float y_pos_L3 = fit2->GetParameter(0) + fit2->GetParameter(1) * z_pos_L3;
+        float x_pos_L3 = alphax + betax * z_pos_L3;
+        float y_pos_L3 = alphay + betay * z_pos_L3;
         returnValue =  GlobalPoint(x_pos_L3, y_pos_L3, z_pos_L3);
 	//std::cout <<"return gp of keylayer at sim level, id "<<  chamberId <<" z "<< z_pos_L3 <<" perp "<< returnValue.perp()<< std::endl;
       }
       else{
         returnValue = simHitsMeanPosition(hitsInChamber(chid));
       }
-      delete fit;
-      delete fit2;
-      delete gr;
-      delete grr;
-    } 
+    }
   }
    
 	//GlobalPoint gptest(simHitsMeanPosition(hitsInChamber(chid)));
 	//std::cout <<"as comparison, gp from MeanPosition, id  "<< chamberId <<" z "<< gptest.z()<<" perp "<< gptest.perp() << std::endl;
-  	//std::cout <<"final return gp of keylayer at sim level, id "<< chamberId <<" z "<< returnValue.z() <<" perp "<< returnValue.perp() <<" eta "<< returnValue.eta()<<" phi "<< returnValue.phi() << std::endl;
+  //std::cout <<"final return gp of keylayer at sim level, id "<< chamberId <<" z "<< returnValue.z() <<" perp "<< returnValue.perp() <<" eta "<< returnValue.eta()<<" phi "<< returnValue.phi() << std::endl;
   return returnValue;
 }
    
