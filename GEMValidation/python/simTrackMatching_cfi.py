@@ -35,11 +35,11 @@ SimTrackMatching = cms.PSet(
     verbose = cms.bool(True),
     ## per collection params
     simVertex = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.InputTag("g4SimHits"),
     ),
     simTrack = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.InputTag("g4SimHits"),
         minPt = cms.double(1.5),
         maxPt = cms.double(999.),
@@ -51,14 +51,14 @@ SimTrackMatching = cms.PSet(
     ),
     ## GEM
     gemSimHit = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.InputTag("g4SimHits", "MuonGEMHits"),
         run = cms.bool(True),
         simMuOnly = cms.bool(True),
         discardEleHits = cms.bool(True),
     ),
     gemStripDigi = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.InputTag("simMuonGEMDigis"),
         run = cms.bool(True),
         minBX = cms.int32(-1),
@@ -66,21 +66,21 @@ SimTrackMatching = cms.PSet(
         matchDeltaStrip = cms.int32(1),
     ),
     gemPadDigi = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.InputTag("simMuonGEMPadDigis"),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
      ),
     gemCoPadDigi = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.InputTag("simCscTriggerPrimitiveDigis"),
         run = cms.bool(True),
         minBX = cms.int32(0),
         maxBX = cms.int32(0),
     ),
     gemRecHit = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.InputTag("gemRecHits"),
         run = cms.bool(True),
         minBX = cms.int32(-1),
@@ -150,7 +150,7 @@ SimTrackMatching = cms.PSet(
     ),
     ## CSC
     cscSimHit = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.InputTag("g4SimHits", "MuonCSCHits"),
         run = cms.bool(True),
         simMuOnly = cms.bool(True),
@@ -158,7 +158,7 @@ SimTrackMatching = cms.PSet(
         minNHitsChamber = cms.int32(4),
     ),
     cscStripDigi = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.InputTag("simMuonCSCDigis", "MuonCSCComparatorDigi"),
         run = cms.bool(True),
         minBX = cms.int32(3),
@@ -167,7 +167,7 @@ SimTrackMatching = cms.PSet(
         minNHitsChamber = cms.int32(4),
     ),
     cscWireDigi = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.InputTag("simMuonCSCDigis", "MuonCSCWireDigi"),
         run = cms.bool(True),
         minBX = cms.int32(3),
@@ -176,7 +176,7 @@ SimTrackMatching = cms.PSet(
         minNHitsChamber = cms.int32(4),
     ),
     cscCLCT = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.InputTag("simCscTriggerPrimitiveDigis"),
         run = cms.bool(True),
         minBX = cms.int32(5),
@@ -184,7 +184,7 @@ SimTrackMatching = cms.PSet(
         minNHitsChamber = cms.int32(4),
     ),
     cscALCT = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.InputTag("simCscTriggerPrimitiveDigis"),
         run = cms.bool(True),
         minBX = cms.int32(5),
@@ -192,7 +192,7 @@ SimTrackMatching = cms.PSet(
         minNHitsChamber = cms.int32(4),
     ),
     cscLCT = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.InputTag("simCscTriggerPrimitiveDigis"),
         run = cms.bool(True),
         minBX = cms.int32(5),
@@ -208,7 +208,7 @@ SimTrackMatching = cms.PSet(
         hsFromSimHitMean = cms.bool(True),
     ),
     cscMPLCT = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.InputTag("simCscTriggerPrimitiveDigis"),
         run = cms.bool(True),
         minBX = cms.int32(5),
