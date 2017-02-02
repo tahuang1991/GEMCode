@@ -8,8 +8,8 @@ L1TrackFinderTrackMatcher::L1TrackFinderTrackMatcher(SimHitMatcher& sh,
   auto dtTfTrack = conf().getParameter<edm::ParameterSet>("dtTfTrack");
   auto rpcTfTrack = conf().getParameter<edm::ParameterSet>("rpcTfTrack");
 
-  dtTfTrackInputLabel_ = dtTfTrack.getParameter<std::vector<edm::InputTag>>("validInputTags");
-  rpcTfTrackInputLabel_ = rpcTfTrack.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  //dtTfTrackInputLabel_ = dtTfTrack.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  //rpcTfTrackInputLabel_ = rpcTfTrack.getParameter<std::vector<edm::InputTag>>("validInputTags");
   
   verboseCscTfTrack_ = cscTfTrack.getParameter<int>("verbose");
   verboseDtTfTrack_ = dtTfTrack.getParameter<int>("verbose");

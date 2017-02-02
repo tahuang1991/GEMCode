@@ -371,21 +371,31 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
       //continue;
     }
 
-    // find a matching LCT
-    const GEMDetId gemDetId(GEMDetId(ch_id.zendcap(),1,ch_id.station(),1,ch_id.chamber(),0));
-    // find matching rpc chamber (only valid for me31 and me41)
-    const int csc_trig_sect(CSCTriggerNumbering::triggerSectorFromLabels(ch_id));
-    const int csc_trig_id( CSCTriggerNumbering::triggerCscIdFromLabels(ch_id));
-    const int csc_trig_chid((3*(csc_trig_sect-1)+csc_trig_id)%18 +1);
-    const int rpc_trig_sect((csc_trig_chid-1)/3+1);
-    const int rpc_trig_subsect((csc_trig_chid-1)%3+1);
-    const RPCDetId rpcDetId(RPCDetId(ch_id.zendcap(),1,ch_id.station(),rpc_trig_sect,1,rpc_trig_subsect,0));
-
     auto clct(clctsInChamber(id));
     auto alct(alctsInChamber(id));
-    auto pads(gem_digi_matcher_->coPadsInSuperChamber(gemDetId));
-    auto rpcDigis(rpc_digi_matcher_->digisInChamber(rpcDetId));
     const auto hits = sh_matcher_->hitsInChamber(id);
+    bool hasPad = false;
+    bool hasDigis = false;
+    if ((ch_id.station()==1 or ch_id.station()==2) and ch_id.ring()==1){
+	// find a matching LCT
+	const GEMDetId gemDetId(GEMDetId(ch_id.zendcap(),1,ch_id.station(),1,ch_id.chamber(),0));
+	auto pads(gem_digi_matcher_->coPadsInSuperChamber(gemDetId));
+	hasPad = (pads.size()>0);
+    }
+    if ((ch_id.station()==3 or ch_id.station()==4) and ch_id.ring()==1){
+	// find matching rpc chamber (only valid for me31 and me41)
+	const int csc_trig_sect(CSCTriggerNumbering::triggerSectorFromLabels(ch_id));
+	const int csc_trig_id( CSCTriggerNumbering::triggerCscIdFromLabels(ch_id));
+	const int csc_trig_chid((3*(csc_trig_sect-1)+csc_trig_id)%18 +1);
+	const int rpc_trig_sect((csc_trig_chid-1)/3+1);
+	const int rpc_trig_subsect((csc_trig_chid-1)%3+1);
+	const RPCDetId rpcDetId(RPCDetId(ch_id.zendcap(),1,ch_id.station(),rpc_trig_sect,1,rpc_trig_subsect,0));
+	auto rpcDigis(rpc_digi_matcher_->digisInChamber(rpcDetId));
+	hasDigis = (rpcDigis.size()>0);
+    }
+
+
+    
     
     int iLct = -1;
     for (auto &lct: lcts_tmp)
@@ -401,8 +411,6 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
             std::cout <<"alcts size "<< alct.size() <<" jth "<<j<< " available ALCT " << alct[j] << std::endl;
           if (verbose() and i<clct.size()) 
             std::cout<<"clcts size"<< clct.size()<<" ith "<<i << " available CLCT " << clct[i] << std::endl; 
-          auto hasPad(pads.size()!=0);
-          auto hasDigis(rpcDigis.size()!=0);
           
           const bool caseAlctClct(j<alct.size() && i<clct.size());
           const bool caseAlctGem(is_valid(alct[j]) and i==clct.size() and (ch_id.station() == 1 or ch_id.station() == 2) and ch_id.ring()==1);

@@ -51,7 +51,6 @@ GEMDigiMatcher::matchDigisToSimTrack(const GEMDigiCollection& digis)
   for (auto id: det_ids)
   {
     GEMDetId p_id(id);
-    if (p_id.station()==2) continue;
     GEMDetId superch_id(p_id.region(), p_id.ring(), p_id.station(), 1, p_id.chamber(), 0);
     auto hit_strips = simhit_matcher_->hitStripsInDetId(id, matchDeltaStrip_);
     if (verboseDigi_)
@@ -71,8 +70,6 @@ GEMDigiMatcher::matchDigisToSimTrack(const GEMDigiCollection& digis)
       // check that it matches a strip that was hit by SimHits from our track
       if (hit_strips.find(d->strip()) == hit_strips.end()) continue;
       if (verboseDigi_) cout<<"...was matched!"<<endl;
-      // ignore hits in the short GE21
-      if (p_id.station()==2) continue;
 
       auto mydigi = make_digi(id, d->strip(), d->bx(), GEM_STRIP);
       detid_to_digis_[id].push_back(mydigi);
@@ -101,7 +98,6 @@ GEMDigiMatcher::matchPadsToSimTrack(const GEMPadDigiCollection& pads)
   for (auto id: det_ids)
   {
     GEMDetId p_id(id);
-    if (p_id.station()==2) continue;
     GEMDetId superch_id(p_id.region(), p_id.ring(), p_id.station(), 1, p_id.chamber(), 0);
 
     auto hit_pads = simhit_matcher_->hitPadsInDetId(id);
@@ -123,8 +119,6 @@ GEMDigiMatcher::matchPadsToSimTrack(const GEMPadDigiCollection& pads)
       // check that it matches a pad that was hit by SimHits from our track
       if (hit_pads.find(pad->pad()) == hit_pads.end()) continue;
       if (verbosePad_) cout<<"chp2"<<endl;
-      // ignore hits in the short GE21
-      if (p_id.station()==2) continue;
       auto mydigi = make_digi(id, pad->pad(), pad->bx(), GEM_PAD);
       detid_to_pads_[id].push_back(mydigi);
       chamber_to_pads_[ p_id.chamberId().rawId() ].push_back(mydigi);
@@ -146,7 +140,6 @@ GEMDigiMatcher::matchCoPadsToSimTrack(const GEMCoPadDigiCollection& co_pads)
   {
     GEMDetId p_id(id);
     if (verboseCoPad_) std::cout <<"GEMDetId "<<p_id << std::endl;
-    if (p_id.station()==2) continue;
     GEMDetId superch_id(p_id.region(), p_id.ring(), p_id.station(), 1, p_id.chamber(), 0);
 
     auto hit_co_pads = simhit_matcher_->hitCoPadsInDetId(id);
@@ -163,16 +156,14 @@ GEMDigiMatcher::matchCoPadsToSimTrack(const GEMCoPadDigiCollection& co_pads)
     {
       if (verbosePad_) cout<<"CoPad: chp "<<*pad<<endl;
       // check that the pad BX is within the range
-      if (pad->bx() < minBXGEMCoPad_ || pad->bx() > maxBXGEMCoPad_) continue;
+      if (pad->bx(1) < minBXGEMCoPad_ || pad->bx(1) > maxBXGEMCoPad_) continue;
       if (verboseCoPad_) cout<<"CoPad: chp1 "<<*pad<<endl;
       // check that it matches a pad that was hit by SimHits from our track
-      if (hit_co_pads.find(pad->pad()) == hit_co_pads.end()) continue;
+      if (hit_co_pads.find(pad->pad(1)) == hit_co_pads.end()) continue;
       if (verboseCoPad_) cout<<"CoPad: chp2 "<<*pad<<endl;
-      // ignore hits in the short GE21
-      if (p_id.station()==2) continue;
       // check that it matches a coincidence pad that was hit by SimHits from our track
 
-      auto mydigi = make_digi(id, pad->pad(), pad->bx(), GEM_COPAD);
+      auto mydigi = make_digi(id, pad->pad(1), pad->bx(1), GEM_COPAD);
       //detid_to_copads_[id].push_back(mydigi);
       superchamber_to_copads_[ superch_id() ].push_back(mydigi);
 
@@ -510,10 +501,7 @@ GEMDigiMatcher::extrapolateHsfromGEMStrip(unsigned int id, int gemstrip) const
   
   GEMDetId gem_id(id);//chamberid
   int endcap = (gem_id.region()>0 ? 1 : 2);
-  int station;
-  if (gem_id.station() == 3) station = 2;
-  else if (gem_id.station() == 2) return result;
-  else station = gem_id.station();
+  int station = gem_id.station();
   CSCDetId csc_id(endcap, station, gem_id.ring(), gem_id.chamber(), 0);
 
   const CSCChamber* cscChamber(getCSCGeometry()->chamber(csc_id));

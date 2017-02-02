@@ -1390,7 +1390,8 @@ GEMCSCAnalyzer::GEMCSCAnalyzer(const edm::ParameterSet& ps)
   */
 
 
-  genParticleInput_ = consumes<reco::GenParticleCollection>(edm::InputTag("genParticles"));
+  auto displacedGenMu = cfg_.getParameter<edm::ParameterSet>("displacedGenMu");
+  genParticleInput_ = consumes<reco::GenParticleCollection>(displacedGenMu.getParameter<edm::InputTag>("validInputTags"));
 
   auto simVertex = cfg_.getParameter<edm::ParameterSet>("simVertex");
   simVertexInput_ = consumes<edm::SimVertexContainer>(simVertex.getParameter<edm::InputTag>("validInputTags"));

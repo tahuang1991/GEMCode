@@ -6,9 +6,11 @@ process = cms.Process("GEMCSCANA")
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
-process.load('Configuration.Geometry.GeometryExtended2023Muon_cff')
-process.load('Configuration.Geometry.GeometryExtended2023MuonReco_cff')
-process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
+#process.load('Configuration.Geometry.GeometryExtended2023D1_cff')
+#process.load('Configuration.Geometry.GeometryExtended2023D1Reco_cff')
+process.load('Configuration.Geometry.GeometryExtended2023D4Reco_cff')
+#process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
+process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
 
@@ -17,12 +19,14 @@ process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorOp
 process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAlong_cfi')
 
 process.source = cms.Source("PoolSource",
-	fileNames = cms.untracked.vstring('file:out_L1.root'),
+	#fileNames = cms.untracked.vstring('file:out_L1.root'),
+	fileNames = cms.untracked.vstring('/store/user/dildick/DarkSUSY_mH_125_mGammaD_20000_cT_0_14TeV_GEN_SIM_90X/DarkSUSY_mH_125_mGammaD_20000_cT_0_14TeV_PU0_DIGI_L1/170116_230113/0000/step2_1.root')
 )
 
 from GEMCode.SimMuL1.GEMCSCTriggerSamplesLib import *
 from GEMCode.GEMValidation.InputFileHelpers import *
-#process = useInputDir(process, InputDir, True)
+InputDir = ['/eos/uscms/store/user/rdking/SingleMu1to100_14TeV_GEN_SIM_90X/DarkSUSY_mH_125_mGammaD_20000_cT_0_14TeV_PU140_DIGI_L1/170125_170819/0000/']
+process = useInputDir(process, InputDir, True)
 #process = useInputDir(process, files['_gem98_pt2-50_PU0_pt0_new'], False)
 
 process.TFileService = cms.Service("TFileService",
@@ -31,7 +35,7 @@ process.TFileService = cms.Service("TFileService",
 
 ## global tag for upgrade studies
 from Configuration.AlCa.GlobalTag import GlobalTag
-process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:upgradePLS3', '')
+process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:run2_mc', '')
 
 # the analyzer configuration
 def enum(*sequential, **named):
@@ -49,8 +53,8 @@ process.GEMCSCAnalyzer = cms.EDAnalyzer("GEMCSCAnalyzer",
 matching = process.GEMCSCAnalyzer.simTrackMatching
 matching.simTrack.minPt = 1.5
 matching.matchprint = cms.bool(False)
-matching.gemRecHit.input = ""
 """
+matching.gemRecHit.input = ""
 matching.cscTfTrack.input = ""
 matching.tfCand.input = ""
 matching.gmtCand.input = ""
@@ -64,7 +68,6 @@ if doGem:
   matching.cscCLCT.minNHitsChamber = 3
   matching.cscALCT.minNHitsChamber = 3
   matching.cscLCT.minNHitsChamber = 3
-  matching.cscLCT.matchAlctGem = True
   matching.cscMPLCT.minNHitsChamber = 3
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
@@ -78,7 +81,7 @@ print
 #print 'Input files:'
 print '----------------------------------------'
 #print process.source.fileNames
-print
+#print
 print 'Output file:'
 print '----------------------------------------'
 print process.TFileService.fileName
