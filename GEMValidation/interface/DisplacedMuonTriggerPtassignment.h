@@ -50,7 +50,6 @@
 #include "CondFormats/DataRecord/interface/L1MuTriggerScalesRcd.h"
 
 #include "GEMCode/GEMValidation/interface/Helpers.h"
-#include "GEMCode/GEMValidation/interface/CSCStubPatterns.h"
 
 #include <vector>
 #include <map>
