@@ -65,7 +65,7 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
       //find GEMPads
       for (auto idgempads : detid_pads){
         GEMDetId gemid(idgempads.first);
-        if (((chid.station() == 1 and gemid.station() == 1) or (chid.station()==2 and gemid.station() ==2))
+        if ((chid.station() == gemid.station())
             and chid.chamber() == gemid.chamber()){
           //if gp_ge11 or gp_ge21 are taken from GME pad in layer1, then ignore the layer2
           if (hasGEMPad_st1 and gemid.station()==1 and gemid.layer()==2)  continue;
@@ -692,7 +692,6 @@ void DisplacedMuonTriggerPtassignment::globalPositionOfGEMPad(GEMPadDigiContaine
   auto gemRoll(gemChamber->etaPartition(gemid.roll()));//any roll
   const int nGEMPads(gemRoll->npads());
   int st = gemid.station();
-  if (st==2) st=2;//use CSC station as reference
   for (auto gempad : gempads){
   	if (gempad.pad() > nGEMPads or gempad.pad() < 0){
       		std::cout <<" gempad.pad() is within pad range gempad "<< gempad <<" npad "<< nGEMPads << std::endl;
@@ -704,7 +703,6 @@ void DisplacedMuonTriggerPtassignment::globalPositionOfGEMPad(GEMPadDigiContaine
 		gp_ge11 = GlobalPoint(gp_pad);
 		dphi_gemcsc_st[st-1] = fabs(deltaPhi(float(gp_pad.phi()), float(gp_st_layer3[st-1].phi())));
 	}
-
   }
 
 }
