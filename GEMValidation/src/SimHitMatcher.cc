@@ -23,6 +23,7 @@ SimHitMatcher::SimHitMatcher(const SimTrack& t, const SimVertex& v,
       			)
 : BaseMatcher(t, v, ps, ev, es)
 {
+
   auto gemSimHit_ = conf().getParameter<edm::ParameterSet>("gemSimHit");
   verboseGEM_ = gemSimHit_.getParameter<int>("verbose");
   simMuOnlyGEM_ = gemSimHit_.getParameter<bool>("simMuOnly");
@@ -111,7 +112,6 @@ SimHitMatcher::SimHitMatcher(const SimTrack& t, const SimVertex& v,
       edm::PSimHitContainer gem_hits_select;
       for (auto& h: *gem_hits.product()) {
         GEMDetId id(h.detUnitId());
-        if (id.station()==2) continue;
         if (useGEMChamberType(gemvalidation::toGEMType(id.station(), id.ring()))) gem_hits_select.push_back(h);
       }
 
@@ -342,8 +342,6 @@ SimHitMatcher::matchGEMSimHitsToSimTrack(std::vector<unsigned int> track_ids, co
       if (discardEleHitsGEM_ && pdgid == 11) continue;
       
       GEMDetId p_id( h.detUnitId() );
-      // ignore hits in the short GE21
-      if (p_id.station()==2) continue;
 
       gem_detid_to_hits_[ h.detUnitId() ].push_back(h);
       gem_hits_.push_back(h);
