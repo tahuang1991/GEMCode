@@ -77,7 +77,7 @@
 #include "CondFormats/DataRecord/interface/L1MuTriggerScalesRcd.h"
 #include <L1Trigger/CSCCommonTrigger/interface/CSCConstants.h>
 #include <L1Trigger/CSCTrackFinder/interface/CSCTFPtLUT.h>
-#include "GEMCode/GEMValidation/plugins/CSCStubPatterns.h"
+#include "GEMCode/GEMValidation/interface/CSCStubPatterns.h"
 
 #include "DataFormats/CSCDigi/interface/CSCComparatorDigiCollection.h"
 #include "DataFormats/CSCDigi/interface/CSCWireDigiCollection.h"
