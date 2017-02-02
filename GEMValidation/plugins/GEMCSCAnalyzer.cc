@@ -2153,108 +2153,106 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
     }
     //find digis that are associatd to LCTs
-      std::vector<GlobalPoint> gps;
-      std::vector<float> phis;
-      std::vector<float> xs;
-      std::vector<float> ys;
-      std::vector<float> zs;
-      std::vector<float> ephis;
-      std::vector<float> exs;
-      std::vector<float> ezs;
-      std::vector<float> status;
-      
-      auto bestMatchingLCT = match_lct.bestCscLctInChamber(d);
-      match_lct.positionsOfComparatorInLCT(d, bestMatchingLCT, gps);
-      GlobalPoint lctgp(match_lct.getGlobalPosition(id.rawId(), bestMatchingLCT));
-      //std::cout <<"csc id "<< id <<" lctgp x "<< lctgp.x() <<"  y "<< lctgp.y() << " phi "<< lctgp.phi() <<" size of gps "<< gps.size()<< std::endl;
-      if (gps.size()>=3){
-	  for (auto gp: gps){
-	        if (gp.z() > 0)
-          		zs.push_back(gp.z());
-		else zs.push_back(-gp.z());
-		xs.push_back(gp.x());
-		ys.push_back(gp.y());
-          	ezs.push_back(0);
-		float gpphi = gp.phi();
-		if (phis.size()>0 and gpphi>0 and phis[0]<0 and  (gpphi-phis[0])>3.1416)
-		    phis.push_back(gpphi-2*3.1415926);
-		else if (phis.size()>0 and gpphi<0 and phis[0]>0 and (gpphi-phis[0])<-3.1416)
-		    phis.push_back(gpphi+2*3.1415926);
-		else     
-          		phis.push_back(gp.phi());
-		ephis.push_back(gemvalidation::cscHalfStripWidth(id)/sqrt(12));
-		float R=0.0;
-		if (id.ring() == 1 or id.ring() == 4) R=200;//cm
-		if (id.ring() == 2) R=400;//cm
-		exs.push_back(gemvalidation::cscHalfStripWidth(id)/sqrt(12)*R);
-	  }
-      }else {
-      	if (verbose_) std::cout <<" the size of gloabl points in this chamber is less than 3 "<< std::endl;
+    std::vector<GlobalPoint> gps;
+    std::vector<float> phis;
+    std::vector<float> xs;
+    std::vector<float> ys;
+    std::vector<float> zs;
+    std::vector<float> ephis;
+    std::vector<float> exs;
+    std::vector<float> ezs;
+    std::vector<float> status;
+  
+    auto bestMatchingLCT = match_lct.bestCscLctInChamber(d);
+    match_lct.positionsOfComparatorInLCT(d, bestMatchingLCT, gps);
+    GlobalPoint lctgp(match_lct.getGlobalPosition(id.rawId(), bestMatchingLCT));
+    //std::cout <<"csc id "<< id <<" lctgp x "<< lctgp.x() <<"  y "<< lctgp.y() << " phi "<< lctgp.phi() <<" size of gps "<< gps.size()<< std::endl;
+    if (gps.size()>=3){
+      for (auto gp: gps){
+	if (gp.z() > 0)
+		zs.push_back(gp.z());
+	else zs.push_back(-gp.z());
+	xs.push_back(gp.x());
+	ys.push_back(gp.y());
+	ezs.push_back(0);
+	float gpphi = gp.phi();
+	if (phis.size()>0 and gpphi>0 and phis[0]<0 and  (gpphi-phis[0])>3.1416)
+	    phis.push_back(gpphi-2*3.1415926);
+	else if (phis.size()>0 and gpphi<0 and phis[0]>0 and (gpphi-phis[0])<-3.1416)
+	    phis.push_back(gpphi+2*3.1415926);
+	else     
+		phis.push_back(gp.phi());
+	ephis.push_back(gemvalidation::cscHalfStripWidth(id)/sqrt(12));
+	float R=0.0;
+	if (id.ring() == 1 or id.ring() == 4) R=200;//cm
+	if (id.ring() == 2) R=400;//cm
+	exs.push_back(gemvalidation::cscHalfStripWidth(id)/sqrt(12)*R);
       }
-     
+    }else {
+    if (verbose_) std::cout <<" the size of gloabl points in this chamber is less than 3 "<< std::endl;
+    }
 
-      float alpha = -99., beta = 0.;
-      PtassignmentHelper::calculateAlphaBeta(zs, phis, ezs, ephis, status,
-                         alpha, beta);
-      float alphax = -99., betax = 0.;
-      PtassignmentHelper::calculateAlphaBeta(zs, xs, ezs, exs, status,
-                         alphax, betax);
-      float alphay = -99., betay = 0.;
-      PtassignmentHelper::calculateAlphaBeta(zs, ys, ezs, exs, status,
-                         alphay, betay);
-      if (phis.size() < 3 or fabs(alpha)>=99){
-      	std::cout <<"warning, falied to fit comparator digis, cscid "<< id <<",num of digis: "<< phis.size()<<" alpha "<< alpha <<" beta "<< beta << std::endl;
-        alpha = lctgp.phi();
-        beta = 0.0;
+
+    float alpha = -99., beta = 0.;
+    PtassignmentHelper::calculateAlphaBeta(zs, phis, ezs, ephis, status,
+		     alpha, beta);
+    float alphax = -99., betax = 0.;
+    PtassignmentHelper::calculateAlphaBeta(zs, xs, ezs, exs, status,
+		     alphax, betax);
+    float alphay = -99., betay = 0.;
+    PtassignmentHelper::calculateAlphaBeta(zs, ys, ezs, exs, status,
+		     alphay, betay);
+    if (phis.size() < 3 or fabs(alpha)>=99){
+    std::cout <<"warning, falied to fit comparator digis, cscid "<< id <<",num of digis: "<< phis.size()<<" alpha "<< alpha <<" beta "<< beta << std::endl;
+    alpha = lctgp.phi();
+    beta = 0.0;
+    }
+    //ME11. even layer1 581.98; odd layer1 611.38, d=2.2
+    //ME12. even layer1 678.706, layer6 691.406; odd layer1 706.106, layer6 718.806, d=2.54
+    //ME21. even layer1 809.506; odd layer1 834.306 , d=2.54
+    //ME22, even layer1 809.506, layer6 822.206; odd layer1 834.306, layer6 847.006, d=2.54
+    //Z(layern) = Z(layer1)+d*(n-1)
+    if(odd){
+    if (id.station()==1 and (id.ring()==1 or id.ring()==4)){
+	    etrk_[1].phi_layer1_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 1));
+	    etrk_[1].phi_layer3_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 3));
+	    etrk_[1].phi_layer6_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 6));
+	    etrk_[1].phiM_fitxyz_odd = atan(betay/betax);
+	    gp_fit_odd[st] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
+	    gp_fit_odd[1] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
+	    //std::cout <<((etrk_[1].has_lct&1)>0?" odd ":" not odd ") <<std::endl;
+    }
+	    etrk_[st].phi_layer1_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 1));
+	    etrk_[st].phi_layer3_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 3));
+	    etrk_[st].phi_layer6_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 6));
+	    etrk_[st].phiM_fitxyz_odd = atan(betay/betax);
+	    gp_fit_odd[st] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
+    //std::cout <<"cscid "<< id <<" ring "<< id.ring() <<" st "<< st <<" alpha "<< alpha <<" beta "<< beta <<" phi layer1 "<< etrk_[st].phi_layer1_fit_odd<<" layer6 "<<etrk_[st].phi_layer6_fit_odd<<" gp x "<< gp_fit_odd[st].x()<<" y "<< gp_fit_odd[st].y() <<std::endl;
+    }else{
+    if (id.station()==1 and (id.ring()==1 or id.ring() ==4)){
+	    etrk_[1].phi_layer1_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 1));
+	    etrk_[1].phi_layer3_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 3));
+	    etrk_[1].phi_layer6_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 6));
+	    etrk_[1].phiM_fitxyz_even = atan(betay/betax);
+	    gp_fit_even[1] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
+	    //std::cout <<((etrk_[1].has_lct&2)>0?" even ":" not even ") <<std::endl;
+    }
+	    etrk_[st].phi_layer1_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 1));
+	    etrk_[st].phi_layer3_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 3));
+	    etrk_[st].phi_layer6_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 6));
+	    etrk_[st].phiM_fitxyz_even = atan(betay/betax);
+	    gp_fit_even[st] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
+
+    }
+    if (gps.size()>=3 and id.ring()==1 and id.station()==2 and fabs(etrk_[st].phi_layer3_fit_even-etrk_[st].phi_lct_even)>0.3 and fabs(etrk_[st].phi_lct_even)>3 and fabs(etrk_[st].phi_lct_even)<4){
+      std::cout <<"id "<< id <<" phi from fit "<< etrk_[st].phi_layer3_fit_even <<" phi from simhits "<< etrk_[st].phi_cscsh_even
+	  <<" phi from lct "<< etrk_[st].phi_lct_even << " fitting alpha "<< alpha <<" beta "<<beta <<" zposition "<< match_lct.zpositionOfLayer(d, 3) << std::endl;
+      int igp=0;
+      for (auto phi: phis){
+	  std::cout <<" igp "<< igp <<" phi "<< phi << std::endl;
+	  igp++;
       }
-      //ME11. even layer1 581.98; odd layer1 611.38, d=2.2
-      //ME12. even layer1 678.706, layer6 691.406; odd layer1 706.106, layer6 718.806, d=2.54
-      //ME21. even layer1 809.506; odd layer1 834.306 , d=2.54
-      //ME22, even layer1 809.506, layer6 822.206; odd layer1 834.306, layer6 847.006, d=2.54
-      //Z(layern) = Z(layer1)+d*(n-1)
-      if(odd){
-      	if (id.station()==1 and (id.ring()==1 or id.ring()==4)){
-      		etrk_[1].phi_layer1_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 1));
-      		etrk_[1].phi_layer3_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 3));
-		etrk_[1].phi_layer6_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 6));
-		etrk_[1].phiM_fitxyz_odd = atan(betay/betax);
-		gp_fit_odd[st] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
-		gp_fit_odd[1] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
-		//std::cout <<((etrk_[1].has_lct&1)>0?" odd ":" not odd ") <<std::endl;
-	}
-      		etrk_[st].phi_layer1_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 1));
-      		etrk_[st].phi_layer3_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 3));
-		etrk_[st].phi_layer6_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 6));
-		etrk_[st].phiM_fitxyz_odd = atan(betay/betax);
-		gp_fit_odd[st] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
-	//std::cout <<"cscid "<< id <<" ring "<< id.ring() <<" st "<< st <<" alpha "<< alpha <<" beta "<< beta <<" phi layer1 "<< etrk_[st].phi_layer1_fit_odd<<" layer6 "<<etrk_[st].phi_layer6_fit_odd<<" gp x "<< gp_fit_odd[st].x()<<" y "<< gp_fit_odd[st].y() <<std::endl;
-      }else{
-      	if (id.station()==1 and (id.ring()==1 or id.ring() ==4)){
-      		etrk_[1].phi_layer1_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 1));
-      		etrk_[1].phi_layer3_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 3));
-		etrk_[1].phi_layer6_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 6));
-		etrk_[1].phiM_fitxyz_even = atan(betay/betax);
-		gp_fit_even[1] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
-		//std::cout <<((etrk_[1].has_lct&2)>0?" even ":" not even ") <<std::endl;
-	}
-      		etrk_[st].phi_layer1_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 1));
-      		etrk_[st].phi_layer3_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 3));
-		etrk_[st].phi_layer6_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 6));
-		etrk_[st].phiM_fitxyz_even = atan(betay/betax);
-		gp_fit_even[st] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
-	
-     }
-     if (gps.size()>=3 and id.ring()==1 and id.station()==2 and fabs(etrk_[st].phi_layer3_fit_even-etrk_[st].phi_lct_even)>0.3 and fabs(etrk_[st].phi_lct_even)>3 and fabs(etrk_[st].phi_lct_even)<4){
-	  std::cout <<"id "<< id <<" phi from fit "<< etrk_[st].phi_layer3_fit_even <<" phi from simhits "<< etrk_[st].phi_cscsh_even
-	      <<" phi from lct "<< etrk_[st].phi_lct_even << " fitting alpha "<< alpha <<" beta "<<beta <<" zposition "<< match_lct.zpositionOfLayer(d, 3) << std::endl;
-	  int igp=0;
-	  for (auto phi: phis){
-	      std::cout <<" igp "<< igp <<" phi "<< phi << std::endl;
-	      igp++;
-	  }
-      
-      }
-      
+    }
   }
    
 
