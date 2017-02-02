@@ -95,7 +95,7 @@ SimHitMatcher::SimHitMatcher(const SimTrack& t, const SimVertex& v,
 	    auto csc_simhits = hitsInDetId(id);
 	    auto csc_simhits_gp = simHitsMeanPosition(csc_simhits);
 	    auto strips = hitStripsInDetId(id);
-	    cout<<"detid "<<CSCDetId(id)<<": "<<csc_simhits.size()<<" "<<csc_simhits_gp.phi()<<" "<< csc_detid_to_hits_[id].size()<<endl;
+	    cout<<"cscdetid "<<CSCDetId(id)<<": "<<csc_simhits.size()<<" "<<csc_simhits_gp.phi()<<" "<< csc_detid_to_hits_[id].size()<<endl;
 	    cout<<"nStrip "<<strips.size()<<endl;
 	    cout<<"strips : "; std::copy(strips.begin(), strips.end(), ostream_iterator<int>(cout, " ")); cout<<endl;
 	  }
@@ -130,7 +130,7 @@ SimHitMatcher::SimHitMatcher(const SimTrack& t, const SimVertex& v,
           for (auto id: gem_ch_ids) {
             auto& gem_simhits = hitsInDetId(id);
             auto gem_simhits_gp = simHitsMeanPosition(gem_simhits);
-            cout<<"cchid "<<GEMDetId(id)<<": nHits "<<gem_simhits.size()<<" phi "<<gem_simhits_gp.phi()<<" nCh "<< gem_chamber_to_hits_[id].size()<<endl;
+            cout<<"gemchid "<<GEMDetId(id)<<": nHits "<<gem_simhits.size()<<" phi "<<gem_simhits_gp.phi()<<" nCh "<< gem_chamber_to_hits_[id].size()<<endl;
             // auto strips = hitStripsInDetId(id);
             // cout<<"nStrip "<<strips.size()<<endl;
             // cout<<"strips : "; std::copy(strips.begin(), strips.end(), ostream_iterator<int>(cout, " ")); cout<<endl;
@@ -139,7 +139,7 @@ SimHitMatcher::SimHitMatcher(const SimTrack& t, const SimVertex& v,
           for (auto id: gem_sch_ids) {
             auto& gem_simhits = hitsInSuperChamber(id);
             auto gem_simhits_gp = simHitsMeanPosition(gem_simhits);
-            cout<<"schid "<<GEMDetId(id)<<": "<<nCoincidencePadsWithHits() <<" | "<<gem_simhits.size()<<" "<<gem_simhits_gp.phi()<<" "<< gem_superchamber_to_hits_[id].size()<<endl;
+            cout<<"gemschid "<<GEMDetId(id)<<": "<<nCoincidencePadsWithHits() <<" | "<<gem_simhits.size()<<" "<<gem_simhits_gp.phi()<<" "<< gem_superchamber_to_hits_[id].size()<<endl;
           }
         }    
       }
@@ -161,7 +161,7 @@ SimHitMatcher::SimHitMatcher(const SimTrack& t, const SimVertex& v,
           for (auto id: me0_ch_ids) {
             auto& me0_simhits = hitsInChamber(id);
             auto me0_simhits_gp = simHitsMeanPosition(me0_simhits);
-            cout<<"cchid "<<ME0DetId(id)<<": nHits "<<me0_simhits.size()<<" phi "<<me0_simhits_gp.phi()<<" nCh "<< me0_chamber_to_hits_[id].size()<<endl;
+            cout<<"me0chid "<<ME0DetId(id)<<": nHits "<<me0_simhits.size()<<" phi "<<me0_simhits_gp.phi()<<" nCh "<< me0_chamber_to_hits_[id].size()<<endl;
             // auto strips = hitStripsInDetId(id);
             // cout<<"nStrip "<<strips.size()<<endl;
             // cout<<"strips : "; std::copy(strips.begin(), strips.end(), ostream_iterator<int>(cout, " ")); cout<<endl;

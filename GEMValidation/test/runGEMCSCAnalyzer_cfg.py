@@ -45,7 +45,7 @@ Stations = enum('ALL','ME11','ME1a','ME1b','ME12','ME13','ME21','ME22','ME31','M
 
 from GEMCode.GEMValidation.simTrackMatching_cfi import SimTrackMatching
 process.GEMCSCAnalyzer = cms.EDAnalyzer("GEMCSCAnalyzer",
-    verbose = cms.untracked.int32(0),
+    verbose = cms.untracked.int32(1),
     stationsToUse = cms.vint32(Stations.ALL,Stations.ME11,Stations.ME1a,Stations.ME1b,
                               Stations.ME21,Stations.ME31,Stations.ME41),
     simTrackMatching = SimTrackMatching

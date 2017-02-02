@@ -1704,6 +1704,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   std::cout <<"Sim trk_no " << trk_no <<" eta "<< t.momentum().eta() << " phi "<< t.momentum().phi() << " pt "<< t.momentum().pt()<<" pz "<<  t.momentum().pz()<<std::endl;
   */
 
+  if (verbose_) std::cout <<"GEMCSCAnalyzer step1 "<< std::endl;
   for (auto s: stations_to_use_)
   {
 
@@ -1912,6 +1913,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
   }
 
+  if (verbose_) std::cout <<"GEMCSCAnalyzer step2 "<< std::endl;
   // CSC strip digis
   for(auto d: match_cd.chamberIdsStrip(0))
   {
@@ -2034,6 +2036,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     }
   }
 
+  if (verbose_) std::cout <<"GEMCSCAnalyzer step3 "<< std::endl;
   // holders for track's LCTs
   Digi lct_odd[12];
   Digi lct_even[12];
@@ -2256,6 +2259,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   }
    
 
+  if (verbose_) std::cout <<"GEMCSCAnalyzer step4 "<< std::endl;
    //for GEMs in station1, it will be also filled in ME11
   // GEM simhits in superchamber
   GlobalPoint gp_gemsh_odd[12];
@@ -2282,7 +2286,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	if(match_sh.hitsInChamber(id_tmp).size()==0) continue;
 	if (odd) gp_gemsh_odd[st] = keygp;
 	else gp_gemsh_even[st] = keygp;
-	//std::cout <<" GEM Id "<< id <<" gp.eta "<< sh_gp.eta() <<" gp.phi "<< sh_gp.phi() << std::endl;
+	std::cout <<"Matching GEMHits GEM Id "<< id <<" gp.eta "<< keygp.eta() <<" gp.phi "<< keygp.phi() << std::endl;
         //std::cout <<" GEM Id "<< id_tmp <<" eta "<< keygp.eta() <<" phi "<< keygp.phi()<<" perp "<< keygp.perp() <<" x " << keygp.x() <<" y "<< keygp.y() << " z "<< keygp.z()<< std::endl;
       	if (odd) etrk_[st].eta_gemsh_odd = keygp.eta();
      	else     etrk_[st].eta_gemsh_even = keygp.eta();
@@ -2365,6 +2369,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
   }
 
+  if (verbose_) std::cout <<"GEMCSCAnalyzer step5 "<< std::endl;
   // placeholders for best mtching pads
   GlobalPoint best_pad_odd[12];
   GlobalPoint best_pad_even[12];
@@ -2427,8 +2432,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         	etrk_[st].bx_pad_odd = digi_bx(gem_dg_and_gp.first);
         	etrk_[st].dphi_pad_odd = deltaPhi(etrk_[st].phi_lct_odd, etrk_[st].phi_pad_odd);
         	etrk_[st].dphi_pad_fit_odd = deltaPhi(etrk_[st].phi_layer3_fit_odd, etrk_[st].phi_pad_odd);
-		//std::cout <<"GEMid "<< id << std::endl;
-		//std::cout <<"GEM sim phi "<< keygp.phi() <<" pad phi "<< etrk_[st].phi_pad_odd <<" phi_lct "<< etrk_[st].phi_lct_odd <<" phi_fit_lct "<< etrk_[st].phi_layer3_fit_odd<< std::endl;
+		std::cout <<"GEMid "<< id << std::endl;
+		std::cout <<"GEM sim phi "<< keygp.phi() <<" pad phi "<< etrk_[st].phi_pad_odd <<" phi_lct "<< etrk_[st].phi_lct_odd <<" phi_fit_lct "<< etrk_[st].phi_layer3_fit_odd<< std::endl;
         	etrk_[st].deta_pad_odd = etrk_[st].eta_lct_odd - etrk_[st].eta_pad_odd;
       	}
     	}
@@ -2448,8 +2453,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         	etrk_[st].bx_pad_even = digi_bx(gem_dg_and_gp.first);
         	etrk_[st].dphi_pad_even = deltaPhi(etrk_[st].phi_lct_even, etrk_[st].phi_pad_even);
         	etrk_[st].dphi_pad_fit_even = deltaPhi(etrk_[st].phi_layer3_fit_even, etrk_[st].phi_pad_even);
-		//std::cout <<"GEMid "<< id << std::endl;
-		//std::cout <<"GEM sim phi "<< keygp.phi() <<" pad phi "<< etrk_[st].phi_pad_even <<" phi_lct "<< etrk_[st].phi_lct_even <<" phi_fit_lct "<< etrk_[st].phi_layer3_fit_even<< std::endl;
+		std::cout <<"GEMid "<< id << std::endl;
+		std::cout <<"GEM sim phi "<< keygp.phi() <<" pad phi "<< etrk_[st].phi_pad_even <<" phi_lct "<< etrk_[st].phi_lct_even <<" phi_fit_lct "<< etrk_[st].phi_layer3_fit_even<< std::endl;
         	etrk_[st].deta_pad_even = etrk_[st].eta_lct_even - etrk_[st].eta_pad_even;
       	}
     	}
@@ -2545,6 +2550,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     }
    }
 
+  if (verbose_) std::cout <<"GEMCSCAnalyzer step6 "<< std::endl;
   for(auto d: match_gd.superChamberIdsCoPad())
   {
     GEMDetId id(d);
@@ -2561,6 +2567,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     if (copads.size() == 0) continue;
     if (odd) etrk_[st].Copad_odd = digi_channel(copads.at(0));
     else etrk_[st].Copad_even = digi_channel(copads.at(0));
+    std::cout <<"Matching GEMCopad detid "<< id <<" size "<< copads.size() << std::endl;
 
     if (st==2 or st==3)
     {
@@ -2703,17 +2710,14 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	    }
     }
 
-
-
-
     std::cout <<"GEM id "<< id << std::endl;	
     std::cout <<" final GEM sim phi "<< phi_gemsh <<" 1strippad "<< gp1.phi()<<" 2strippad "<< gp2.phi()<<" 4strippad "<< gp4.phi()<<" 8strippad "<< gp8.phi() <<" pad phi "<< phi_pad <<" lct phi "<< lct_phi <<" lct fit phi "<< lct_fit_phi << std::endl; 
-	 
 
   }
 
 
 
+  if (verbose_) std::cout <<"GEMCSCAnalyzer step7 "<< std::endl;
   // placeholders for best mtching rpcstrips
   GlobalPoint best_rpcstrip_odd[12];
   GlobalPoint best_rpcstrip_even[12];
@@ -2780,8 +2784,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     }
   }
 
-
-
+  if (verbose_) std::cout <<"GEMCSCAnalyzer step8 "<< std::endl;
+  /*
   GlobalPoint gp1,gp2, gp3, gp4, gp_ge11, gp_ge21;
   GlobalVector gv1,gv2;
   if (etrk_[1].has_csc_sh>0 and etrk_[6].has_csc_sh>0){
@@ -2791,8 +2795,10 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         gp2=gp_sh_even[6];
         gv1=gv_sh_odd[1];
         gv2=gv_sh_even[6];
-	gp_ge11 = gp_gemsh_odd[1];
-	gp_ge21 = gp_gemsh_even[6];
+	if ((etrk_[1].has_gem_sh&1)>0)
+	    gp_ge11 = gp_gemsh_odd[1];
+	if ((etrk_[6].has_gem_sh&2)>0)
+	    gp_ge21 = gp_gemsh_even[6];
 	if ((etrk_[8].has_csc_sh&2)>0)
 	    gp3=gp_sh_even[8];
      }else if ((etrk_[1].has_csc_sh&1)>0 and (etrk_[6].has_csc_sh&1)>0 ){ 
@@ -2800,8 +2806,10 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         gp2=gp_sh_odd[6];
         gv1=gv_sh_odd[1];
         gv2=gv_sh_odd[6];
-	gp_ge11 = gp_gemsh_odd[1];
-	gp_ge21 = gp_gemsh_odd[6];
+	if ((etrk_[1].has_gem_sh&1)>0)
+	    gp_ge11 = gp_gemsh_odd[1];
+	if ((etrk_[6].has_gem_sh&1)>0)
+	    gp_ge21 = gp_gemsh_odd[6];
 	if ((etrk_[8].has_csc_sh&1)>0)
 	    gp3=gp_sh_odd[8];
      }else if ((etrk_[1].has_csc_sh&2)>0 and (etrk_[6].has_csc_sh&2)>0 ){ 
@@ -2809,8 +2817,10 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         gp2=gp_sh_even[6];
         gv1=gv_sh_even[1];
         gv2=gv_sh_even[6];
-	gp_ge11 = gp_gemsh_even[1];
-	gp_ge21 = gp_gemsh_even[6];
+	if ((etrk_[1].has_gem_sh&2)>0)
+	    gp_ge11 = gp_gemsh_even[1];
+	if ((etrk_[6].has_gem_sh&2)>0)
+	    gp_ge21 = gp_gemsh_even[6];
 	if ((etrk_[8].has_csc_sh&2)>0)
 	    gp3=gp_sh_even[8];
      }else if ((etrk_[1].has_csc_sh&2)>0 and (etrk_[6].has_csc_sh&1)>0 ){ 
@@ -2818,8 +2828,10 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         gp2=gp_sh_odd[6];
         gv1=gv_sh_even[1];
         gv2=gv_sh_odd[6];
-	gp_ge11 = gp_gemsh_even[1];
-	gp_ge21 = gp_gemsh_odd[6];
+	if ((etrk_[1].has_gem_sh&2)>0)
+	    gp_ge11 = gp_gemsh_even[1];
+	if ((etrk_[6].has_gem_sh&1)>0)
+	    gp_ge21 = gp_gemsh_odd[6];
 	if ((etrk_[8].has_csc_sh&1)>0)
 	    gp3=gp_sh_odd[8];
      }
@@ -2858,7 +2870,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
      }
   }
 
-
+ 
   DisplacedMuonTriggerPtassignment displacedMuonL1Pt(match_lct.allLctsMatched2SimMuon(), match_gd.allGempadsMatch2SimMuon_2strip(), match_lct.eventSetup(), match_lct.event()); 
   displacedMuonL1Pt.setCharge(etrk_[0].charge);
   if (displacedMuonL1Pt.getNParity() >= 0)  std::cout <<"DisplacedMuon get npar "<< displacedMuonL1Pt.getNParity()<<" ring "<<displacedMuonL1Pt.getMeRing() << std::endl;
@@ -3105,10 +3117,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
      
      }else if (etrk_[0].hasSt1St2St3){
     	std::cout <<"Failed to run DisplacedMuonPtassignment, sim pt "<<  etrk_[0].pt <<" GEMCSCAnalyer sim deltay12 "<< etrk_[0].deltay12_sim<<" deltay23 "<< etrk_[0].deltay23_sim << " L1 deltay12 "<< etrk_[0].deltay12_fit <<" deltay23 "<< etrk_[0].deltay23_fit << std::endl; 
-     }
+     }*/
   
-
-
+  if (verbose_) std::cout <<"GEMCSCAnalyzer step9 "<< std::endl;
  //general propagation 
   auto propagate_odd_gp(match_track.simTrackPropagateGPs_odd());
   auto propagate_even_gp(match_track.simTrackPropagateGPs_even());
@@ -3393,6 +3404,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     }
   }*/
 
+  if (verbose_) std::cout <<"GEMCSCAnalyzer step10 "<< std::endl;
   for (auto s: stations_to_use_)
   {
     tree_eff_[s]->Fill();
