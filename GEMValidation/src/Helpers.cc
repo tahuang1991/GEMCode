@@ -60,7 +60,7 @@ gemvalidation::toGEMType(int st, int ri)
   if (st==1) {
     if (ri==1) return GEM_ME11;
   }
-  else if (st==3) {
+  else if (st==2) {
     if (ri==1) return GEM_ME21;
   }
   return GEM_ALL;
@@ -195,7 +195,7 @@ gemvalidation::toGEMTypeString(int st, int ri)
   if (st ==1) {
     if (ri==1) return "GEM_ME11";
   }
-  else if (st ==3) {
+  else if (st ==2) {
     if (ri==1) return "GEM_ME21";
   }
   return "GEM_ALL";

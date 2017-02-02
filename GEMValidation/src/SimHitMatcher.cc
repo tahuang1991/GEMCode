@@ -106,20 +106,24 @@ SimHitMatcher::SimHitMatcher(const SimTrack& t,
       // select GEM simhits
       edm::PSimHitContainer gem_hits_select;
       for (auto& h: *gem_hits.product()) {
+	std::cout << "Test detId " << std::endl;
         GEMDetId id(h.detUnitId());
+	std::cout << "Ok detId " << id << std::endl;
         if (useGEMChamberType(gemvalidation::toGEMType(id.station(), id.ring()))) gem_hits_select.push_back(h);
       }
-
+      
+      std::cout << "Start hit matching "  << std::endl;
       if(runGEMSimHit_) {
+	std::cout << "Do hit matching "  << std::endl;
         matchGEMSimHitsToSimTrack(track_ids, gem_hits_select);
         
         if (verboseGEM_) {
           cout<<"nSimHits "<<no<<" nTrackIds "<<track_ids.size()<<" nSelectedGEMSimHits "<<(*gem_hits.product()).size()<<endl;
           cout << "detids GEM " << detIdsGEM().size() << endl;
           
-          auto gem_ch_ids = chamberIdsGEM();
+          auto gem_ch_ids = detIdsGEM();
           for (auto id: gem_ch_ids) {
-            auto& gem_simhits = hitsInChamber(id);
+            auto& gem_simhits = hitsInDetId(id);
             auto gem_simhits_gp = simHitsMeanPosition(gem_simhits);
             cout<<"cchid "<<GEMDetId(id)<<": nHits "<<gem_simhits.size()<<" phi "<<gem_simhits_gp.phi()<<" nCh "<< gem_chamber_to_hits_[id].size()<<endl;
             auto strips = hitStripsInDetId(id);
@@ -148,7 +152,7 @@ SimHitMatcher::SimHitMatcher(const SimTrack& t,
           cout<<"nSimHits "<<no<<" nTrackIds "<<track_ids.size()<<" nSelectedME0SimHits "<<(*me0_hits.product()).size()<<endl;
           cout << "detids ME0 " << detIdsME0().size() << endl;
           
-          auto me0_ch_ids = chamberIdsME0();
+          auto me0_ch_ids = detIdsME0();
           for (auto id: me0_ch_ids) {
             auto& me0_simhits = hitsInChamber(id);
             auto me0_simhits_gp = simHitsMeanPosition(me0_simhits);
@@ -331,7 +335,7 @@ SimHitMatcher::matchGEMSimHitsToSimTrack(std::vector<unsigned int> track_ids, co
       gem_hits_.push_back(h);
       GEMDetId p_id( h.detUnitId() );
       gem_chamber_to_hits_[ p_id.chamberId().rawId() ].push_back(h);
-      GEMDetId superch_id(p_id.region(), p_id.ring(), p_id.station(), 1, p_id.chamber(), 0);
+      GEMDetId superch_id(p_id.region(), p_id.ring(), p_id.station(), 0, p_id.chamber(), 0);
       gem_superchamber_to_hits_[ superch_id() ].push_back(h);
     }
   }

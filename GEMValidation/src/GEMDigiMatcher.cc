@@ -51,7 +51,8 @@ GEMDigiMatcher::matchDigisToSimTrack(const GEMDigiCollection& digis)
   for (auto id: det_ids)
   {
     GEMDetId p_id(id);
-    GEMDetId superch_id(p_id.region(), p_id.ring(), p_id.station(), 1, p_id.chamber(), 0);
+    GEMDetId superch_id(p_id.region(), p_id.ring(), p_id.station(), 0, p_id.chamber(), 0);
+    std::cout << "ch " << p_id << " chid " << superch_id << std::endl; 
 
     auto hit_strips = simhit_matcher_->hitStripsInDetId(id, matchDeltaStrip_);
     if (verboseDigi_)
@@ -62,6 +63,7 @@ GEMDigiMatcher::matchDigisToSimTrack(const GEMDigiCollection& digis)
     }
 
     auto digis_in_det = digis.get(GEMDetId(id));
+    std::cout << "Get digis in detid " << GEMDetId(id) << std::endl;
 
     for (auto d = digis_in_det.first; d != digis_in_det.second; ++d)
     {
@@ -80,7 +82,7 @@ GEMDigiMatcher::matchDigisToSimTrack(const GEMDigiCollection& digis)
       detid_to_gemdigis_[id].push_back(*d);
       chamber_to_gemdigis_[ p_id.chamberId().rawId() ].push_back(*d);
       superchamber_to_gemdigis_[ superch_id() ].push_back(*d);
-
+      cout<<"oki2"<<endl;
       //int pad_num = 1 + static_cast<int>( roll->padOfStrip(d->strip()) ); // d->strip() is int
       //digi_map[ make_pair(pad_num, d->bx()) ].push_back( d->strip() );
     }
@@ -95,7 +97,7 @@ GEMDigiMatcher::matchPadsToSimTrack(const GEMPadDigiCollection& pads)
   for (auto id: det_ids)
   {
     GEMDetId p_id(id);
-    GEMDetId superch_id(p_id.region(), p_id.ring(), p_id.station(), 1, p_id.chamber(), 0);
+    GEMDetId superch_id(p_id.region(), p_id.ring(), p_id.station(), 0, p_id.chamber(), 0);
 
     auto hit_pads = simhit_matcher_->hitPadsInDetId(id);
     auto pads_in_det = pads.get(p_id);
@@ -138,14 +140,14 @@ GEMDigiMatcher::matchCoPadsToSimTrack(const GEMCoPadDigiCollection& co_pads)
   for (auto id: det_ids)
   {
     GEMDetId p_id(id);
-    GEMDetId superch_id(p_id.region(), p_id.ring(), p_id.station(), 1, p_id.chamber(), 0);
+    GEMDetId superch_id(p_id.region(), p_id.ring(), p_id.station(), 0, p_id.chamber(), 0);
 
     auto hit_co_pads = simhit_matcher_->hitCoPadsInDetId(id);
     auto co_pads_in_det = co_pads.get(p_id);
 
     if (verboseCoPad_)
     {
-      cout<<"checkpads "<<hit_co_pads.size()<<" "<<std::distance(co_pads_in_det.first, co_pads_in_det.second)<<" hit_pads: ";
+      cout<<"checkcopads "<<hit_co_pads.size()<<" "<<std::distance(co_pads_in_det.first, co_pads_in_det.second)<<" hit_pads: ";
       copy(hit_co_pads.begin(), hit_co_pads.end(), ostream_iterator<int>(cout," "));
       cout<<endl;
     }
@@ -463,10 +465,7 @@ GEMDigiMatcher::extrapolateHsfromGEMPad(unsigned int id, int gempad) const
   
   GEMDetId gem_id(id);
   int endcap = (gem_id.region()>0 ? 1 : 2);
-  int station;
-  if (gem_id.station() == 3) station = 2;
-  else if (gem_id.station() == 2) return result;
-  else station = gem_id.station();
+  int station = gem_id.station();
   CSCDetId csc_id(endcap, station, gem_id.ring(), gem_id.chamber(), 0);
 
   const CSCChamber* cscChamber(getCSCGeometry()->chamber(csc_id));
@@ -495,10 +494,7 @@ GEMDigiMatcher::extrapolateHsfromGEMStrip(unsigned int id, int gemstrip) const
   
   GEMDetId gem_id(id);//chamberid
   int endcap = (gem_id.region()>0 ? 1 : 2);
-  int station;
-  if (gem_id.station() == 3) station = 2;
-  else if (gem_id.station() == 2) return result;
-  else station = gem_id.station();
+  int station = gem_id.station();
   CSCDetId csc_id(endcap, station, gem_id.ring(), gem_id.chamber(), 0);
 
   const CSCChamber* cscChamber(getCSCGeometry()->chamber(csc_id));

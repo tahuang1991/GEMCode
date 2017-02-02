@@ -32,7 +32,7 @@ GEMRecHitMatcher::matchRecHitsToSimTrack(const GEMRecHitCollection& rechits)
   for (auto id: det_ids)
   {
     GEMDetId p_id(id);
-    GEMDetId superch_id(p_id.region(), p_id.ring(), p_id.station(), 1, p_id.chamber(), 0);
+    GEMDetId superch_id(p_id.region(), p_id.ring(), p_id.station(), 0, p_id.chamber(), 0);
 
     auto hit_strips = simhit_matcher_->hitStripsInDetId(id, matchDeltaStrip_);
     if (verboseGEMRecHit_)

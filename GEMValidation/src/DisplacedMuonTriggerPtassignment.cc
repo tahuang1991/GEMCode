@@ -49,7 +49,7 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
     if (chid.station()==2) meRing = chid.ring();
     //chamber parity in station3 should be the same as in station2,
     //if there is already qualified one, the skip stubs in station 3
-    if (chid.station()==3 and hasStub_st[1] and hasStub_st[2] and
+    if (chid.station()==2 and hasStub_st[1] and hasStub_st[2] and
 	   ((isEven[1] and isEven[2]) or (not(isEven[1]) and not(isEven[2]))))
 	continue;
     if (chid.chamber()%2 == 0) isEven[chid.station()-1] = true;
@@ -65,13 +65,13 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
       //find GEMPads
       for (auto idgempads : detid_pads){
         GEMDetId gemid(idgempads.first);
-        if (((chid.station() == 1 and gemid.station() == 1) or (chid.station()==2 and gemid.station() ==3))
+        if (((chid.station() == 1 and gemid.station() == 1) or (chid.station()==2 and gemid.station() ==2))
             and chid.chamber() == gemid.chamber()){
           //if gp_ge11 or gp_ge21 are taken from GME pad in layer1, then ignore the layer2
           if (hasGEMPad_st1 and gemid.station()==1 and gemid.layer()==2)  continue;
-          if (hasGEMPad_st2 and gemid.station()==3 and gemid.layer()==2)  continue;
+          if (hasGEMPad_st2 and gemid.station()==2 and gemid.layer()==2)  continue;
           if (gemid.station() == 1 ) hasGEMPad_st1 = true;
-          else if (gemid.station() == 3) hasGEMPad_st2 = true;
+          else if (gemid.station() == 2) hasGEMPad_st2 = true;
           else if (verbose_>0)
             std::cout <<" gemid "<< gemid <<" CSC chamber id "<< chid << std::endl;
           //maybe also check the dR(csc, gem)
@@ -674,7 +674,7 @@ void DisplacedMuonTriggerPtassignment::globalPositionOfGEMPad(const GEMPadDigi g
   	gp_ge11 = GlobalPoint(gemRoll->toGlobal(lpGEM));
 	phi_gem[0] = gp_ge11.phi();
 	if (verbose_>0) std::cout <<" gempad in GE11 id " << gemid <<" gp eta "<< gp_ge11.eta()<<" phi "<< gp_ge11.phi()<<" pad "<<gempad.pad()<< std::endl;
-  }else if (gemid.station() == 3){
+  }else if (gemid.station() == 2){
   	const LocalPoint lpGEM(gemRoll->centreOfStrip(float(gempad.pad()*2.0-1.0)));
   	gp_ge21 = GlobalPoint(gemRoll->toGlobal(lpGEM));
 	phi_gem[1] = gp_ge21.phi();
@@ -692,7 +692,7 @@ void DisplacedMuonTriggerPtassignment::globalPositionOfGEMPad(GEMPadDigiContaine
   auto gemRoll(gemChamber->etaPartition(gemid.roll()));//any roll
   const int nGEMPads(gemRoll->npads());
   int st = gemid.station();
-  if (st==3) st=2;//use CSC station as reference
+  if (st==2) st=2;//use CSC station as reference
   for (auto gempad : gempads){
   	if (gempad.pad() > nGEMPads or gempad.pad() < 0){
       		std::cout <<" gempad.pad() is within pad range gempad "<< gempad <<" npad "<< nGEMPads << std::endl;
