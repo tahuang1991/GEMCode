@@ -1074,6 +1074,7 @@ SimHitMatcher::simHitPositionKeyLayer(unsigned int chid) const
     // check if the chamber has hits at all
     if (hitsInChamber(chid).size()==0) returnValue = GlobalPoint();
     else if (hitsInChamber(chid).size()==1) returnValue = simHitsMeanPosition(hitsInChamber(chid));
+    else if (hitsInChamber(chid).size()==2) returnValue = simHitsMeanPosition(hitsInChamber(chid));
     else {
       std::vector<float> zs; 
       std::vector<float> xs;
