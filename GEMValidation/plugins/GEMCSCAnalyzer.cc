@@ -2196,16 +2196,16 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     float alpha = -99., beta = 0.;
     PtassignmentHelper::calculateAlphaBeta(zs, phis, ezs, ephis, status,
 		     alpha, beta);
-    float alphax = -99., betax = 0.;
-    PtassignmentHelper::calculateAlphaBeta(zs, xs, ezs, exs, status,
-		     alphax, betax);
-    float alphay = -99., betay = 0.;
-    PtassignmentHelper::calculateAlphaBeta(zs, ys, ezs, exs, status,
-		     alphay, betay);
+    //float alphax = -99., betax = 0.;
+    //PtassignmentHelper::calculateAlphaBeta(zs, xs, ezs, exs, status,
+    //		     alphax, betax);
+    //float alphay = -99., betay = 0.;
+    //PtassignmentHelper::calculateAlphaBeta(zs, ys, ezs, exs, status,
+    //		     alphay, betay);
     if (phis.size() < 3 or fabs(alpha)>=99){
-    std::cout <<"warning, falied to fit comparator digis, cscid "<< id <<",num of digis: "<< phis.size()<<" alpha "<< alpha <<" beta "<< beta << std::endl;
-    alpha = lctgp.phi();
-    beta = 0.0;
+	std::cout <<"warning, falied to fit comparator digis, cscid "<< id <<",num of digis: "<< phis.size()<<" alpha "<< alpha <<" beta "<< beta << std::endl;
+	alpha = lctgp.phi();
+	beta = 0.0;
     }
     //ME11. even layer1 581.98; odd layer1 611.38, d=2.2
     //ME12. even layer1 678.706, layer6 691.406; odd layer1 706.106, layer6 718.806, d=2.54
@@ -2213,36 +2213,36 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     //ME22, even layer1 809.506, layer6 822.206; odd layer1 834.306, layer6 847.006, d=2.54
     //Z(layern) = Z(layer1)+d*(n-1)
     if(odd){
-    if (id.station()==1 and (id.ring()==1 or id.ring()==4)){
+	if (id.station()==1 and (id.ring()==1 or id.ring()==4)){
 	    etrk_[1].phi_layer1_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 1));
 	    etrk_[1].phi_layer3_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 3));
 	    etrk_[1].phi_layer6_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 6));
-	    etrk_[1].phiM_fitxyz_odd = atan(betay/betax);
+	    //etrk_[1].phiM_fitxyz_odd = atan(betay/betax);
 	    gp_fit_odd[st] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
 	    gp_fit_odd[1] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
 	    //std::cout <<((etrk_[1].has_lct&1)>0?" odd ":" not odd ") <<std::endl;
-    }
-	    etrk_[st].phi_layer1_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 1));
-	    etrk_[st].phi_layer3_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 3));
-	    etrk_[st].phi_layer6_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 6));
-	    etrk_[st].phiM_fitxyz_odd = atan(betay/betax);
-	    gp_fit_odd[st] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
-    //std::cout <<"cscid "<< id <<" ring "<< id.ring() <<" st "<< st <<" alpha "<< alpha <<" beta "<< beta <<" phi layer1 "<< etrk_[st].phi_layer1_fit_odd<<" layer6 "<<etrk_[st].phi_layer6_fit_odd<<" gp x "<< gp_fit_odd[st].x()<<" y "<< gp_fit_odd[st].y() <<std::endl;
+	}
+	etrk_[st].phi_layer1_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 1));
+	etrk_[st].phi_layer3_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 3));
+	etrk_[st].phi_layer6_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 6));
+	//etrk_[st].phiM_fitxyz_odd = atan(betay/betax);
+	gp_fit_odd[st] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
+        std::cout <<"cscid "<< id <<" ring "<< id.ring() <<" st "<< st <<" alpha "<< alpha <<" beta "<< beta <<" phi layer1 "<< etrk_[st].phi_layer1_fit_odd<<" layer6 "<<etrk_[st].phi_layer6_fit_odd<<" gp x "<< gp_fit_odd[st].x()<<" y "<< gp_fit_odd[st].y() <<std::endl;
     }else{
-    if (id.station()==1 and (id.ring()==1 or id.ring() ==4)){
+	if (id.station()==1 and (id.ring()==1 or id.ring() ==4)){
 	    etrk_[1].phi_layer1_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 1));
 	    etrk_[1].phi_layer3_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 3));
 	    etrk_[1].phi_layer6_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 6));
-	    etrk_[1].phiM_fitxyz_even = atan(betay/betax);
+	    //etrk_[1].phiM_fitxyz_even = atan(betay/betax);
 	    gp_fit_even[1] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
 	    //std::cout <<((etrk_[1].has_lct&2)>0?" even ":" not even ") <<std::endl;
-    }
-	    etrk_[st].phi_layer1_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 1));
-	    etrk_[st].phi_layer3_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 3));
-	    etrk_[st].phi_layer6_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 6));
-	    etrk_[st].phiM_fitxyz_even = atan(betay/betax);
-	    gp_fit_even[st] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
-
+	}
+	etrk_[st].phi_layer1_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 1));
+	etrk_[st].phi_layer3_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 3));
+	etrk_[st].phi_layer6_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 6));
+	//etrk_[st].phiM_fitxyz_even = atan(betay/betax);
+	gp_fit_even[st] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
+        std::cout <<"cscid "<< id <<" ring "<< id.ring() <<" st "<< st <<" alpha "<< alpha <<" beta "<< beta <<" phi layer1 "<< etrk_[st].phi_layer1_fit_even<<" layer6 "<<etrk_[st].phi_layer6_fit_even<<" gp x "<< gp_fit_even[st].x()<<" y "<< gp_fit_even[st].y() <<std::endl;
     }
     if (gps.size()>=3 and id.ring()==1 and id.station()==2 and fabs(etrk_[st].phi_layer3_fit_even-etrk_[st].phi_lct_even)>0.3 and fabs(etrk_[st].phi_lct_even)>3 and fabs(etrk_[st].phi_lct_even)<4){
       std::cout <<"id "<< id <<" phi from fit "<< etrk_[st].phi_layer3_fit_even <<" phi from simhits "<< etrk_[st].phi_cscsh_even
