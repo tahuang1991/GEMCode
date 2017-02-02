@@ -111,15 +111,11 @@ SimHitMatcher::SimHitMatcher(const SimTrack& t, const SimVertex& v,
       // select GEM simhits
       edm::PSimHitContainer gem_hits_select;
       for (auto& h: *gem_hits.product()) {
-	std::cout << "Test detId " << std::endl;
         GEMDetId id(h.detUnitId());
-	std::cout << "Ok detId " << id << std::endl;
         if (useGEMChamberType(gemvalidation::toGEMType(id.station(), id.ring()))) gem_hits_select.push_back(h);
       }
       
-      std::cout << "Start hit matching "  << std::endl;
       if(runGEMSimHit_) {
-	std::cout << "Do hit matching "  << std::endl;
         matchGEMSimHitsToSimTrack(track_ids, gem_hits_select);
         
         if (verboseGEM_) {

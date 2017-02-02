@@ -61,7 +61,6 @@ GEMDigiMatcher::matchDigisToSimTrack(const GEMDigiCollection& digis)
     }
 
     auto digis_in_det = digis.get(GEMDetId(id));
-    std::cout << "Get digis in detid " << GEMDetId(id) << std::endl;
 
     for (auto d = digis_in_det.first; d != digis_in_det.second; ++d)
     {
@@ -84,7 +83,6 @@ GEMDigiMatcher::matchDigisToSimTrack(const GEMDigiCollection& digis)
       	detid_to_gempads_2strip_[id].push_back(pad);
       chamber_to_gemdigis_[ p_id.chamberId().rawId() ].push_back(*d);
       superchamber_to_gemdigis_[ superch_id() ].push_back(*d);
-      cout<<"oki2"<<endl;
       //int pad_num = 1 + static_cast<int>( roll->padOfStrip(d->strip()) ); // d->strip() is int
       //digi_map[ make_pair(pad_num, d->bx()) ].push_back( d->strip() );
     }
@@ -477,7 +475,8 @@ GEMDigiMatcher::extrapolateHsfromGEMPad(unsigned int id, int gempad) const
   const CSCLayer* cscKeyLayer(cscChamber->layer(3));
   const CSCLayerGeometry* cscKeyLayerGeometry(cscKeyLayer->geometry());
 
-  const GEMChamber* gemChamber(getGEMGeometry()->chamber(id));
+  const GEMSuperChamber* gemSuperChamber(getGEMGeometry()->superChamber(id));
+  const GEMChamber* gemChamber(gemSuperChamber->chamber(1));
   auto gemRoll(gemChamber->etaPartition(2));//any roll
   const int nGEMPads(gemRoll->npads());
   std::cout <<"total GEMPads in roll 2 "<< nGEMPads << std::endl;
@@ -508,7 +507,8 @@ GEMDigiMatcher::extrapolateHsfromGEMStrip(unsigned int id, int gemstrip) const
   const CSCLayer* cscKeyLayer(cscChamber->layer(3));
   const CSCLayerGeometry* cscKeyLayerGeometry(cscKeyLayer->geometry());
 
-  const GEMChamber* gemChamber(getGEMGeometry()->chamber(id));
+  const GEMSuperChamber* gemSuperChamber(getGEMGeometry()->superChamber(id));
+  const GEMChamber* gemChamber(gemSuperChamber->chamber(1));
   auto gemRoll(gemChamber->etaPartition(2));//any roll
   const int nGEMStrips(gemRoll->nstrips());
   if (gemstrip > nGEMStrips or gemstrip < 0) result = -1;
