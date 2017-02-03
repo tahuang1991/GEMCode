@@ -192,6 +192,7 @@ void PtassignmentHelper::calculateAlphaBeta(const std::vector<float>& v,
   }
 
   TF1 *fit1 = new TF1("fit1","pol1",zmin,zmax); 
+  //std::cout <<"fit1 "; fit1->Print("V");
   //where 0 = x-axis_lowest and 48 = x_axis_highest 
   TGraphErrors* gr = new TGraphErrors(v.size(),&(v[0]),&(w[0]),&(ev[0]),&(ew[0]));
   gr->SetMinimum(w[2]-5*0.002);
