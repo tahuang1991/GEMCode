@@ -2230,7 +2230,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	etrk_[st].phi_layer6_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 6));
 	//etrk_[st].phiM_fitxyz_odd = atan(betay/betax);
 	gp_fit_odd[st] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
-        std::cout <<"cscid "<< id <<" ring "<< id.ring() <<" st "<< st <<" alpha "<< alpha <<" beta "<< beta <<" phi layer1 "<< etrk_[st].phi_layer1_fit_odd<<" layer6 "<<etrk_[st].phi_layer6_fit_odd<<" gp x "<< gp_fit_odd[st].x()<<" y "<< gp_fit_odd[st].y() <<std::endl;
+        //std::cout <<"cscid "<< id <<" ring "<< id.ring() <<" st "<< st <<" alpha "<< alpha <<" beta "<< beta <<" phi layer1 "<< etrk_[st].phi_layer1_fit_odd<<" layer6 "<<etrk_[st].phi_layer6_fit_odd<<" gp x "<< gp_fit_odd[st].x()<<" y "<< gp_fit_odd[st].y() <<std::endl;
     }else{
 	if (id.station()==1 and (id.ring()==1 or id.ring() ==4)){
 	    etrk_[1].phi_layer1_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 1));
@@ -2245,7 +2245,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	etrk_[st].phi_layer6_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 6));
 	//etrk_[st].phiM_fitxyz_even = atan(betay/betax);
 	gp_fit_even[st] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
-        std::cout <<"cscid "<< id <<" ring "<< id.ring() <<" st "<< st <<" alpha "<< alpha <<" beta "<< beta <<" phi layer1 "<< etrk_[st].phi_layer1_fit_even<<" layer6 "<<etrk_[st].phi_layer6_fit_even<<" gp x "<< gp_fit_even[st].x()<<" y "<< gp_fit_even[st].y() <<std::endl;
+        //std::cout <<"cscid "<< id <<" ring "<< id.ring() <<" st "<< st <<" alpha "<< alpha <<" beta "<< beta <<" phi layer1 "<< etrk_[st].phi_layer1_fit_even<<" layer6 "<<etrk_[st].phi_layer6_fit_even<<" gp x "<< gp_fit_even[st].x()<<" y "<< gp_fit_even[st].y() <<std::endl;
     }
     if (gps.size()>=3 and id.ring()==1 and id.station()==2 and fabs(etrk_[st].phi_layer3_fit_even-etrk_[st].phi_lct_even)>0.3 and fabs(etrk_[st].phi_lct_even)>3 and fabs(etrk_[st].phi_lct_even)<4){
       std::cout <<"id "<< id <<" phi from fit "<< etrk_[st].phi_layer3_fit_even <<" phi from simhits "<< etrk_[st].phi_cscsh_even
@@ -2286,7 +2286,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	if(match_sh.hitsInChamber(id_tmp).size()==0) continue;
 	if (odd) gp_gemsh_odd[st] = keygp;
 	else gp_gemsh_even[st] = keygp;
-	std::cout <<"Matching GEMHits GEM Id "<< id <<" gp.eta "<< keygp.eta() <<" gp.phi "<< keygp.phi() << std::endl;
+	//std::cout <<"Matching GEMHits GEM Id "<< id <<" gp.eta "<< keygp.eta() <<" gp.phi "<< keygp.phi() << std::endl;
         //std::cout <<" GEM Id "<< id_tmp <<" eta "<< keygp.eta() <<" phi "<< keygp.phi()<<" perp "<< keygp.perp() <<" x " << keygp.x() <<" y "<< keygp.y() << " z "<< keygp.z()<< std::endl;
       	if (odd) etrk_[st].eta_gemsh_odd = keygp.eta();
      	else     etrk_[st].eta_gemsh_even = keygp.eta();
@@ -2427,14 +2427,14 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	//question: ME1a is not included here
         if (is_valid(lct_odd[st]))
         {
-        	auto gem_dg_and_gp = match_gd.digiInGEMClosestToCSC(pads, gp_lct_odd[st]);
-        	best_pad_odd[st] = gem_dg_and_gp.second;
-        	etrk_[st].bx_pad_odd = digi_bx(gem_dg_and_gp.first);
-        	etrk_[st].dphi_pad_odd = deltaPhi(etrk_[st].phi_lct_odd, etrk_[st].phi_pad_odd);
-        	etrk_[st].dphi_pad_fit_odd = deltaPhi(etrk_[st].phi_layer3_fit_odd, etrk_[st].phi_pad_odd);
-		std::cout <<"GEMid "<< id << std::endl;
-		std::cout <<"GEM sim phi "<< keygp.phi() <<" pad phi "<< etrk_[st].phi_pad_odd <<" phi_lct "<< etrk_[st].phi_lct_odd <<" phi_fit_lct "<< etrk_[st].phi_layer3_fit_odd<< std::endl;
-        	etrk_[st].deta_pad_odd = etrk_[st].eta_lct_odd - etrk_[st].eta_pad_odd;
+	    auto gem_dg_and_gp = match_gd.digiInGEMClosestToCSC(pads, gp_lct_odd[st]);
+	    best_pad_odd[st] = gem_dg_and_gp.second;
+	    etrk_[st].bx_pad_odd = digi_bx(gem_dg_and_gp.first);
+	    etrk_[st].dphi_pad_odd = deltaPhi(etrk_[st].phi_lct_odd, etrk_[st].phi_pad_odd);
+	    etrk_[st].dphi_pad_fit_odd = deltaPhi(etrk_[st].phi_layer3_fit_odd, etrk_[st].phi_pad_odd);
+	    //std::cout <<"GEMid "<< id << std::endl;
+	    //std::cout <<"GEM sim phi "<< keygp.phi() <<" pad phi "<< etrk_[st].phi_pad_odd <<" phi_lct "<< etrk_[st].phi_lct_odd <<" phi_fit_lct "<< etrk_[st].phi_layer3_fit_odd<< std::endl;
+	    etrk_[st].deta_pad_odd = etrk_[st].eta_lct_odd - etrk_[st].eta_pad_odd;
       	}
     	}
       else
@@ -2448,14 +2448,14 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         etrk_[st].eta_pad_even = best_pad_even[st].eta();
         if (is_valid(lct_even[st]))
         {
-        	auto gem_dg_and_gp = match_gd.digiInGEMClosestToCSC(pads, gp_lct_even[st]);
-        	best_pad_even[st] = gem_dg_and_gp.second;
-        	etrk_[st].bx_pad_even = digi_bx(gem_dg_and_gp.first);
-        	etrk_[st].dphi_pad_even = deltaPhi(etrk_[st].phi_lct_even, etrk_[st].phi_pad_even);
-        	etrk_[st].dphi_pad_fit_even = deltaPhi(etrk_[st].phi_layer3_fit_even, etrk_[st].phi_pad_even);
-		std::cout <<"GEMid "<< id << std::endl;
-		std::cout <<"GEM sim phi "<< keygp.phi() <<" pad phi "<< etrk_[st].phi_pad_even <<" phi_lct "<< etrk_[st].phi_lct_even <<" phi_fit_lct "<< etrk_[st].phi_layer3_fit_even<< std::endl;
-        	etrk_[st].deta_pad_even = etrk_[st].eta_lct_even - etrk_[st].eta_pad_even;
+	    auto gem_dg_and_gp = match_gd.digiInGEMClosestToCSC(pads, gp_lct_even[st]);
+	    best_pad_even[st] = gem_dg_and_gp.second;
+	    etrk_[st].bx_pad_even = digi_bx(gem_dg_and_gp.first);
+	    etrk_[st].dphi_pad_even = deltaPhi(etrk_[st].phi_lct_even, etrk_[st].phi_pad_even);
+	    etrk_[st].dphi_pad_fit_even = deltaPhi(etrk_[st].phi_layer3_fit_even, etrk_[st].phi_pad_even);
+	    //std::cout <<"GEMid "<< id << std::endl;
+	    //std::cout <<"GEM sim phi "<< keygp.phi() <<" pad phi "<< etrk_[st].phi_pad_even <<" phi_lct "<< etrk_[st].phi_lct_even <<" phi_fit_lct "<< etrk_[st].phi_layer3_fit_even<< std::endl;
+	    etrk_[st].deta_pad_even = etrk_[st].eta_lct_even - etrk_[st].eta_pad_even;
       	}
     	}
       if (id_tmp.layer()==1) break;
@@ -2785,7 +2785,6 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   }
 
   if (verbose_) std::cout <<"GEMCSCAnalyzer step8 "<< std::endl;
-  /*
   GlobalPoint gp1,gp2, gp3, gp4, gp_ge11, gp_ge21;
   GlobalVector gv1,gv2;
   if (etrk_[1].has_csc_sh>0 and etrk_[6].has_csc_sh>0){
@@ -3117,7 +3116,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
      
      }else if (etrk_[0].hasSt1St2St3){
     	std::cout <<"Failed to run DisplacedMuonPtassignment, sim pt "<<  etrk_[0].pt <<" GEMCSCAnalyer sim deltay12 "<< etrk_[0].deltay12_sim<<" deltay23 "<< etrk_[0].deltay23_sim << " L1 deltay12 "<< etrk_[0].deltay12_fit <<" deltay23 "<< etrk_[0].deltay23_fit << std::endl; 
-     }*/
+     }
   
   if (verbose_) std::cout <<"GEMCSCAnalyzer step9 "<< std::endl;
  //general propagation 
