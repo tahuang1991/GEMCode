@@ -831,7 +831,7 @@ bool DisplacedMuonTriggerPtassignment::runDirectionbasedGE21()
    dPhi_dir_st12_st23 = (fabs(phiM_st12)<4 and fabs(phiM_st23)<4)? deltaPhi(phiM_st12, phiM_st23):-9;
 
    if (npar>=0 and npar<=3){
-        direction_pt = 0.5;
+        direction_pt = 2.0;
    	int neta = PtassignmentHelper::GetEtaPartition(eta_st2);
    	for (int i=0; i<PtassignmentHelper::NPt2; i++){
 		if (fabs(dPhi_dir_st1_st2) <= PtassignmentHelper::DirectionbasedDeltaPhiLUT[i][neta][npar])
