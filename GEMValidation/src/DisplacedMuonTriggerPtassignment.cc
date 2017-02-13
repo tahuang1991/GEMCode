@@ -771,7 +771,7 @@ bool DisplacedMuonTriggerPtassignment::runPositionbased()
    deltaY12 = deltaYcalculation(gp_st_layer3[0], gp_st_layer3[1]); 
    deltaY23 = -deltaYcalculation(gp_st_layer3[2], gp_st_layer3[1]); 
    if (npar>=0 and npar<=3){
-        position_pt = 0.5;
+        position_pt = 2.0;
    	int neta = PtassignmentHelper::GetEtaPartition(eta_st2);
    	for (int i=0; i<PtassignmentHelper::NPt2; i++){
 		if (fabs(ddY123) <= PtassignmentHelper::PositionbasedDDYLUT[i][neta][npar])
@@ -877,7 +877,7 @@ bool DisplacedMuonTriggerPtassignment::runDirectionbasedCSConly()
    dPhi_dir_st12_st23 = (fabs(phiM_st12)<4 and fabs(phiM_st23)<4)? deltaPhi(phiM_st12, phiM_st23):-9;
 
    if (npar>=0 and npar<=3){
-        direction_pt = 0.5;
+        direction_pt = 2.0;
    	int neta = PtassignmentHelper::GetEtaPartition(eta_st2);
    	for (int i=0; i<PtassignmentHelper::NPt2; i++){
 		if (fabs(dPhi_dir_st1_st2) <= PtassignmentHelper::DirectionbasedDeltaPhiME21CSConlyLUT[i][neta][npar])
@@ -897,13 +897,18 @@ void DisplacedMuonTriggerPtassignment::runHybrid(bool useGE21)
 {
 
    //firstly to run through position-based and direction-based
-   hybrid_pt = 0.5;
+   hybrid_pt = 2.0;
    runPositionbased();
    if (useGE21)
    	runDirectionbasedGE21();
    else
  	runDirectionbasedCSConly();
    if (npar>=0 and npar<=3){
+	if (fabs(ddY123)>=40 or fabs(dPhi_dir_st1_st2)>=1.0){
+	   hybrid_pt = 2.0;
+	   return;
+	}
+
    	int neta = PtassignmentHelper::GetEtaPartition(eta_st2);
 	//ignore pt=40
    	for (int i=0; i<PtassignmentHelper::NPt-1; i++){
@@ -911,13 +916,16 @@ void DisplacedMuonTriggerPtassignment::runHybrid(bool useGE21)
 		  			  PtassignmentHelper::HybridDDYAndDeltaPhiLUT[i][neta][npar][1],
 		  			  PtassignmentHelper::HybridDDYAndDeltaPhiLUT[i][neta][npar][2],
 		  			  PtassignmentHelper::HybridDDYAndDeltaPhiLUT[i][neta][npar][3],
-		  			  PtassignmentHelper::HybridDDYAndDeltaPhiLUT[i][neta][npar][4], ddY123*charge, dPhi_dir_st1_st2*charge) <=1)
+					 // not using charge info for now, may update it later 
+		  			  //PtassignmentHelper::HybridDDYAndDeltaPhiLUT[i][neta][npar][4], ddY123*charge, dPhi_dir_st1_st2*charge) <=1)
+		  			  PtassignmentHelper::HybridDDYAndDeltaPhiLUT[i][neta][npar][4], ddY123, dPhi_dir_st1_st2) <=1)
 		hybrid_pt = PtassignmentHelper::PtBins[i];
 	   else if(not(useGE21) and PtassignmentHelper::ellipse(PtassignmentHelper::HybridDDYAndDeltaPhiLUTME21CSConly[i][neta][npar][0],
 		  			  PtassignmentHelper::HybridDDYAndDeltaPhiLUTME21CSConly[i][neta][npar][1],
 		  			  PtassignmentHelper::HybridDDYAndDeltaPhiLUTME21CSConly[i][neta][npar][2],
 		  			  PtassignmentHelper::HybridDDYAndDeltaPhiLUTME21CSConly[i][neta][npar][3],
-		  			  PtassignmentHelper::HybridDDYAndDeltaPhiLUTME21CSConly[i][neta][npar][4], ddY123*charge, dPhi_dir_st1_st2*charge) <=1)
+		  		//  PtassignmentHelper::HybridDDYAndDeltaPhiLUTME21CSConly[i][neta][npar][4], ddY123*charge, dPhi_dir_st1_st2*charge) <=1)
+		  			PtassignmentHelper::HybridDDYAndDeltaPhiLUTME21CSConly[i][neta][npar][4], ddY123, dPhi_dir_st1_st2) <=1)
 		hybrid_pt = PtassignmentHelper::PtBins[i];
 	   else//make sure LUT is consitent
 	   	break;
