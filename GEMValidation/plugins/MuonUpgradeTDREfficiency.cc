@@ -1203,20 +1203,22 @@ void MuonUpgradeTDREfficiency::analyzeTrackEff(SimTrackMatchManager& match, int 
   {
     GEMDetId id(d);
     std::cout << "GEM id " << id << std::endl;
-    // if (id.station() == 3) MEStation = 2;
-    // else if (id.station() == 2) continue;
-    // else MEStation = id.station();
+    int MEStation = id.station();
 
-    // const int st(detIdToMEStation(MEStation,id.ring()));
-    // if (stations_to_use_.count(st) == 0) continue;
+    const int st(detIdToMEStation(MEStation,id.ring()));
+    if (stations_to_use_.count(st) == 0) continue;
 
-    // const bool odd(id.chamber()%2==1);
-    // if (odd) etrk_[st].has_gem_copad |= 1;
-    // else     etrk_[st].has_gem_copad |= 2;
-    
-    for (auto pad : match_gd.gemCoPadsInSuperChamber(d)){
-      cout << "\tPad " << pad << endl;
+    const bool odd(id.chamber()%2==1);
+
+    if (odd){
+      etrk_[st].pad_L1_odd = match_gd.gemCoPadsInSuperChamber(d).at(0).pad(1);
+      etrk_[st].pad_L2_odd = match_gd.gemCoPadsInSuperChamber(d).at(0).pad(2);
     }
+    else{
+      etrk_[st].pad_L1_even = match_gd.gemCoPadsInSuperChamber(d).at(0).pad(1);
+      etrk_[st].pad_L2_even = match_gd.gemCoPadsInSuperChamber(d).at(0).pad(2);
+    }
+
     // auto copads = match_gd.coPadsInSuperChamber(d);
     // if (copads.size() == 0) continue;
     // if (odd) etrk_[st].Copad_odd = digi_channel(copads.at(0));
