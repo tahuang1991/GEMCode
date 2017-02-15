@@ -154,7 +154,7 @@ public:
   bool runDirectionbasedGE21();
   bool runDirectionbasedCSConly();
   bool runHybrid(float pt, bool useGE21);
-  void runHybrid(bool useGE21);
+  bool runHybrid(bool useGE21);
 
   // helper functions
   int getHalfStrip(const CSCComparatorDigi& digi);
