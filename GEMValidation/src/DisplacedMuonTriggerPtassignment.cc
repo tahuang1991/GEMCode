@@ -560,7 +560,7 @@ void DisplacedMuonTriggerPtassignment::fitComparatorsLCT(const CSCComparatorDigi
       beta = 0.0;
   }
   if (verbose_>0)
-  std::cout <<"fitting results: alpha "<< alpha <<" beta "<< beta << std::endl;
+      std::cout <<"fitting results: alpha "<< alpha <<" beta "<< beta << std::endl;
   for (int i=0; i<6; i++){
       fit_z_layers[i] = cscChamber->layer(i+1)->centerOfStrip(20).z();
       fit_phi_layers[i] = PtassignmentHelper::normalizePhi(alpha + beta * fit_z_layers[i]);
