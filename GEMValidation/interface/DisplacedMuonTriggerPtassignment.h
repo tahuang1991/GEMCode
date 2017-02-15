@@ -320,9 +320,9 @@ public:
   float dPhi_dir_st2_st23;
   float dPhi_dir_st12_st23;
 
-  int position_pt;
-  int direction_pt;
-  int hybrid_pt;
+  float position_pt;
+  float direction_pt;
+  float hybrid_pt;
 
   const CSCCorrelatedLCTDigiContainer lcts;
   const CSCDetIdContainer cscids;
