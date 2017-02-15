@@ -775,12 +775,12 @@ bool DisplacedMuonTriggerPtassignment::runPositionbased()
         position_pt = 2.0;
    	int neta = PtassignmentHelper::GetEtaPartition(eta_st2);
    	for (int i=0; i<PtassignmentHelper::NPt2; i++){
-		if (fabs(ddY123) <= PtassignmentHelper::PositionbasedDDYLUT[i][neta][npar])
-		    position_pt = float(PtassignmentHelper::PtBins2[i]);
-		else
-		    break;
-		if (verbose_>0)
-		    std::cout <<"eta "<< eta_st2 <<" neta "<< neta <<" npar "<< npar <<" fabs ddY123 "<< fabs(ddY123) <<" cut "<< PtassignmentHelper::PositionbasedDDYLUT[i][neta][npar] <<" position pt "<< position_pt<<std::endl;
+	    if (fabs(ddY123) <= PtassignmentHelper::PositionbasedDDYLUT[i][neta][npar])
+		position_pt = float(PtassignmentHelper::PtBins2[i]);
+	    else
+		break;
+	    if (verbose_>0)
+		std::cout <<"eta "<< eta_st2 <<" neta "<< neta <<" npar "<< npar <<" fabs ddY123 "<< fabs(ddY123) <<" cut "<< PtassignmentHelper::PositionbasedDDYLUT[i][neta][npar] <<" position pt "<< position_pt<<std::endl;
 	}
    }
    return true;
@@ -835,12 +835,12 @@ bool DisplacedMuonTriggerPtassignment::runDirectionbasedGE21()
         direction_pt = 2.0;
    	int neta = PtassignmentHelper::GetEtaPartition(eta_st2);
    	for (int i=0; i<PtassignmentHelper::NPt2; i++){
-		if (fabs(dPhi_dir_st1_st2) <= PtassignmentHelper::DirectionbasedDeltaPhiLUT[i][neta][npar])
-		    direction_pt = float(PtassignmentHelper::PtBins2[i]);
-		else 
-		    break;
-		if (verbose_>0)
-		    std::cout <<"eta "<< eta_st2 <<" neta "<< neta <<" npar "<< npar <<" fabs dphi "<< fabs(dPhi_dir_st1_st2) <<" cut "<< PtassignmentHelper::DirectionbasedDeltaPhiLUT[i][neta][npar] <<" direction pt "<< direction_pt<<std::endl;
+	    if (fabs(dPhi_dir_st1_st2) <= PtassignmentHelper::DirectionbasedDeltaPhiLUT[i][neta][npar])
+		direction_pt = float(PtassignmentHelper::PtBins2[i]);
+	    else 
+		break;
+	    if (verbose_>0)
+		std::cout <<"eta "<< eta_st2 <<" neta "<< neta <<" npar "<< npar <<" fabs dphi "<< fabs(dPhi_dir_st1_st2) <<" cut "<< PtassignmentHelper::DirectionbasedDeltaPhiLUT[i][neta][npar] <<" direction pt "<< direction_pt<<std::endl;
 	}
    }
    return true;
@@ -881,12 +881,12 @@ bool DisplacedMuonTriggerPtassignment::runDirectionbasedCSConly()
         direction_pt = 2.0;
    	int neta = PtassignmentHelper::GetEtaPartition(eta_st2);
    	for (int i=0; i<PtassignmentHelper::NPt2; i++){
-		if (fabs(dPhi_dir_st1_st2) <= PtassignmentHelper::DirectionbasedDeltaPhiME21CSConlyLUT[i][neta][npar])
-		    direction_pt = float(PtassignmentHelper::PtBins2[i]);
-		else
-		    break;
-		if (verbose_>0)
-		    std::cout <<"eta "<< eta_st2 <<" neta "<< neta <<" npar "<< npar <<" fabs dphi "<< fabs(dPhi_dir_st1_st2) <<" cut "<< PtassignmentHelper::DirectionbasedDeltaPhiME21CSConlyLUT[i][neta][npar] <<" direction pt "<< direction_pt<<std::endl;
+	    if (fabs(dPhi_dir_st1_st2) <= PtassignmentHelper::DirectionbasedDeltaPhiME21CSConlyLUT[i][neta][npar])
+		direction_pt = float(PtassignmentHelper::PtBins2[i]);
+	    else
+		break;
+	    if (verbose_>0)
+		std::cout <<"eta "<< eta_st2 <<" neta "<< neta <<" npar "<< npar <<" fabs dphi "<< fabs(dPhi_dir_st1_st2) <<" cut "<< PtassignmentHelper::DirectionbasedDeltaPhiME21CSConlyLUT[i][neta][npar] <<" direction pt "<< direction_pt<<std::endl;
 	}
 
    }
@@ -894,21 +894,23 @@ bool DisplacedMuonTriggerPtassignment::runDirectionbasedCSConly()
 }
 
 
-void DisplacedMuonTriggerPtassignment::runHybrid(bool useGE21)
+bool DisplacedMuonTriggerPtassignment::runHybrid(bool useGE21)
 {
 
    //firstly to run through position-based and direction-based
-   hybrid_pt = 2.0;
-   runPositionbased();
+   bool checkPosition = runPositionbased();
+   bool checkDirection = false;
    if (useGE21)
-   	runDirectionbasedGE21();
+   	checkDirection = runDirectionbasedGE21();
    else
- 	runDirectionbasedCSConly();
+ 	checkDirection = runDirectionbasedCSConly();
+   if (not (checkPosition and checkDirection))
+       return false;
+   hybrid_pt = 2.0;
    if (npar>=0 and npar<=3){
    	int neta = PtassignmentHelper::GetEtaPartition(eta_st2);
 	if (fabs(ddY123)>=40 or fabs(dPhi_dir_st1_st2)>=1.0){//rejected by hybrid 
-	    hybrid_pt = 2.0;
-	    return;
+	    return true;
 	}
 	//ignore pt=40
    	for (int i=0; i<PtassignmentHelper::NPt-1; i++){
@@ -933,6 +935,7 @@ void DisplacedMuonTriggerPtassignment::runHybrid(bool useGE21)
 		
 	}
    }
+   return true;
 }
 
 float DisplacedMuonTriggerPtassignment::getlocalPhiDirection(int st) const
