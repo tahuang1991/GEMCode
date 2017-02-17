@@ -309,9 +309,8 @@ DisplacedGENMuonMatcher::matchDisplacedGENMuonFromMuonGunMatcherToSimTrack(const
   for(reco::GenParticleCollection::const_iterator iGenParticle = genParticles.begin();  iGenParticle != genParticles.end();  ++iGenParticle) {
     counterGenParticle++;
     // Check if gen particle is muon (pdgId = +/-13) and stable (status = 1)
-    //    if (verbose_) std::cout << counterGenParticle << " " << iGenParticle->status() << " " << iGenParticle->pdgId() << " " << iGenParticle->vx() << " " << iGenParticle->vy() << " " << iGenParticle->vz() << std::endl;
     if ( fabs( iGenParticle->pdgId() ) == 13 and iGenParticle->status() == 1 ) {
-      if (verbose_) std::cout << "Muon " << counterGenParticle << " " << iGenParticle->status() << " " << iGenParticle->pdgId() << " " << iGenParticle->vx() << " " << iGenParticle->vy() << " " << iGenParticle->vz() << std::endl;
+      if (verbose_) std::cout << "Muon " << counterGenParticle << " " << iGenParticle->status() << " (vx, vy, vz) " << iGenParticle->pdgId() << " " << iGenParticle->vx() << " " << iGenParticle->vy() << " " << iGenParticle->vz() <<" pt "<< iGenParticle->pt() <<" eta "<< iGenParticle->eta() <<" phi "<< iGenParticle->phi()<<" simTrack eta "<< trk().momentum().eta()<<" phi "<< trk().momentum().phi() << std::endl;
 	const double deltaR(reco::deltaR(iGenParticle->eta(), iGenParticle->phi(), trk().momentum().eta(), trk().momentum().phi()));
 	if (deltaR < minDeltaR) {
 	  minDeltaR = deltaR;
@@ -319,6 +318,7 @@ DisplacedGENMuonMatcher::matchDisplacedGENMuonFromMuonGunMatcherToSimTrack(const
 	  matchedGenMu_dR = deltaR;
 	}
     }
+    if (matchedGENMuon_) runOK_ = true;
 
 
   }

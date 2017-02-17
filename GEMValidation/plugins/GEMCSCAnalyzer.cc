@@ -1466,13 +1466,6 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   const SimTrack &t = match_sh.trk();
    
 
-  /*
-  if (match_gen.checkRunOK()){
-  	std::cout <<" matched dark boson mass "<< matchedDarkBoson->mass() << std::endl;
- 	std::cout <<"matched muon pt "<< matchedGENMuon->pt()<<" phi "<< matchedGENMuon->phi()<<" eta "<< matchedGENMuon->eta() <<" dR "<< match_gen.matchedGenMudR()<<" dxy "<< match_gen.matchedGenMudxy() <<std::endl;
-  }
-  std::cout <<"Sim trk_no " << trk_no <<" eta "<< t.momentum().eta() << " phi "<< t.momentum().phi() << " pt "<< t.momentum().pt()<<" pz "<<  t.momentum().pz()<<std::endl;
-  */
 
   for (auto s: stations_to_use_)
   {
@@ -1490,6 +1483,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
   if (match_gen.checkRunOK()){
     // Dark photon  
+    //std::cout <<"matched muon pt "<< matchedGENMuon->pt()<<" phi "<< matchedGENMuon->phi()<<" eta "<< matchedGENMuon->eta() <<" dR "<< match_gen.matchedGenMudR()<<" dxy "<< match_gen.matchedGenMudxy() <<std::endl;
+    //std::cout <<"Sim trk_no " << trk_no <<" eta "<< t.momentum().eta() << " phi "<< t.momentum().phi() << " pt "<< t.momentum().pt()<<" pz "<<  t.momentum().pz()<<std::endl;
     auto matchedDarkBoson(match_gen.getMatchedDarkBoson());
     auto matchedGENMuon(match_gen.getMatchedGENMuon());
     if (matchedDarkBoson){
