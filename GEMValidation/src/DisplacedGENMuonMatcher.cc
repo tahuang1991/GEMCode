@@ -18,6 +18,7 @@ DisplacedGENMuonMatcher::DisplacedGENMuonMatcher(const SimTrack& t, const SimVer
   
   matchedGENMuon_ = NULL;
   matchedDarkBoson_ = NULL;
+  matchedGenMu_dxy = 0.0;
 
 }
 
@@ -318,8 +319,13 @@ DisplacedGENMuonMatcher::matchDisplacedGENMuonFromMuonGunMatcherToSimTrack(const
 	  matchedGenMu_dR = deltaR;
 	}
     }
-    if (matchedGENMuon_) runOK_ = true;
+    if (matchedGENMuon_) {
+	runOK_ = true;
+	matchedGenMu_dxy = dxy(matchedGENMuon_->px(), matchedGENMuon_->py(), matchedGENMuon_->vx(), matchedGENMuon_->vy(), matchedGENMuon_->pt());
+    }
 
+    if (verbose_)
+	std::cout <<" minDR "<< minDeltaR << " matchedGenMu_dR "<< matchedGenMu_dR <<" matchedGenMu_dxy "<< matchedGenMu_dxy << std::endl;
 
   }
 
