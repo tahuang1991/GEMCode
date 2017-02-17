@@ -348,6 +348,7 @@ SimTrackMatching = cms.PSet(
     displacedGenMu = cms.PSet(
 	validInputTags = cms.VInputTag(cms.InputTag("genParticles")),
 	verbose = cms.int32(0),
+	sampleType = cms.int32(0),
 	run = cms.bool(True),
     ),
     sectorProcessor = csctfTrackDigis.SectorProcessor,
