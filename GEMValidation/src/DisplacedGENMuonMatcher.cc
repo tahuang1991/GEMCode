@@ -12,13 +12,12 @@ DisplacedGENMuonMatcher::DisplacedGENMuonMatcher(const SimTrack& t, const SimVer
 
   edm::Handle<reco::GenParticleCollection> genParticles;
   runOK_ = false;
-  bool getProduct = gemvalidation::getByLabel(input_, genParticles, event());
-  if(getProduct and run_ and sampleType_ == DarkSUSY) matchDisplacedGENMuonMatcherToSimTrack(*genParticles.product());
-  else if (getProduct and run_ and sampleType_ == MuonGun) matchDisplacedGENMuonFromMuonGunMatcherToSimTrack(*genParticles.product());
-  
   matchedGENMuon_ = NULL;
   matchedDarkBoson_ = NULL;
   matchedGenMu_dxy = 0.0;
+  bool getProduct = gemvalidation::getByLabel(input_, genParticles, event());
+  if(getProduct and run_ and sampleType_ == DarkSUSY) matchDisplacedGENMuonMatcherToSimTrack(*genParticles.product());
+  else if (getProduct and run_ and sampleType_ == MuonGun) matchDisplacedGENMuonFromMuonGunMatcherToSimTrack(*genParticles.product());
 
 }
 
