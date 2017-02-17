@@ -12,12 +12,12 @@ DisplacedGENMuonMatcher::DisplacedGENMuonMatcher(const SimTrack& t, const SimVer
 
   edm::Handle<reco::GenParticleCollection> genParticles;
   runOK_ = false;
+  matchedGENMuon_ = NULL;
+  matchedDarkBoson_ = NULL;
+  matchedGenMu_dxy = 0.0;
   bool getProduct = gemvalidation::getByLabel(input_, genParticles, event());
   if(getProduct and run_ and sampleType_ == DarkSUSY) matchDisplacedGENMuonMatcherToSimTrack(*genParticles.product());
   else if (getProduct and run_ and sampleType_ == MuonGun) matchDisplacedGENMuonFromMuonGunMatcherToSimTrack(*genParticles.product());
-  
-  matchedGENMuon_ = NULL;
-  matchedDarkBoson_ = NULL;
 
 }
 
@@ -318,8 +318,13 @@ DisplacedGENMuonMatcher::matchDisplacedGENMuonFromMuonGunMatcherToSimTrack(const
 	  matchedGenMu_dR = deltaR;
 	}
     }
-    if (matchedGENMuon_) runOK_ = true;
+    if (matchedGENMuon_) {
+	runOK_ = true;
+	matchedGenMu_dxy = dxy(matchedGENMuon_->px(), matchedGENMuon_->py(), matchedGENMuon_->vx(), matchedGENMuon_->vy(), matchedGENMuon_->pt());
+    }
 
+    if (verbose_)
+	std::cout <<" minDR "<< minDeltaR << " matchedGenMu_dR "<< matchedGenMu_dR <<" matchedGenMu_dxy "<< matchedGenMu_dxy << std::endl;
 
   }
 
