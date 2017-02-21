@@ -109,7 +109,7 @@ const double DirectionEpLUT[Parity][EtaPartitions][2]={
 */
 
 const int PtBins[NPt] = {5,7,10,15,20,30,40};
-const int PtBins2[NPt2] = {2,3,4,5,6,7,8,9,10,12,15,20,30,40};
+const int PtBins2[NPt2] = {2,3,4,5,6,7,8,10,12,15,20,30,40};
 
 const double DirectionbasedDeltaPhiLUT[NPt2][EtaPartitions][Parity] = {
         {//pt=2
@@ -333,7 +333,7 @@ const double DirectionbasedDeltaPhiME21CSConlyLUT[NPt2][EtaPartitions][Parity] =
 
 const double PositionbasedDDYLUT[NPt2][EtaPartitions][Parity] = {
         {//pt=2
-	  {0.000000,0.000000,0.000000,0.000000},
+	  {28.236000,21.296000,36.365000,21.208000},
 	  {16.918000,19.712000,38.134000,11.136000},
 	  {39.262000,29.200000,39.080000,33.882000},
 	  {31.724000,22.982000,33.506000,24.444000},
