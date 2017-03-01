@@ -6,26 +6,25 @@
 #include <map>
 #include <string>
 
-enum DT_Types_2stubs {DT1_DT2, DT1_DT3, DT1_DT4, DT2_DT3, DT2_DT4, DT3_DT4};
-enum DT_Types_3stubs {DT1_DT2__DT1_DT3, DT1_DT2__DT1_DT4, DT1_DT2__DT2_DT3, DT1_DT2__DT2_DT4,
-                      DT1_DT3__DT1_DT4, DT1_DT3__DT2_DT3, DT1_DT3__DT3_DT4,
-                      DT1_DT4__DT2_DT4, DT1_DT4__DT3_DT4,
-                      DT2_DT3__DT2_DT4, DT2_DT3__DT3_DT4,
-                      DT3_DT4__DT3_DT4};
+namespace BarrelTriggerPtAssignmentHelper {
 
-enum DT_Types_4stubs {DT1_DT2__DT3_DT4, DT1_DT3__DT2_DT4, DT1_DT4__DT2_DT3};
+enum DT_Types_2stubs {DT1_DT2, DT1_DT3, DT1_DT4, DT2_DT3, DT2_DT4, DT3_DT4};
+enum DT_Types_3or4stubs {DT1_DT2__DT1_DT3, DT1_DT2__DT1_DT4, DT1_DT2__DT2_DT3, DT1_DT2__DT2_DT4,
+                         DT1_DT3__DT1_DT4, DT1_DT3__DT2_DT3, DT1_DT3__DT3_DT4,
+                         DT1_DT4__DT2_DT4, DT1_DT4__DT3_DT4,
+                         DT2_DT3__DT2_DT4, DT2_DT3__DT3_DT4,
+                         DT3_DT4__DT3_DT4,
+                         DT1_DT2__DT3_DT4, DT1_DT3__DT2_DT4, DT1_DT4__DT2_DT3};
 
 const std::vector<std::string> DT_Types_2stubs_string = {
   "DT1_DT2", "DT1_DT3", "DT1_DT4", "DT2_DT3", "DT2_DT4", "DT3_DT4"};
 
-const std::vector<std::string> DT_Types_3stubs_string = {
+const std::vector<std::string> DT_Types_3or4stubs_string = {
   "DT1_DT2__DT1_DT3", "DT1_DT2__DT1_DT4", "DT1_DT2__DT2_DT3", "DT1_DT2__DT2_DT4",
   "DT1_DT3__DT1_DT4", "DT1_DT3__DT2_DT3", "DT1_DT3__DT3_DT4",
   "DT1_DT4__DT2_DT4", "DT1_DT4__DT3_DT4",
   "DT2_DT3__DT2_DT4", "DT2_DT3__DT3_DT4",
-  "DT3_DT4__DT3_DT4"};
-
-const std::vector<std::string> DT_Types_4stubs_string = {
+  "DT3_DT4__DT3_DT4",
   "DT1_DT2__DT3_DT4", "DT1_DT3__DT2_DT4", "DT1_DT4__DT2_DT3"};
 
 // barrel trigger 2-station LUTs
@@ -47,16 +46,48 @@ std::map<std::string,std::vector<float> > DirectionBasedDeltaPhiLUT_2stubs = {
   {"DT3_DT4", {0.46840000000000004, 0.25570270270270273, 0.16560550458715598, 0.12402958579881657, 0.09708730158730158, 0.08288000000000001, 0.06968926553672317, 0.058116853932584284, 0.052528957528957546, 0.04980503144654089, 0.04863445378151261, 0.04883177570093458, 0.049464135021097054, 0.04774496644295303, 0.04876000000000001, 0.04692857142857144, 0.04775757575757576} }
 };
 
+
+// barrel trigger 3/4-station LUTs
+std::map<std::string,std::map<int, std::vector<float> > > DirectionBasedDeltaPhiLUT_3or4stubs = {
+  {"DT1_DT2__DT1_DT3", {
+      {3 , { 0.15 , 0.49 , 32.0 } }, //Acceptance 0.900069294528  //Rejection 0.681036911806
+      {5 , { 0.13 , 0.45 , 30.0 } }, //Acceptance 0.900258851035  //Rejection 0.76246830093
+      {7 , { 0.11 , 0.15 , 33.0 } }, //Acceptance 0.90093437602  //Rejection 0.842209072978
+      {10 , { 0.09 , 0.11 , 20.0 } }, //Acceptance 0.903721366586  //Rejection 0.898562975486
+      {15 , { 0.11 , 0.07 , 28.0 } }, //Acceptance 0.900597585017  //Rejection 0.937447168216
+      {20 , { 0.05 , 0.17 , 27.0 } }, //Acceptance 0.900077259851  //Rejection 0.942519019442
+      {30 , { 0.25 , 0.05 , 22.0 } }, //Acceptance 0.901083537225  //Rejection 0.957171034094
+      {40 , { 0.23 , 0.05 , 25.0 } }, //Acceptance 0.901442307692  //Rejection 0.964778810933
+    }
+  }
+  /* {"DT1_DT2__DT1_DT4", {}}, */
+  /* {"DT1_DT2__DT2_DT3", {}}, */
+  /* {"DT1_DT2__DT2_DT4", {}}, */
+  /* {"DT1_DT3__DT1_DT4", {}}, */
+  /* {"DT1_DT3__DT2_DT3", {}}, */
+  /* {"DT1_DT3__DT3_DT4", {}}, */
+  /* {"DT1_DT4__DT2_DT4", {}}, */
+  /* {"DT1_DT4__DT3_DT4", {}}, */
+  /* {"DT2_DT3__DT2_DT4", {}}, */
+  /* {"DT2_DT3__DT3_DT4", {}}, */
+  /* {"DT3_DT4__DT3_DT4", {}} */
+  /* {"DT1_DT2__DT3_DT4", {}}, */
+  /* {"DT1_DT3__DT2_DT4", {}}, */
+  /* {"DT1_DT4__DT2_DT3", {}} */
+};
+
+
 float getDirectionBasedPt2Stubs(float DPhi, int DT_type);
 float getDirectionBasedPt2Stubs(float DPhi, std::string DT_type);
 
-// barrel trigger 3-station LUTs
-float getDirectionBasedPt3Stubs(float DPhi1, float DPhi2, int DT_type);
-float getDirectionBasedPt3Stubs(float DPhi1, float DPhi2, std::string DT_type);
+float getDirectionBasedPt3or4Stubs(float DPhi1, float DPhi2, int DT_type);
+float getDirectionBasedPt3or4Stubs(float DPhi1, float DPhi2, std::string DT_type);
 
-// barrel trigger 4-station LUTs
-float getDirectionBasedPt4Stubs(float DPhi1, float DPhi2, int DT_type);
-float getDirectionBasedPt4Stubs(float DPhi1, float DPhi2, std::string DT_type);
+float getEllipse(float x, float y, float a, float b, float alpha, float x0=0, float y0=0);
+bool passEllipse(float x, float y, float a, float b, float alpha, float x0=0, float y0=0);
+bool failEllipse(float x, float y, float a, float b, float alpha, float x0=0, float y0=0);
+
+}
 
 #endif
 
