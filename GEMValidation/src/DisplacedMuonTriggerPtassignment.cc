@@ -58,7 +58,7 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
 	    std::cout <<" chid "<< chid <<"  number of lcts "<< idlcts.second.size() << std::endl;
 	    continue;
     }
-    if (idlcts.second.size()>1 and verbose_>0) 
+    if (idlcts.second.size()>1 and verbose_>0)
 	std::cout <<"more than one LCT  available in chamber id "<< chid <<" LCT size "<< idlcts.second.size()<<std::endl;
     globalPositionOfLCT(idlcts.second, chid);
     if (chid.station() == 1 or chid.station()==2){
@@ -319,7 +319,7 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(GlobalPoint g
 	xfactor = (gp_st_layer3[1].perp()/gp_st_layer3[0].perp()-1.0)/fabs(gp_st_layer3[0].z()-gp_st_layer3[1].z());
   //second station
   if (hasStub_st[1]) eta_st2 = gp_st_layer3[1].eta();
-        
+
 }
 
 
@@ -679,7 +679,7 @@ void DisplacedMuonTriggerPtassignment::globalPositionOfGEMPad(const GEMCSCPadDig
   	gp_ge21 = GlobalPoint(gemRoll->toGlobal(lpGEM));
 	phi_gem[1] = gp_ge21.phi();
 	if (verbose_>0) std::cout <<" gempad in GE21 id "<< gemid <<" gp eta "<< gp_ge21.eta()<<" phi "<< gp_ge21.phi()<<" pad "<<gempad.pad()<< std::endl;
-  }else if (verbose_>0) 
+  }else if (verbose_>0)
       std::cout <<" gemid "<< gemid  <<" not in station 1 or 3" << std::endl;
 
 }
@@ -769,8 +769,8 @@ bool DisplacedMuonTriggerPtassignment::runPositionbased()
    	return false;
    }
    ddY123 = deltadeltaYcalculation(gp_st_layer3[0], gp_st_layer3[1], gp_st_layer3[2], gp_st_layer3[1].eta(), npar);
-   deltaY12 = deltaYcalculation(gp_st_layer3[0], gp_st_layer3[1]); 
-   deltaY23 = -deltaYcalculation(gp_st_layer3[2], gp_st_layer3[1]); 
+   deltaY12 = deltaYcalculation(gp_st_layer3[0], gp_st_layer3[1]);
+   deltaY23 = -deltaYcalculation(gp_st_layer3[2], gp_st_layer3[1]);
    if (npar>=0 and npar<=3){
         position_pt = 2.0;
    	int neta = PtassignmentHelper::GetEtaPartition(eta_st2);
@@ -796,8 +796,8 @@ bool DisplacedMuonTriggerPtassignment::runDirectionbased(bool useGE21)
 //use GE21 if GE21 pads are available. use GE11 if GE11 pads are available
 bool DisplacedMuonTriggerPtassignment::runDirectionbasedGE21()
 {
-   //if (not (npar<4 and npar>=0 and hasGEMPad_st1 and hasGEMPad_st2)) return false; 
-   if (not (npar<4 and npar>=0)) return false; 
+   //if (not (npar<4 and npar>=0 and hasGEMPad_st1 and hasGEMPad_st2)) return false;
+   if (not (npar<4 and npar>=0)) return false;
    //if (fabs(phi_gem[1])>4) return false;//check this because we want to use setPhiGE21() to set phi_gem[1](using 2strips-pad)
 
    float xfactor_st1 = 0.0;
@@ -813,7 +813,7 @@ bool DisplacedMuonTriggerPtassignment::runDirectionbasedGE21()
    if (meRing==1 and hasGEMPad_st2){
 	xfactor_st2 = xfactor*fabs(gp_ge21.z() - gp_st_layer3[1].z())/(xfactor*fabs(gp_st_layer3[0].z() - gp_st_layer3[1].z())+1);
    	phiM_st2 = phiMomentum_Xfactor(gp_st_layer3[1].phi(), phi_gem[1], xfactor_st2);
-   }else if(meRing==2){ 
+   }else if(meRing==2){
    	xfactor_st2 = xfactor*fabs(z_st_layers[1][0] - z_st_layers[1][5])/(xfactor*fabs(gp_st_layer3[0].z() - z_st_layers[1][5])+1);
    	phiM_st2 = phiMomentum_Xfactor(gp_st_layer6[1].phi(), gp_st_layer1[1].phi(), xfactor_st2);//
    }else return false;
@@ -837,7 +837,7 @@ bool DisplacedMuonTriggerPtassignment::runDirectionbasedGE21()
    	for (int i=0; i<PtassignmentHelper::NPt2; i++){
 	    if (fabs(dPhi_dir_st1_st2) <= PtassignmentHelper::DirectionbasedDeltaPhiLUT[i][neta][npar])
 		direction_pt = float(PtassignmentHelper::PtBins2[i]);
-	    else 
+	    else
 		break;
 	    if (verbose_>0)
 		std::cout <<"eta "<< eta_st2 <<" neta "<< neta <<" npar "<< npar <<" fabs dphi "<< fabs(dPhi_dir_st1_st2) <<" cut "<< PtassignmentHelper::DirectionbasedDeltaPhiLUT[i][neta][npar] <<" direction pt "<< direction_pt<<std::endl;
@@ -909,7 +909,7 @@ bool DisplacedMuonTriggerPtassignment::runHybrid(bool useGE21)
    hybrid_pt = 2.0;
    if (npar>=0 and npar<=3){
    	int neta = PtassignmentHelper::GetEtaPartition(eta_st2);
-	if (fabs(ddY123)>=40 or fabs(dPhi_dir_st1_st2)>=1.0){//rejected by hybrid 
+	if (fabs(ddY123)>=40 or fabs(dPhi_dir_st1_st2)>=1.0){//rejected by hybrid
 	    return true;
 	}
 	//ignore pt=40
@@ -932,11 +932,16 @@ bool DisplacedMuonTriggerPtassignment::runHybrid(bool useGE21)
 	   	break;
 	   if (verbose_>0)
    		std::cout <<"eta_st2 "<< eta_st2 <<" npar "<< npar <<" charge "<< charge <<" ddY123 "<< ddY123 << " dphi_dir "<< dPhi_dir_st1_st2 <<" hybrid_pt "<< hybrid_pt << std::endl;
-		
+
 	}
    }
    return true;
 }
+
+void DisplacedMuonTriggerPtassignment::runDirectionBasedBarrel(){}
+void DisplacedMuonTriggerPtassignment::runPositionBasedBarrel(){}
+void DisplacedMuonTriggerPtassignment::runHybridBasedBarrel(){}
+
 
 float DisplacedMuonTriggerPtassignment::getlocalPhiDirection(int st) const
 {

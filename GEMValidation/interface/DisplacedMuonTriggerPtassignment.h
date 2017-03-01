@@ -161,8 +161,8 @@ public:
   float getFractionalStrip(const CSCComparatorDigi&d);
 
   float getTrackEta() const { return eta_st2; }
-  int getNParity() const {return npar; } 
-  int getMeRing() const {return meRing; } 
+  int getNParity() const {return npar; }
+  int getMeRing() const {return meRing; }
   float getPositionPt() const {return position_pt; }
   float getDirectionPt() const {return direction_pt; }
   float getHybridPt() const {return hybrid_pt; }
@@ -177,6 +177,13 @@ public:
   float getPhiGEM(int st) const {return phi_gem[st-1]; }
   float getNStubs() const { return nstubs; }
 
+  // barrel pT algorithm
+  void runDirectionBasedBarrel();
+  void runPositionBasedBarrel();
+  void runHybridBasedBarrel();
+  float getDirectionPtBarrel() const {return barrel_direction_pt; }
+  float getPositionPtBarrel() const {return barrel_position_pt; }
+  float getHybridPtBarrel() const {return barrel_hybrid_pt; }
 
   void setCharge(int x) { charge = x; }
   void setRadiusSt(float x, int st) { radius_st_ME[st-1] = x; }
@@ -211,13 +218,13 @@ public:
   //
   //r3);//?
   float phiMomentum_Xfactor(float phi_CSC, float phi_GEM, float xfactor) const;
-  //void fitComparatorsLCT(const CSCComparatorDigiCollection&, const CSCCorrelatedLCTDigi& tp, 
- //	                          CSCDetId chid, float& fit_phi_layer1, float& fit_phi_layer3, float& fit_phi_layer6, 
-  //				  float& fit_z_layer1, float& fit_z_layer3, float& fit_z_layer6, float& perp); 
-  void fitComparatorsLCT(const CSCComparatorDigiCollection&, 
-                         const CSCCorrelatedLCTDigi& tp, 
-                         CSCDetId chid, 
-                         float* fit_phi_layers, float* fit_z_layers, float& perp); 
+  //void fitComparatorsLCT(const CSCComparatorDigiCollection&, const CSCCorrelatedLCTDigi& tp,
+ //	                          CSCDetId chid, float& fit_phi_layer1, float& fit_phi_layer3, float& fit_phi_layer6,
+  //				  float& fit_z_layer1, float& fit_z_layer3, float& fit_z_layer6, float& perp);
+  void fitComparatorsLCT(const CSCComparatorDigiCollection&,
+                         const CSCCorrelatedLCTDigi& tp,
+                         CSCDetId chid,
+                         float* fit_phi_layers, float* fit_z_layers, float& perp);
   void fitTrackRadius(GlobalPoint* gps, float* radius);
 
 
@@ -323,6 +330,10 @@ public:
   float position_pt;
   float direction_pt;
   float hybrid_pt;
+
+  float barrel_direction_pt;
+  float barrel_position_pt;
+  float barrel_hybrid_pt;
 
   const CSCCorrelatedLCTDigiContainer lcts;
   const CSCDetIdContainer cscids;
