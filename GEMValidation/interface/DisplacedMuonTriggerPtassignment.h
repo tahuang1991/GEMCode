@@ -73,7 +73,7 @@ typedef std::vector<std::pair<CSCDetId, CSCComparatorDigiContainer> > CSCCompara
 typedef std::pair<GEMDetId, GEMCSCPadDigi> GEMCSCPadDigiId;
 typedef std::vector<GEMCSCPadDigi> GEMCSCPadDigiContainer;
 
-typedef std::vector<std::vector<L1MuDTTrackSegPhi> > L1MuDTTrackSegPhiContainer;
+typedef std::vector<L1MuDTTrackSegPhi > L1MuDTTrackSegPhiContainer;
 typedef std::vector<std::pair<L1MuDTTrack,std::vector<L1MuDTTrackSegPhi> > > L1MuDTTrackCollection;
 
 class DisplacedMuonTriggerPtassignment
@@ -184,6 +184,8 @@ public:
   float getDirectionPtBarrel() const {return barrel_direction_pt; }
   float getPositionPtBarrel() const {return barrel_position_pt; }
   float getHybridPtBarrel() const {return barrel_hybrid_pt; }
+
+  int getBarrelStubCase(bool, bool, bool, bool);
 
   void setCharge(int x) { charge = x; }
   void setRadiusSt(float x, int st) { radius_st_ME[st-1] = x; }
@@ -344,6 +346,9 @@ public:
   bool has_stub_mb1, has_stub_mb2, has_stub_mb3, has_stub_mb4;
   float phi_mb1, phi_mb2, phi_mb3, phi_mb4;
   float phib_mb1, phib_mb2, phib_mb3, phib_mb4;
+  float dphi_mb1, dphi_mb2, dphi_mb3, dphi_mb4; //phi + phib
+  float dPhi_barrel_dir_12, dPhi_barrel_dir_13, dPhi_barrel_dir_14;
+  float dPhi_barrel_dir_23, dPhi_barrel_dir_24, dPhi_barrel_dir_34;
 };
 
 #endif

@@ -12,7 +12,7 @@
 #include "DataFormats/Math/interface/deltaR.h"
 #include "GEMCode/GEMValidation/interface/DisplacedMuonTriggerPtassignment.h"
 #include "GEMCode/GEMValidation/interface/PtassignmentHelper.h"
-
+#include "GEMCode/GEMValidation/interface/BarrelTriggerPtAssignmentHelper.h"
 
 //endcap, we need LCTs and associated cscid, gempads and associated gemid, and all gemometry
 //to get position from fitting, we also need all comparator digis
@@ -326,13 +326,49 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(GlobalPoint g
 //DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(){ //test constructor
 //}
 
-DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const L1MuDTTrackSegPhiContainer& tracks,
+DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const L1MuDTTrackSegPhiContainer& stubs,
                                                                    const edm::EventSetup& es,
                                                                    const edm::Event& ev)
   : ev_(ev), es_(es), verbose_(0)
 {
   setupGeometry(es);
   initVariables();
+
+  // check which stubs are available
+  for (auto& stub: stubs){
+    if (stub.station()==1){
+      has_stub_mb1 = true;
+      phi_mb1 = stub.phiValue();
+      phib_mb1 = stub.phibValue();
+      dphi_mb1 = PtassignmentHelper::normalizePhi(phi_mb1 + phib_mb1);
+    }
+    if (stub.station()==2){
+      has_stub_mb2 = true;
+      phi_mb2 = stub.phiValue();
+      phib_mb2 = stub.phibValue();
+      dphi_mb2 = PtassignmentHelper::normalizePhi(phi_mb2 + phib_mb2);
+    }
+    if (stub.station()==3){
+      has_stub_mb3 = true;
+      phi_mb3 = stub.phiValue();
+      phib_mb3 = stub.phibValue();
+      dphi_mb3 = PtassignmentHelper::normalizePhi(phi_mb3 + phib_mb3);
+    }
+    if (stub.station()==4){
+      has_stub_mb4 = true;
+      phi_mb4 = stub.phiValue();
+      phib_mb4 = stub.phibValue();
+      dphi_mb1 = PtassignmentHelper::normalizePhi(phi_mb4 + phib_mb4);
+    }
+  }
+
+  // calculate bending angles
+  if (has_stub_mb1 and has_stub_mb2) dPhi_barrel_dir_12 = deltaPhi(dphi_mb1, dphi_mb2);
+  if (has_stub_mb1 and has_stub_mb3) dPhi_barrel_dir_13 = deltaPhi(dphi_mb1, dphi_mb3);
+  if (has_stub_mb1 and has_stub_mb4) dPhi_barrel_dir_14 = deltaPhi(dphi_mb1, dphi_mb4);
+  if (has_stub_mb2 and has_stub_mb3) dPhi_barrel_dir_23 = deltaPhi(dphi_mb2, dphi_mb3);
+  if (has_stub_mb2 and has_stub_mb4) dPhi_barrel_dir_24 = deltaPhi(dphi_mb2, dphi_mb4);
+  if (has_stub_mb3 and has_stub_mb4) dPhi_barrel_dir_34 = deltaPhi(dphi_mb3, dphi_mb4);
 }
 
 
@@ -938,7 +974,74 @@ bool DisplacedMuonTriggerPtassignment::runHybrid(bool useGE21)
    return true;
 }
 
-void DisplacedMuonTriggerPtassignment::runDirectionBasedBarrel(){}
+void DisplacedMuonTriggerPtassignment::runDirectionBasedBarrel()
+{
+  // check case
+  int dt_stub_case = getBarrelStubCase(has_stub_mb1, has_stub_mb2, has_stub_mb3, has_stub_mb4);
+
+  barrel_direction_pt = -1;
+
+  switch(dt_stub_case){
+  case 0:
+    barrel_direction_pt = BarrelTriggerPtAssignmentHelper::getDirectionBasedPt2Stubs(dPhi_barrel_dir_12, "DT1_DT2");
+    break;
+  case 1:
+    barrel_direction_pt = BarrelTriggerPtAssignmentHelper::getDirectionBasedPt2Stubs(dPhi_barrel_dir_13, "DT1_DT3");
+    break;
+  case 2:
+    barrel_direction_pt = BarrelTriggerPtAssignmentHelper::getDirectionBasedPt2Stubs(dPhi_barrel_dir_14, "DT1_DT4");
+   break;
+  case 3:
+    barrel_direction_pt = BarrelTriggerPtAssignmentHelper::getDirectionBasedPt2Stubs(dPhi_barrel_dir_23, "DT2_DT3");
+    break;
+  case 4:
+    barrel_direction_pt = BarrelTriggerPtAssignmentHelper::getDirectionBasedPt2Stubs(dPhi_barrel_dir_24, "DT2_DT4");
+    break;
+  case 5:
+    barrel_direction_pt = BarrelTriggerPtAssignmentHelper::getDirectionBasedPt2Stubs(dPhi_barrel_dir_34, "DT3_DT4");
+    break;
+  case 6:
+    // first dphi is x value, second dphi is y value!!!!
+    barrel_direction_pt = BarrelTriggerPtAssignmentHelper::getDirectionBasedPt3or4Stubs(dPhi_barrel_dir_12, dPhi_barrel_dir_13, "DT1_DT2__DT1_DT3");
+    break;
+  case 7:
+    barrel_direction_pt = BarrelTriggerPtAssignmentHelper::getDirectionBasedPt3or4Stubs(dPhi_barrel_dir_12, dPhi_barrel_dir_14, "DT1_DT2__DT1_DT4");
+    break;
+  case 8:
+    barrel_direction_pt = BarrelTriggerPtAssignmentHelper::getDirectionBasedPt3or4Stubs(dPhi_barrel_dir_13, dPhi_barrel_dir_14, "DT1_DT3__DT1_DT4");
+    break;
+  case 9:
+    barrel_direction_pt = BarrelTriggerPtAssignmentHelper::getDirectionBasedPt3or4Stubs(dPhi_barrel_dir_23, dPhi_barrel_dir_24, "DT2_DT3__DT2_DT4");
+    break;
+  case 10:
+    barrel_direction_pt = BarrelTriggerPtAssignmentHelper::getDirectionBasedPt3or4Stubs(dPhi_barrel_dir_14, dPhi_barrel_dir_23, "DT1_DT4__DT2_DT3");
+    break;
+  default:
+    barrel_direction_pt = -1;
+    break;
+  };
+}
+
+int DisplacedMuonTriggerPtassignment::getBarrelStubCase(bool MB1, bool MB2, bool MB3, bool MB4)
+{
+  if (    MB1 and     MB2 and not MB3 and not MB4) return 0;
+  if (    MB1 and not MB2 and     MB3 and not MB4) return 1;
+  if (    MB1 and not MB2 and not MB3 and     MB4) return 2;
+  if (not MB1 and     MB2 and     MB3 and not MB4) return 3;
+  if (not MB1 and     MB2 and not MB3 and     MB4) return 4;
+  if (not MB1 and not MB2 and     MB3 and     MB4) return 5;
+
+  if (    MB1 and     MB2 and     MB3 and not MB4) return 6;
+  if (    MB1 and     MB2 and not MB3 and     MB4) return 7;
+  if (    MB1 and not MB2 and     MB3 and     MB4) return 8;
+  if (not MB1 and     MB2 and     MB3 and     MB4) return 9;
+
+  if (MB1 and MB2 and MB3 and MB4) return 10;
+
+  return -1;
+}
+
+
 void DisplacedMuonTriggerPtassignment::runPositionBasedBarrel(){}
 void DisplacedMuonTriggerPtassignment::runHybridBasedBarrel(){}
 
