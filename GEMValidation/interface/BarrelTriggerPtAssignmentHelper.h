@@ -39,6 +39,7 @@ bool failEllipse(float x, float y, float a, float b, float alpha, float x0=0, fl
 
 std::string getBestDPhiPair(int station1, int station2, int station3);
 std::string getBestDPhiPair(int station1, int station2, int station3, int station4);
+
 }
 
 #endif

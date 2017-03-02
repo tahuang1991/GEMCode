@@ -14,6 +14,8 @@
 #include "GEMCode/GEMValidation/interface/PtassignmentHelper.h"
 #include "GEMCode/GEMValidation/interface/BarrelTriggerPtAssignmentHelper.h"
 
+using namespace std;
+
 //endcap, we need LCTs and associated cscid, gempads and associated gemid, and all gemometry
 //to get position from fitting, we also need all comparator digis
 //step0 get LCTs and associated cscids, GEMPads and associated gemids, and geometry.
@@ -1144,4 +1146,100 @@ phiL1CSCTrack(const csc::L1Track& track)
   return phi_packed;
 }
 
+void DisplacedMuonTriggerPtassignment::calculateTTIsolation()
+{
+  for (unsigned int j=0; j<tttracks_.size(); ++j) {
+    auto l1Tk = tttracks_[j];
+    // const double l1Tk_pt = l1Tk.getMomentum().perp();
+    // const double l1Tk_eta = l1Tk.getMomentum().eta();
+    // const double l1Tk_phi = normalizedPhi(l1Tk.getMomentum().phi());
+    // const double l1Tk_charge = l1Tk.getRInv()>0? 1: -1;
+
+    // if(false) {
+    //   cout << "l1Tk " << j << endl;
+    //   cout << "l1Tk_pt " << l1Tk_pt << endl;
+    //   cout << "l1Tk_eta " << l1Tk_eta << endl;
+    //   cout << "l1Tk_phi " << l1Tk_phi << endl;
+    //   cout << "l1Tk_phi_corr " << l1Tk_phi_corr << endl;
+    //   cout << "l1Tk_charge " << l1Tk_charge << endl;
+    // }
+
+    double l1Tk_eta_prop = -99;
+    double l1Tk_phi_prop = -99;
+    GlobalPoint ex_point(extrapolateGP(l1Tk));
+    if (!(ex_point == GlobalPoint())) {
+      l1Tk_eta_prop = ex_point.eta();
+      l1Tk_phi_prop = ex_point.phi();
+      if(false) {
+        cout << "l1Tk_eta_prop " << l1Tk_eta_prop << endl;
+        cout << "l1Tk_phi_prop " << l1Tk_phi_prop << endl;
+      }
+      // const double dR_l1Mu_l1Tk_prop = reco::deltaR(l1Tk_eta_prop, l1Tk_phi_prop, event_.L1Mu_eta[i], event_.L1Mu_phi[i]);
+      // if (dR_l1Mu_l1Tk_prop < L1Mu_L1Tk_dR_min_) {
+      //   L1Mu_L1Tk_dR_min_ = dR_l1Mu_l1Tk_prop;
+      //   L1Mu_L1Tk_pt_min_ = l1Tk_pt;
+      // }
+    }
+  }
+  // end of loop on TTTracks
+
+  if (L1Mu_L1Tk_dR_min_ < 0.12 and L1Mu_L1Tk_pt_min_ > 4) isLooseVeto_ = true;
+  if (L1Mu_L1Tk_dR_min_ < 0.12 and L1Mu_L1Tk_pt_min_ > 3) isMediumVeto_ = true;
+  if (L1Mu_L1Tk_dR_min_ < 0.12 and L1Mu_L1Tk_pt_min_ > 2) isTightVeto_ = true;
+}
+
+GlobalPoint
+DisplacedMuonTriggerPtassignment::extrapolateGP(const TTTrack< Ref_PixelDigi_ > &tk, int station)
+{
+  TrajectoryStateOnSurface tsos;
+  GlobalPoint inner_point(tk.getPOCA());
+  GlobalVector inner_vec (tk.getMomentum());
+  double charge(tk.getRInv()>0? 1: -1);
+  double R, Zmin, Zmax;
+  if (station == 1){
+    R = 440.; Zmax = 600.; Zmin = -600.;
+  }
+  else if (station == 2){
+    R = 523.; Zmax = 828.; Zmin = -828.;
+  }
+  else {
+    R = 0.; Zmax = 0.; Zmin = 0.;
+  }
+
+  if (std::abs(tk.getMomentum().eta())<1.2) tsos = propagateToR(inner_point, inner_vec, charge, R);
+  else if (tk.getMomentum().eta()>1.2)      tsos = propagateToZ(inner_point, inner_vec, charge, Zmax);
+  else if (tk.getMomentum().eta()<-1.2)     tsos = propagateToZ(inner_point, inner_vec, charge, Zmin);
+  else                                      tsos = TrajectoryStateOnSurface();
+
+  if (tsos.isValid()) return tsos.globalPosition();
+  else                return GlobalPoint();
+}
+
+TrajectoryStateOnSurface
+DisplacedMuonTriggerPtassignment::propagateToZ(const GlobalPoint &inner_point, const GlobalVector &inner_vec, double charge, double z) const
+{
+  Plane::PositionType pos(0.f, 0.f, z);
+  Plane::RotationType rot;
+  Plane::PlanePointer my_plane(Plane::build(pos, rot));
+
+  FreeTrajectoryState state_start(inner_point, inner_vec, charge, &*magfield_);
+
+  TrajectoryStateOnSurface tsos(propagator_->propagate(state_start, *my_plane));
+  if (!tsos.isValid()) tsos = propagatorOpposite_->propagate(state_start, *my_plane);
+  return tsos;
+}
+
+TrajectoryStateOnSurface
+DisplacedMuonTriggerPtassignment::propagateToR(const GlobalPoint &inner_point, const GlobalVector &inner_vec, double charge, double R) const
+{
+  Cylinder::CylinderPointer my_cyl(Cylinder::build(Surface::PositionType(0,0,0), Surface::RotationType(), R));
+
+  FreeTrajectoryState state_start(inner_point, inner_vec, charge, &*magfield_);
+
+  TrajectoryStateOnSurface tsos(propagator_->propagate(state_start, *my_cyl));
+  if (!tsos.isValid()) tsos = propagatorOpposite_->propagate(state_start, *my_cyl);
+  return tsos;
+}
+
 #endif
+

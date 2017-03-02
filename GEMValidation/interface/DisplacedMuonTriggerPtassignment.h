@@ -1,4 +1,3 @@
-
 #ifndef GEMCode_GEMValidation_DisplacedMuonTriggerPtassignment_h
 #define GEMCode_GEMValidation_DisplacedMuonTriggerPtassignment_h
 
@@ -20,6 +19,13 @@
 
 #include "MagneticField/Engine/interface/MagneticField.h"
 #include "TrackingTools/GeomPropagators/interface/Propagator.h"
+#include "TrackingTools/TrajectoryState/interface/TrajectoryStateOnSurface.h"
+#include "TrackingTools/Records/interface/TrackingComponentsRecord.h"
+#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
+#include "DataFormats/GeometrySurface/interface/Plane.h"
+#include "DataFormats/GeometrySurface/interface/Cylinder.h"
+#include "DataFormats/GeometrySurface/interface/BoundCylinder.h"
+#include "DataFormats/GeometrySurface/interface/BoundDisk.h"
 
 #include "Geometry/Records/interface/MuonGeometryRecord.h"
 #include "Geometry/GEMGeometry/interface/GEMGeometry.h"
@@ -43,6 +49,9 @@
 #include "L1Trigger/DTTrackFinder/interface/L1MuDTTrack.h"
 #include "L1Trigger/DTTrackFinder/src/L1MuDTTrackSegPhi.h"
 #include "DataFormats/L1CSCTrackFinder/interface/L1CSCTrackCollection.h"
+#include "DataFormats/L1TrackTrigger/interface/L1TkMuonParticle.h"
+#include "DataFormats/L1TrackTrigger/interface/L1TkMuonParticleFwd.h"
+#include "DataFormats/L1TrackTrigger/interface/TTTrack.h"
 
 #include "CondFormats/L1TObjects/interface/L1MuTriggerScales.h"
 #include "CondFormats/L1TObjects/interface/L1MuTriggerPtScale.h"
@@ -147,6 +156,13 @@ public:
   const CSCGeometry* getCSCGeometry() const {return cscGeometry_;}
   const DTGeometry* getDTGeometry() const {return dtGeometry_;}
 
+  // TT Track veto
+  void setTTTracks(const std::vector< TTTrack< Ref_PixelDigi_ > >& tracks) {tttracks_ = tracks;}
+  void calculateTTIsolation();
+  bool isLooseVeto() const {return isLooseVeto_;}
+  bool isMediumVeto() const {return isMediumVeto_;}
+  bool isTightVeto() const {return isTightVeto_;}
+
   // pT assignment algorithms
   bool runPositionbased();
   bool runDirectionbased(bool useGE21);
@@ -230,6 +246,10 @@ public:
   void fitTrackRadius(GlobalPoint* gps, float* radius);
 
 
+  // track veto
+  GlobalPoint extrapolateGP(const TTTrack< Ref_PixelDigi_ > &tk, int station=2);
+  TrajectoryStateOnSurface propagateToZ(const GlobalPoint &, const GlobalVector &, double, double) const;
+  TrajectoryStateOnSurface propagateToR(const GlobalPoint &, const GlobalVector &, double, double) const;
 
  private:
 
@@ -349,6 +369,20 @@ public:
   float dphi_mb1, dphi_mb2, dphi_mb3, dphi_mb4; //phi + phib
   float dPhi_barrel_dir_12, dPhi_barrel_dir_13, dPhi_barrel_dir_14;
   float dPhi_barrel_dir_23, dPhi_barrel_dir_24, dPhi_barrel_dir_34;
+
+  // veto
+  std::vector< TTTrack< Ref_PixelDigi_ > > tttracks_;
+  float L1Mu_L1Tk_dR_min_;
+  float L1Mu_L1Tk_pt_min_;
+  bool isLooseVeto_;
+  bool isMediumVeto_;
+  bool isTightVeto_;
+
+  // propagators
+  edm::ESHandle<MagneticField> magfield_;
+  edm::ESHandle<Propagator> propagator_;
+  edm::ESHandle<Propagator> propagatorOpposite_;
+  edm::ESHandle<Propagator> propagatorAny_;
 };
 
 #endif
