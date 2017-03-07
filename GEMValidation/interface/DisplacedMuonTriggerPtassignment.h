@@ -177,6 +177,7 @@ public:
   float getFractionalStrip(const CSCComparatorDigi&d);
 
   float getTrackEta() const { return eta_st2; }
+  float getTrackPhi(int st) const {return gp_st_layer3[st-1].phi(); }
   int getNParity() const {return npar; }
   int getMeRing() const {return meRing; }
   float getPositionPt() const {return position_pt; }
