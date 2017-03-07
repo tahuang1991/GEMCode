@@ -21,7 +21,7 @@ std::map<std::string,std::vector<float> > DirectionBasedDeltaPhiLUT_2stubs = {
 
 // barrel trigger 3/4-station LUTs
 std::map<std::string,std::map<int, std::vector<float> > > DirectionBasedDeltaPhiLUT_3or4stubs = {
-  {"DT1_DT2__DT1_DT3", {
+{"DT1_DT2__DT1_DT3", {
       {3 , { 0.15 , 0.49 , 32.0 } }, //Acceptance 0.900069294528  //Rejection 0.681036911806
       {5 , { 0.13 , 0.45 , 30.0 } }, //Acceptance 0.900258851035  //Rejection 0.76246830093
       {7 , { 0.11 , 0.15 , 33.0 } }, //Acceptance 0.90093437602  //Rejection 0.842209072978
@@ -32,20 +32,6 @@ std::map<std::string,std::map<int, std::vector<float> > > DirectionBasedDeltaPhi
       {40 , { 0.23 , 0.05 , 25.0 } }, //Acceptance 0.901442307692  //Rejection 0.964778810933
     }
   }
-  /* {"DT1_DT2__DT1_DT4", {}}, */
-  /* {"DT1_DT2__DT2_DT3", {}}, */
-  /* {"DT1_DT2__DT2_DT4", {}}, */
-  /* {"DT1_DT3__DT1_DT4", {}}, */
-  /* {"DT1_DT3__DT2_DT3", {}}, */
-  /* {"DT1_DT3__DT3_DT4", {}}, */
-  /* {"DT1_DT4__DT2_DT4", {}}, */
-  /* {"DT1_DT4__DT3_DT4", {}}, */
-  /* {"DT2_DT3__DT2_DT4", {}}, */
-  /* {"DT2_DT3__DT3_DT4", {}}, */
-  /* {"DT3_DT4__DT3_DT4", {}} */
-  /* {"DT1_DT2__DT3_DT4", {}}, */
-  /* {"DT1_DT3__DT2_DT4", {}}, */
-  /* {"DT1_DT4__DT2_DT3", {}} */
 };
 
 

@@ -26,12 +26,22 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const CSCCorr
   : ev_(ev), es_(es), verbose_(0)
 {
   setupGeometry(es);
+
+  es_.get<IdealMagneticFieldRecord>().get(magfield_);
+  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator_);
+  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorOpposite", propagatorOpposite_);
+  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny",      propagatorAny_);
 }
 
 DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const CSCCorrelatedLCTDigiContainer lcts, const CSCDetIdContainer cscids, const edm::EventSetup& es, const edm::Event& ev)
   : ev_(ev), es_(es), verbose_(0)
 {
   setupGeometry(es);
+
+  es_.get<IdealMagneticFieldRecord>().get(magfield_);
+  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator_);
+  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorOpposite", propagatorOpposite_);
+  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny",      propagatorAny_);
 }
 
 //chamberid_lcts: LCTs matched to simmuon and their associated chamberid, detid_pads: gempads matched to simmuon and their associated detid_pads
@@ -42,6 +52,11 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
   chamberid_lcts_ = chamberid_lcts;
   detid_pads_ = detid_pads;
   ev.getByLabel("simMuonCSCDigis", "MuonCSCComparatorDigi", hCSCComparators);
+
+  es_.get<IdealMagneticFieldRecord>().get(magfield_);
+  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator_);
+  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorOpposite", propagatorOpposite_);
+  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny",      propagatorAny_);
 
   initVariables();
   for (auto idlcts : chamberid_lcts_){
@@ -140,6 +155,11 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const L1CSCTr
   setupGeometry(es);
   initVariables();
   setupTriggerScales(es);
+
+  es_.get<IdealMagneticFieldRecord>().get(magfield_);
+  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator_);
+  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorOpposite", propagatorOpposite_);
+  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny",      propagatorAny_);
 
   // first step: collect all stubs associated to the CSC TF Track
   std::map<unsigned int, CSCCorrelatedLCTDigiContainer> chamberid_lct;
@@ -277,6 +297,11 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(GlobalPoint g
 
   setupGeometry(es);
   initVariables();
+
+  es_.get<IdealMagneticFieldRecord>().get(magfield_);
+  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator_);
+  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorOpposite", propagatorOpposite_);
+  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny",      propagatorAny_);
   gp_st_layer3[0] = GlobalPoint(gp1);
   //use z>100 to make sure this is valid globalpoint
   if (fabs(gp1.z())>100) hasStub_st[0] = true;
@@ -335,6 +360,11 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const L1MuDTT
 {
   setupGeometry(es);
   initVariables();
+
+  es_.get<IdealMagneticFieldRecord>().get(magfield_);
+  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator_);
+  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorOpposite", propagatorOpposite_);
+  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny",      propagatorAny_);
 
   // check which stubs are available
   for (auto& stub: stubs){
@@ -1019,7 +1049,8 @@ void DisplacedMuonTriggerPtassignment::runDirectionBasedBarrel()
     barrel_direction_pt = BarrelTriggerPtAssignmentHelper::getDirectionBasedPt3or4Stubs(dPhi_barrel_dir_14, dPhi_barrel_dir_23, "DT1_DT4__DT2_DT3");
     break;
   default:
-    barrel_direction_pt = -1;
+    // all else fails; assign lowest possible pT
+    barrel_direction_pt = 2;
     break;
   };
 }
@@ -1150,7 +1181,7 @@ void DisplacedMuonTriggerPtassignment::calculateTTIsolation()
 {
   for (unsigned int j=0; j<tttracks_.size(); ++j) {
     auto l1Tk = tttracks_[j];
-    // const double l1Tk_pt = l1Tk.getMomentum().perp();
+    const double l1Tk_pt = l1Tk.getMomentum().perp();
     // const double l1Tk_eta = l1Tk.getMomentum().eta();
     // const double l1Tk_phi = normalizedPhi(l1Tk.getMomentum().phi());
     // const double l1Tk_charge = l1Tk.getRInv()>0? 1: -1;
@@ -1174,18 +1205,19 @@ void DisplacedMuonTriggerPtassignment::calculateTTIsolation()
         cout << "l1Tk_eta_prop " << l1Tk_eta_prop << endl;
         cout << "l1Tk_phi_prop " << l1Tk_phi_prop << endl;
       }
-      // const double dR_l1Mu_l1Tk_prop = reco::deltaR(l1Tk_eta_prop, l1Tk_phi_prop, event_.L1Mu_eta[i], event_.L1Mu_phi[i]);
-      // if (dR_l1Mu_l1Tk_prop < L1Mu_L1Tk_dR_min_) {
-      //   L1Mu_L1Tk_dR_min_ = dR_l1Mu_l1Tk_prop;
-      //   L1Mu_L1Tk_pt_min_ = l1Tk_pt;
-      // }
+      const double dR_l1Mu_l1Tk_prop = reco::deltaR(l1Tk_eta_prop, l1Tk_phi_prop,
+                                                    getTrackEta(), getTrackPhi(2));
+      if (dR_l1Mu_l1Tk_prop < L1Mu_L1Tk_dR_min_) {
+        L1Mu_L1Tk_dR_min_ = dR_l1Mu_l1Tk_prop;
+        L1Mu_L1Tk_pt_min_ = l1Tk_pt;
+      }
     }
   }
   // end of loop on TTTracks
 
-  if (L1Mu_L1Tk_dR_min_ < 0.12 and L1Mu_L1Tk_pt_min_ > 4) isLooseVeto_ = true;
-  if (L1Mu_L1Tk_dR_min_ < 0.12 and L1Mu_L1Tk_pt_min_ > 3) isMediumVeto_ = true;
-  if (L1Mu_L1Tk_dR_min_ < 0.12 and L1Mu_L1Tk_pt_min_ > 2) isTightVeto_ = true;
+  if (L1Mu_L1Tk_dR_min_ <= 0.12 and L1Mu_L1Tk_pt_min_ >= 4) isLooseVeto_ = true;
+  if (L1Mu_L1Tk_dR_min_ <= 0.12 and L1Mu_L1Tk_pt_min_ >= 3) isMediumVeto_ = true;
+  if (L1Mu_L1Tk_dR_min_ <= 0.12 and L1Mu_L1Tk_pt_min_ >= 2) isTightVeto_ = true;
 }
 
 GlobalPoint
