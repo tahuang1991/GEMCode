@@ -450,6 +450,24 @@ void DisplacedMuonTriggerPtassignment::initVariables()
   phib_mb2 = -9;
   phib_mb3 = -9;
   phib_mb4 = -9;
+
+  dPhi_barrel_dir_12 = -9;
+  dPhi_barrel_dir_13 = -9;
+  dPhi_barrel_dir_14 = -9;
+  dPhi_barrel_dir_23 = -9;
+  dPhi_barrel_dir_24 = -9;
+  dPhi_barrel_dir_34 = -9;
+
+  barrel_direction_pt = 0.0;
+  barrel_position_pt = 0.0;
+  barrel_hybrid_pt = 0.0;
+
+  L1Mu_L1Tk_dR_min_ = 999;
+  L1Mu_L1Tk_pt_min_ = 0.;
+
+  isLooseVeto_ = 0;
+  isMediumVeto_ = 0;
+  isTightVeto_ = 0;
 }
 
 
@@ -1179,6 +1197,8 @@ phiL1CSCTrack(const csc::L1Track& track)
 
 void DisplacedMuonTriggerPtassignment::calculateTTIsolation()
 {
+  // std::cout << "getTrackEta " << getTrackEta() << std::endl;
+  // std::cout << "getTrackPhi " << getTrackPhi(2) << std::endl;
   for (unsigned int j=0; j<tttracks_.size(); ++j) {
     auto l1Tk = tttracks_[j];
     const double l1Tk_pt = l1Tk.getMomentum().perp();
@@ -1202,22 +1222,34 @@ void DisplacedMuonTriggerPtassignment::calculateTTIsolation()
       l1Tk_eta_prop = ex_point.eta();
       l1Tk_phi_prop = ex_point.phi();
       if(false) {
-        cout << "l1Tk_eta_prop " << l1Tk_eta_prop << endl;
-        cout << "l1Tk_phi_prop " << l1Tk_phi_prop << endl;
+        cout << "Index " << j << endl;
+        cout << "\tl1Tk_eta_prop " << l1Tk_eta_prop << endl;
+        cout << "\tl1Tk_phi_prop " << l1Tk_phi_prop << endl;
       }
       const double dR_l1Mu_l1Tk_prop = reco::deltaR(l1Tk_eta_prop, l1Tk_phi_prop,
                                                     getTrackEta(), getTrackPhi(2));
-      if (dR_l1Mu_l1Tk_prop < L1Mu_L1Tk_dR_min_) {
+      // std::cout << "\tdR_l1Mu_l1Tk_prop " << dR_l1Mu_l1Tk_prop << std::endl;
+       if (dR_l1Mu_l1Tk_prop < L1Mu_L1Tk_dR_min_) {
         L1Mu_L1Tk_dR_min_ = dR_l1Mu_l1Tk_prop;
         L1Mu_L1Tk_pt_min_ = l1Tk_pt;
+        // std::cout << "\t\tL1Mu_L1Tk_dR_min_ " << L1Mu_L1Tk_dR_min_ << std::endl;
+        // std::cout << "\t\tL1Mu_L1Tk_pt_min_ " << L1Mu_L1Tk_pt_min_ << std::endl;
       }
     }
   }
-  // end of loop on TTTracks
+  // end of loop on TTTrack
+  // std::cout << std::endl;
+  // std::cout << "L1Mu_L1Tk_dR_min_ " << L1Mu_L1Tk_dR_min_ << std::endl;
+  // std::cout << "L1Mu_L1Tk_pt_min_ " << L1Mu_L1Tk_pt_min_ << std::endl;
 
-  if (L1Mu_L1Tk_dR_min_ <= 0.12 and L1Mu_L1Tk_pt_min_ >= 4) isLooseVeto_ = true;
-  if (L1Mu_L1Tk_dR_min_ <= 0.12 and L1Mu_L1Tk_pt_min_ >= 3) isMediumVeto_ = true;
-  if (L1Mu_L1Tk_dR_min_ <= 0.12 and L1Mu_L1Tk_pt_min_ >= 2) isTightVeto_ = true;
+  if (L1Mu_L1Tk_dR_min_ <= 0.12 and L1Mu_L1Tk_pt_min_ >= 4) isLooseVeto_ = 1;
+  if (L1Mu_L1Tk_dR_min_ <= 0.12 and L1Mu_L1Tk_pt_min_ >= 3) isMediumVeto_ = 1;
+  if (L1Mu_L1Tk_dR_min_ <= 0.12 and L1Mu_L1Tk_pt_min_ >= 2) isTightVeto_ = 1;
+
+  // std::cout << std::endl;
+  // std::cout << "isLooseVeto " << isLooseVeto_ << std::endl;
+  // std::cout << "isMediumVeto " << isMediumVeto_ << std::endl;
+  // std::cout << "isTightVeto " << isTightVeto_ << std::endl;
 }
 
 GlobalPoint
