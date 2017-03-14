@@ -180,12 +180,20 @@ L1GlobalMuonTriggerMatcher::matchGMTCandToSimTrack(const L1MuGMTCandCollection& 
 {
   if (verboseGmtCand_) cout << "Match SimTrack to GMTCands" << endl;
   int i=0;
+  bestdRGmtCand = 99;
+  GlobalPoint gp_st2(propagatedPositionSt2());
   for (auto& cand: cands) {
-    const float dR(deltaR(trk().momentum().eta(), trk().momentum().phi(), cand.etaValue(), normalizedPhi(cand.phiValue())));
+    const  float dR = deltaR(gp_st2.eta(), gp_st2.phi(), cand.etaValue(), normalizedPhi(cand.phiValue()));
+    //const float dR(deltaR(trk().momentum().eta(), trk().momentum().phi(), cand.etaValue(), normalizedPhi(cand.phiValue())));
     if (verboseGmtCand_) {
       cout << i+1 << ": pT = " << cand.ptValue() << ", eta = " << cand.etaValue() <<  ", phi = " << normalizedPhi(cand.phiValue())
 	   << ", bx = " << cand.bx() << ", charge = " << cand.charge() << ", quality = " << cand.quality() << endl;    
       cout << "\tDeltaR = " << dR << endl;
+    }
+    if (dR > deltaRGmtCand_) continue;
+    if (dR < bestdRGmtCand){
+    	bestdRGmtCand = dR;
+	bestGmtCand = cand;
     }
     matchedL1GmtCands_.push_back(cand);
     ++i;
