@@ -31,7 +31,7 @@ void L1TrackTriggerVeto::calculateTTIsolation()
     GlobalPoint ex_point(extrapolateGP(l1Tk));
     if (!(ex_point == GlobalPoint())) {
       l1Tk_eta_prop = ex_point.eta();
-      l1Tk_phi_prop = ex_point.phi();
+      l1Tk_phi_prop = normalizedPhi(ex_point.phi());
       const double dR_l1Mu_l1Tk_prop = reco::deltaR(l1Tk_eta_prop, l1Tk_phi_prop,
                                                     etaReference_, phiReference_);
 
