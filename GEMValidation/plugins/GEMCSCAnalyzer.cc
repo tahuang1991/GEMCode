@@ -15,6 +15,7 @@
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/ServiceRegistry/interface/Service.h"
+#include "FWCore/Utilities/interface/RandomNumberGenerator.h"
 #include "CommonTools/UtilAlgos/interface/TFileService.h"
 
 #include "DataFormats/Math/interface/deltaPhi.h"
@@ -29,6 +30,7 @@
 #include "GEMCode/GEMValidation/interface/DisplacedMuonTriggerPtassignment.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "CLHEP/Random/Randomize.h"
+#include "CLHEP/Random/RandFlat.h"
 
 #include "TTree.h"
 
@@ -91,6 +93,7 @@ struct MyTrackEff
   Int_t lumi;
   Int_t run;
   Int_t event;
+  Float_t rand01_v1, rand01_v2, rand01_v3;
 
   Float_t pt, eta, phi, pz;
   Char_t charge;
@@ -300,6 +303,7 @@ struct MyTrackEff
  
   //csctf
   Float_t trackpt, tracketa, trackphi;
+  Int_t trackbx;
   UInt_t quality_packed, pt_packed, eta_packed, phi_packed;
   UInt_t chargesign;
   UInt_t rank;
@@ -366,7 +370,12 @@ struct MyTrackEff
   Int_t recoChargedCandidate_nValidCSCHits;
   Int_t recoChargedCandidate_nValidRPCHits;
   Int_t recoChargedCandidate_nValidDTHits;
-
+  //L1Mu
+  Float_t bestdRGmtCand;
+  Float_t L1Mu_pt, L1Mu_eta, L1Mu_phi, L1Mu_quality, L1Mu_bx;
+  UInt_t L1Mu_charge;
+  Float_t bestDrL1MuL1CSCTrack;
+  Bool_t matchCSCTFtoL1Mu;
 
   // pt assginment
   Int_t meRing;
@@ -408,6 +417,9 @@ void MyTrackEff::init()
   lumi = -99;
   run = -99;
   event = -99;
+  rand01_v1 = 99;
+  rand01_v2 = 99;
+  rand01_v3 = 99;
 
   pt = 0.;
   phi = 0.;
@@ -699,6 +711,7 @@ void MyTrackEff::init()
   trackpt = 0 ;
   tracketa = 0;
   trackphi = -9;
+  trackbx = -9;
   quality_packed = 0;
   pt_packed = 0;
   eta_packed = 0;
@@ -791,6 +804,15 @@ void MyTrackEff::init()
   recoChargedCandidate_nValidDTHits = 0;
   recoChargedCandidate_nValidCSCHits = 0;
   recoChargedCandidate_nValidRPCHits = 0;
+  bestdRGmtCand = 99;
+  L1Mu_pt = -99; 
+  L1Mu_eta = -99;
+  L1Mu_phi = -99;
+  L1Mu_quality = -99;
+  L1Mu_bx = -99;
+  L1Mu_charge = -99;
+  bestDrL1MuL1CSCTrack = 99;
+  matchCSCTFtoL1Mu = false;
 
   npar = -1;
   npar_lct = -1;
@@ -830,6 +852,9 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("lumi", &lumi);
   t->Branch("run", &run);
   t->Branch("event", &event);
+  t->Branch("rand01_v1", &rand01_v1);
+  t->Branch("rand01_v2", &rand01_v2);
+  t->Branch("rand01_v3", &rand01_v3);
 
   t->Branch("pt", &pt);
   t->Branch("pz", &pz);
@@ -1114,6 +1139,7 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("trackpt", &trackpt);
   t->Branch("tracketa", &tracketa);
   t->Branch("trackphi", &trackphi);
+  t->Branch("trackbx", &trackbx);
   t->Branch("quality_packed",&quality_packed);
   t->Branch("rank",&rank);
   t->Branch("pt_packed",&pt_packed);
@@ -1207,6 +1233,15 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("recoChargedCandidate_nValidCSCHits", &recoChargedCandidate_nValidCSCHits); 
   t->Branch("recoChargedCandidate_nValidRPCHits", &recoChargedCandidate_nValidRPCHits); 
 
+  t->Branch("bestdRGmtCand", &bestdRGmtCand);
+  t->Branch("L1Mu_pt", &L1Mu_pt); 
+  t->Branch("L1Mu_eta", &L1Mu_eta); 
+  t->Branch("L1Mu_phi", &L1Mu_phi); 
+  t->Branch("L1Mu_quality", &L1Mu_quality); 
+  t->Branch("L1Mu_bx", &L1Mu_bx); 
+  t->Branch("L1Mu_charge", &L1Mu_charge); 
+  t->Branch("bestDrL1MuL1CSCTrack", &bestDrL1MuL1CSCTrack); 
+  t->Branch("matchCSCTFtoL1Mu", &matchCSCTFtoL1Mu); 
   
   t->Branch("meRing", &meRing); 
   t->Branch("npar", &npar); 
@@ -1258,6 +1293,7 @@ public:
   
 private:
   
+  //CLHEP::HepRandomEngine engine; 
   void bookSimTracksDeltaTree();
 
   void analyzeTrackChamberDeltas(SimTrackMatchManager& match, int trk_no);
@@ -1399,6 +1435,17 @@ bool GEMCSCAnalyzer::isSimTrackGood(const SimTrack &t)
 
 void GEMCSCAnalyzer::analyze(const edm::Event& ev, const edm::EventSetup& es)
 {
+  /*edm::Service<edm::RandomNumberGenerator> rng;
+  if(!rng.isAvailable()) {
+      throw cms::Exception("Configuration")
+	<< "MyModule requires the RandomNumberGeneratorService,\n"
+	   "which is not present in the configuration file. You must add\n"
+	   "the service in the configuration file or remove the modules that\n"
+	   "require it.\n";
+  }
+
+  engine = rng->getEngine();*/
+
   edm::Handle<edm::SimTrackContainer> sim_tracks;
   ev.getByLabel(simInputLabel_, sim_tracks);
   const edm::SimTrackContainer & sim_track = *sim_tracks.product();
@@ -1462,10 +1509,12 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   const CSCStubMatcher& match_lct = match.cscStubs();
   const TrackMatcher& match_track = match.tracks();
   const L1GlobalMuonTriggerMatcher& match_l1_gmt = match.l1GMTCands();
+//const L1GlobalMuonTriggerMatcher& match_l1gmtcand = match.l1GMTCands();
   const HLTTrackMatcher& match_hlt_track = match.hltTracks();
   const SimTrack &t = match_sh.trk();
    
-
+  float randtest1 = CLHEP::RandFlat::shoot(0.0,1.0) ;
+  float randtest2 = CLHEP::RandFlat::shoot(0.0,1.0) ;
 
   for (auto s: stations_to_use_)
   {
@@ -1474,6 +1523,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     etrk_[s].run = match.simhits().event().id().run();
     etrk_[s].lumi = match.simhits().event().id().luminosityBlock();
     etrk_[s].event = match.simhits().event().id().event();
+    etrk_[s].rand01_v1 = randtest1;
+    etrk_[s].rand01_v2 = randtest2;
+    etrk_[s].rand01_v3 = CLHEP::RandFlat::shoot(0.0,1.0);
     etrk_[s].pt = t.momentum().pt();
     etrk_[s].pz = t.momentum().pz();
     etrk_[s].phi = t.momentum().phi();
@@ -2926,6 +2978,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     etrk_[0].trackpt = besttrack->pt();
     etrk_[0].tracketa = besttrack->eta();
     etrk_[0].trackphi = besttrack->phi();
+    etrk_[0].trackbx = besttrack->bx();
   //  quality_packed;
    etrk_[0].pt_packed = besttrack->ptPacked();
    etrk_[0].eta_packed = besttrack->etaPacked();
@@ -2939,6 +2992,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
    etrk_[0].nstubs = besttrack->nStubs();
    etrk_[0].deltaR = besttrack->dr();
    etrk_[0].chargesign = besttrack->chargesign();
+   std::cout <<"CSCTF track bestdR "<< besttrack->dr() <<" pt "<< etrk_[0].trackpt<<" eta "<< etrk_[0].tracketa <<" phi "<< etrk_[0].trackphi <<" bx "<<etrk_[0].trackbx << std::endl;
    unsigned int lct1 = 999;
    auto me1b(besttrack->digiInME(1,1));
    auto me1a(besttrack->digiInME(1,4));
@@ -3123,9 +3177,45 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     std::cout << "SimTrack has GMTRegCand" << std::endl;
   }
 
-  if (match_track.gmtCands().size()) {
+  auto l1GmtCands(match_l1_gmt.L1MuGMTCands());
+  if (l1GmtCands.size()) {
     etrk_[0].has_gmtCand = 1;
-    std::cout << "SimTrack has GMTCand" << std::endl;
+    auto bestGmtCand(match_l1_gmt.bestL1MuGMTCand());
+    etrk_[0].bestdRGmtCand = match_l1_gmt.bestdRL1MuGMTCand();
+    etrk_[0].L1Mu_pt = bestGmtCand.ptValue();
+    etrk_[0].L1Mu_eta = bestGmtCand.etaValue();
+    etrk_[0].L1Mu_phi = normalizedPhi(bestGmtCand.phiValue());
+    etrk_[0].L1Mu_charge = bestGmtCand.charge();
+    etrk_[0].L1Mu_bx = bestGmtCand.bx();
+    etrk_[0].L1Mu_quality = bestGmtCand.quality();
+    std::cout << "SimTrack has GMTCand, size "<< l1GmtCands.size() <<" bestdR "<<etrk_[0].bestdRGmtCand <<" eta "<<bestGmtCand.etaValue()<<" phi "<< normalizedPhi(bestGmtCand.phiValue()) << " pt " << bestGmtCand.ptValue()<< std::endl;
+    for (unsigned int i =0; i<l1GmtCands.size(); i++){
+	auto l1Mu = l1GmtCands[i];
+	if (etrk_[0].has_tfTrack>0 and ( reco::deltaPhi(normalizedPhi(l1Mu.phiValue()), etrk_[0].trackphi) < 0.001 ) and
+		           (l1Mu.bx() == etrk_[0].trackbx) ){
+	    double drL1MuL1CSCTrack = reco::deltaR(l1Mu.etaValue(),
+					       normalizedPhi(l1Mu.phiValue()),
+					        etrk_[0].tracketa,
+						 etrk_[0].trackphi);
+	    if (drL1MuL1CSCTrack < etrk_[0].bestDrL1MuL1CSCTrack and drL1MuL1CSCTrack < 0.3){
+		std::cout <<"match CSCTF to L1Mu is true "<< std::endl;
+		etrk_[0].bestDrL1MuL1CSCTrack = drL1MuL1CSCTrack;
+		etrk_[0].matchCSCTFtoL1Mu = true;
+		etrk_[0].L1Mu_pt = l1Mu.ptValue();
+		etrk_[0].L1Mu_eta = l1Mu.etaValue();
+		etrk_[0].L1Mu_phi = normalizedPhi(l1Mu.phiValue());
+		etrk_[0].L1Mu_charge = l1Mu.charge();
+		etrk_[0].L1Mu_bx = l1Mu.bx();
+		etrk_[0].L1Mu_quality = l1Mu.quality();
+		if (bestGmtCand != l1Mu and abs(etrk_[0].tracketa)>1.2) std::cout<<"best GMTCand is not matched to CSCTF track "<< std::endl;
+	    }
+	}
+    	
+    }
+    if (abs(etrk_[0].eta)>1.2 and abs(etrk_[0].eta)<2.4 and etrk_[0].pt>5 and not(etrk_[0].matchCSCTFtoL1Mu) and etrk_[0].has_tfTrack>0)
+	std::cout <<"can not matching CSC TFTrack "<< std::endl;
+    
+
   }
 
   // L1Extra
@@ -3198,6 +3288,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 		<< " RPC " << etrk_[0].recoChargedCandidate_nValidRPCHits << std::endl;
     }
   }
+  
+
 
   for (auto s: stations_to_use_)
   {
@@ -3511,10 +3603,6 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
   tree_delta_->Branch("gem_pad_eta", &dtrk_.gem_pad_eta);
   tree_delta_->Branch("deta_sh", &dtrk_.deta_sh);
   tree_delta_->Branch("deta_dg", &dtrk_.deta_dg);
-  tree_delta_->Branch("deta_pad", &dtrk_.deta_pad);
-  tree_delta_->Branch("csc_lct_phi", &dtrk_.csc_lct_phi);
-  tree_delta_->Branch("dphi_lct_pad", &dtrk_.dphi_lct_pad);
-  tree_delta_->Branch("csc_lct_eta", &dtrk_.csc_lct_eta);
   tree_delta_->Branch("deta_lct_pad", &dtrk_.deta_lct_pad);
   //tree_delta_->Branch("", &dtrk_.);
   tree_delta_->Branch("dphi_gem_sh_csc_sh", &dtrk_.dphi_gem_sh_csc_sh);
@@ -3693,12 +3781,12 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
     
   }
 
-
   std::cout << "######  matching Tracks to Simtrack " << std::endl;
   if (match_track.tfTracks().size()) {
      TFTrack* besttrack = match_track.bestTFTrack();
      std::cout << "       Best TFTrack                  " << std::endl;
      besttrack->print();
+
 	 /*for (unsigned int i=0; i<triggerDigiIds.size(); i++)
 	 {
 	  auto id(triggerDigiIds.at(i));

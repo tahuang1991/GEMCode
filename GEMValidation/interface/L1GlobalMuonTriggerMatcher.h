@@ -27,11 +27,20 @@ class L1GlobalMuonTriggerMatcher : public BaseMatcher
 
   bool gmtCandInContainer(const L1MuGMTCand&, const L1MuGMTCandCollection&) const;
   bool isGmtCandMatched(const L1MuGMTCand&) const;
+  L1MuGMTCandCollection L1MuGMTCands() const {return matchedL1GmtCands_; }
+  L1MuGMTCand bestL1MuGMTCand() const {return bestGmtCand; }
+  float bestdRL1MuGMTCand() const {return bestdRGmtCand; }
+  
 
  private:
   
   void clear();
   void init(); 
+  float simPt;
+  float simEta;
+  float simPhi;
+  float simE;
+  float simCharge;
   
   void matchRegionalCandCSCToSimTrack(const L1MuRegionalCandCollection&); 
   void matchRegionalCandDTToSimTrack(const L1MuRegionalCandCollection&); 
@@ -81,6 +90,10 @@ class L1GlobalMuonTriggerMatcher : public BaseMatcher
   float deltaRGmtRegCandRPCb_;
   float deltaRGmtCand_;
   float deltaRL1ExtraMuon_;
+
+  float bestdRGmtCand;
+  
+  L1MuGMTCand bestGmtCand;
 
   const SimHitMatcher* simhit_matcher_;
 
