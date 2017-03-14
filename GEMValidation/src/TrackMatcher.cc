@@ -190,6 +190,7 @@ TrackMatcher::init()
 void 
 TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
 {
+  GlobalPoint gp_st2(propagatedPositionSt2());
   for (auto trk = tracks.begin(); trk != tracks.end(); trk++) {
     TFTrack *track = new TFTrack(&trk->first,&trk->second);
     track->init(muScalesHd_, muPtScaleHd_);
@@ -219,9 +220,10 @@ TrackMatcher::matchTfTrackToSimTrack(const L1CSCTrackCollection& tracks)
     }
     
    //propagate simtrack to station2
-   float phi_cor = phiHeavyCorr(simPt, simEta, simPhi, simCharge); 
-   simmuon.SetPtEtaPhiM(simPt, simEta, phi_cor, 0.1057);
-   dR = simmuon.DeltaR(templ1muon);
+   //float phi_cor = phiHeavyCorr(simPt, simEta, simPhi, simCharge); 
+   //simmuon.SetPtEtaPhiM(simPt, simEta, phi_cor, 0.1057);
+   //dR = simmuon.DeltaR(templ1muon);
+   dR = deltaR(gp_st2.eta(), gp_st2.phi(), track->eta(), track->phi());
    /*  auto lcts2(lctsInStation(2));
     auto lcts3(lctsInStation(3));
     lcts2.insert(lcts2.end(),lcts3.begin(),lcts3.end());

@@ -294,7 +294,7 @@ SimTrackMatching = cms.PSet(
         validInputTags = cms.VInputTag(cms.InputTag("simCsctfTrackDigis")),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
-        deltaR = cms.double(0.5),
+        deltaR = cms.double(0.2),
     ),
     dtTfTrack = cms.PSet(
         verbose = cms.int32(0),
@@ -413,7 +413,7 @@ SimTrackMatching = cms.PSet(
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
-        deltaR = cms.double(0.05),
+        deltaR = cms.double(0.2),
     ),
     l1ExtraMuonParticle = cms.PSet(
         verbose = cms.int32(0),
