@@ -156,12 +156,6 @@ public:
   const CSCGeometry* getCSCGeometry() const {return cscGeometry_;}
   const DTGeometry* getDTGeometry() const {return dtGeometry_;}
 
-  // TT Track veto
-  void setTTTracks(const std::vector< TTTrack< Ref_PixelDigi_ > >& tracks) {tttracks_ = tracks;}
-  void calculateTTIsolation();
-  bool isLooseVeto() const {return isLooseVeto_;}
-  bool isMediumVeto() const {return isMediumVeto_;}
-  bool isTightVeto() const {return isTightVeto_;}
 
   // pT assignment algorithms
   bool runPositionbased();
@@ -245,12 +239,6 @@ public:
                          CSCDetId chid,
                          float* fit_phi_layers, float* fit_z_layers, float& perp);
   void fitTrackRadius(GlobalPoint* gps, float* radius);
-
-
-  // track veto
-  GlobalPoint extrapolateGP(const TTTrack< Ref_PixelDigi_ > &tk, int station=2);
-  TrajectoryStateOnSurface propagateToZ(const GlobalPoint &, const GlobalVector &, double, double) const;
-  TrajectoryStateOnSurface propagateToR(const GlobalPoint &, const GlobalVector &, double, double) const;
 
  private:
 
@@ -370,20 +358,6 @@ public:
   float dphi_mb1, dphi_mb2, dphi_mb3, dphi_mb4; //phi + phib
   float dPhi_barrel_dir_12, dPhi_barrel_dir_13, dPhi_barrel_dir_14;
   float dPhi_barrel_dir_23, dPhi_barrel_dir_24, dPhi_barrel_dir_34;
-
-  // veto
-  std::vector< TTTrack< Ref_PixelDigi_ > > tttracks_;
-  float L1Mu_L1Tk_dR_min_;
-  float L1Mu_L1Tk_pt_min_;
-  bool isLooseVeto_;
-  bool isMediumVeto_;
-  bool isTightVeto_;
-
-  // propagators
-  edm::ESHandle<MagneticField> magfield_;
-  edm::ESHandle<Propagator> propagator_;
-  edm::ESHandle<Propagator> propagatorOpposite_;
-  edm::ESHandle<Propagator> propagatorAny_;
 };
 
 #endif

@@ -26,22 +26,12 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const CSCCorr
   : ev_(ev), es_(es), verbose_(0)
 {
   setupGeometry(es);
-
-  es_.get<IdealMagneticFieldRecord>().get(magfield_);
-  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator_);
-  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorOpposite", propagatorOpposite_);
-  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny",      propagatorAny_);
 }
 
 DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const CSCCorrelatedLCTDigiContainer lcts, const CSCDetIdContainer cscids, const edm::EventSetup& es, const edm::Event& ev)
   : ev_(ev), es_(es), verbose_(0)
 {
   setupGeometry(es);
-
-  es_.get<IdealMagneticFieldRecord>().get(magfield_);
-  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator_);
-  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorOpposite", propagatorOpposite_);
-  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny",      propagatorAny_);
 }
 
 //chamberid_lcts: LCTs matched to simmuon and their associated chamberid, detid_pads: gempads matched to simmuon and their associated detid_pads
@@ -52,11 +42,6 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
   chamberid_lcts_ = chamberid_lcts;
   detid_pads_ = detid_pads;
   ev.getByLabel("simMuonCSCDigis", "MuonCSCComparatorDigi", hCSCComparators);
-
-  es_.get<IdealMagneticFieldRecord>().get(magfield_);
-  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator_);
-  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorOpposite", propagatorOpposite_);
-  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny",      propagatorAny_);
 
   initVariables();
   for (auto idlcts : chamberid_lcts_){
@@ -155,11 +140,6 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const L1CSCTr
   setupGeometry(es);
   initVariables();
   setupTriggerScales(es);
-
-  es_.get<IdealMagneticFieldRecord>().get(magfield_);
-  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator_);
-  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorOpposite", propagatorOpposite_);
-  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny",      propagatorAny_);
 
   // first step: collect all stubs associated to the CSC TF Track
   std::map<unsigned int, CSCCorrelatedLCTDigiContainer> chamberid_lct;
@@ -298,10 +278,6 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(GlobalPoint g
   setupGeometry(es);
   initVariables();
 
-  es_.get<IdealMagneticFieldRecord>().get(magfield_);
-  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator_);
-  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorOpposite", propagatorOpposite_);
-  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny",      propagatorAny_);
   gp_st_layer3[0] = GlobalPoint(gp1);
   //use z>100 to make sure this is valid globalpoint
   if (fabs(gp1.z())>100) hasStub_st[0] = true;
@@ -360,11 +336,6 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const L1MuDTT
 {
   setupGeometry(es);
   initVariables();
-
-  es_.get<IdealMagneticFieldRecord>().get(magfield_);
-  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator_);
-  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorOpposite", propagatorOpposite_);
-  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny",      propagatorAny_);
 
   // check which stubs are available
   for (auto& stub: stubs){
@@ -461,13 +432,6 @@ void DisplacedMuonTriggerPtassignment::initVariables()
   barrel_direction_pt = 0.0;
   barrel_position_pt = 0.0;
   barrel_hybrid_pt = 0.0;
-
-  L1Mu_L1Tk_dR_min_ = 999;
-  L1Mu_L1Tk_pt_min_ = 0.;
-
-  isLooseVeto_ = 0;
-  isMediumVeto_ = 0;
-  isTightVeto_ = 0;
 }
 
 
@@ -1193,81 +1157,6 @@ phiL1CSCTrack(const csc::L1Track& track)
   if(gbl_phi > 143) gbl_phi -= 143;
   double phi_packed = gbl_phi & 0xff;
   return phi_packed;
-}
-
-void DisplacedMuonTriggerPtassignment::calculateTTIsolation()
-{
-  for (unsigned int j=0; j<tttracks_.size(); ++j) {
-    auto l1Tk = tttracks_[j];
-    const double l1Tk_pt = l1Tk.getMomentum().perp();
-
-    double l1Tk_eta_prop = -99;
-    double l1Tk_phi_prop = -99;
-    GlobalPoint ex_point(extrapolateGP(l1Tk));
-    if (!(ex_point == GlobalPoint())) {
-      l1Tk_eta_prop = ex_point.eta();
-      l1Tk_phi_prop = ex_point.phi();
-      const double dR_l1Mu_l1Tk_prop = reco::deltaR(l1Tk_eta_prop, l1Tk_phi_prop,
-                                                    getTrackEta(), getTrackPhi(2));
-
-      if (dR_l1Mu_l1Tk_prop <= 0.12 and l1Tk_pt >= 4) isLooseVeto_ = 1;
-      if (dR_l1Mu_l1Tk_prop <= 0.12 and l1Tk_pt >= 3) isMediumVeto_ = 1;
-      if (dR_l1Mu_l1Tk_prop <= 0.12 and l1Tk_pt >= 2) isTightVeto_ = 1;
-    }
-  }
-}
-
-GlobalPoint
-DisplacedMuonTriggerPtassignment::extrapolateGP(const TTTrack< Ref_PixelDigi_ > &tk, int station)
-{
-  TrajectoryStateOnSurface tsos;
-  GlobalPoint inner_point(tk.getPOCA());
-  GlobalVector inner_vec (tk.getMomentum());
-  double charge(tk.getRInv()>0? 1: -1);
-  double R, Zmin, Zmax;
-  if (station == 1){
-    R = 440.; Zmax = 600.; Zmin = -600.;
-  }
-  else if (station == 2){
-    R = 523.; Zmax = 828.; Zmin = -828.;
-  }
-  else {
-    R = 0.; Zmax = 0.; Zmin = 0.;
-  }
-
-  if (std::abs(tk.getMomentum().eta())<1.2) tsos = propagateToR(inner_point, inner_vec, charge, R);
-  else if (tk.getMomentum().eta()>1.2)      tsos = propagateToZ(inner_point, inner_vec, charge, Zmax);
-  else if (tk.getMomentum().eta()<-1.2)     tsos = propagateToZ(inner_point, inner_vec, charge, Zmin);
-  else                                      tsos = TrajectoryStateOnSurface();
-
-  if (tsos.isValid()) return tsos.globalPosition();
-  else                return GlobalPoint();
-}
-
-TrajectoryStateOnSurface
-DisplacedMuonTriggerPtassignment::propagateToZ(const GlobalPoint &inner_point, const GlobalVector &inner_vec, double charge, double z) const
-{
-  Plane::PositionType pos(0.f, 0.f, z);
-  Plane::RotationType rot;
-  Plane::PlanePointer my_plane(Plane::build(pos, rot));
-
-  FreeTrajectoryState state_start(inner_point, inner_vec, charge, &*magfield_);
-
-  TrajectoryStateOnSurface tsos(propagator_->propagate(state_start, *my_plane));
-  if (!tsos.isValid()) tsos = propagatorOpposite_->propagate(state_start, *my_plane);
-  return tsos;
-}
-
-TrajectoryStateOnSurface
-DisplacedMuonTriggerPtassignment::propagateToR(const GlobalPoint &inner_point, const GlobalVector &inner_vec, double charge, double R) const
-{
-  Cylinder::CylinderPointer my_cyl(Cylinder::build(Surface::PositionType(0,0,0), Surface::RotationType(), R));
-
-  FreeTrajectoryState state_start(inner_point, inner_vec, charge, &*magfield_);
-
-  TrajectoryStateOnSurface tsos(propagator_->propagate(state_start, *my_cyl));
-  if (!tsos.isValid()) tsos = propagatorOpposite_->propagate(state_start, *my_cyl);
-  return tsos;
 }
 
 #endif
