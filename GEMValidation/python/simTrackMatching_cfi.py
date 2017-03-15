@@ -289,7 +289,7 @@ SimTrackMatching = cms.PSet(
     l1track = cms.PSet(
         verbose = cms.int32(0),
         run = cms.bool(True),
-	validInputTags = cms.VInputTag(ccms.InputTag("TTTracksFromPixelDigis", "Level1TTTracks")),
+	validInputTags = cms.VInputTag(cms.InputTag("TTTracksFromPixelDigis", "Level1TTTracks")),
     ),
     ## TrackFinder tracks
     cscTfTrack = cms.PSet(
