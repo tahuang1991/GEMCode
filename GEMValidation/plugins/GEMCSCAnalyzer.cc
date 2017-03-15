@@ -1540,13 +1540,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   float randtest1 = CLHEP::RandFlat::shoot(0.0,1.0) ;
   float randtest2 = CLHEP::RandFlat::shoot(0.0,1.0) ;
 
-  edm::Handle< std::vector< TTTrack< Ref_PixelDigi_ > > > TTTrackHandle;
-  match_sh.event().getByLabel("TTTracksFromPixelDigis", "Level1TTTracks", TTTrackHandle);
-  std::vector< TTTrack< Ref_PixelDigi_ > > TTTracks = *TTTrackHandle.product();
-
-  L1TrackTriggerVeto trkVeto(TTTracks, match_sh.eventSetup(), match_sh.event());
-  trkVeto.setEtaPhiReference(t.momentum().eta(), normalizedPhi(t.momentum().phi()));
-  trkVeto.calculateTTIsolation();
+  L1TrackTriggerVeto trkVeto(cfg_, match_sh.eventSetup(), match_sh.event(),
+                             t.momentum().eta(), normalizedPhi(t.momentum().phi()));
 
   for (auto s: stations_to_use_)
   {
@@ -3249,9 +3244,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     }
 
     // track trigger veto
-    L1TrackTriggerVeto trkVeto(TTTracks, match_sh.eventSetup(), match_sh.event());
-    trkVeto.setEtaPhiReference(etrk_[0].L1Mu_eta, normalizedPhi(etrk_[0].L1Mu_phi));
-    trkVeto.calculateTTIsolation();
+    L1TrackTriggerVeto trkVeto(cfg_, match_sh.eventSetup(), match_sh.event(), etrk_[0].L1Mu_eta, normalizedPhi(etrk_[0].L1Mu_phi));
     etrk_[0].isL1LooseVeto = trkVeto.isLooseVeto();
     etrk_[0].isL1MediumVeto = trkVeto.isMediumVeto();
     etrk_[0].isL1TightVeto = trkVeto.isTightVeto();
