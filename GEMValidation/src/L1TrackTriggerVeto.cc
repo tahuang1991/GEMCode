@@ -1,11 +1,13 @@
 #include "GEMCode/GEMValidation/interface/L1TrackTriggerVeto.h"
+#include "GEMCode/GEMValidation/interface/Helpers.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
 #include "DataFormats/Math/interface/deltaR.h"
 
-L1TrackTriggerVeto::L1TrackTriggerVeto(const std::vector< TTTrack< Ref_PixelDigi_ > >& tracks,
+L1TrackTriggerVeto::L1TrackTriggerVeto(const edm::ParameterSet& ps,
                                        const edm::EventSetup& es,
-                                       const edm::Event& ev)
-  : ev_(ev), es_(es)
+                                       const edm::Event& ev,
+                                       float eta, float phi)
+  : ps_(ps), ev_(ev), es_(es), etaReference_(eta), phiReference_(phi)
 {
   es_.get<IdealMagneticFieldRecord>().get(magfield_);
   es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator_);
@@ -16,14 +18,22 @@ L1TrackTriggerVeto::L1TrackTriggerVeto(const std::vector< TTTrack< Ref_PixelDigi
   isMediumVeto_ = 0;
   isTightVeto_ = 0;
 
-  tttracks_ = tracks;
+  auto l1track = ps_.getParameter<edm::ParameterSet>("l1track");
+  trackInput_ = l1track.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  verbose_ = l1track.getParameter<int>("verbose");
+  run_ = l1track.getParameter<bool>("run");
+
+  edm::Handle< std::vector< TTTrack< Ref_PixelDigi_ > > > TTTrackHandle;
+  if (gemvalidation::getByLabel(trackInput_, TTTrackHandle, ev_) and run_) {
+    calculateTTIsolation(*TTTrackHandle.product());
+  }
 }
 
 
-void L1TrackTriggerVeto::calculateTTIsolation()
+void L1TrackTriggerVeto::calculateTTIsolation(const std::vector< TTTrack< Ref_PixelDigi_ > >& TTTracks)
 {
-  for (unsigned int j=0; j<tttracks_.size(); ++j) {
-    auto l1Tk = tttracks_[j];
+  for (unsigned int j=0; j<TTTracks.size(); ++j) {
+    auto l1Tk = TTTracks[j];
     const double l1Tk_pt = l1Tk.getMomentum().perp();
 
     double l1Tk_eta_prop = -99;
