@@ -2464,7 +2464,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     auto GPsPad4 = match_gd.positionPad4InDetId(d);
     auto GPsPad8 = match_gd.positionPad8InDetId(d);
     GEMDetId id_tmp(id.region(), id.ring(), id.station(), id.layer(), id.chamber(), 0);
-    if (GPsPad1.size()==0 or match_sh.hitsInSuperChamber(id_tmp.rawId()).size()==0) continue;
+    //if (GPsPad1.size()==0 or match_sh.hitsInSuperChamber(id_tmp.rawId()).size()==0) continue;
+    if (GPsPad1.size()==0) continue;
     float dphi1 = 99;
     float dphi2 = 99;
     float dphi4 = 99;
@@ -2486,7 +2487,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	    lct_phi = etrk_[st].phi_lct_even;
 	    lct_fit_phi = etrk_[st].phi_layer3_fit_even;
 	}
-	phi_pad = etrk_[st].phi_pad_odd;
+	phi_pad = etrk_[st].phi_pad_even;
 	phi_gemsh = etrk_[st].phi_gemsh_even;
     }
     GlobalPoint gp1, gp2, gp4, gp8;
