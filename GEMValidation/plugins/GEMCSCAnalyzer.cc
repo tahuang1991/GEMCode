@@ -2595,7 +2595,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     auto GPsPad4 = match_gd.positionPad4InDetId(d);
     auto GPsPad8 = match_gd.positionPad8InDetId(d);
     GEMDetId id_tmp(id.region(), id.ring(), id.station(), id.layer(), id.chamber(), 0);
-    if (GPsPad1.size()==0 or match_sh.hitsInSuperChamber(id_tmp.rawId()).size()==0) continue;
+    if (GPsPad1.size()==0) continue;
     float dphi1 = 99;
     float dphi2 = 99;
     float dphi4 = 99;
