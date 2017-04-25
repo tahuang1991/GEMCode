@@ -5,7 +5,7 @@ SimTrackMatching = cms.PSet(
     # common
     cscStations = cms.vstring("CSC_ALL", "CSC_ME11", "CSC_ME1a", "CSC_ME1b", "CSC_ME12", "CSC_ME13",
                               "CSC_ME21", "CSC_ME22", "CSC_ME31", "CSC_ME32", "CSC_ME41", "CSC_ME42"),
-    dtStations = cms.vstring("DT_ALL", 
+    dtStations = cms.vstring("DT_ALL",
                              "DT_MB01", "DT_MB02", "DT_MB03", "DT_MB04",
                              "DT_MB11p", "DT_MB12p", "DT_MB13p", "DT_MB14p",
                              "DT_MB21p", "DT_MB22p", "DT_MB23p", "DT_MB24p",
@@ -97,7 +97,7 @@ SimTrackMatching = cms.PSet(
     ),
     me0DigiPreReco = cms.PSet(
         verbose = cms.int32(0),
-        validInputTags = cms.InputTag("simMuonME0Digis"),
+        validInputTags = cms.InputTag("simMuonME0ReDigis"),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
@@ -292,7 +292,7 @@ SimTrackMatching = cms.PSet(
         run = cms.bool(False),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
-        deltaR = cms.double(0.05),        
+        deltaR = cms.double(0.05),
     ),
     rpcTfTrack = cms.PSet(
         verbose = cms.int32(0),
@@ -300,7 +300,7 @@ SimTrackMatching = cms.PSet(
         run = cms.bool(False),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
-        deltaR = cms.double(0.05),        
+        deltaR = cms.double(0.05),
     ),
     ## TrackFinder candidates
     cscTfCand = cms.PSet(
@@ -334,7 +334,7 @@ SimTrackMatching = cms.PSet(
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
         deltaR = cms.double(0.05),
-    ),    
+    ),
     displacedGenMu = cms.PSet(
 	validInputTags = cms.InputTag("genParticles"),
 	verbose = cms.int32(0),
@@ -424,14 +424,14 @@ SimTrackMatching = cms.PSet(
     ),
     recoChargedCandidate = cms.PSet(
         verbose = cms.int32(0),
-        validInputTags = cms.InputTag("hltL2MuonCandidatesNoVtx"), 
+        validInputTags = cms.InputTag("hltL2MuonCandidatesNoVtx"),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
     ),
     recoMuon = cms.PSet(
         verbose = cms.int32(0),
-        validInputTags = cms.InputTag("hltGlbTrkMuonsNoVtx"), 
+        validInputTags = cms.InputTag("hltGlbTrkMuonsNoVtx"),
         run = cms.bool(True),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),

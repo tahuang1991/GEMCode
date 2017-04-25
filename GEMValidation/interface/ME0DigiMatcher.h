@@ -5,7 +5,7 @@
 
  Description: Matching of Digis for SimTrack in ME0
 
- Original Author:  "Vadim Khotilovich"
+ Original Author:  "Sven Dildick"
 */
 
 #include "GEMCode/GEMValidation/interface/DigiMatcher.h"
@@ -26,7 +26,7 @@ class ME0DigiMatcher : public DigiMatcher
 public:
 
   ME0DigiMatcher(SimHitMatcher& sh, edm::EDGetTokenT<ME0DigiPreRecoCollection>& me0DigiInput_);
-  
+
   ~ME0DigiMatcher();
 
   // partition ME0 detIds with digis
