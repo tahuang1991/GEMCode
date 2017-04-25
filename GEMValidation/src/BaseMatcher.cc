@@ -272,3 +272,13 @@ bool BaseMatcher::passDPhicut(CSCDetId id, int chargesign, float dphi, float pt)
 }
 
 
+const CSCLayerGeometry*
+BaseMatcher::retriveCSCKeyLayerGeometry(int rawid) const 
+{
+  const CSCChamber* cscChamber(cscGeometry_->chamber(CSCDetId(rawid)));
+  const CSCLayer* cscKeyLayer(cscChamber->layer(3));
+  const CSCLayerGeometry* cscKeyLayerGeometry(cscKeyLayer->geometry());
+  return cscKeyLayerGeometry; 
+
+
+}

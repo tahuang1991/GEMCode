@@ -9,10 +9,6 @@ L1TrackTriggerVeto::L1TrackTriggerVeto(const edm::ParameterSet& ps,
                                        float eta, float phi)
   : ps_(ps), ev_(ev), es_(es), etaReference_(eta), phiReference_(phi)
 {
-  es_.get<IdealMagneticFieldRecord>().get(magfield_);
-  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator_);
-  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorOpposite", propagatorOpposite_);
-  es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny",      propagatorAny_);
 
   isLooseVeto_ = 0;
   isMediumVeto_ = 0;
@@ -25,6 +21,10 @@ L1TrackTriggerVeto::L1TrackTriggerVeto(const edm::ParameterSet& ps,
 
   edm::Handle< std::vector< TTTrack< Ref_PixelDigi_ > > > TTTrackHandle;
   if (gemvalidation::getByLabel(trackInput_, TTTrackHandle, ev_) and run_) {
+      es_.get<IdealMagneticFieldRecord>().get(magfield_);
+      es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator_);
+      es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorOpposite", propagatorOpposite_);
+      es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAny",      propagatorAny_);
     calculateTTIsolation(*TTTrackHandle.product());
   }
 }

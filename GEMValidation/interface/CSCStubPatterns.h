@@ -111,6 +111,8 @@ std::vector< std::vector<std::vector<int> > > patIndexToPatternDelta {
   pat0delta, pat1delta, pat2delta, pat3delta, pat4delta, pat5delta, pat6delta, pat7delta, pat8delta, pat9delta, patAdelta 
  }; 
 
+//int patternBend[10] = {-1, -1, 5, 4, 3, 2, 1};
+
 bool 
 comparatorInLCTPattern(int keyStrip, int pattern, int layer, int halfStrip)
 {
