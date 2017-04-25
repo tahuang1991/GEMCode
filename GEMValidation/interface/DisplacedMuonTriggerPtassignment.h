@@ -107,7 +107,9 @@ public:
   DisplacedMuonTriggerPtassignment(std::map<unsigned int, CSCCorrelatedLCTDigiContainer> chamberid_lct,
                                    std::map<unsigned int, GEMCSCPadDigiContainer> detid_pads,
                                    const edm::EventSetup& es,
-                                   const edm::Event& iEvent);
+                                   const edm::Event& iEvent, 
+				   int stripBits_ = -1, 
+				   bool useFit_ = true);
 
   // starting from a CSC TF Track and the CSC LCT collection
   DisplacedMuonTriggerPtassignment(const L1CSCTrack&,
@@ -179,6 +181,7 @@ public:
   float getHybridPt() const {return hybrid_pt; }
   float assignedPositionPt();
   float assignedDirectionPt();
+  float getxfactor() const { return xfactor; }
   float getdeltaY12() const { return deltaY12; }
   float getdeltaY23() const { return deltaY23; }
   float getdeltaY123() const { return ddY123; }
@@ -198,6 +201,8 @@ public:
 
   int getBarrelStubCase(bool, bool, bool, bool);
 
+  void setUseFit(bool x) { useFit = x; }
+  void setStripBits(int x) { stripBits = x; }
   void setCharge(int x) { charge = x; }
   void setRadiusSt(float x, int st) { radius_st_ME[st-1] = x; }
   void setNParity(int x) { npar=x; }
@@ -223,10 +228,6 @@ public:
   //pt assignment
   float deltaYcalculation(GlobalPoint gp1, GlobalPoint gp2) const;
   float deltadeltaYcalculation(GlobalPoint gp1, GlobalPoint gp2, GlobalPoint gp3, float eta, int par) const;
-  //float PhiMomentum(float dphi, float phi_position, int st, bool evenodd);
-  //float PhiMomentum_Radius(float dphi, float phi_position, float radius_csc, float radius_gem);
-  //float PhiMomentum_Xfactor(float dphi, float phi_position, float xfactor);
-  //float xFactocalculation(float r1, float r2, float
   //
   //
   //r3);//?
@@ -293,6 +294,7 @@ public:
   void globalPositionOfLCT(CSCCorrelatedLCTDigiContainer stubs, CSCDetId chid);
   void globalPositionOfGEMPad(const GEMCSCPadDigi gempad, GEMDetId gemid);
   void globalPositionOfGEMPad(GEMCSCPadDigiContainer gempads, GEMDetId gemid);
+  void globalPositionOfLCTFromPattern(const CSCCorrelatedLCTDigi stub, CSCDetId chid);
 
 
   //endcap, direction based
@@ -307,6 +309,8 @@ public:
   float eta_st2;
   int npar;
   int meRing ;
+  int stripBits;
+  bool useFit;
   float eta_st[4] = {-9, -9, -9, -9};
   float phi_gem[2] = {-9, -9};
   float dphi_gemcsc_st[2] = {-99, -99};

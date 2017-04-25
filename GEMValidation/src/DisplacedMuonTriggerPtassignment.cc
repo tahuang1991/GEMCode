@@ -35,8 +35,8 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const CSCCorr
 }
 
 //chamberid_lcts: LCTs matched to simmuon and their associated chamberid, detid_pads: gempads matched to simmuon and their associated detid_pads
-DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsigned int, CSCCorrelatedLCTDigiContainer> chamberid_lcts, std::map<unsigned int, GEMCSCPadDigiContainer> detid_pads, const edm::EventSetup& es, const edm::Event& ev)
-  : ev_(ev), es_(es), verbose_(0)
+DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsigned int, CSCCorrelatedLCTDigiContainer> chamberid_lcts, std::map<unsigned int, GEMCSCPadDigiContainer> detid_pads, const edm::EventSetup& es, const edm::Event& ev, int stripBits_, bool useFit_)
+  : ev_(ev), es_(es), verbose_(0), stripBits(stripBits_), useFit(useFit_)
 {
   setupGeometry(es);
   chamberid_lcts_ = chamberid_lcts;
@@ -598,6 +598,10 @@ void DisplacedMuonTriggerPtassignment::fitComparatorsLCT(const CSCComparatorDigi
   LocalPoint csc_intersect = layer_geo->intersectionOfStripAndWire(fractional_strip, wire);
   GlobalPoint csc_gp = cscGeometry_->idToDet(key_id)->surface().toGlobal(csc_intersect);
   perp = csc_gp.perp();
+  float stripPhiPitch = layer_geo->stripPhiPitch();
+  if (stripBits > 0)
+      stripPhiPitch = stripPhiPitch/stripBits;
+
   // use average perp
   //perp = perp/phis.size();
   // do a fit to the comparator digis
@@ -614,6 +618,8 @@ void DisplacedMuonTriggerPtassignment::fitComparatorsLCT(const CSCComparatorDigi
   for (int i=0; i<6; i++){
       fit_z_layers[i] = cscChamber->layer(i+1)->centerOfStrip(20).z();
       fit_phi_layers[i] = PtassignmentHelper::normalizePhi(alpha + beta * fit_z_layers[i]);
+      if (stripBits > 0)
+      	fit_phi_layers[i] = (std::floor(fit_phi_layers[i]/stripPhiPitch) + 0.5)*stripPhiPitch;
       if (verbose_>0)
       	std::cout <<"i "<< i <<" fit_z "<< fit_z_layers[i]<< " fit_phi "<< fit_phi_layers[i]<<" perp "<< perp << std::endl;
   }
@@ -650,6 +656,46 @@ void DisplacedMuonTriggerPtassignment::fitTrackRadius(GlobalPoint* gps, float* r
 	    std::cout <<"station "<< i+1 <<" z "<< gps[i].z() <<" radius from gp "<< gps[i].perp()<<" from fit "<< radius[i]<< std::endl;
 	}
   }
+
+
+}
+
+void DisplacedMuonTriggerPtassignment::globalPositionOfLCTFromPattern(const CSCCorrelatedLCTDigi stub, CSCDetId chid)
+{
+  const int LCT_BEND_PATTERN[11] = { -99,  -5,  4, -4,  3, -3,  2, -2,  1, -1,  0};
+  int pattern = stub.getPattern();
+  if (pattern>=2){
+      int st = chid.station();
+      int hs = stub.getStrip(); 
+      int hs_layer1 = hs + LCT_BEND_PATTERN[pattern]; 
+      int hs_layer6 = hs - LCT_BEND_PATTERN[pattern]; 
+      auto cscChamber = cscGeometry_->chamber(chid);
+      CSCDetId detid_layer1(chid.endcap(), chid.station(), chid.ring(), chid.chamber(), CSCConstants::KEY_CLCT_LAYER-2);
+      auto layer1_geo = cscChamber->layer(CSCConstants::KEY_CLCT_LAYER-2)->geometry();
+      float fractional_strip1 = 0.5*(hs_layer1+1)-0.25;
+      float wire1 = layer1_geo->middleWireOfGroup(stub.getKeyWG() + 1);
+      LocalPoint csc_intersect1 = layer1_geo->intersectionOfStripAndWire(fractional_strip1, wire1);
+      GlobalPoint csc_gp1 = cscGeometry_->idToDet(detid_layer1)->surface().toGlobal(csc_intersect1);
+
+      CSCDetId detid_layer3(chid.endcap(), chid.station(), chid.ring(), chid.chamber(), CSCConstants::KEY_CLCT_LAYER);
+      auto layer3_geo = cscChamber->layer(CSCConstants::KEY_CLCT_LAYER)->geometry();
+      float fractional_strip3 = 0.5*(hs+1)-0.25;
+      float wire3 = layer3_geo->middleWireOfGroup(stub.getKeyWG() + 1);
+      LocalPoint csc_intersect3 = layer3_geo->intersectionOfStripAndWire(fractional_strip3, wire3);
+      GlobalPoint csc_gp3 = cscGeometry_->idToDet(detid_layer3)->surface().toGlobal(csc_intersect3);
+
+      CSCDetId detid_layer6(chid.endcap(), chid.station(), chid.ring(), chid.chamber(), CSCConstants::KEY_CLCT_LAYER+3);
+      auto layer6_geo = cscChamber->layer(CSCConstants::KEY_CLCT_LAYER+3)->geometry();
+      float fractional_strip6 = 0.5*(hs_layer6+1)-0.25;
+      float wire6 = layer6_geo->middleWireOfGroup(stub.getKeyWG() + 1);
+      LocalPoint csc_intersect6 = layer6_geo->intersectionOfStripAndWire(fractional_strip6, wire6);
+      GlobalPoint csc_gp6 = cscGeometry_->idToDet(detid_layer6)->surface().toGlobal(csc_intersect6);
+      //std::cout <<"globalPositionOfLCTFromPattern "<< pattern <<" layer1 phi "<< csc_gp1.phi()<<" layer6 phi "<< csc_gp6.phi() << std::endl;
+      gp_st_layer1[st-1] = csc_gp1; phi_st_layers[st-1][0] = csc_gp1.phi(); z_st_layers[st-1][0] = csc_gp1.z();
+      gp_st_layer3[st-1] = csc_gp3; phi_st_layers[st-1][2] = csc_gp3.phi(); z_st_layers[st-1][2] = csc_gp3.z();
+      gp_st_layer6[st-1] = csc_gp6; phi_st_layers[st-1][5] = csc_gp6.phi(); z_st_layers[st-1][5] = csc_gp6.z();
+  }
+
 
 
 }
@@ -701,7 +747,10 @@ void DisplacedMuonTriggerPtassignment::globalPositionOfLCT(CSCCorrelatedLCTDigiC
    }
   if (beststub >= stubs.size())
       std::cout <<"error beststub >= stubs.size() , beststub "<< beststub <<" stubs size "<< stubs.size() << std::endl;
-  globalPositionOfLCT(stubs[beststub], chid);
+  if (useFit)
+      globalPositionOfLCT(stubs[beststub], chid);
+  else 
+      globalPositionOfLCTFromPattern(stubs[beststub], chid);
   if (verbose_>0)
       std::cout <<"LCT position, chid "<< chid<<" hs "<<stubs[beststub].getStrip()+1<<" wg "<< stubs[beststub].getKeyWG()+1 <<" gp eta "<< gp_st_layer3[st-1].eta()<<" phi "<<gp_st_layer3[st-1].phi()<<" perp "<< gp_st_layer3[st-1].perp() << std::endl;
 }

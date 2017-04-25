@@ -165,6 +165,14 @@ struct MyTrackEff
   Char_t has_csc_strips; // #layers with comparator digis > minHitsChamber    bit1: in odd, bit2: even
   Char_t has_csc_wires; // #layers with wire digis > minHitsChamber    bit1: in odd, bit2: even
   Float_t phi_layer1_fit_even, phi_layer3_fit_even, phi_layer6_fit_even, phi_layer1_fit_odd, phi_layer3_fit_odd, phi_layer6_fit_odd;
+  Float_t phi_layer1_fit_even_v8, phi_layer6_fit_even_v8, phi_layer1_fit_odd_v8, phi_layer6_fit_odd_v8;
+  Float_t phi_layer3_fit_even_v4, phi_layer3_fit_odd_v4;
+  Float_t phi_layer3_fit_even_v8, phi_layer3_fit_odd_v8;
+  Float_t phi_layer3_fit_even_v16, phi_layer3_fit_odd_v16;
+  Int_t dphi_layer16_fit_even_v4, dphi_layer16_fit_odd_v4;
+  Int_t dphi_layer16_fit_even_v8, dphi_layer16_fit_odd_v8;
+  Int_t dphi_layer16_fit_even_v16, dphi_layer16_fit_odd_v16;
+  Float_t stripPhiPitch;
 
   Char_t has_clct; // bit1: in odd, bit2: even
   Char_t has_alct; // bit1: in odd, bit2: even
@@ -381,16 +389,21 @@ struct MyTrackEff
 
   // pt assginment
   Int_t meRing;
-  Float_t phiM_gemcsc_even,phiM_gemcsc_odd;
+  Float_t phiM_gemcsc_sh_even,phiM_gemcsc_sh_odd;
   Float_t phiM_st1_sh, phiM_st2_sh;
   Float_t phiM_st12_sh, phiM_st23_sh;
   Float_t phiM_fitxyz_even,phiM_fitxyz_odd;
-  Float_t phiM_st1_L1_1, phiM_st2_L1_1, phiM_st1_L1_2, phiM_st2_L1_2, phiM_st1_L1_3, phiM_st2_L1_3;
-  Float_t phiM_st12_L1, phiM_st23_L1;
-  Float_t phiM_st1_test, phiM_st2_test, phiM_st12_test, phiM_st23_test;
+  Float_t phiM_st1_L1_v4, phiM_st2_L1_v4, phiM_st1_L1_v8, phiM_st2_L1_v8, phiM_st1_L1_v16, phiM_st2_L1_v16;
+  Float_t phiM_st1_L1_v4_csc, phiM_st2_L1_v4_csc, phiM_st1_L1_v8_csc, phiM_st2_L1_v8_csc, phiM_st1_L1_v16_csc, phiM_st2_L1_v16_csc;
+  Float_t phiM_st1_L1, phiM_st2_L1, phiM_st12_L1, phiM_st23_L1, phiM_st1_L1_csc, phiM_st2_L1_csc;
+  Float_t phiM_st1_lct, phiM_st2_lct, phiM_st12_lct, phiM_st23_lct, phiM_st1_lct_csc, phiM_st2_lct_csc;
   Float_t pt_sh_even,pt_sh_odd,ptphi_sh_even,ptphi_sh_odd,pteta_sh_even,pteta_sh_odd;
   Float_t ptphi_gemsh_odd, ptphi_gemsh_even;
   Float_t dphi_dir_st1_st2_sh, dphi_dir_st1_st2_L1, dphi_dir_st1_st2_L1_csc;
+  Float_t dphi_dir_st1_st2_L1_v4, dphi_dir_st1_st2_L1_v4_csc;
+  Float_t dphi_dir_st1_st2_L1_v8, dphi_dir_st1_st2_L1_v8_csc;
+  Float_t dphi_dir_st1_st2_L1_v16, dphi_dir_st1_st2_L1_v16_csc;
+  Float_t dphi_dir_st1_st2_lct, dphi_dir_st1_st2_lct_csc;
   Float_t dphi_dir_st1_st12_sh,dphi_dir_st2_st23_sh, dphi_dir_st12_st23_sh;
   Float_t dphi_dir_st1_st12_L1,dphi_dir_st2_st23_L1,dphi_dir_st1_st12_L1_csc,dphi_dir_st2_st23_L1_csc, dphi_dir_st12_st23_L1;
   Float_t hybrid_pt, hybrid_noge21_pt, position_pt, direction_ge21_pt, direction_noge21_pt;
@@ -403,10 +416,7 @@ struct MyTrackEff
   Float_t eta_st2_sh, eta_st2_L1;
   Int_t npar_L1;
   Float_t pt_position_sh, pt_direction_sh;
-  Float_t pt_position, pt_direction_gemcsc, pt_direction_gemcsc_central, pt_direction_xfactor;
-  Float_t pt_direction_xfactor_smear0, pt_direction_xfactor_smear1,pt_direction_xfactor_smear2,pt_direction_xfactor_smear3;
-  Float_t pt_direction_xfactor_L1_1,pt_direction_xfactor_L1_2;
-  Float_t pt_position_smeared, pt_direction_gemcsc_smeared;
+  Float_t pt_position;
   Float_t pt_position_fit;
   Int_t npar;
   Int_t npar_lct;
@@ -540,6 +550,15 @@ void MyTrackEff::init()
   dphi_dir_st1_st12_L1_csc = -9;
   dphi_dir_st2_st23_L1_csc = -9;
   dphi_dir_st12_st23_L1 = -9;
+  dphi_dir_st1_st2_L1_v4 = -9;
+  dphi_dir_st1_st2_L1_v4_csc = -9;
+  dphi_dir_st1_st2_L1_v8 = -9;
+  dphi_dir_st1_st2_L1_v8_csc = -9;
+  dphi_dir_st1_st2_L1_v16 = -9;
+  dphi_dir_st1_st2_L1_v16_csc = -9;
+  dphi_dir_st1_st2_lct = -9;
+  dphi_dir_st1_st2_lct_csc = -9;
+  dphi_dir_st1_st12_sh = -9;
   hybrid_pt = 0.0;
   hybrid_noge21_pt = 0.0;
   position_pt = 0.0;
@@ -563,6 +582,24 @@ void MyTrackEff::init()
   phi_layer3_fit_odd =-9.0;
   phi_layer6_fit_even =-9.0;
   phi_layer6_fit_odd =-9.0;
+  phi_layer1_fit_even_v8 =-9.0;
+  phi_layer1_fit_odd_v8 =-9.0;
+  phi_layer3_fit_even_v4 =-9.0;
+  phi_layer3_fit_odd_v4 =-9.0;
+  phi_layer3_fit_even_v8 =-9.0;
+  phi_layer3_fit_odd_v8 =-9.0;
+  phi_layer3_fit_even_v16 =-9.0;
+  phi_layer3_fit_odd_v16 =-9.0;
+  phi_layer6_fit_even_v8 =-9.0;
+  phi_layer6_fit_odd_v8 =-9.0;
+  dphi_layer16_fit_even_v4 = -999;
+  dphi_layer16_fit_odd_v4 = -999;
+  dphi_layer16_fit_even_v8 = -999;
+  dphi_layer16_fit_odd_v8 = -999;
+  dphi_layer16_fit_even_v16 = -999;
+  dphi_layer16_fit_odd_v16 = -999;
+  stripPhiPitch = -1.0;
+
   has_csc_sh = 0;
   has_csc_strips = 0;
   has_csc_wires = 0;
@@ -631,26 +668,36 @@ void MyTrackEff::init()
   dphipositionpt_gemsh_odd = -9;
   dphipositionpt_cscsh_even = -9;
   dphipositionpt_cscsh_odd = -9;
-  phiM_gemcsc_odd = -9;
-  phiM_gemcsc_even =-9;
+  phiM_gemcsc_sh_odd = -9;
+  phiM_gemcsc_sh_even =-9;
   phiM_fitxyz_odd = -9;
   phiM_fitxyz_even =-9;
   phiM_st1_sh = -9;
   phiM_st2_sh = -9;
   phiM_st12_sh = -9;
   phiM_st23_sh = -9;
-  phiM_st1_L1_1 = -9;
-  phiM_st2_L1_1 = -9;
-  phiM_st1_L1_2 = -9;
-  phiM_st2_L1_2 = -9;
-  phiM_st1_L1_3 = -9;
-  phiM_st2_L1_3 = -9;
+  phiM_st1_L1_v4 = -9;
+  phiM_st2_L1_v4 = -9;
+  phiM_st1_L1_v4_csc = -9;
+  phiM_st2_L1_v4_csc = -9;
+  phiM_st1_L1_v8 = -9;
+  phiM_st2_L1_v8 = -9;
+  phiM_st1_L1_v8_csc = -9;
+  phiM_st2_L1_v8_csc = -9;
+  phiM_st1_L1_v16 = -9;
+  phiM_st2_L1_v16 = -9;
+  phiM_st1_L1_v16_csc = -9;
+  phiM_st2_L1_v16_csc = -9;
+  phiM_st1_L1 = -9;
+  phiM_st2_L1 = -9;
+  phiM_st1_L1_csc = -9;
+  phiM_st2_L1_csc = -9;
   phiM_st12_L1 = -9;
   phiM_st23_L1 = -9;
-  phiM_st1_test = -9;
-  phiM_st2_test = -9;
-  phiM_st12_test = -9;
-  phiM_st23_test = -9;
+  phiM_st1_lct = -9;
+  phiM_st2_lct = -9;
+  phiM_st1_lct_csc = -9;
+  phiM_st2_lct_csc = -9;
 
   strip_gemdg_odd = -9;
   strip_gemdg_even = -9;
@@ -838,18 +885,8 @@ void MyTrackEff::init()
   deltay123_test = -99;
   pt_position_sh=-1;
   pt_position=-1;
-  pt_position_smeared=-1;
   pt_position_fit =-1;
-  pt_direction_gemcsc = -1;
   pt_direction_sh=-1;
-  pt_direction_gemcsc_smeared=-1;
-  pt_direction_xfactor = -1;
-  pt_direction_xfactor_smear0 = -1;
-  pt_direction_xfactor_smear1 = -1;
-  pt_direction_xfactor_smear2 = -1;
-  pt_direction_xfactor_smear3 = -1;
-  pt_direction_xfactor_L1_1 = -1;
-  pt_direction_xfactor_L1_2 = -1;
   hasSt1St2St3=false;
   hasSt3orSt4_sh=false;
 
@@ -975,6 +1012,14 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("dphi_dir_st12_st23_L1", &dphi_dir_st12_st23_L1);
   t->Branch("dphi_dir_st1_st12_L1_csc", &dphi_dir_st1_st12_L1_csc);
   t->Branch("dphi_dir_st2_st23_L1_csc", &dphi_dir_st2_st23_L1_csc);
+  t->Branch("dphi_dir_st1_st2_L1_v4", &dphi_dir_st1_st2_L1_v4);
+  t->Branch("dphi_dir_st1_st2_L1_v4_csc", &dphi_dir_st1_st2_L1_v4_csc);
+  t->Branch("dphi_dir_st1_st2_L1_v8", &dphi_dir_st1_st2_L1_v8);
+  t->Branch("dphi_dir_st1_st2_L1_v8_csc", &dphi_dir_st1_st2_L1_v8_csc);
+  t->Branch("dphi_dir_st1_st2_L1_v16", &dphi_dir_st1_st2_L1_v16);
+  t->Branch("dphi_dir_st1_st2_L1_v16_csc", &dphi_dir_st1_st2_L1_v16_csc);
+  t->Branch("dphi_dir_st1_st2_lct", &dphi_dir_st1_st2_lct);
+  t->Branch("dphi_dir_st1_st2_lct_csc", &dphi_dir_st1_st2_lct_csc);
   t->Branch("position_pt", &position_pt);
   t->Branch("direction_noge21_pt", &direction_noge21_pt);
   t->Branch("direction_ge21_pt", &direction_ge21_pt);
@@ -999,6 +1044,23 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("phi_layer3_fit_odd", &phi_layer3_fit_odd);
   t->Branch("phi_layer6_fit_even", &phi_layer6_fit_even);
   t->Branch("phi_layer6_fit_odd", &phi_layer6_fit_odd);
+  t->Branch("phi_layer1_fit_even_v8", &phi_layer1_fit_even_v8);
+  t->Branch("phi_layer1_fit_odd_v8", &phi_layer1_fit_odd_v8);
+  t->Branch("phi_layer3_fit_even_v4", &phi_layer3_fit_even_v4);
+  t->Branch("phi_layer3_fit_odd_v4", &phi_layer3_fit_odd_v4);
+  t->Branch("phi_layer3_fit_even_v8", &phi_layer3_fit_even_v8);
+  t->Branch("phi_layer3_fit_odd_v8", &phi_layer3_fit_odd_v8);
+  t->Branch("phi_layer3_fit_even_v16", &phi_layer3_fit_even_v16);
+  t->Branch("phi_layer3_fit_odd_v16", &phi_layer3_fit_odd_v16);
+  t->Branch("phi_layer6_fit_even_v8", &phi_layer6_fit_even_v8);
+  t->Branch("phi_layer6_fit_odd_v8", &phi_layer6_fit_odd_v8);
+  t->Branch("dphi_layer16_fit_even_v4", &dphi_layer16_fit_even_v4);
+  t->Branch("dphi_layer16_fit_odd_v4", &dphi_layer16_fit_odd_v4);
+  t->Branch("dphi_layer16_fit_even_v8", &dphi_layer16_fit_even_v8);
+  t->Branch("dphi_layer16_fit_odd_v8", &dphi_layer16_fit_odd_v8);
+  t->Branch("dphi_layer16_fit_even_v16", &dphi_layer16_fit_even_v16);
+  t->Branch("dphi_layer16_fit_odd_v16", &dphi_layer16_fit_odd_v16);
+  t->Branch("stripPhiPitch", &stripPhiPitch);
   t->Branch("has_csc_sh", &has_csc_sh);
   t->Branch("has_csc_strips", &has_csc_strips);
   t->Branch("has_csc_wires", &has_csc_wires);
@@ -1068,26 +1130,36 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("dphipositionpt_gemsh_odd", &dphipositionpt_gemsh_odd);
   t->Branch("dphipositionpt_cscsh_even", &dphipositionpt_cscsh_even);
   t->Branch("dphipositionpt_cscsh_odd", &dphipositionpt_cscsh_odd);
-  t->Branch("phiM_gemcsc_odd", &phiM_gemcsc_odd);
-  t->Branch("phiM_gemcsc_even", &phiM_gemcsc_even);
+  t->Branch("phiM_gemcsc_sh_odd", &phiM_gemcsc_sh_odd);
+  t->Branch("phiM_gemcsc_sh_even", &phiM_gemcsc_sh_even);
   t->Branch("phiM_fitxyz_odd", &phiM_fitxyz_odd);
   t->Branch("phiM_fitxyz_even", &phiM_fitxyz_even);
   t->Branch("phiM_st1_sh", &phiM_st1_sh);
   t->Branch("phiM_st2_sh", &phiM_st2_sh);
   t->Branch("phiM_st12_sh", &phiM_st12_sh);
   t->Branch("phiM_st23_sh", &phiM_st23_sh);
+  t->Branch("phiM_st1_L1_v4", &phiM_st1_L1_v4);
+  t->Branch("phiM_st2_L1_v4", &phiM_st2_L1_v4);
+  t->Branch("phiM_st1_L1_v4_csc", &phiM_st1_L1_v4_csc);
+  t->Branch("phiM_st2_L1_v4_csc", &phiM_st2_L1_v4_csc);
+  t->Branch("phiM_st1_L1_v8", &phiM_st1_L1_v8);
+  t->Branch("phiM_st2_L1_v8", &phiM_st2_L1_v8);
+  t->Branch("phiM_st1_L1_v8_csc", &phiM_st1_L1_v8_csc);
+  t->Branch("phiM_st2_L1_v8_csc", &phiM_st2_L1_v8_csc);
+  t->Branch("phiM_st1_L1_v16", &phiM_st1_L1_v16);
+  t->Branch("phiM_st2_L1_v16", &phiM_st2_L1_v16);
+  t->Branch("phiM_st1_L1_v16_csc", &phiM_st1_L1_v16_csc);
+  t->Branch("phiM_st2_L1_v16_csc", &phiM_st2_L1_v16_csc);
+  t->Branch("phiM_st1_L1", &phiM_st1_L1);
+  t->Branch("phiM_st2_L1", &phiM_st2_L1);
+  t->Branch("phiM_st1_L1_csc", &phiM_st1_L1_csc);
+  t->Branch("phiM_st2_L1_csc", &phiM_st2_L1_csc);
   t->Branch("phiM_st12_L1", &phiM_st12_L1);
   t->Branch("phiM_st23_L1", &phiM_st23_L1);
-  t->Branch("phiM_st1_L1_1", &phiM_st1_L1_1);
-  t->Branch("phiM_st2_L1_1", &phiM_st2_L1_1);
-  t->Branch("phiM_st1_L1_2", &phiM_st1_L1_2);
-  t->Branch("phiM_st2_L1_2", &phiM_st2_L1_2);
-  t->Branch("phiM_st1_L1_3", &phiM_st1_L1_3);
-  t->Branch("phiM_st2_L1_3", &phiM_st2_L1_3);
-  t->Branch("phiM_st1_test", &phiM_st1_test);
-  t->Branch("phiM_st2_test", &phiM_st2_test);
-  t->Branch("phiM_st12_test", &phiM_st12_test);
-  t->Branch("phiM_st23_test", &phiM_st23_test);
+  t->Branch("phiM_st1_lct", &phiM_st1_lct);
+  t->Branch("phiM_st2_lct", &phiM_st2_lct);
+  t->Branch("phiM_st1_lct_csc", &phiM_st1_lct_csc);
+  t->Branch("phiM_st2_lct_csc", &phiM_st2_lct_csc);
   t->Branch("strip_gemdg_odd", &strip_gemdg_odd);
   t->Branch("strip_gemdg_even", &strip_gemdg_even);
 
@@ -1275,18 +1347,8 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("npar_lct", &npar_lct);
   t->Branch("pt_position_sh", &pt_position_sh);
   t->Branch("pt_position", &pt_position);
-  t->Branch("pt_position_smeared", &pt_position_smeared);
   t->Branch("pt_position_fit", &pt_position_fit);
   t->Branch("pt_direction_sh", &pt_direction_sh);
-  t->Branch("pt_direction_gemcsc", &pt_direction_gemcsc);
-  t->Branch("pt_direction_xfactor", &pt_direction_xfactor);
-  t->Branch("pt_direction_xfactor_smear0", &pt_direction_xfactor_smear0);
-  t->Branch("pt_direction_xfactor_smear1", &pt_direction_xfactor_smear1);
-  t->Branch("pt_direction_xfactor_smear2", &pt_direction_xfactor_smear2);
-  t->Branch("pt_direction_xfactor_smear3", &pt_direction_xfactor_smear3);
-  t->Branch("pt_direction_xfactor_L1_1", &pt_direction_xfactor_L1_1);
-  t->Branch("pt_direction_xfactor_L1_2", &pt_direction_xfactor_L1_2);
-  t->Branch("pt_direction_gemcsc_smeared", &pt_direction_gemcsc_smeared);
   t->Branch("hasSt1St2St3", &hasSt1St2St3);
   t->Branch("hasSt3orSt4_sh", &hasSt3orSt4_sh);
 
@@ -2061,6 +2123,15 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         alpha = lctgp.phi();
         beta = 0.0;
       }
+      //halfstrip or ?
+      float stripPhiPitch = match_lct.retriveCSCKeyLayerGeometry(d)->stripPhiPitch();
+      float stripPhiPitch_v16 = stripPhiPitch/16.0;
+      float stripPhiPitch_v8 = stripPhiPitch/8.0;
+      float stripPhiPitch_v4 = stripPhiPitch/4.0;
+      etrk_[st].stripPhiPitch = stripPhiPitch;
+      if (id.station() == 1 and (id.ring() == 1 or id.ring() == 4)){
+	etrk_[1].stripPhiPitch = stripPhiPitch;
+      }
       //ME11. even layer1 581.98; odd layer1 611.38, d=2.2
       //ME12. even layer1 678.706, layer6 691.406; odd layer1 706.106, layer6 718.806, d=2.54
       //ME21. even layer1 809.506; odd layer1 834.306 , d=2.54
@@ -2072,7 +2143,14 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       		etrk_[1].phi_layer3_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 3));
 		etrk_[1].phi_layer6_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 6));
 		etrk_[1].phiM_fitxyz_odd = atan(betay/betax);
-		gp_fit_odd[st] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
+		etrk_[1].phi_layer1_fit_odd_v8 = (floor(etrk_[1].phi_layer1_fit_odd/stripPhiPitch_v8) + 0.5 )* stripPhiPitch_v8;
+		etrk_[1].phi_layer6_fit_odd_v8 = (floor(etrk_[1].phi_layer6_fit_odd/stripPhiPitch_v8) + 0.5 )* stripPhiPitch_v8;
+		etrk_[1].phi_layer3_fit_odd_v4 = (floor(etrk_[1].phi_layer3_fit_odd/stripPhiPitch_v4) + 0.5 )* stripPhiPitch_v4;
+		etrk_[1].phi_layer3_fit_odd_v8 = (floor(etrk_[1].phi_layer3_fit_odd/stripPhiPitch_v8) + 0.5 )* stripPhiPitch_v8;
+		etrk_[1].phi_layer3_fit_odd_v16 = (floor(etrk_[1].phi_layer3_fit_odd/stripPhiPitch_v16) + 0.5 ) * stripPhiPitch_v16;
+		etrk_[1].dphi_layer16_fit_odd_v4 = floor(etrk_[1].phi_layer1_fit_odd/stripPhiPitch_v4) - floor(etrk_[1].phi_layer6_fit_odd/stripPhiPitch_v4);
+		etrk_[1].dphi_layer16_fit_odd_v8 = floor(etrk_[1].phi_layer1_fit_odd/stripPhiPitch_v8) - floor(etrk_[1].phi_layer6_fit_odd/stripPhiPitch_v8);
+		etrk_[1].dphi_layer16_fit_odd_v16 = floor(etrk_[1].phi_layer1_fit_odd/stripPhiPitch_v16) - floor(etrk_[1].phi_layer6_fit_odd/stripPhiPitch_v16);
 		gp_fit_odd[1] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
 		//std::cout <<((etrk_[1].has_lct&1)>0?" odd ":" not odd ") <<std::endl;
 	}
@@ -2080,6 +2158,14 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       		etrk_[st].phi_layer3_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 3));
 		etrk_[st].phi_layer6_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 6));
 		etrk_[st].phiM_fitxyz_odd = atan(betay/betax);
+		etrk_[st].phi_layer1_fit_odd_v8 = (floor(etrk_[st].phi_layer1_fit_odd/stripPhiPitch_v8) + 0.5 ) * stripPhiPitch_v8;
+		etrk_[st].phi_layer6_fit_odd_v8 = (floor(etrk_[st].phi_layer6_fit_odd/stripPhiPitch_v8) + 0.5 ) * stripPhiPitch_v8;
+		etrk_[st].phi_layer3_fit_odd_v4 = (floor(etrk_[st].phi_layer3_fit_odd/stripPhiPitch_v4) + 0.5 ) * stripPhiPitch_v4;
+		etrk_[st].phi_layer3_fit_odd_v8 = (floor(etrk_[st].phi_layer3_fit_odd/stripPhiPitch_v8)+ 0.5 ) * stripPhiPitch_v8;
+		etrk_[st].phi_layer3_fit_odd_v16 = (floor(etrk_[st].phi_layer3_fit_odd/stripPhiPitch_v16)+ 0.5 ) * stripPhiPitch_v16;
+		etrk_[st].dphi_layer16_fit_odd_v4 = floor(etrk_[st].phi_layer1_fit_odd/stripPhiPitch_v4) - floor(etrk_[st].phi_layer6_fit_odd/stripPhiPitch_v4);
+		etrk_[st].dphi_layer16_fit_odd_v8 = floor(etrk_[st].phi_layer1_fit_odd/stripPhiPitch_v8) - floor(etrk_[st].phi_layer6_fit_odd/stripPhiPitch_v8);
+		etrk_[st].dphi_layer16_fit_odd_v16 = floor(etrk_[st].phi_layer1_fit_odd/stripPhiPitch_v16) - floor(etrk_[st].phi_layer6_fit_odd/stripPhiPitch_v16);
 		gp_fit_odd[st] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
 	//std::cout <<"cscid "<< id <<" ring "<< id.ring() <<" st "<< st <<" alpha "<< alpha <<" beta "<< beta <<" phi layer1 "<< etrk_[st].phi_layer1_fit_odd<<" layer6 "<<etrk_[st].phi_layer6_fit_odd<<" gp x "<< gp_fit_odd[st].x()<<" y "<< gp_fit_odd[st].y() <<std::endl;
       }else{
@@ -2088,6 +2174,14 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       		etrk_[1].phi_layer3_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 3));
 		etrk_[1].phi_layer6_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 6));
 		etrk_[1].phiM_fitxyz_even = atan(betay/betax);
+		etrk_[1].phi_layer1_fit_even_v8 = (floor(etrk_[1].phi_layer1_fit_even/stripPhiPitch_v8) + 0.5 ) * stripPhiPitch_v8;
+		etrk_[1].phi_layer6_fit_even_v8 = (floor(etrk_[1].phi_layer6_fit_even/stripPhiPitch_v8) + 0.5 )* stripPhiPitch_v8;
+		etrk_[1].phi_layer3_fit_even_v4 = (floor(etrk_[1].phi_layer3_fit_even/stripPhiPitch_v4) + 0.5 )* stripPhiPitch_v4;
+		etrk_[1].phi_layer3_fit_even_v16 = (floor(etrk_[1].phi_layer3_fit_even/stripPhiPitch_v16) + 0.5 )* stripPhiPitch_v16;
+		etrk_[1].phi_layer3_fit_even_v8 = (floor(etrk_[1].phi_layer3_fit_even/stripPhiPitch_v8) + 0.5 )* stripPhiPitch_v8;
+		etrk_[1].dphi_layer16_fit_even_v8 = floor(etrk_[1].phi_layer1_fit_even/stripPhiPitch_v8) - floor(etrk_[1].phi_layer6_fit_even/stripPhiPitch_v8);
+		etrk_[1].dphi_layer16_fit_even_v4 = floor(etrk_[1].phi_layer1_fit_even/stripPhiPitch_v4) - floor(etrk_[1].phi_layer6_fit_even/stripPhiPitch_v4);
+		etrk_[1].dphi_layer16_fit_even_v16 = floor(etrk_[1].phi_layer1_fit_even/stripPhiPitch_v16) - floor(etrk_[1].phi_layer6_fit_even/stripPhiPitch_v16);
 		gp_fit_even[1] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
 		//std::cout <<((etrk_[1].has_lct&2)>0?" even ":" not even ") <<std::endl;
 	}
@@ -2095,6 +2189,14 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       		etrk_[st].phi_layer3_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 3));
 		etrk_[st].phi_layer6_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 6));
 		etrk_[st].phiM_fitxyz_even = atan(betay/betax);
+		etrk_[st].phi_layer1_fit_even_v8 = (floor(etrk_[st].phi_layer1_fit_even/stripPhiPitch_v8)+ 0.5 ) * stripPhiPitch_v8;
+		etrk_[st].phi_layer3_fit_even_v8 = (floor(etrk_[st].phi_layer3_fit_even/stripPhiPitch_v8)+ 0.5 ) * stripPhiPitch_v8;
+		etrk_[st].phi_layer6_fit_even_v8 = (floor(etrk_[st].phi_layer6_fit_even/stripPhiPitch_v8)+ 0.5 ) * stripPhiPitch_v8;
+		etrk_[st].phi_layer3_fit_even_v4 = (floor(etrk_[st].phi_layer3_fit_even/stripPhiPitch_v4)+ 0.5 ) * stripPhiPitch_v4;
+		etrk_[st].phi_layer3_fit_even_v16 = (floor(etrk_[st].phi_layer3_fit_even/stripPhiPitch_v16)+ 0.5 ) * stripPhiPitch_v16;
+		etrk_[st].dphi_layer16_fit_even_v8 = floor(etrk_[st].phi_layer1_fit_even/stripPhiPitch_v8) - floor(etrk_[st].phi_layer6_fit_even/stripPhiPitch_v8);
+		etrk_[st].dphi_layer16_fit_even_v4 = floor(etrk_[st].phi_layer1_fit_even/stripPhiPitch_v4) - floor(etrk_[st].phi_layer6_fit_even/stripPhiPitch_v4);
+		etrk_[st].dphi_layer16_fit_even_v16 = floor(etrk_[st].phi_layer1_fit_even/stripPhiPitch_v16) - floor(etrk_[st].phi_layer6_fit_even/stripPhiPitch_v16);
 		gp_fit_even[st] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
 
      }
@@ -2159,14 +2261,14 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	    etrk_[st].dphi_sh_odd = deltaPhi(etrk_[st_csc].phi_cscsh_odd, keygp.phi());// here should we use st or st_csc?
     	    etrk_[st].dphipositionpt_gemsh_odd = deltaPhi(keygp.phi(),etrk_[st_csc].ptphi_sh_odd);
             phi_m =  PtassignmentHelper::PhiMomentum_Radius(etrk_[st].dphi_sh_odd, etrk_[st].phi_gemsh_odd, etrk_[st_csc].perp_cscsh_odd, etrk_[st].perp_gemsh_odd);
-	    etrk_[st].phiM_gemcsc_odd = phi_m;
+	    etrk_[st].phiM_gemcsc_sh_odd = phi_m;
 	    //std::cout <<"dphi(M,P) "<< deltaPhi(etrk_[st].phi_gemsh_odd, gv_sh_odd[st_csc].phi())<<" momentum phi from simhits "<< gv_sh_odd[st_csc].phi() <<" phi from gem-csc "<< phi_m << std::endl;
 	}
       	else if (not(odd) and etrk_[st_csc].phi_cscsh_even>-9) {
 	    etrk_[st].dphi_sh_even = deltaPhi(etrk_[st_csc].phi_cscsh_even, keygp.phi());
     	    etrk_[st].dphipositionpt_gemsh_even = deltaPhi(keygp.phi(),etrk_[st_csc].ptphi_sh_even);
 	    phi_m =  PtassignmentHelper::PhiMomentum_Radius(etrk_[st].dphi_sh_even, etrk_[st].phi_gemsh_even, etrk_[st_csc].perp_cscsh_even, etrk_[st].perp_gemsh_even);
-	    etrk_[st].phiM_gemcsc_even = phi_m;
+	    etrk_[st].phiM_gemcsc_sh_even = phi_m;
 	    //std::cout <<"dphi(M,P) "<< deltaPhi(etrk_[st].phi_gemsh_even, gv_sh_even[st_csc].phi())<<" momentum phi from simhits "<< gv_sh_even[st_csc].phi() <<" phi from gem-csc "<< phi_m << std::endl;
 	}
 	if (st==2 or st==3){
@@ -2184,8 +2286,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 		else     etrk_[1].centralperp_gemsh_even = centralperp_gemsh;
       		if (odd and etrk_[1].phi_cscsh_odd>-9) etrk_[1].dphi_sh_odd = deltaPhi(etrk_[1].phi_cscsh_odd,keygp.phi());
       		else if (etrk_[1].phi_cscsh_even>-9)     etrk_[1].dphi_sh_even = deltaPhi(etrk_[1].phi_cscsh_even,keygp.phi());
-		if (odd) etrk_[1].phiM_gemcsc_odd = phi_m;
-		else etrk_[1].phiM_gemcsc_even = phi_m;
+		if (odd) etrk_[1].phiM_gemcsc_sh_odd = phi_m;
+		else etrk_[1].phiM_gemcsc_sh_even = phi_m;
 		if (odd) etrk_[1].dphipositionpt_gemsh_odd = deltaPhi(keygp.phi(),etrk_[1].ptphi_sh_odd);
 		else etrk_[1].dphipositionpt_gemsh_even = deltaPhi(keygp.phi(),etrk_[1].ptphi_sh_even);
 	}
@@ -2726,10 +2828,30 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	    gp3=gp_sh_odd[9];
      }
   }
+  if (etrk_[0].meRing > 0){
+      std::cout <<"gp1 phi "<< gp1.phi() <<" gv1 phi "<< gv1.phi() <<" gp2 phi "<< gp2.phi()<<" gv2 phi "<< gv2.phi() << std::endl;
+      etrk_[0].phiM_st1_sh =  gv1.phi(); 
+      etrk_[0].phiM_st2_sh =  gv2.phi(); 
+      etrk_[0].dphi_dir_st1_st2_sh = deltaPhi( etrk_[0].phiM_st1_sh , etrk_[0].phiM_st2_sh);
+  }
+
 
 
   DisplacedMuonTriggerPtassignment displacedMuonL1Pt(match_lct.allLctsMatched2SimMuon(), match_gd.allGempadsMatch2SimMuon_2strip(), match_lct.eventSetup(), match_lct.event());
   displacedMuonL1Pt.setCharge(etrk_[0].charge);
+
+  DisplacedMuonTriggerPtassignment displacedMuonL1Pt_LCTonly(match_lct.allLctsMatched2SimMuon(), match_gd.allGempadsMatch2SimMuon_2strip(), match_lct.eventSetup(), match_lct.event(), -1, false);
+  displacedMuonL1Pt_LCTonly.setCharge(etrk_[0].charge);
+
+  DisplacedMuonTriggerPtassignment displacedMuonL1Pt_v4(match_lct.allLctsMatched2SimMuon(), match_gd.allGempadsMatch2SimMuon_2strip(), match_lct.eventSetup(), match_lct.event(), 4, true);
+  displacedMuonL1Pt_v4.setCharge(etrk_[0].charge);
+
+  DisplacedMuonTriggerPtassignment displacedMuonL1Pt_v8(match_lct.allLctsMatched2SimMuon(), match_gd.allGempadsMatch2SimMuon_2strip(), match_lct.eventSetup(), match_lct.event(), 8, true);
+  displacedMuonL1Pt_v8.setCharge(etrk_[0].charge);
+
+  DisplacedMuonTriggerPtassignment displacedMuonL1Pt_v16(match_lct.allLctsMatched2SimMuon(), match_gd.allGempadsMatch2SimMuon_2strip(), match_lct.eventSetup(), match_lct.event(), 16, true);
+  displacedMuonL1Pt_v16.setCharge(etrk_[0].charge);
+
   if (displacedMuonL1Pt.getNParity() >= 0)  std::cout <<"DisplacedMuon get npar "<< displacedMuonL1Pt.getNParity()<<" ring "<<displacedMuonL1Pt.getMeRing() << std::endl;
 
   int npar =displacedMuonL1Pt.getNParity();
@@ -2743,36 +2865,109 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 		 or fabs(displacedMuonL1Pt.getRadiusSt(3)-gp3.perp())>.02*gp3.perp()))
 	    std::cout <<" warning, difference between fitting and sim is large, module, npar  "<< displacedMuonL1Pt.getNParity()<<" ring "<< displacedMuonL1Pt.getMeRing() << std::endl;
      if (etrk_[0].meRing == 1 and displacedMuonL1Pt.getNParity()>=0 and displacedMuonL1Pt.runDirectionbased(true)){
-     	etrk_[0].phiM_st1_test = displacedMuonL1Pt.getlocalPhiDirection(1);
-     	etrk_[0].phiM_st2_test = displacedMuonL1Pt.getlocalPhiDirection(2);
-     	etrk_[0].phiM_st12_test = displacedMuonL1Pt.getlocalPhiDirection(12);
-     	etrk_[0].phiM_st23_test = displacedMuonL1Pt.getlocalPhiDirection(23);
+     	etrk_[0].phiM_st1_L1 = displacedMuonL1Pt.getlocalPhiDirection(1);
+     	etrk_[0].phiM_st2_L1 = displacedMuonL1Pt.getlocalPhiDirection(2);
+     	etrk_[0].phiM_st12_L1 = displacedMuonL1Pt.getlocalPhiDirection(12);
+     	etrk_[0].phiM_st23_L1 = displacedMuonL1Pt.getlocalPhiDirection(23);
 	etrk_[0].dphi_dir_st1_st2_L1 = displacedMuonL1Pt.getdeltaPhiDirection(1, 2);
 	etrk_[0].dphi_dir_st1_st12_L1 = displacedMuonL1Pt.getdeltaPhiDirection(1, 12);
 	etrk_[0].dphi_dir_st2_st23_L1 = displacedMuonL1Pt.getdeltaPhiDirection(2, 23);
 	etrk_[0].dphi_dir_st12_st23_L1 = displacedMuonL1Pt.getdeltaPhiDirection(12, 23);
 	etrk_[0].direction_ge21_pt = displacedMuonL1Pt.getDirectionPt();
+
      }
 
      if (displacedMuonL1Pt.getNParity()>=0 and displacedMuonL1Pt.runDirectionbased(false)){
-     	etrk_[0].phiM_st1_test = displacedMuonL1Pt.getlocalPhiDirection(1);
-     	etrk_[0].phiM_st2_test = displacedMuonL1Pt.getlocalPhiDirection(2);
-     	etrk_[0].phiM_st12_test = displacedMuonL1Pt.getlocalPhiDirection(12);
-     	etrk_[0].phiM_st23_test = displacedMuonL1Pt.getlocalPhiDirection(23);
+     	etrk_[0].phiM_st1_L1_csc = displacedMuonL1Pt.getlocalPhiDirection(1);
+     	etrk_[0].phiM_st2_L1_csc = displacedMuonL1Pt.getlocalPhiDirection(2);
+        //etrk_[0].phiM_st12_L1 = displacedMuonL1Pt.getlocalPhiDirection(12);
+     	//etrk_[0].phiM_st23_L1 = displacedMuonL1Pt.getlocalPhiDirection(23);
+
 	if (etrk_[0].meRing == 2){
-		etrk_[0].dphi_dir_st1_st2_L1 = displacedMuonL1Pt.getdeltaPhiDirection(1, 2);
-		etrk_[0].dphi_dir_st1_st12_L1 = displacedMuonL1Pt.getdeltaPhiDirection(1, 12);
-		etrk_[0].dphi_dir_st2_st23_L1 = displacedMuonL1Pt.getdeltaPhiDirection(2, 23);
-		etrk_[0].dphi_dir_st12_st23_L1 = displacedMuonL1Pt.getdeltaPhiDirection(12, 23);
+	    etrk_[0].phiM_st1_L1 = displacedMuonL1Pt.getlocalPhiDirection(1);
+	    etrk_[0].phiM_st2_L1 = displacedMuonL1Pt.getlocalPhiDirection(2);
+	    etrk_[0].dphi_dir_st1_st2_L1 = displacedMuonL1Pt.getdeltaPhiDirection(1, 2);
+	    etrk_[0].dphi_dir_st1_st12_L1 = displacedMuonL1Pt.getdeltaPhiDirection(1, 12);
+	    etrk_[0].dphi_dir_st2_st23_L1 = displacedMuonL1Pt.getdeltaPhiDirection(2, 23);
+	    etrk_[0].dphi_dir_st12_st23_L1 = displacedMuonL1Pt.getdeltaPhiDirection(12, 23);
 	}
 		//assign values to these variable both in ring1 and ring2
-		etrk_[0].dphi_dir_st1_st2_L1_csc = displacedMuonL1Pt.getdeltaPhiDirection(1, 2);
-		etrk_[0].dphi_dir_st1_st12_L1_csc = displacedMuonL1Pt.getdeltaPhiDirection(1, 12);
-		etrk_[0].dphi_dir_st2_st23_L1_csc = displacedMuonL1Pt.getdeltaPhiDirection(2, 23);
-		etrk_[0].dphi_dir_st12_st23_L1 = displacedMuonL1Pt.getdeltaPhiDirection(12, 23);
+	etrk_[0].dphi_dir_st1_st2_L1_csc = displacedMuonL1Pt.getdeltaPhiDirection(1, 2);
+	etrk_[0].dphi_dir_st1_st12_L1_csc = displacedMuonL1Pt.getdeltaPhiDirection(1, 12);
+	etrk_[0].dphi_dir_st2_st23_L1_csc = displacedMuonL1Pt.getdeltaPhiDirection(2, 23);
+	etrk_[0].dphi_dir_st12_st23_L1 = displacedMuonL1Pt.getdeltaPhiDirection(12, 23);
 
 	etrk_[0].direction_noge21_pt = displacedMuonL1Pt.getDirectionPt();
      }
+
+     if (etrk_[0].meRing == 1 and displacedMuonL1Pt_v4.getNParity()>=0 and displacedMuonL1Pt_v4.runDirectionbased(true)){
+     	etrk_[0].phiM_st1_L1_v4 = displacedMuonL1Pt_v4.getlocalPhiDirection(1);
+     	etrk_[0].phiM_st2_L1_v4 = displacedMuonL1Pt_v4.getlocalPhiDirection(2);
+	etrk_[0].dphi_dir_st1_st2_L1_v4 = displacedMuonL1Pt_v4.getdeltaPhiDirection(1, 2);
+	//std::cout <<"phiM_st1_L1_v4 " << etrk_[0].phiM_st1_L1_v4 <<" st2 "<< etrk_[0].phiM_st2_L1_v4 << std::endl;
+     }
+     if (displacedMuonL1Pt_v4.getNParity()>=0 and displacedMuonL1Pt_v4.runDirectionbased(false)){
+     	etrk_[0].phiM_st1_L1_v4_csc = displacedMuonL1Pt_v4.getlocalPhiDirection(1);
+     	etrk_[0].phiM_st2_L1_v4_csc = displacedMuonL1Pt_v4.getlocalPhiDirection(2);
+	etrk_[0].dphi_dir_st1_st2_L1_v4_csc = displacedMuonL1Pt_v4.getdeltaPhiDirection(1, 2);
+	if (etrk_[0].meRing == 2){
+	    etrk_[0].phiM_st1_L1_v4 = displacedMuonL1Pt_v4.getlocalPhiDirection(1);
+	    etrk_[0].phiM_st2_L1_v4 = displacedMuonL1Pt_v4.getlocalPhiDirection(2);
+	    etrk_[0].dphi_dir_st1_st2_L1_v4 = displacedMuonL1Pt_v4.getdeltaPhiDirection(1, 2);
+	}
+     }
+
+     if (displacedMuonL1Pt_v8.getNParity()>=0 and displacedMuonL1Pt_v8.runDirectionbased(true)){
+     	etrk_[0].phiM_st1_L1_v8 = displacedMuonL1Pt_v8.getlocalPhiDirection(1);
+     	etrk_[0].phiM_st2_L1_v8 = displacedMuonL1Pt_v8.getlocalPhiDirection(2);
+	etrk_[0].dphi_dir_st1_st2_L1_v8 = displacedMuonL1Pt_v8.getdeltaPhiDirection(1, 2);
+	//std::cout <<"phiM_st1_L1_v8 " << etrk_[0].phiM_st1_L1_v8 <<" st2 "<< etrk_[0].phiM_st2_L1_v8 << std::endl;
+     }
+     if (displacedMuonL1Pt_v8.getNParity()>=0 and displacedMuonL1Pt_v8.runDirectionbased(false)){
+     	etrk_[0].phiM_st1_L1_v8_csc = displacedMuonL1Pt_v8.getlocalPhiDirection(1);
+     	etrk_[0].phiM_st2_L1_v8_csc = displacedMuonL1Pt_v8.getlocalPhiDirection(2);
+	etrk_[0].dphi_dir_st1_st2_L1_v8_csc = displacedMuonL1Pt_v8.getdeltaPhiDirection(1, 2);
+	if (etrk_[0].meRing == 2){
+	    etrk_[0].phiM_st1_L1_v8 = displacedMuonL1Pt_v8.getlocalPhiDirection(1);
+	    etrk_[0].phiM_st2_L1_v8 = displacedMuonL1Pt_v8.getlocalPhiDirection(2);
+	    etrk_[0].dphi_dir_st1_st2_L1_v8 = displacedMuonL1Pt_v8.getdeltaPhiDirection(1, 2);
+	}
+     }
+
+     if (displacedMuonL1Pt_v16.getNParity()>=0 and displacedMuonL1Pt_v16.runDirectionbased(true)){
+     	etrk_[0].phiM_st1_L1_v16 = displacedMuonL1Pt_v16.getlocalPhiDirection(1);
+     	etrk_[0].phiM_st2_L1_v16 = displacedMuonL1Pt_v16.getlocalPhiDirection(2);
+	etrk_[0].dphi_dir_st1_st2_L1_v16 = displacedMuonL1Pt_v16.getdeltaPhiDirection(1, 2);
+        //std::cout <<"phiM_st1_L1_v16 " << etrk_[0].phiM_st1_L1_v16 <<" st2 "<< etrk_[0].phiM_st2_L1_v16 << std::endl;
+     }
+     if (displacedMuonL1Pt_v16.getNParity()>=0 and displacedMuonL1Pt_v16.runDirectionbased(false)){
+     	etrk_[0].phiM_st1_L1_v16_csc = displacedMuonL1Pt_v16.getlocalPhiDirection(1);
+     	etrk_[0].phiM_st2_L1_v16_csc = displacedMuonL1Pt_v16.getlocalPhiDirection(2);
+	etrk_[0].dphi_dir_st1_st2_L1_v16_csc = displacedMuonL1Pt_v16.getdeltaPhiDirection(1, 2);
+	if (etrk_[0].meRing == 2){
+	    etrk_[0].phiM_st1_L1_v16 = displacedMuonL1Pt_v16.getlocalPhiDirection(1);
+	    etrk_[0].phiM_st2_L1_v16 = displacedMuonL1Pt_v16.getlocalPhiDirection(2);
+	    etrk_[0].dphi_dir_st1_st2_L1_v16 = displacedMuonL1Pt_v16.getdeltaPhiDirection(1, 2);
+	}
+     }
+
+     if (displacedMuonL1Pt_LCTonly.getNParity()>=0 and displacedMuonL1Pt_LCTonly.runDirectionbased(true)){
+     	etrk_[0].phiM_st1_lct = displacedMuonL1Pt_LCTonly.getlocalPhiDirection(1);
+     	etrk_[0].phiM_st2_lct = displacedMuonL1Pt_LCTonly.getlocalPhiDirection(2);
+	etrk_[0].dphi_dir_st1_st2_lct_csc = displacedMuonL1Pt_LCTonly.getdeltaPhiDirection(1, 2);
+	//std::cout <<"phiM_st1_L1_lct " << etrk_[0].phiM_st1_lct <<" st2 "<< etrk_[0].phiM_st2_lct << std::endl;
+     }
+     if (displacedMuonL1Pt_LCTonly.getNParity()>=0 and displacedMuonL1Pt_LCTonly.runDirectionbased(false)){
+     	etrk_[0].phiM_st1_lct_csc = displacedMuonL1Pt_LCTonly.getlocalPhiDirection(1);
+     	etrk_[0].phiM_st2_lct_csc = displacedMuonL1Pt_LCTonly.getlocalPhiDirection(2);
+	etrk_[0].dphi_dir_st1_st2_lct_csc = displacedMuonL1Pt_LCTonly.getdeltaPhiDirection(1, 2);
+	if (etrk_[0].meRing == 2){
+	    etrk_[0].phiM_st1_lct = displacedMuonL1Pt_LCTonly.getlocalPhiDirection(1);
+	    etrk_[0].phiM_st2_lct = displacedMuonL1Pt_LCTonly.getlocalPhiDirection(2);
+	    etrk_[0].dphi_dir_st1_st2_lct = displacedMuonL1Pt_LCTonly.getdeltaPhiDirection(1, 2);
+	}
+     }
+
 
      //etrk_[0].pt_direction_sh=PtassignmentHelper::Ptassign_Direction(csc_bending_angle_12, gp2.eta(), npar);
      etrk_[0].eta_st2_L1 = displacedMuonL1Pt.getTrackEta();

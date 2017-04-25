@@ -98,6 +98,8 @@ public:
   double phiHeavyCorr(double pt, double eta, double phi, double charge) const;
   bool passDPhicut(CSCDetId id, int chargesign, float dphi, float pt) const;
 
+  const CSCLayerGeometry* retriveCSCKeyLayerGeometry(int rawid) const;
+
  protected:
   
   bool hasGEMGeometry_;
