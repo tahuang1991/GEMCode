@@ -26,9 +26,9 @@ class DTGeometry;
 class SimHitMatcher : public BaseMatcher
 {
 public:
-  
+
   SimHitMatcher(const SimTrack& t, const SimVertex& v,
-      		const edm::ParameterSet& ps, const edm::Event& ev, const edm::EventSetup& es,
+                const edm::ParameterSet& ps, const edm::Event& ev, const edm::EventSetup& es,
                 edm::EDGetTokenT<edm::SimVertexContainer>& simVertexInput_,
                 edm::EDGetTokenT<edm::SimTrackContainer>& simTrackInput_,
                 edm::EDGetTokenT<edm::PSimHitContainer>& gemSimHitInput_,
@@ -36,7 +36,7 @@ public:
                 edm::EDGetTokenT<edm::PSimHitContainer>& rpcSimHitInput_,
                 edm::EDGetTokenT<edm::PSimHitContainer>& me0SimHitInput_,
                 edm::EDGetTokenT<edm::PSimHitContainer>& dtSimHitInput_);
-  
+
   ~SimHitMatcher();
 
   /// access to all the Muon SimHits (use MuonSubdetId::SubSystem)
@@ -103,7 +103,7 @@ public:
   /// DT super layer detIds with SimHits
   std::set<unsigned int> superlayerIdsDT() const;
 
-  /// simhits from a particular partition (GEM)/layer (CSC), chamber or superchamber
+  /// simhits from a particular partition (GEM)/layer (CSC)/ME0, chamber or superchamber
   const edm::PSimHitContainer& hitsInDetId(unsigned int) const;
   const edm::PSimHitContainer& hitsInChamber(unsigned int) const;
   const edm::PSimHitContainer& hitsInSuperChamber(unsigned int) const;
@@ -148,12 +148,12 @@ public:
 
   /// calculated the fitted position in a given layer for CSC simhits in a chamber
   GlobalPoint simHitPositionKeyLayer(unsigned int chamberid) const;
-   
+
   /// calculate Global average momentum for a provided collection of simhits in CSC
   GlobalVector simHitsMeanMomentum(const edm::PSimHitContainer& sim_hits) const;
 
   float	simHitsGEMCentralPosition(const edm::PSimHitContainer& sim_hits) const;
-  /// 
+  ///
   float LocalBendingInChamber(unsigned int detid) const;
 
   /// calculate average strip (strip for GEM/ME0, half-strip for CSC) number for a provided collection of simhits
@@ -164,7 +164,7 @@ public:
 
   /// calculate average wg number for a provided collection of simhits (for DT)
   float simHitsMeanWire(const edm::PSimHitContainer& sim_hits) const;
-   
+
 
 
   std::set<int> hitStripsInDetId(unsigned int, int margin_n_strips = 0) const;  // GEM/ME0 or CSC
@@ -213,7 +213,7 @@ private:
   bool runDTSimHit_;
 
   std::string simInputLabel_;
-  
+
   std::map<unsigned int, unsigned int> trkid_to_index_;
 
   edm::PSimHitContainer no_hits_;

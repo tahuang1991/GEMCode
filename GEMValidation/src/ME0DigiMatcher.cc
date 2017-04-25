@@ -16,11 +16,11 @@ ME0DigiMatcher::ME0DigiMatcher(SimHitMatcher& sh, edm::EDGetTokenT<ME0DigiPreRec
 
   if (hasME0Geometry_) {
     edm::Handle<ME0DigiPreRecoCollection> me0_digis;
-    if (gemvalidation::getByToken(me0DigiInput_, me0_digis, event())) if (runME0Digi_) matchPreRecoDigisToSimTrack(*me0_digis.product());    
+    if (gemvalidation::getByToken(me0DigiInput_, me0_digis, event())) if (runME0Digi_) matchPreRecoDigisToSimTrack(*me0_digis.product());
   }
 }
 
-ME0DigiMatcher::~ME0DigiMatcher() 
+ME0DigiMatcher::~ME0DigiMatcher()
 {}
 
 
@@ -32,30 +32,34 @@ ME0DigiMatcher::matchPreRecoDigisToSimTrack(const ME0DigiPreRecoCollection& digi
   {
     ME0DetId p_id(id);
 
-    auto hit_strips = simhit_matcher_->hitStripsInDetId(id, matchDeltaStrip_);
-    if (verboseDigi_)
-    {
-      cout<<"hit_strips_fat ";
-      copy(hit_strips.begin(), hit_strips.end(), ostream_iterator<int>(cout, " "));
-      cout<<endl;
-    }
-
     auto digis_in_det = digis.get(ME0DetId(id));
 
     for (auto d = digis_in_det.first; d != digis_in_det.second; ++d)
     {
       if (verboseDigi_) cout<<"gdigi "<<p_id<<" "<<*d<<endl;
       // check that the digi is within BX range
-      //      if (d->bx() < minBXME0_ || d->bx() > maxBXME0_) continue;
-      // check that it matches a strip that was hit by SimHits from our track
-      //      if (hit_strips.find(d->strip()) == hit_strips.end()) continue;
-      if (verboseDigi_) cout<<"oki"<<endl;
+      if (d->tof() < minBXME0_ || d->tof() > maxBXME0_) continue;
 
-      detid_to_digis_[id].push_back(*d);
-      chamber_to_digis_[ p_id.chamberId().rawId() ].push_back(*d);
+      bool match = false;
 
-      //int pad_num = 1 + static_cast<int>( roll->padOfStrip(d->strip()) ); // d->strip() is int
-      //digi_map[ make_pair(pad_num, d->bx()) ].push_back( d->strip() );
+      edm::PSimHitContainer hits = simhit_matcher_->hitsInDetId(id);
+      for (const auto& hit: hits){
+        // check that the digi position matches a simhit position (within 3 sigma)
+        if (d->x() - 3 * d->ex() < hit.localPosition().x() and
+            d->x() + 3 * d->ex() > hit.localPosition().x() and
+            d->y() - 3 * d->ey() < hit.localPosition().y() and
+            d->y() + 3 * d->ey() > hit.localPosition().y() ) {
+          match = true;
+          break;
+        }
+      }
+
+      if (match) {
+        if (verboseDigi_) cout<<"oki"<<endl;
+        detid_to_digis_[id].push_back(*d);
+        chamber_to_digis_[ p_id.layerId().rawId() ].push_back(*d);
+        superchamber_to_digis_[ p_id.chamberId().rawId() ].push_back(*d);
+      }
     }
   }
 }
