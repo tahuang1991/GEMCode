@@ -7,7 +7,7 @@ import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
 
-process = cms.Process('L1',eras.Phase2C2_timing)
+process = cms.Process('L1',eras.Phase2C2)
 
 # import of standard configurations
 process.load('Configuration.StandardSequences.Services_cff')
@@ -15,7 +15,8 @@ process.load('SimGeneral.HepPDTESSource.pythiapdt_cfi')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
 process.load('SimGeneral.MixingModule.mixNoPU_cfi')
-process.load('Configuration.StandardSequences.GeometryRecoDB_cff')
+process.load('Configuration.Geometry.GeometryExtended2023D4Reco_cff')
+process.load('Configuration.Geometry.GeometryExtended2023D4_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.Digi_cff')
 process.load('Configuration.StandardSequences.SimL1Emulator_cff')
@@ -31,6 +32,19 @@ process.simMuonME0ReDigis192 = process.simMuonME0ReDigis.clone(
 )
 process.simMuonME0ReDigis96 = process.simMuonME0ReDigis.clone(
     numberOfStrips = cms.uint32(96)
+)
+
+process.RandomNumberGeneratorService.simMuonME0ReDigis384 = cms.PSet(
+    initialSeed = cms.untracked.uint32(1234567),
+    engineName = cms.untracked.string('HepJamesRandom')
+)
+process.RandomNumberGeneratorService.simMuonME0ReDigis192 = cms.PSet(
+    initialSeed = cms.untracked.uint32(2234567),
+    engineName = cms.untracked.string('HepJamesRandom')
+)
+process.RandomNumberGeneratorService.simMuonME0ReDigis96 = cms.PSet(
+    initialSeed = cms.untracked.uint32(3234567),
+    engineName = cms.untracked.string('HepJamesRandom')
 )
 
 process.me0RecHits384 = process.me0RecHits.clone(
@@ -55,6 +69,7 @@ process.me0Segments96 = process.me0Segments.clone(
 
 
 process.me0DigiRecoSequence = cms.Sequence(
+
     process.simMuonME0ReDigis384 *
     process.simMuonME0ReDigis192 *
     process.simMuonME0ReDigis96 *
@@ -76,7 +91,7 @@ process.maxEvents = cms.untracked.PSet(
 # Input source
 process.source = cms.Source("PoolSource",
     dropDescendantsOfDroppedBranches = cms.untracked.bool(False),
-    fileNames = cms.untracked.vstring('file:step1.root'),
+    fileNames = cms.untracked.vstring('file:/eos/uscms/store/user/lpcgem/SingleMu_91X_FlatPt05_30_eta20_28_phase2_realistic_Extended2023D4_GEN_SIM/SingleMu_91X_FlatPt05_30_eta20_28_phase2_realistic_Extended2023D4_GEN_SIM/170425_023359/0000/step1_142.root'),
     inputCommands = cms.untracked.vstring('keep *',
         'drop *_genParticles_*_*',
         'drop *_genParticlesForJets_*_*',
@@ -120,6 +135,8 @@ process.FEVTDEBUGHLToutput = cms.OutputModule("PoolOutputModule",
     outputCommands = process.FEVTDEBUGHLTEventContent.outputCommands,
     splitLevel = cms.untracked.int32(0)
 )
+process.FEVTDEBUGHLToutput.outputCommands.append('keep *_*Muon*_*_*')
+process.FEVTDEBUGHLToutput.outputCommands.append('keep *_me0*_*_*')
 
 # Additional output definition
 
