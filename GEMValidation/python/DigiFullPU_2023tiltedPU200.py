@@ -19,8 +19,68 @@ process.load('Configuration.Geometry.GeometryExtended2023D4Reco_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.Digi_cff')
 process.load('Configuration.StandardSequences.SimL1Emulator_cff')
+process.load('Configuration.StandardSequences.Reconstruction_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
+
+process.simMuonME0ReDigis384 = process.simMuonME0ReDigis.clone(
+    numberOfStrips = cms.uint32(384)
+)
+process.simMuonME0ReDigis192 = process.simMuonME0ReDigis.clone(
+    numberOfStrips = cms.uint32(192)
+)
+process.simMuonME0ReDigis96 = process.simMuonME0ReDigis.clone(
+    numberOfStrips = cms.uint32(96)
+)
+
+process.RandomNumberGeneratorService.simMuonME0ReDigis384 = cms.PSet(
+    initialSeed = cms.untracked.uint32(1234567),
+    engineName = cms.untracked.string('HepJamesRandom')
+)
+process.RandomNumberGeneratorService.simMuonME0ReDigis192 = cms.PSet(
+    initialSeed = cms.untracked.uint32(2234567),
+    engineName = cms.untracked.string('HepJamesRandom')
+)
+process.RandomNumberGeneratorService.simMuonME0ReDigis96 = cms.PSet(
+    initialSeed = cms.untracked.uint32(3234567),
+    engineName = cms.untracked.string('HepJamesRandom')
+)
+
+process.me0RecHits384 = process.me0RecHits.clone(
+    me0DigiLabel = cms.InputTag("simMuonME0ReDigis384")
+)
+process.me0RecHits192 = process.me0RecHits.clone(
+    me0DigiLabel = cms.InputTag("simMuonME0ReDigis192")
+)
+process.me0RecHits96 = process.me0RecHits.clone(
+    me0DigiLabel = cms.InputTag("simMuonME0ReDigis96")
+)
+
+process.me0Segments384 = process.me0Segments.clone(
+    me0RecHitLabel = cms.InputTag("me0RecHits384")
+)
+process.me0Segments192 = process.me0Segments.clone(
+    me0RecHitLabel = cms.InputTag("me0RecHits192")
+)
+process.me0Segments96 = process.me0Segments.clone(
+    me0RecHitLabel = cms.InputTag("me0RecHits96")
+)
+
+
+process.me0DigiRecoSequence = cms.Sequence(
+
+    process.simMuonME0ReDigis384 *
+    process.simMuonME0ReDigis192 *
+    process.simMuonME0ReDigis96 *
+
+    process.me0RecHits384 *
+    process.me0RecHits192 *
+    process.me0RecHits96 *
+
+    process.me0Segments384 *
+    process.me0Segments192 *
+    process.me0Segments96
+)
 
 process.maxEvents = cms.untracked.PSet(
     input = cms.untracked.int32(10)
@@ -74,6 +134,10 @@ process.FEVTDEBUGHLToutput = cms.OutputModule("PoolOutputModule",
     splitLevel = cms.untracked.int32(0)
 )
 
+process.FEVTDEBUGHLToutput.outputCommands.append('keep *_*Muon*_*_*')
+process.FEVTDEBUGHLToutput.outputCommands.append('keep *_me0*_*_*')
+
+
 # Additional output definition
 
 # Other statements
@@ -87,7 +151,7 @@ process.GlobalTag = GlobalTag(process.GlobalTag, 'auto:phase2_realistic', '')
 
 # Path and EndPath definitions
 process.digitisation_step = cms.Path(process.pdigi_valid)
-process.L1simulation_step = cms.Path(process.SimL1Emulator)
+process.L1simulation_step = cms.Path(process.SimL1Emulator + process.me0DigiRecoSequence)
 process.endjob_step = cms.EndPath(process.endOfProcess)
 process.FEVTDEBUGHLToutput_step = cms.EndPath(process.FEVTDEBUGHLToutput)
 
