@@ -6,23 +6,32 @@
 #include <map>
 
 UpgradeL1TrackMatcher::UpgradeL1TrackMatcher(CSCStubMatcher& csc,
-                                             edm::EDGetTokenT<l1t::EMTFTrackCollection> &emtfTrackInputLabel_)
+                                             edm::EDGetTokenT<l1t::EMTFTrackCollection> &emtfTrackInputLabel_,
+                                             edm::EDGetTokenT< BXVector<l1t::RegionalMuonCand> > & gmtInputLabel_)
   : BaseMatcher(csc.trk(), csc.vtx(), csc.conf(), csc.event(), csc.eventSetup())
   , csc_stub_matcher_(&csc)
 {
-  auto tfTrack = conf().getParameter<edm::ParameterSet>("cscTfTrack");
+  auto tfTrack = conf().getParameter<edm::ParameterSet>("upgradeEmtfTrack");
   minBXEMTFTrack_ = tfTrack.getParameter<int>("minBX");
   maxBXEMTFTrack_ = tfTrack.getParameter<int>("minBX");
   verboseEMTFTrack_ = tfTrack.getParameter<int>("verbose");
   deltaREMTFTrack_ = tfTrack.getParameter<double>("deltaR");
 
+  auto gmt = conf().getParameter<edm::ParameterSet>("upgradeGMT");
+  minBXGMT_ = gmt.getParameter<int>("minBX");
+  maxBXGMT_ = gmt.getParameter<int>("minBX");
+  verboseGMT_ = gmt.getParameter<int>("verbose");
+  deltaRGMT_ = gmt.getParameter<double>("deltaR");
+
   //std::cout<<" UpgradeL1TrackMatcher constructor" <<std::endl;
   clear();
-  init();
 
   // tracks produced by EMEMTF
   edm::Handle<l1t::EMTFTrackCollection> hl1Tracks;
   if (gemvalidation::getByToken(emtfTrackInputLabel_,hl1Tracks, event())) matchEmtfTrackToSimTrack(*hl1Tracks.product());
+
+  edm::Handle<BXVector<l1t::RegionalMuonCand>> hGMT;
+  if (gemvalidation::getByToken(gmtInputLabel_,hGMT, event())) matchGMTToSimTrack(*hGMT.product());
 }
 
 UpgradeL1TrackMatcher::~UpgradeL1TrackMatcher()
@@ -36,20 +45,22 @@ UpgradeL1TrackMatcher::clear()
 }
 
 void
-UpgradeL1TrackMatcher::init()
-{
-}
-
-
-void
 UpgradeL1TrackMatcher::matchEmtfTrackToSimTrack(const l1t::EMTFTrackCollection& tracks)
 {
-  for (auto& trk : tracks) {
+  // for (const auto& trk : tracks) {
 
-    // check the matching CSC stubs
-    auto sim_stubs = csc_stub_matcher_->allLctsMatched2SimMuon();
-    // EMTFHitCollection l1_stubs = trk.Hits();
-  }
+  //   // check the matching CSC stubs
+  //   const auto sim_stubs = csc_stub_matcher_->allLctsMatched2SimMuon();
+  //   const l1t::EMTFHitCollection l1_stubs = trk.Hits();
+
+  //   for (const auto& l1_stub: l1_stubs){
+  //     CSCCorrelatedLCTDigi csc_stub = l1_stub.CSC_LCTDigi();
+
+  //     for (const auto& sim_stub: sim_stubs){
+  //       if (csc_stub==sim_stub.
+  //     }
+  //   }
+}
   /*
   const float simPt = trk().momentum().pt();
   const float simEta = trk().momentum().eta();
@@ -181,5 +192,7 @@ UpgradeL1TrackMatcher::matchEmtfTrackToSimTrack(const l1t::EMTFTrackCollection& 
       i++;
     }
 */
-}
+// }
 
+void UpgradeL1TrackMatcher::matchGMTToSimTrack(const BXVector<l1t::RegionalMuonCand>&)
+{}
