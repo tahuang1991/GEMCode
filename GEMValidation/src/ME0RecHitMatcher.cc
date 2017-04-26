@@ -52,9 +52,9 @@ ME0RecHitMatcher::matchME0RecHitsToSimTrack(const ME0RecHitCollection& rechits)
       bool match = false;
       ME0DigiPreRecoContainer digis = digi_matcher_->digisInDetId(id);
       for (const auto& digi: digis){
-        if (digi.tof() == rr->tof() and
-            digi.x() == rr->localPosition().x() and
-            digi.y() == rr->localPosition().y() ) {
+        if (std::abs(digi.tof() - rr->tof())<0.001 and
+            std::abs(digi.x() - rr->localPosition().x())<0.001 and
+            std::abs(digi.y() - rr->localPosition().y())<0.001 ) {
           match = true;
         }
       }
@@ -103,7 +103,7 @@ ME0RecHitMatcher::matchME0SegmentsToSimTrack(const ME0SegmentCollection& me0Segm
        	if (isME0RecHitMatched(*me0rh))
        	  ++rechitsFound;
       }
-      if (rechitsFound==0) continue;
+      if (rechitsFound<4) continue;
       if (verboseME0Segment_) {
 	cout << "Found " << rechitsFound << " rechits out of " << me0RecHitsInSuperChamber(id).size() << endl;
 	cout << "\t...was matched!" << endl;

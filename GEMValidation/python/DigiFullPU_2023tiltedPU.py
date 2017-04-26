@@ -2,7 +2,7 @@
 # using:
 # Revision: 1.19
 # Source: /local/reps/CMSSW/CMSSW/Configuration/Applications/python/ConfigBuilder.py,v
-# with command line options: step2 --conditions auto:phase2_realistic -n 10 --era Phase2C2_timing --eventcontent FEVTDEBUGHLT -s DIGI:pdigi_valid,L1 --datatier GEN-SIM-DIGI--geometry Extended2023D4 --python DigiFullPU_2023tiltedPU.py --no_exec --filein file:step1.root --fileout file:step2.root
+# with command line options: step2 --conditions auto:phase2_realistic -n 10 --era Phase2C2_timing --eventcontent FEVTDEBUGHLT -s DIGI:pdigi_valid,L1 --datatier GEN-SIM-DIGI --geometry Extended2023D4 --python DigiFullPU_2023tiltedPU.py --no_exec --filein file:step1.root --fileout file:step2.root
 import FWCore.ParameterSet.Config as cms
 
 from Configuration.StandardSequences.Eras import eras
@@ -127,7 +127,7 @@ process.configurationMetadata = cms.untracked.PSet(
 
 process.FEVTDEBUGHLToutput = cms.OutputModule("PoolOutputModule",
     dataset = cms.untracked.PSet(
-        dataTier = cms.untracked.string('GEN-SIM-DIGI--geometry'),
+        dataTier = cms.untracked.string('GEN-SIM-DIGI'),
         filterName = cms.untracked.string('')
     ),
     eventAutoFlushCompressedSize = cms.untracked.int32(10485760),
