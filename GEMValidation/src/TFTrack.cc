@@ -5,6 +5,7 @@ TFTrack::TFTrack(const csc::L1Track* t, const CSCCorrelatedLCTDigiCollection* lc
 {
   l1track_ = t;
   nstubs = 0;
+  trackType = CSCTF_Track;
 
   for (auto detUnitIt = lcts->begin(); detUnitIt != lcts->end(); detUnitIt++) {
     const CSCDetId& id = (*detUnitIt).first;
@@ -22,6 +23,24 @@ TFTrack::TFTrack(const csc::L1Track* t, const CSCCorrelatedLCTDigiCollection* lc
 
 }
 
+
+TFTrack::TFTrack(const l1t::EMTFTrack *t)
+{
+
+  trackType = EMTF_Track;
+  trackHits_ = t->PtrHits();
+  pt_ = t->Pt();
+  eta_ = t->Eta();
+  phi_ = t->Phi_glob_rad();
+  chargesign_ = t->Charge();
+  dPhi12_ = (unsigned)t->DPhi_12();
+  dPhi23_ = (unsigned)t->DPhi_23();
+  nstubs = 0;
+  for (auto hit : *trackHits_)
+      if (hit.Is_CSC_hit()) nstubs++;
+
+}
+
 TFTrack::TFTrack(const TFTrack& rhs)
 {}
 
@@ -34,6 +53,7 @@ TFTrack::~TFTrack()
   triggerStubs_.clear();
   mplcts_.clear();
   ids_.clear(); // chamber ids_
+  trackHits_ = NULL;
 
 }
 
@@ -55,6 +75,8 @@ TFTrack::init(edm::ESHandle< L1MuTriggerScales > &muScales,
   q_packed_ = quality & 0x3;
   pt_packed_ = gpt & 0x1f;
   chargesign_ = l1track_->charge_packed();
+  dPhi12_ = 1*(l1track_->ptLUTAddress() & 0xFF);
+  dPhi23_ = 1*((l1track_->ptLUTAddress() & 0xF00)>>8);
   // calculate pt, eta and phi (don't forget to store the sign)                                                                                   
   const int sign(l1track_->endcap()==1 ? 1 : -1);
   pt_ = muPtScale->getPtScale()->getLowEdge(pt_packed_) + 1.e-6;
@@ -72,10 +94,15 @@ TFTrack::setDR(double dr)
 bool 
 TFTrack::hasStubEndcap(int st) const
 {
-  if(st==1 and l1track_->me1ID() > 0) return true;
-  if(st==2 and l1track_->me2ID() > 0) return true;
-  if(st==3 and l1track_->me3ID() > 0) return true;
-  if(st==4 and l1track_->me4ID() > 0) return true;
+  if (trackType == CSCTF_Track){
+      if(st==1 and l1track_->me1ID() > 0) return true;
+      if(st==2 and l1track_->me2ID() > 0) return true;
+      if(st==3 and l1track_->me3ID() > 0) return true;
+      if(st==4 and l1track_->me4ID() > 0) return true;
+  }else if (trackType == EMTF_Track){
+      for (auto stub : *trackHits_)
+	  if (stub.Is_CSC_hit() and stub.Station() == st) return true;
+  }
   return false;
 }
 
@@ -89,11 +116,7 @@ bool
 TFTrack::hasStubStation(int st) const
 {
   if(st==0 and hasStubBarrel())       return true;
-  if(st==1 and l1track_->me1ID() > 0) return true;
-  if(st==2 and l1track_->me2ID() > 0) return true;
-  if(st==3 and l1track_->me3ID() > 0) return true;
-  if(st==4 and l1track_->me4ID() > 0) return true;
-  return false;
+  else return hasStubEndcap(st);
 }
 
 
@@ -146,6 +169,8 @@ void
 TFTrack::print()
 {
   
+    std::cout<<"\tpt: "<<pt_<<"  eta: "<<eta_<<"  phi: "<<phi_<<"  dr: "<<dr_<<std::endl;
+  if (trackType == CSCTF_Track){
 //    std::cout<<"#### TFTRACK PRINT: "<<msg<<" #####"<<std::endl;
     //std::cout<<"## L1MuRegionalCand print: ";
     //l1track_->print();
@@ -153,7 +178,6 @@ TFTrack::print()
     //l1track_->Print();
     //std::cout<<"## TFTRACK:  
     std::cout<<"\tpt_packed: "<<pt_packed_<<"  eta_packed: " << eta_packed_<<"  phi_packed: " << phi_packed_<<"  q_packed: "<< q_packed_<<"  bx: "<<l1track_->bx()<<std::endl;
-    std::cout<<"\tpt: "<<pt_<<"  eta: "<<eta_<<"  phi: "<<phi_<<"  sector: "<<l1track_->sector()<<"  dr: "<<dr_<<std::endl;
   /*  std::cout<<"\tMB1 ME1 ME2 ME3 ME4 = "<<l1track_->mb1ID()<<" "<<l1track_->me1ID()<<" "<<l1track_->me2ID()<<" "<<l1track_->me3ID()<<" "<<l1track_->me4ID()
         <<" ("<<hasStub(0)<<" "<<hasStub(1)<<" "<<hasStub(2)<<" "<<hasStub(3)<<" "<<hasStub(4)<<")  "
         <<" ("<<hasStubCSCOk(1)<<" "<<hasStubCSCOk(2)<<" "<<hasStubCSCOk(3)<<" "<<hasStubCSCOk(4)<<")"<<std::endl;*/
@@ -175,18 +199,28 @@ TFTrack::print()
     std::cout<<"\tMPCs meEtap and mePhip: ";
     for (size_t s=0; s<ids_.size(); s++) std::cout<<mplcts_[s]->meEtap<<", "<<mplcts_[s]->mePhip<<";  ";
     std::cout<<std::endl;*/
+  }
     std::cout<<"#### TFTRACK END PRINT #####"<<std::endl;
   
 }
 
 unsigned int TFTrack::digiInME(int st, int ring) const
 {
-  if (triggerDigis_.size() != triggerIds_.size()) std::cout<<" BUG " <<std::endl;
-  for (unsigned int i=0; i<triggerDigis_.size(); i++)
-  {
-     auto id(triggerIds_.at(i));
-     if (id.station()==st && id.ring()==ring) return i;
-     else continue;  
+  if (trackType == CSCTF_Track){
+      if (triggerDigis_.size() != triggerIds_.size()) std::cout<<" BUG " <<std::endl;
+      for (unsigned int i=0; i<triggerDigis_.size(); i++)
+      {
+	 auto id(triggerIds_.at(i));
+	 if (id.station()==st && id.ring()==ring) return i;
+	 else continue;  
+      }
+  }else if (trackType == EMTF_Track){
+      unsigned int i =0;
+      for (auto hit : *trackHits_){
+     	if (hit.Station() == st and hit.Ring() == ring and hit.Is_CSC_hit()) 
+	    return i;
+	i++;
+      }
   }
   return 999;//invalid return, larger than triggerDigis_.size();
 

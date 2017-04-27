@@ -20,6 +20,8 @@
 #include "L1Trigger/CSCTrackFinder/interface/CSCSectorReceiverLUT.h"
 #include "L1Trigger/CSCTrackFinder/interface/CSCTrackFinderDataTypes.h"
 #include "DataFormats/L1CSCTrackFinder/interface/L1CSCTrackCollection.h"
+#include "DataFormats/L1TMuon/interface/EMTFTrack.h"
+#include "DataFormats/L1TMuon/interface/EMTFHit.h"
 
 #include "DataFormats/CSCDigi/interface/CSCCorrelatedLCTDigiCollection.h"
 
@@ -41,11 +43,14 @@ class TFTrack
  public:
   /// constructor
   TFTrack(const csc::L1Track* t, const CSCCorrelatedLCTDigiCollection*);
+
+  TFTrack(const l1t::EMTFTrack *t);
   /// copy constructor
   TFTrack(const TFTrack&);
   /// destructor
   ~TFTrack();  
 
+  enum {CSCTF_Track, EMTF_Track, OMTF_Track};
   void init(edm::ESHandle< L1MuTriggerScales > &muScales,
 	    edm::ESHandle< L1MuTriggerPtScale > &muPtScale);
   
@@ -69,6 +74,7 @@ class TFTrack
   void addTriggerEtaPhi(const std::pair<float,float>&);
   void addTriggerStub(const csctf::TrackStub&);
 
+  int gettrackType() const { return trackType; }
   /// track sign
   bool sign() const {return l1track_->sign();}
   /// bunch crossing 
@@ -94,8 +100,8 @@ class TFTrack
 
 
   /// bending angles
-  unsigned dPhi12() const { return 1*(l1track_->ptLUTAddress() & 0xFF);}
-  unsigned dPhi23() const { return 1*((l1track_->ptLUTAddress() & 0xF00)>>8);}
+  unsigned dPhi12() const { return dPhi12_;}
+  unsigned dPhi23() const { return dPhi23_;}
 
   unsigned ptPacked() const {return pt_packed_;}
   unsigned etaPacked() const {return eta_packed_;}
@@ -111,8 +117,10 @@ class TFTrack
   bool passDPhicutTFTrack(int st, float pt) const;
    
  private:
+  int trackType;
   const csc::L1Track* l1track_;
   std::vector<const CSCCorrelatedLCTDigi*> triggerDigis_;
+  const l1t::EMTFHitCollection * trackHits_; //similar to triggerDigis_ + triggerDigis_
   std::vector<CSCDetId> triggerIds_;
   std::vector<std::pair<float, float>> triggerEtaPhis_;
   std::vector<csctf::TrackStub> triggerStubs_;
@@ -122,6 +130,8 @@ class TFTrack
   unsigned eta_packed_;
   unsigned pt_packed_;
   unsigned q_packed_;
+  unsigned dPhi12_;
+  unsigned dPhi23_; 
   unsigned int chargesign_;
   double phi_;
   double eta_;

@@ -1300,8 +1300,10 @@ private:
   edm::EDGetTokenT<RPCDigiCollection> rpcDigiInput_;
   edm::EDGetTokenT<RPCRecHitCollection> rpcRecHitInput_;
 
-  edm::EDGetTokenT<L1CSCTrackCollection> cscTfTrackInputLabel_; 
-  edm::EDGetTokenT<L1MuRegionalCandCollection> cscTfCandInputLabel_; 
+  //edm::EDGetTokenT<L1CSCTrackCollection> cscTfTrackInputLabel_; 
+  //edm::EDGetTokenT<L1MuRegionalCandCollection> cscTfCandInputLabel_; 
+  edm::EDGetTokenT<l1t::EMTFTrackCollection> emtfTrackInputLabel_;
+  edm::EDGetTokenT<BXVector<l1t::RegionalMuonCand>> gmtInputLabel_;
   edm::EDGetTokenT<L1MuRegionalCandCollection> dtTfCandInputLabel_; 
   edm::EDGetTokenT<L1MuRegionalCandCollection> rpcfTfCandInputLabel_; 
   edm::EDGetTokenT<L1MuRegionalCandCollection> rpcbTfCandInputLabel_; 
@@ -1486,11 +1488,15 @@ GEMCSCAnalyzer::GEMCSCAnalyzer(const edm::ParameterSet& ps)
   auto rpcRecHit_= cfg_.getParameter<edm::ParameterSet>("rpcRecHit");
   rpcRecHitInput_ = consumes<RPCRecHitCollection>(rpcRecHit_.getParameter<edm::InputTag>("validInputTags"));
 
-  auto tfTrack = cfg_.getParameter<edm::ParameterSet>("cscTfTrack");
-  cscTfTrackInputLabel_ = consumes<L1CSCTrackCollection>(tfTrack.getParameter<edm::InputTag>("validInputTags"));
+  //auto tfTrack = cfg_.getParameter<edm::ParameterSet>("cscTfTrack");
+  //cscTfTrackInputLabel_ = consumes<L1CSCTrackCollection>(tfTrack.getParameter<edm::InputTag>("validInputTags"));
+  auto emtfTrack = cfg_.getParameter<edm::ParameterSet>("upgradeEmtfTrack");
+  emtfTrackInputLabel_ = consumes<l1t::EMTFTrackCollection>(emtfTrack.getParameter<edm::InputTag>("validInputTags"));
 
-  auto tfCand = cfg_.getParameter<edm::ParameterSet>("cscTfCand");
-  cscTfCandInputLabel_ = consumes<L1MuRegionalCandCollection>(tfCand.getParameter<edm::InputTag>("validInputTags"));
+  //auto tfCand = cfg_.getParameter<edm::ParameterSet>("cscTfCand");
+  //cscTfCandInputLabel_ = consumes<L1MuRegionalCandCollection>(tfCand.getParameter<edm::InputTag>("validInputTags"));
+  auto upgradegmt = cfg_.getParameter<edm::ParameterSet>("upgradeGMT");
+  gmtInputLabel_ = consumes< BXVector<l1t::RegionalMuonCand> >(upgradegmt.getParameter<edm::InputTag>("validInputTags"));
 
   auto dtTfCand = cfg_.getParameter<edm::ParameterSet>("dtTfCand");
   dtTfCandInputLabel_ = consumes<L1MuRegionalCandCollection>(dtTfCand.getParameter<edm::InputTag>("validInputTags"));
@@ -1523,6 +1529,7 @@ GEMCSCAnalyzer::GEMCSCAnalyzer(const edm::ParameterSet& ps)
 
   auto recoChargedCandidate = cfg_.getParameter<edm::ParameterSet>("recoChargedCandidate");
   recoChargedCandidateInputLabel_ = consumes<reco::RecoChargedCandidateCollection>(recoChargedCandidate.getParameter<edm::InputTag>("validInputTags"));
+ 
 
   if (ntupleTrackChamberDelta_) bookSimTracksDeltaTree();
   if (ntupleTrackEff_)
@@ -1638,8 +1645,10 @@ void GEMCSCAnalyzer::analyze(const edm::Event& ev, const edm::EventSetup& es)
                                dtRecSegment4DInput_,
                                rpcDigiInput_,
                                rpcRecHitInput_,
-                               cscTfTrackInputLabel_, 
-                               cscTfCandInputLabel_, 
+                               //cscTfTrackInputLabel_, 
+                               //cscTfCandInputLabel_, 
+			       emtfTrackInputLabel_,
+			       gmtInputLabel_,
                                dtTfCandInputLabel_, 
                                rpcfTfCandInputLabel_, 
                                rpcbTfCandInputLabel_, 
@@ -1651,7 +1660,8 @@ void GEMCSCAnalyzer::analyze(const edm::Event& ev, const edm::EventSetup& es)
                                l1ExtraMuonInputLabel_,
                                recoTrackExtraInputLabel_,
                                recoTrackInputLabel_,
-                               recoChargedCandidateInputLabel_);
+                               recoChargedCandidateInputLabel_
+			       );
 
     if (ntupleTrackChamberDelta_) analyzeTrackChamberDeltas(match, trk_no);
     if (ntupleTrackEff_) analyzeTrackEff(match, trk_no);
@@ -1688,8 +1698,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   const RPCDigiMatcher& match_rd = match.rpcDigis();
   const CSCDigiMatcher& match_cd = match.cscDigis();
   const CSCStubMatcher& match_lct = match.cscStubs();
-  const L1TrackMatcher& match_track = match.l1Tracks();
- // const L1GlobalMuonTriggerMatcher& match_l1_gmt = match.l1GMTCands();
+  //const L1TrackMatcher& match_track = match.l1Tracks();
+  const UpgradeL1TrackMatcher& match_track = match.l1Tracks();
+  //const L1GlobalMuonTriggerMatcher& match_l1_gmt = match.l1GMTCands();
   //const HLTTrackMatcher& match_hlt_track = match.hltTracks();
   const SimTrack &t = match_sh.trk();
    
@@ -2710,8 +2721,10 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	    }
     }
 
-    std::cout <<"GEM id "<< id << std::endl;	
-    std::cout <<" final GEM sim phi "<< phi_gemsh <<" 1strippad "<< gp1.phi()<<" 2strippad "<< gp2.phi()<<" 4strippad "<< gp4.phi()<<" 8strippad "<< gp8.phi() <<" pad phi "<< phi_pad <<" lct phi "<< lct_phi <<" lct fit phi "<< lct_fit_phi << std::endl; 
+    if (verbose_){
+	std::cout <<"GEM id "<< id << std::endl;	
+	std::cout <<" final GEM sim phi "<< phi_gemsh <<" 1strippad "<< gp1.phi()<<" 2strippad "<< gp2.phi()<<" 4strippad "<< gp4.phi()<<" 8strippad "<< gp8.phi() <<" pad phi "<< phi_pad <<" lct phi "<< lct_phi <<" lct fit phi "<< lct_fit_phi << std::endl; 
+    }
 
   }
 
@@ -2894,7 +2907,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	etrk_[0].dphi_dir_st2_st23_L1 = displacedMuonL1Pt.getdeltaPhiDirection(2, 23); 
 	etrk_[0].dphi_dir_st12_st23_L1 = displacedMuonL1Pt.getdeltaPhiDirection(12, 23); 
 	etrk_[0].direction_ge21_pt = displacedMuonL1Pt.getDirectionPt();
-	std::cout <<"Direction based ge21 pt "<< etrk_[0].direction_ge21_pt  << std::endl;
+	//std::cout <<"Direction based ge21 pt "<< etrk_[0].direction_ge21_pt  << std::endl;
      } 
 
      if (displacedMuonL1Pt.getNParity()>=0 and displacedMuonL1Pt.runDirectionbased(false)){
@@ -2915,7 +2928,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 		etrk_[0].dphi_dir_st12_st23_L1 = displacedMuonL1Pt.getdeltaPhiDirection(12, 23); 
 	
 	etrk_[0].direction_noge21_pt = displacedMuonL1Pt.getDirectionPt();
-	std::cout <<"Direction based no ge21 pt "<< etrk_[0].direction_noge21_pt  << std::endl;
+	//std::cout <<"Direction based no ge21 pt "<< etrk_[0].direction_noge21_pt  << std::endl;
      }
 
      //etrk_[0].pt_direction_sh=PtassignmentHelper::Ptassign_Direction(csc_bending_angle_12, gp2.eta(), npar);  
@@ -3094,33 +3107,33 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     	etrk_[0].deltay23_test = displacedMuonL1Pt.getdeltaY23();  
     	etrk_[0].deltay123_test = displacedMuonL1Pt.getdeltaY123();  
 	etrk_[0].position_pt = displacedMuonL1Pt.getPositionPt();
-	std::cout <<"DisplacedMuon L1, Position based deltay12 "<< etrk_[0].deltay12_test <<" deltay23 "<< etrk_[0].deltay23_test <<" deltay123 "<< etrk_[0].deltay123_test<<" position pt "<< etrk_[0].position_pt << std::endl;
+	//std::cout <<"DisplacedMuon L1, Position based deltay12 "<< etrk_[0].deltay12_test <<" deltay23 "<< etrk_[0].deltay23_test <<" deltay123 "<< etrk_[0].deltay123_test<<" position pt "<< etrk_[0].position_pt << std::endl;
 	displacedMuonL1Pt.runHybrid(true);
 	etrk_[0].hybrid_pt = float(displacedMuonL1Pt.getHybridPt()); 
 	displacedMuonL1Pt.runHybrid(false);
 	etrk_[0].hybrid_noge21_pt = float(displacedMuonL1Pt.getHybridPt()); 
-	std::cout <<"simpt "<< etrk_[0].pt <<" eta "<< etrk_[0].eta <<" npar "<< etrk_[0].npar_L1 <<" hybrid pt "<< etrk_[0].hybrid_pt <<" hybrid pt(NOGE21) "<< etrk_[0].hybrid_noge21_pt << std::endl;
+	//std::cout <<"simpt "<< etrk_[0].pt <<" eta "<< etrk_[0].eta <<" npar "<< etrk_[0].npar_L1 <<" hybrid pt "<< etrk_[0].hybrid_pt <<" hybrid pt(NOGE21) "<< etrk_[0].hybrid_noge21_pt << std::endl;
      }
 
 
      //std::cout <<"DisplacedMuon SIM get npar "<< displacedMuonL1Pt_sim.getNParity()<<" ring "<<displacedMuonL1Pt_sim.getMeRing() << std::endl;
-     if (displacedMuonL1Pt_sim.getNParity()>=0 and displacedMuonL1Pt_sim.runPositionbased())
+     if (verbose_ and displacedMuonL1Pt_sim.getNParity()>=0 and displacedMuonL1Pt_sim.runPositionbased())
      {
      	std::cout <<"DisplacedMuon SIM deltay12 "<< displacedMuonL1Pt_sim.getdeltaY12() <<" deltay23 "<< displacedMuonL1Pt_sim.getdeltaY23() <<" ddY123 "<< displacedMuonL1Pt_sim.getdeltaY123() <<" etrk deltay12 "<< etrk_[0].deltay12_sim <<" deltay23 "<< etrk_[0].deltay23_sim << std::endl;
      }
-     if (displacedMuonL1Pt.getNParity()>=0 and displacedMuonL1Pt.runPositionbased() and etrk_[0].hasSt1St2St3)
+     if (verbose_ and displacedMuonL1Pt.getNParity()>=0 and displacedMuonL1Pt.runPositionbased() and etrk_[0].hasSt1St2St3)
      {
 	if (fabs(displacedMuonL1Pt.getdeltaY23()-etrk_[0].deltay23_fit)>.1) 
 	    std::cout <<"sim pt "<< etrk_[0].pt<<" difference between module and ana "<< displacedMuonL1Pt.getdeltaY23()-etrk_[0].deltay23_fit << std::endl;
      	std::cout <<"DisplacedMuon deltay12 "<< displacedMuonL1Pt.getdeltaY12() <<" deltay23 "<< displacedMuonL1Pt.getdeltaY23() <<" ddY123 "<< displacedMuonL1Pt.getdeltaY123() <<" etrk deltay12, sim "<< etrk_[0].deltay12_sim <<" fit "<< etrk_[0].deltay12_fit <<" deltay23,sim "<< etrk_[0].deltay23_sim <<" fit "<< etrk_[0].deltay23_fit << std::endl;
      
-     }else if (etrk_[0].hasSt1St2St3){
+     }else if (verbose_ and etrk_[0].hasSt1St2St3){
     	std::cout <<"Failed to run DisplacedMuonPtassignment, sim pt "<<  etrk_[0].pt <<" GEMCSCAnalyer sim deltay12 "<< etrk_[0].deltay12_sim<<" deltay23 "<< etrk_[0].deltay23_sim << " L1 deltay12 "<< etrk_[0].deltay12_fit <<" deltay23 "<< etrk_[0].deltay23_fit << std::endl; 
      }
   
   if (verbose_) std::cout <<"GEMCSCAnalyzer step9 "<< std::endl;
  //general propagation 
-  auto propagate_odd_gp(match_track.simTrackPropagateGPs_odd());
+  /*auto propagate_odd_gp(match_track.simTrackPropagateGPs_odd());
   auto propagate_even_gp(match_track.simTrackPropagateGPs_even());
   auto propagate_interstat_odd(match_track.interStatPropagation_odd());
   auto propagate_interstat_even(match_track.interStatPropagation_even());
@@ -3145,7 +3158,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	if (st==3 && !isnan(propagate_interstat_odd[13].eta()))  
 	              {etrk_[s].eta_interStat13 = propagate_interstat_odd[13].eta();
 	               etrk_[s].phi_interStat13 = propagate_interstat_odd[13].phi();}
-  }
+  }*/
   if (match_track.tfTracks().size()) {
     etrk_[0].has_tfTrack = 1;
     TFTrack* besttrack = match_track.bestTFTrack();
@@ -3153,11 +3166,13 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     etrk_[0].tracketa = besttrack->eta();
     etrk_[0].trackphi = besttrack->phi();
   //  quality_packed;
-   etrk_[0].pt_packed = besttrack->ptPacked();
-   etrk_[0].eta_packed = besttrack->etaPacked();
-   etrk_[0].phi_packed = besttrack->phiPacked();
-   etrk_[0].quality_packed = besttrack->qPacked();
- // rank = 0;
+    if (besttrack->gettrackType() == 0){
+       etrk_[0].pt_packed = besttrack->ptPacked();
+       etrk_[0].eta_packed = besttrack->etaPacked();
+       etrk_[0].phi_packed = besttrack->phiPacked();
+       etrk_[0].quality_packed = besttrack->qPacked();
+    }
+     // rank = 0;
    etrk_[0].deltaphi12 = besttrack->dPhi12();
    etrk_[0].deltaphi23 = besttrack->dPhi23();
    etrk_[0].hasME1 = besttrack->hasStubEndcap(1);
@@ -3165,7 +3180,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
    etrk_[0].nstubs = besttrack->nStubs();
    etrk_[0].deltaR = besttrack->dr();
    etrk_[0].chargesign = besttrack->chargesign();
-   unsigned int lct1 = 999;
+   /*unsigned int lct1 = 999;
    auto me1b(besttrack->digiInME(1,1));
    auto me1a(besttrack->digiInME(1,4));
    if (me1a != 999) lct1 = me1a;
@@ -3313,11 +3328,10 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	 auto etaphi2(triggerDigiEtaPhi.at(1));
 	 etrk_[0].lctdphi12 = etaphi1.second-etaphi2.second;
     
-    }
+    }*/
   }
   
-  /*
-  if (match_track.tfCands().size()) {
+  /*if (match_track.tfCands().size()) {
     etrk_[0].has_tfCand = 1;
     std::cout << "SimTrack has matched CSCTF Cand" << std::endl;
   }
@@ -3736,7 +3750,8 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
   const RPCDigiMatcher& match_rd = match.rpcDigis();
   const CSCDigiMatcher& match_cd = match.cscDigis();
   const CSCStubMatcher& match_lct = match.cscStubs();
-  const L1TrackMatcher& match_track = match.l1Tracks();
+  //const L1TrackMatcher& match_track = match.l1Tracks();
+  const UpgradeL1TrackMatcher& match_track = match.l1Tracks();
   const SimTrack &t = match_sh.trk();
 
   

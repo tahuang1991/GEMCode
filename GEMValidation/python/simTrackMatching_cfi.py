@@ -32,7 +32,7 @@ SimTrackMatching = cms.PSet(
     ntupleTrackEff = cms.bool(True),
     overrideminNHitsChamber = cms.bool(False),
     minNHitsChamber = cms.untracked.int32(4),
-    verbose = cms.bool(True),
+    verbose = cms.bool(False),
     ## per collection params
     simVertex = cms.PSet(
         verbose = cms.int32(0),
@@ -278,6 +278,23 @@ SimTrackMatching = cms.PSet(
         maxBX = cms.int32(1),
     ),
     ## TrackFinder tracks
+    upgradeEmtfTrack = cms.PSet(
+        verbose = cms.int32(1),
+        run = cms.bool(True),
+        validInputTags = cms.InputTag("simEmtfDigis"),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+        deltaR = cms.double(0.5),
+    ),
+    upgradeGMT = cms.PSet(
+        verbose = cms.int32(1),
+        run = cms.bool(True),
+        validInputTags = cms.InputTag("simEmtfDigis","EMTF"),
+        minBX = cms.int32(-1),
+        maxBX = cms.int32(1),
+        deltaR = cms.double(0.5),
+    ),
+
     cscTfTrack = cms.PSet(
         verbose = cms.int32(1),
         run = cms.bool(False),

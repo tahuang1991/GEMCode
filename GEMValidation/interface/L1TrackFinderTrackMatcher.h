@@ -10,8 +10,8 @@ class L1TrackFinderTrackMatcher : public BaseMatcher
 {
  public:
   /// constructor
-  L1TrackFinderTrackMatcher(SimHitMatcher& sh, 
-                            edm::EDGetTokenT<L1CSCTrackCollection>& cscTfTrackInputLabel_);
+  L1TrackFinderTrackMatcher(SimHitMatcher& sh);///, 
+   ///                           edm::EDGetTokenT<L1CSCTrackCollection>& cscTfTrackInputLabel_);
   /// destructor
   ~L1TrackFinderTrackMatcher();
   

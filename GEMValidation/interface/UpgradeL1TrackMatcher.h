@@ -7,6 +7,8 @@
 
  Original Author:  "Sven Dildick"
 */
+#include "GEMCode/GEMValidation/interface/TFTrack.h" 
+#include "GEMCode/GEMValidation/interface/TFCand.h" 
 
 #include "GEMCode/GEMValidation/interface/CSCStubMatcher.h"
 #include "DataFormats/L1TMuon/interface/RegionalMuonCand.h"
@@ -23,12 +25,29 @@ class UpgradeL1TrackMatcher : public BaseMatcher
   /// destructor
   ~UpgradeL1TrackMatcher();
 
+  std::vector<TFTrack*> tfTracks() const  {return tfTracks_;}
+  TFTrack* bestTFTrack() const { return bestTrack; }
+  //const l1t::RegionalMuonCand* bestGMTCand(float& mindR) const { mindR  = mindRGMT; return bestGMT; }
+  
+
  private:
 
   void clear();
 
+  float simPt;
+  float simEta;
+  float simPhi;
+  float simE;
+  float simCharge;
+
   void matchEmtfTrackToSimTrack(const l1t::EMTFTrackCollection&);
   void matchGMTToSimTrack(const BXVector<l1t::RegionalMuonCand>&);
+
+  float mindREMTFTrack = 10;
+  TFTrack* bestTrack;
+
+  float mindRGMT = 10;
+  l1t::RegionalMuonCand* bestGMT;
 
   const CSCStubMatcher* csc_stub_matcher_;
 
@@ -40,8 +59,9 @@ class UpgradeL1TrackMatcher : public BaseMatcher
   int verboseGMT_;
   double deltaRGMT_;
 
-  l1t::EMTFTrackCollection tfTracks_;
-  l1t::RegionalMuonCand gmt_;
+  //l1t::EMTFTrackCollection tfTracks_;
+  std::vector<TFTrack*> tfTracks_;
+  std::vector<l1t::RegionalMuonCand*> gmt_;
 };
 
 #endif

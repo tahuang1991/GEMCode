@@ -13,25 +13,35 @@ UpgradeL1TrackMatcher::UpgradeL1TrackMatcher(CSCStubMatcher& csc,
 {
   auto tfTrack = conf().getParameter<edm::ParameterSet>("upgradeEmtfTrack");
   minBXEMTFTrack_ = tfTrack.getParameter<int>("minBX");
-  maxBXEMTFTrack_ = tfTrack.getParameter<int>("minBX");
+  maxBXEMTFTrack_ = tfTrack.getParameter<int>("maxBX");
   verboseEMTFTrack_ = tfTrack.getParameter<int>("verbose");
   deltaREMTFTrack_ = tfTrack.getParameter<double>("deltaR");
 
   auto gmt = conf().getParameter<edm::ParameterSet>("upgradeGMT");
   minBXGMT_ = gmt.getParameter<int>("minBX");
-  maxBXGMT_ = gmt.getParameter<int>("minBX");
+  maxBXGMT_ = gmt.getParameter<int>("maxBX");
   verboseGMT_ = gmt.getParameter<int>("verbose");
   deltaRGMT_ = gmt.getParameter<double>("deltaR");
 
   //std::cout<<" UpgradeL1TrackMatcher constructor" <<std::endl;
   clear();
 
+  simPt = trk().momentum().pt();
+  simEta = trk().momentum().eta();
+  simPhi = trk().momentum().phi();
+  simE = trk().momentum().E();
+  simCharge = trk().charge();
+
   // tracks produced by EMEMTF
   edm::Handle<l1t::EMTFTrackCollection> hl1Tracks;
   if (gemvalidation::getByToken(emtfTrackInputLabel_,hl1Tracks, event())) matchEmtfTrackToSimTrack(*hl1Tracks.product());
+  else 
+      std::cout  <<"failed readout EMTFTracks " << std::endl;
 
   edm::Handle<BXVector<l1t::RegionalMuonCand>> hGMT;
   if (gemvalidation::getByToken(gmtInputLabel_,hGMT, event())) matchGMTToSimTrack(*hGMT.product());
+  else 
+      std::cout  <<"failed readout RegionalMuonCand " << std::endl;
 }
 
 UpgradeL1TrackMatcher::~UpgradeL1TrackMatcher()
@@ -47,152 +57,57 @@ UpgradeL1TrackMatcher::clear()
 void
 UpgradeL1TrackMatcher::matchEmtfTrackToSimTrack(const l1t::EMTFTrackCollection& tracks)
 {
-  // for (const auto& trk : tracks) {
-
+  GlobalPoint gp_st2(propagatedPositionSt2());
+  mindREMTFTrack = 10.0;
+  if (verboseEMTFTrack_)
+      std::cout <<"propaget position to st2 eta "<< float(gp_st2.eta()) <<" phi "<< float(gp_st2.phi()) << std::endl;
+  for (const auto& trk : tracks) {
+    if (verboseEMTFTrack_)
+	std::cout <<"track BX "<< trk.BX() <<  " pt "<< trk.Pt() <<" eta "<< trk.Eta() <<" phi "<< trk.Phi_glob_rad()<< std::endl;
+    if (trk.BX() < minBXEMTFTrack_ or trk.BX() > maxBXEMTFTrack_) continue;
+    float dR = 10.0;
+    dR = deltaR(float(gp_st2.eta()), float(gp_st2.phi()), trk.Eta(), trk.Phi_glob_rad());
+    if (verboseEMTFTrack_)
+	std::cout <<"dR (track, sim) "<< dR <<" deltaREMTFTrack_ "<< deltaREMTFTrack_ << std::endl;
+    if (dR < deltaREMTFTrack_){
+	TFTrack* track  = new TFTrack(&trk);
+	track->setDR(dR);
+	if (verboseEMTFTrack_){
+	    std::cout <<"bestTrack cand "<< std::endl;
+	    track->print();
+	}
+	tfTracks_.push_back(track);
+	if (dR < mindREMTFTrack)
+	    bestTrack = track;
+    }
   //   // check the matching CSC stubs
   //   const auto sim_stubs = csc_stub_matcher_->allLctsMatched2SimMuon();
   //   const l1t::EMTFHitCollection l1_stubs = trk.Hits();
-
   //   for (const auto& l1_stub: l1_stubs){
   //     CSCCorrelatedLCTDigi csc_stub = l1_stub.CSC_LCTDigi();
 
   //     for (const auto& sim_stub: sim_stubs){
   //       if (csc_stub==sim_stub.
   //     }
-  //   }
+   }
 }
-  /*
-  const float simPt = trk().momentum().pt();
-  const float simEta = trk().momentum().eta();
-  const float simPhi = trk().momentum().phi();
-  const float simE = trk().momentum().E();
-  const float simCharge = trk().charge();
 
-  for (const auto& trk = tracks.begin(); trk != tracks.end(); trk++) {
-     verboseTFTrack_ = 0;
-    TFTrack *track = new TFTrack(&trk->first,&trk->second);
-    //track->init(ptLUT_, muScalesHd_, muPtScaleHd_);
-    track->init(muScalesHd_, muPtScaleHd_);
+void UpgradeL1TrackMatcher::matchGMTToSimTrack(const BXVector<l1t::RegionalMuonCand>& gmtCands)
+{
+   if (tfTracks_.size()  ==  0) return;
+   bestTrack->print();
+   for (int bx = gmtCands.getFirstBX(); bx != gmtCands.getLastBX(); bx++ ){
+       if ( bx < minBXGMT_ or bx > maxBXGMT_) continue;
+       for (std::vector<l1t::RegionalMuonCand>::const_iterator cand = gmtCands.begin(bx); cand != gmtCands.end(bx); ++cand ){
+	   float pt = cand->hwPt() * 0.5;
+	   float phi = cand->hwPhi() * 2.0/576.0 ;
+	   float eta = cand->hwEta() * 0.010875;
+	   int charge = cand->hwSign() == 0? 0 : -1;
+	   //int quality  = cand->hwQual();
+	   std::cout <<"RegionalMuonCand hwPt "<< cand->hwPt()<<" pt "<< pt <<" hwPhi " << cand->hwPhi() <<" phi "<< phi <<" hwEta "<< cand->hwEta() <<" eta "<< eta <<" charge "<< charge << std::endl;
+       	   
+       }
+   }
 
-    float dR = 10.0;
-    TLorentzVector templ1muon;
-    templ1muon.SetPtEtaPhiM(track->pt(), track->eta(), track->phi(), 0.1057);
+}
 
-
-    if (simEta*track->eta() < 0) continue;
-    // calculate the deltaR using the simhits in the 2nd CSC station -- reference station
-    auto p(rpc_digi_matcher_->simHitMatcher()->chamberIdsCSC(CSC_ME21));
-    auto pp(rpc_digi_matcher_->simHitMatcher()->chamberIdsCSC(CSC_ME22));
-    p.insert(pp.begin(),pp.end());
-
-    TLorentzVector simmuon;
-
-    if (verboseTFTrack_ > 1) std::cout << "----------------------------------------------------------" << std::endl;
-    if (verboseTFTrack_ > 1) std::cout << "detids " << std::endl;
-
-    if (p.size()!=0) {
-      if (verboseTFTrack_ > 1) std::cout << CSCDetId(*p.begin()) << std::endl;
-      auto hits(rpc_digi_matcher_->simHitMatcher()->hitsInChamber(*p.begin()));
-      auto gp(rpc_digi_matcher_->simHitMatcher()->simHitsMeanPosition(hits));
-      if (verboseTFTrack_ > 1) std::cout << gp << std::endl;
-      // simmuon.SetPtEtaPhiM(simPt, gp.eta(), gp.phi(), 1.057);
-    }
-
-    //propagate simtrack to station2
-    float phi_cor = phiHeavyCorr(simPt, simEta, simPhi, simCharge);
-    simmuon.SetPtEtaPhiM(simPt, simEta, phi_cor, 0.1057);
-    dR = simmuon.DeltaR(templ1muon);
-
-   // auto lcts2(lctsInStation(2));
-   //  auto lcts3(lctsInStation(3));
-   //  lcts2.insert(lcts2.end(),lcts3.begin(),lcts3.end());
-
-   //  if (lcts2.size() != 0) {
-
-   // 	TLorentzVector simmuon;
-   //      for (auto stub : lcts2)
-   //      {
-   // 	    if (verboseTFTrack_ > 1)   std::cout <<"stubs in st2,3 "<< stub << std::endl;
-   // 	    auto EtaPhi(intersectionEtaPhi(digi_id(stub), digi_wg(stub), digi_channel(stub)));
-   //          //simmuon.SetPtEtaPhiE(simPt, simEta, simPhi, simE);
-   //          simmuon.SetPtEtaPhiE(simPt, EtaPhi.first, EtaPhi.second, simE);
-   // 	    if (simmuon.DeltaR(templ1muon) < dR)  dR = simmuon.DeltaR(templ1muon);
-   // 	}
-
-   //  }
-   //  else continue;//if no stubs available in station2,or 3 that can match to simtrack, then continue;???
-
-    if (verboseTFTrack_ > 1) std::cout << "----------------------------------------------------------" << std::endl;
-
-
-    track->setDR(dR);
-
-    // debugging
-    if (track->nStubs()==0)
-    {
-        std::cout << "nstubs == 0" << std::endl;
-	verboseTFTrack_ = 2;
-    }
-    //debug
-    //if (!(track->hasStubEndcap(1) and track->hasStubEndcap(2)) and track->dr()< deltaRTFTrack_)
-   // {
-    //     std::cout <<"no stubs in station 1 or 2" << std::endl;
-//	 verboseTFTrack_ = 2;
-  //  }
-
-    if (verboseTFTrack_){
-      std::cout << "\tL1CSC TFTrack "<< trk-tracks.begin() << " information:" << std::endl;
-      std::cout << "\tpt (GeV/c) = " << track->pt() << ", eta = " << track->eta()
-                << "\t, phi = " << track->phi() << ", dR(sim,L1) = " << track->dr()
-		<<" nStubs = "<< track->nStubs() << ", deltaphi12 = "<< track->dPhi12() <<", deltaphi23 = "<<track->dPhi23() <<std::endl;
-      std::cout << " pt_packed " << track->ptPacked()  << " eta_packed " << track->etaPacked() << " phi_packed " << track->phiPacked() << std::endl;
-      std::cout << "simTrack \t simpt " << simPt << " simeta "<< simEta << " simPhi "<< simPhi <<" simenergy "<< simE << std::endl;
-    }
-
-    // check the stubs
-    if (verboseTFTrack_ > 1){
-      std::cout << " \t\tStubs:" << std::endl;
-    }
-    for (auto  detUnitIt = trk->second.begin();
-         detUnitIt != trk->second.end(); detUnitIt++) {
-      const CSCDetId& id = (*detUnitIt).first;
-      if (verboseTFTrack_ > 1){
-        std::cout << "\t\tDetId: " << id << std::endl;
-      }
-      const CSCCorrelatedLCTDigiCollection::Range& range = (*detUnitIt).second;
-      for (auto digiIt = range.first; digiIt != range.second; digiIt++) {
-        auto lct(*digiIt);
-        // check for valid stubs
-        if (!(lct.isValid())) continue;
-	//  track.addTriggerDigi(&lct);
-	//  track.addTriggerDigiId(id);
-	auto EtaPhi(intersectionEtaPhi(id, lct.getKeyWG(), lct.getStrip()));
-        track->addTriggerEtaPhi(EtaPhi);
-        track->addTriggerStub(buildTrackStub(lct, id));
-        if (verboseTFTrack_ > 1 ) {
-	  //    auto EtaPhi(intersectionEtaPhi(id, lct.getKeyWG(), lct.getStrip()));
-          std::cout << "\t\tLCT" << digiIt-range.first<<" eta:"<< EtaPhi.first
-		    <<" phi:"<< EtaPhi.second << ": " << lct << std::endl;
-        }
-      }
-    }
-
-    //check the dR of simtrack and tftrack
-    if (track->dr() < deltaRTFTrack_) {
-      tfTracks_.push_back(track);
-      if (verboseTFTrack_) std::cout<<" dR(sim, L1) is ok "<<" deltaRTFTrack"<< deltaRTFTrack_ <<" real dr"<<track->dr()<< std::endl;
-    }
-
-  }
-  int i=0;
-  for (auto tftrk : tfTracks_)
-    {
-      if (verboseTFTrack_)  std::cout<<" track that can match to simtrack "<< i << " track pt " << tftrk->pt() <<" track eta " << tftrk->eta()
-				     <<" nstubs:"<< tftrk->nStubs()<<" dr:" << tftrk->dr() <<std::endl;
-      i++;
-    }
-*/
-// }
-
-void UpgradeL1TrackMatcher::matchGMTToSimTrack(const BXVector<l1t::RegionalMuonCand>&)
-{}

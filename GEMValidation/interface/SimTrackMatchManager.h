@@ -26,7 +26,8 @@
 #include "GEMCode/GEMValidation/interface/DTDigiMatcher.h"
 #include "GEMCode/GEMValidation/interface/DTStubMatcher.h"
 #include "GEMCode/GEMValidation/interface/DTRecHitMatcher.h"
-#include "GEMCode/GEMValidation/interface/L1TrackMatcher.h"
+//#include "GEMCode/GEMValidation/interface/L1TrackMatcher.h"
+#include "GEMCode/GEMValidation/interface/UpgradeL1TrackMatcher.h"
 #include "GEMCode/GEMValidation/interface/L1TrackFinderTrackMatcher.h"
 #include "GEMCode/GEMValidation/interface/L1TrackFinderCandidateMatcher.h"
 #include "GEMCode/GEMValidation/interface/L1GlobalMuonTriggerMatcher.h"
@@ -69,8 +70,10 @@ public:
                        edm::EDGetTokenT<DTRecSegment4DCollection>& dtRecSegment4DInput_,
                        edm::EDGetTokenT<RPCDigiCollection>& rpcDigiInput_,
                        edm::EDGetTokenT<RPCRecHitCollection>& rpcRecHitInput_,
-                       edm::EDGetTokenT<L1CSCTrackCollection>& cscTfTrackInputLabel_, 
-                       edm::EDGetTokenT<L1MuRegionalCandCollection>& cscTfCandInputLabel_, 
+                       //edm::EDGetTokenT<L1CSCTrackCollection>& cscTfTrackInputLabel_, 
+                       //edm::EDGetTokenT<L1MuRegionalCandCollection>& cscTfCandInputLabel_, 
+		       edm::EDGetTokenT<l1t::EMTFTrackCollection> &emtfTrackInputLabel_,
+		       edm::EDGetTokenT< BXVector<l1t::RegionalMuonCand> > & gmtInputLabel_,
                        edm::EDGetTokenT<L1MuRegionalCandCollection>& dtTfCandInputLabel_, 
                        edm::EDGetTokenT<L1MuRegionalCandCollection>& rpcfTfCandInputLabel_, 
                        edm::EDGetTokenT<L1MuRegionalCandCollection>& rpcbTfCandInputLabel_, 
@@ -101,8 +104,9 @@ public:
   const DTDigiMatcher& dtDigis() const {return dt_digis_;}
   const DTStubMatcher& dtStubs() const {return dt_stubs_;}
   const DTRecHitMatcher& dtRecHits() const {return dt_rechits_;} 
-  const L1TrackMatcher& l1Tracks() const {return l1_tracks_;}
-  const L1TrackFinderTrackMatcher& l1TfTracks() const {return l1_tf_tracks_;}
+  //const L1TrackMatcher& l1Tracks() const {return l1_tracks_;}
+  const UpgradeL1TrackMatcher& l1Tracks() const {return l1_tracks_;}
+  const L1TrackFinderTrackMatcher& l1TfTracks() const {return l1_tf_tracks_;} // not used yet
   const L1TrackFinderCandidateMatcher& l1TfCands() const {return l1_tf_cands_;}
   const L1GlobalMuonTriggerMatcher& l1GMTCands() const {return l1_gmt_cands_;}
   const HLTTrackMatcher& hltTracks() const {return hlt_tracks_;}
@@ -123,7 +127,8 @@ private:
   DTDigiMatcher dt_digis_;
   DTStubMatcher dt_stubs_;
   DTRecHitMatcher dt_rechits_; 
-  L1TrackMatcher l1_tracks_;
+  //L1TrackMatcher l1_tracks_;
+  UpgradeL1TrackMatcher l1_tracks_;
   L1TrackFinderTrackMatcher l1_tf_tracks_;
   L1TrackFinderCandidateMatcher l1_tf_cands_;
   L1GlobalMuonTriggerMatcher l1_gmt_cands_;

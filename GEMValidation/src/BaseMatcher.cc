@@ -4,6 +4,8 @@
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 #include "DataFormats/GeometrySurface/interface/Plane.h"
 #include "GEMCode/GEMValidation/interface/Helpers.h"
+#include "DataFormats/GeometrySurface/interface/Cylinder.h"
+//#include "DataFormats/GeometrySurface/interface/BoundCylinder.h"
 
 
 BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
@@ -168,6 +170,27 @@ BaseMatcher::propagateToZ(float z) const
   return propagateToZ(inner_point, inner_vec, z);
 }
 
+GlobalPoint
+BaseMatcher::propagateToR(GlobalPoint &inner_point, GlobalVector &inner_vec, float R) const
+{
+  Cylinder::CylinderPointer my_cyl(Cylinder::build(Surface::PositionType(0,0,0), Surface::RotationType(), R));
+
+  FreeTrajectoryState state_start(inner_point, inner_vec, trk_.charge(), &*magfield_);
+
+  TrajectoryStateOnSurface tsos(propagator_->propagate(state_start, *my_cyl));
+  if (!tsos.isValid()) tsos = propagatorOpposite_->propagate(state_start, *my_cyl);
+
+  if (tsos.isValid()) return tsos.globalPosition();
+  return GlobalPoint();
+}
+
+GlobalPoint
+BaseMatcher::propagateToR(float r) const
+{
+  GlobalPoint inner_point(vtx_.position().x(), vtx_.position().y(), vtx_.position().z());
+  GlobalVector inner_vec (trk_.momentum().x(), trk_.momentum().y(), trk_.momentum().z());
+  return propagateToR(inner_point, inner_vec, r);
+}
 
 GlobalPoint
 BaseMatcher::propagatedPositionGEM() const
@@ -176,6 +199,17 @@ BaseMatcher::propagatedPositionGEM() const
   const int endcap( (eta > 0.) ? 1 : -1);
   return propagateToZ(endcap*AVERAGE_GEM_Z);
 }
+
+GlobalPoint
+BaseMatcher::propagatedPositionSt2() const
+{
+  const double eta(trk().momentum().eta());
+  const int endcap( (eta > 0.) ? 1 : -1);
+  float AVERAGE_Z = (AVERAGE_ME21_EVEN_Z+AVERAGE_ME21_ODD_Z)/2.0;
+  if (abs(eta)<1.2) return propagateToR(AVERAGE_DT2_R);
+  else return  propagateToZ(endcap*AVERAGE_Z);
+}
+
 
 
 double 
@@ -238,3 +272,13 @@ bool BaseMatcher::passDPhicut(CSCDetId id, int chargesign, float dphi, float pt)
 }
 
 
+const CSCLayerGeometry*
+BaseMatcher::retriveCSCKeyLayerGeometry(int rawid) const 
+{
+  const CSCChamber* cscChamber(cscGeometry_->chamber(CSCDetId(rawid)));
+  const CSCLayer* cscKeyLayer(cscChamber->layer(3));
+  const CSCLayerGeometry* cscKeyLayerGeometry(cscKeyLayer->geometry());
+  return cscKeyLayerGeometry; 
+
+
+}

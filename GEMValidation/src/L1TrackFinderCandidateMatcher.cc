@@ -1,7 +1,7 @@
 #include "GEMCode/GEMValidation/interface/L1TrackFinderCandidateMatcher.h"
 
 L1TrackFinderCandidateMatcher::L1TrackFinderCandidateMatcher(SimHitMatcher& sh,
-                                                             edm::EDGetTokenT<L1MuRegionalCandCollection> &cscTfCandInputLabel_, 
+///                                                             edm::EDGetTokenT<L1MuRegionalCandCollection> &cscTfCandInputLabel_, 
                                                              edm::EDGetTokenT<L1MuRegionalCandCollection> &dtTfCandInputLabel_, 
                                                              edm::EDGetTokenT<L1MuRegionalCandCollection> &rpcfTfCandInputLabel_, 
                                                              edm::EDGetTokenT<L1MuRegionalCandCollection> &rpcbTfCandInputLabel_)
@@ -32,8 +32,8 @@ L1TrackFinderCandidateMatcher::L1TrackFinderCandidateMatcher(SimHitMatcher& sh,
   maxBXRpcfTfCand_ = rpcfTfCand.getParameter<int>("maxBX");
   maxBXRpcbTfCand_ = rpcbTfCand.getParameter<int>("maxBX");
 
-  edm::Handle<L1MuRegionalCandCollection> hCscTfCand;
-  if (gemvalidation::getByToken(cscTfCandInputLabel_, hCscTfCand, event())) if (runCscTfCand_) matchCSCTfCandToSimTrack(*hCscTfCand.product());
+  ///edm::Handle<L1MuRegionalCandCollection> hCscTfCand;
+  ///if (gemvalidation::getByToken(cscTfCandInputLabel_, hCscTfCand, event())) if (runCscTfCand_) matchCSCTfCandToSimTrack(*hCscTfCand.product());
 
   edm::Handle<L1MuRegionalCandCollection> hDtTfCand;
   if (gemvalidation::getByToken(dtTfCandInputLabel_, hDtTfCand, event())) if (runDtTfCand_) matchDTTfCandToSimTrack(*hDtTfCand.product());

@@ -470,7 +470,7 @@ GEMDigiMatcher::extrapolateHsfromGEMPad(unsigned int id, int gempad) const
   int station = gem_id.station();
   CSCDetId csc_id(endcap, station, gem_id.ring(), gem_id.chamber(), 0);
 
-  std::cout <<"extrapolateHsfromGEMPad gemid "<< gem_id <<" cscid "<< csc_id << std::endl;
+  //std::cout <<"extrapolateHsfromGEMPad gemid "<< gem_id <<" cscid "<< csc_id << std::endl;
   const CSCChamber* cscChamber(getCSCGeometry()->chamber(csc_id));
   const CSCLayer* cscKeyLayer(cscChamber->layer(3));
   const CSCLayerGeometry* cscKeyLayerGeometry(cscKeyLayer->geometry());
@@ -479,7 +479,7 @@ GEMDigiMatcher::extrapolateHsfromGEMPad(unsigned int id, int gempad) const
   const GEMChamber* gemChamber(gemSuperChamber->chamber(1));
   auto gemRoll(gemChamber->etaPartition(2));//any roll
   const int nGEMPads(gemRoll->npads());
-  std::cout <<"total GEMPads in roll 2 "<< nGEMPads << std::endl;
+  //std::cout <<"total GEMPads in roll 2 "<< nGEMPads << std::endl;
   if (gempad > nGEMPads or gempad < 0) result = -1;
 
   const LocalPoint lpGEM(gemRoll->centreOfPad(gempad));

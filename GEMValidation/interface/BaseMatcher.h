@@ -71,6 +71,14 @@ public:
   /// propagation for a track starting from a vertex
   GlobalPoint propagateToZ(float z) const;
 
+  /// general interface to propagation
+  GlobalPoint propagateToR(GlobalPoint &inner_point, GlobalVector &inner_vector, float r) const;
+  /// propagation for a track starting from a vertex
+  GlobalPoint propagateToR(float r) const;
+
+  /// propagation for a track starting from a vertex
+  GlobalPoint propagatedPositionSt2() const;
+
   /// propagate the track to average GEM z-position                                               
   GlobalPoint propagatedPositionGEM() const;
 
@@ -89,6 +97,8 @@ public:
 
   double phiHeavyCorr(double pt, double eta, double phi, double charge) const;
   bool passDPhicut(CSCDetId id, int chargesign, float dphi, float pt) const;
+
+  const CSCLayerGeometry* retriveCSCKeyLayerGeometry(int rawid) const;
 
  protected:
   

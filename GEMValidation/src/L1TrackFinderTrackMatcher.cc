@@ -1,7 +1,7 @@
 #include "GEMCode/GEMValidation/interface/L1TrackFinderTrackMatcher.h"
 
-L1TrackFinderTrackMatcher::L1TrackFinderTrackMatcher(SimHitMatcher& sh,
-                                                     edm::EDGetTokenT<L1CSCTrackCollection> &cscTfTrackInputLabel_)
+L1TrackFinderTrackMatcher::L1TrackFinderTrackMatcher(SimHitMatcher& sh)//,
+  //                                                   edm::EDGetTokenT<L1CSCTrackCollection> &cscTfTrackInputLabel_)
 : BaseMatcher(sh.trk(), sh.vtx(), sh.conf(), sh.event(), sh.eventSetup())
 {
   auto cscTfTrack = conf().getParameter<edm::ParameterSet>("cscTfTrack");
@@ -27,10 +27,10 @@ L1TrackFinderTrackMatcher::L1TrackFinderTrackMatcher(SimHitMatcher& sh,
   maxBXDtTfTrack_ = dtTfTrack.getParameter<int>("maxBX");
   maxBXRpcTfTrack_ = rpcTfTrack.getParameter<int>("maxBX");
 
+  /*
   edm::Handle<L1CSCTrackCollection> hCscTfTrack;
   if (runCscTfTrack_) if (gemvalidation::getByToken(cscTfTrackInputLabel_, hCscTfTrack, event())) matchCSCTfTrackToSimTrack(*hCscTfTrack.product());
 
-  /*
   edm::Handle<L1CSCTrackCollection> hDtTfTrack;
   if (runDtTfTrack_) if (gemvalidation::getByToken(dtTfTrackInputLabel_, hDtTfTrack, event())) matchDTTfTrackToSimTrack(*hDtTfTrack.product());
 
