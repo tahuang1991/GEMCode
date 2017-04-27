@@ -111,6 +111,7 @@ class TFTrack
   double pt() const {return pt_;}
   double eta() const {return eta_;}
   double phi() const {return phi_;}
+  double phi_local() const {return phi_local_;}
   double dr() const {return dr_;}
   std::vector<bool> deltaOk();
   bool debug() const {return debug_;}
@@ -134,6 +135,7 @@ class TFTrack
   unsigned dPhi23_; 
   unsigned int chargesign_;
   double phi_;
+  double phi_local_;
   double eta_;
   double pt_;
   double dr_;

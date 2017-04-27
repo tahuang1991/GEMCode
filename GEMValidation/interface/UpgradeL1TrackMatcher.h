@@ -27,7 +27,8 @@ class UpgradeL1TrackMatcher : public BaseMatcher
 
   std::vector<TFTrack*> tfTracks() const  {return tfTracks_;}
   TFTrack* bestTFTrack() const { return bestTrack; }
-  //const l1t::RegionalMuonCand* bestGMTCand(float& mindR) const { mindR  = mindRGMT; return bestGMT; }
+  TFCand* bestGMTCand() const { return bestGMT; }
+  std::vector<TFCand*> gmts() const { return gmts_; }
   
 
  private:
@@ -47,7 +48,7 @@ class UpgradeL1TrackMatcher : public BaseMatcher
   TFTrack* bestTrack;
 
   float mindRGMT = 10;
-  l1t::RegionalMuonCand* bestGMT;
+  TFCand* bestGMT;
 
   const CSCStubMatcher* csc_stub_matcher_;
 
@@ -61,7 +62,7 @@ class UpgradeL1TrackMatcher : public BaseMatcher
 
   //l1t::EMTFTrackCollection tfTracks_;
   std::vector<TFTrack*> tfTracks_;
-  std::vector<l1t::RegionalMuonCand*> gmt_;
+  std::vector<TFCand*> gmts_;
 };
 
 #endif

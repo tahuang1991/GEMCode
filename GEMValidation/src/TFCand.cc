@@ -5,6 +5,16 @@ TFCand::TFCand(const L1MuRegionalCand* t)
   l1Cand_ = t;
 }
 
+TFCand::TFCand(const l1t::RegionalMuonCand* cand )
+{
+  //const l1t::RegionalMuonCand* cand(&t);
+  eta_ = cand->hwEta() * 0.010875;
+  //local phi from GMT
+  phi_local_ = cand->hwPhi() * 2.0 * 3.1415926/576.0;
+  pt_ = cand->hwPt() * 0.5;
+  charge_ = cand->hwSign() == 0? 1 : -1; 
+}
+
 TFCand::TFCand(const TFCand& rhs)
 {}
 
@@ -50,4 +60,11 @@ void
 TFCand::setDR(double dr)
 {
   dr_ = dr;
+}
+
+
+void 
+TFCand::print()
+{
+    std::cout <<"TFCand eta "<< eta_ << " phi "<< phi_ << " local phi "<< phi_local_ <<" pt "<< pt_ << " quality "<< quality_ <<" dR "<< dr_ << std::endl;
 }

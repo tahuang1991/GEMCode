@@ -63,7 +63,7 @@ UpgradeL1TrackMatcher::matchEmtfTrackToSimTrack(const l1t::EMTFTrackCollection& 
       std::cout <<"propaget position to st2 eta "<< float(gp_st2.eta()) <<" phi "<< float(gp_st2.phi()) << std::endl;
   for (const auto& trk : tracks) {
     if (verboseEMTFTrack_)
-	std::cout <<"track BX "<< trk.BX() <<  " pt "<< trk.Pt() <<" eta "<< trk.Eta() <<" phi "<< trk.Phi_glob_rad()<< std::endl;
+	std::cout <<"track BX "<< trk.BX() <<  " pt "<< trk.Pt() <<" eta "<< trk.Eta() <<" phi "<< trk.Phi_glob_rad()<<" phi_local "<< trk.Phi_loc_rad() << std::endl;
     if (trk.BX() < minBXEMTFTrack_ or trk.BX() > maxBXEMTFTrack_) continue;
     float dR = 10.0;
     dR = deltaR(float(gp_st2.eta()), float(gp_st2.phi()), trk.Eta(), trk.Phi_glob_rad());
@@ -78,6 +78,7 @@ UpgradeL1TrackMatcher::matchEmtfTrackToSimTrack(const l1t::EMTFTrackCollection& 
 	}
 	tfTracks_.push_back(track);
 	if (dR < mindREMTFTrack)
+	    mindREMTFTrack = dR;
 	    bestTrack = track;
     }
   //   // check the matching CSC stubs
@@ -96,16 +97,35 @@ void UpgradeL1TrackMatcher::matchGMTToSimTrack(const BXVector<l1t::RegionalMuonC
 {
    if (tfTracks_.size()  ==  0) return;
    bestTrack->print();
+   float mindPtRel = 0.5;
+   mindRGMT = 10.0;
    for (int bx = gmtCands.getFirstBX(); bx != gmtCands.getLastBX(); bx++ ){
        if ( bx < minBXGMT_ or bx > maxBXGMT_) continue;
        for (std::vector<l1t::RegionalMuonCand>::const_iterator cand = gmtCands.begin(bx); cand != gmtCands.end(bx); ++cand ){
-	   float pt = cand->hwPt() * 0.5;
-	   float phi = cand->hwPhi() * 2.0/576.0 ;
-	   float eta = cand->hwEta() * 0.010875;
-	   int charge = cand->hwSign() == 0? 0 : -1;
+	   TFCand *L1Mu = new TFCand(&(*cand));
+	   float pt = L1Mu->pt();
+	   float phi = L1Mu->phi_local() ;
+	   float eta = L1Mu->eta();
+           for (auto trk : tfTracks_){
+	       float dR = deltaR(trk->eta(), trk->phi_local(), eta, phi);
+	       float dPtRel = std::fabs(trk->pt() - pt)/pt;
+	       if (dR < deltaRGMT_ and dPtRel < mindPtRel)
+		   L1Mu->setGlobalPhi(trk->phi());
+		   gmts_.push_back(L1Mu);
+	   }
+	   L1Mu->print();
 	   //int quality  = cand->hwQual();
-	   std::cout <<"RegionalMuonCand hwPt "<< cand->hwPt()<<" pt "<< pt <<" hwPhi " << cand->hwPhi() <<" phi "<< phi <<" hwEta "<< cand->hwEta() <<" eta "<< eta <<" charge "<< charge << std::endl;
+	   //std::cout <<"RegionalMuonCand hwPt "<< cand->hwPt()<<" pt "<< pt <<" hwPhi " << cand->hwPhi() <<" local phi "<< phi <<" hwEta "<< cand->hwEta() <<" eta "<< eta <<" charge "<< charge << std::endl;
        	   
+       }
+   }
+   for (auto cand : gmts_){
+       float phi = cand->phi_local();
+       float eta = cand->eta();
+       float dR = deltaR(bestTrack->eta(), bestTrack->phi_local(), eta, phi);
+       if (dR < mindRGMT){
+	   mindRGMT = dR;
+	   bestGMT = cand;
        }
    }
 

@@ -32,6 +32,7 @@ TFTrack::TFTrack(const l1t::EMTFTrack *t)
   pt_ = t->Pt();
   eta_ = t->Eta();
   phi_ = t->Phi_glob_rad();
+  phi_local_ = t->Phi_loc_rad();
   chargesign_ = t->Charge();
   dPhi12_ = (unsigned)t->DPhi_12();
   dPhi23_ = (unsigned)t->DPhi_23();
