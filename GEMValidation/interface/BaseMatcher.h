@@ -32,6 +32,7 @@
 #include "Geometry/DTGeometry/interface/DTGeometry.h"
 
 #include "GEMCode/GEMValidation/interface/Helpers.h"
+#include "DataFormats/GEMRecHit/interface/ME0SegmentCollection.h"
 //#include "GEMCode/GEMValidation/interface/CSCStubPatterns.h"
 
 class BaseMatcher
@@ -81,6 +82,9 @@ public:
 
   /// propagate the track to average GEM z-position                                               
   GlobalPoint propagatedPositionGEM() const;
+
+  /// propaate from ME0 to CSC
+  GlobalPoint propagateFromME0ToCSC(ME0Segment segment, int st, bool evenodd) const;
 
   /// geometry
   void setGEMGeometry(const GEMGeometry *geom) {gemGeometry_ = geom;}
