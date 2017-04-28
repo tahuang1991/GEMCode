@@ -36,14 +36,17 @@ ME0DigiMatcher::matchPreRecoDigisToSimTrack(const ME0DigiPreRecoCollection& digi
 
     for (auto d = digis_in_det.first; d != digis_in_det.second; ++d)
     {
-      if (verboseDigi_) cout<<"gdigi "<<p_id<<" "<<*d<<endl;
       // check that the digi is within BX range
       if (d->tof() < minBXME0_ || d->tof() > maxBXME0_) continue;
 
+      // check that the pdgid is 13 for muon!
+      if (std::abs(d->pdgid()) != 13) continue;
+
+      if (verboseDigi_) cout<<"gdigi "<<p_id<<" "<<*d<<endl;
+
       bool match = false;
 
-      edm::PSimHitContainer hits = simhit_matcher_->hitsInDetId(id);
-      for (const auto& hit: hits){
+      for (const auto& hit: simhit_matcher_->hitsInDetId(id)){
         // check that the digi position matches a simhit position (within 3 sigma)
         if (d->x() - 3 * d->ex() < hit.localPosition().x() and
             d->x() + 3 * d->ex() > hit.localPosition().x() and
@@ -116,6 +119,16 @@ int
 ME0DigiMatcher::nLayersWithDigisInSuperChamber(unsigned int detid) const
 {
   set<int> layers;
+  ME0DetId sch_id(detid);
+  for (int iLayer=1; iLayer<=6; iLayer++){
+    ME0DetId ch_id(sch_id.region(), iLayer, sch_id.chamber(), 0);
+    // get the digis in this chamber
+    auto digis = digisInChamber(ch_id.rawId());
+    // at least one digi in this layer!
+    if (digis.size()>0){
+      layers.insert(iLayer);
+    }
+  }
   return layers.size();
 }
 
