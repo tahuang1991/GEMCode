@@ -46,7 +46,8 @@ ME0RecHitMatcher::matchME0RecHitsToSimTrack(const ME0RecHitCollection& rechits)
     // get the rechits
     auto rechits_in_det = rechits.get(p_id);
     for (auto rr = rechits_in_det.first; rr != rechits_in_det.second; ++rr) {
-      if (verboseME0RecHit_) cout<<"rechit "<<p_id<<" "<<*rr;
+
+      if (verboseME0RecHit_) cout<<"rechit "<<p_id<<" "<<*rr << endl;;
 
       // match the rechit to the digis if the TOF, x and y are the same
       bool match = false;
@@ -105,8 +106,8 @@ ME0RecHitMatcher::matchME0SegmentsToSimTrack(const ME0SegmentCollection& me0Segm
       }
       if (rechitsFound<4) continue;
       if (verboseME0Segment_) {
-	cout << "Found " << rechitsFound << " rechits out of " << me0RecHitsInSuperChamber(id).size() << endl;
-	cout << "\t...was matched!" << endl;
+        cout << "Found " << rechitsFound << " rechits out of " << me0RecHitsInSuperChamber(id).size() << endl;
+        cout << "\t...was matched!" << endl;
       }
       superChamber_to_me0Segment_[ p_id.rawId() ].push_back(*d);
     }
@@ -285,7 +286,7 @@ ME0RecHitMatcher::bestME0Segment(unsigned int id)
 }
 
 ME0Segment
-ME0RecHitMatcher::findbestME0Segment(ME0SegmentContainer allSegs) const 
+ME0RecHitMatcher::findbestME0Segment(ME0SegmentContainer allSegs) const
 {
   ME0Segment bestSegment;
   double chi2overNdf = 99;
