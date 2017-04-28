@@ -1,10 +1,10 @@
 #include "GEMCode/GEMValidation/interface/SimTrackMatchManager.h"
 
-SimTrackMatchManager::SimTrackMatchManager(const SimTrack& t, 
+SimTrackMatchManager::SimTrackMatchManager(const SimTrack& t,
                                            const SimVertex& v,
-                                           const edm::ParameterSet& ps, 
-                                           const edm::Event& ev, 
-                                           const edm::EventSetup& es, 
+                                           const edm::ParameterSet& ps,
+                                           const edm::Event& ev,
+                                           const edm::EventSetup& es,
                                            edm::EDGetTokenT<reco::GenParticleCollection>& genParticleInput_,
                                            edm::EDGetTokenT<edm::SimVertexContainer>& simVertexInput_,
                                            edm::EDGetTokenT<edm::SimTrackContainer>& simTrackInput_,
@@ -18,6 +18,8 @@ SimTrackMatchManager::SimTrackMatchManager(const SimTrack& t,
                                            edm::EDGetTokenT<GEMCoPadDigiCollection>& gemCoPadDigiInput_,
                                            edm::EDGetTokenT<GEMRecHitCollection>& gemRecHitInput_,
                                            edm::EDGetTokenT<ME0DigiPreRecoCollection>& me0DigiInput_,
+                                           edm::EDGetTokenT<ME0RecHitCollection>& me0RecHitInput_,
+                                           edm::EDGetTokenT<ME0SegmentCollection>& me0SegmentInput_,
                                            edm::EDGetTokenT<CSCComparatorDigiCollection>& cscComparatorDigiInput_,
                                            edm::EDGetTokenT<CSCWireDigiCollection>& cscWireDigiInput_,
                                            edm::EDGetTokenT<CSCCLCTDigiCollection>& clctInputs_,
@@ -33,13 +35,13 @@ SimTrackMatchManager::SimTrackMatchManager(const SimTrack& t,
                                            edm::EDGetTokenT<DTRecSegment4DCollection>& dtRecSegment4DInput_,
                                            edm::EDGetTokenT<RPCDigiCollection>& rpcDigiInput_,
                                            edm::EDGetTokenT<RPCRecHitCollection>& rpcRecHitInput_,
-                                           //edm::EDGetTokenT<L1CSCTrackCollection>& cscTfTrackInputLabel_, 
-                                           //edm::EDGetTokenT<L1MuRegionalCandCollection>& cscTfCandInputLabel_, 
-					   edm::EDGetTokenT<l1t::EMTFTrackCollection>& emtfTrackInputLabel_,
-					   edm::EDGetTokenT< BXVector<l1t::RegionalMuonCand> >& gmtInputLabel_,
-                                           edm::EDGetTokenT<L1MuRegionalCandCollection>& dtTfCandInputLabel_, 
-                                           edm::EDGetTokenT<L1MuRegionalCandCollection>& rpcfTfCandInputLabel_, 
-                                           edm::EDGetTokenT<L1MuRegionalCandCollection>& rpcbTfCandInputLabel_, 
+                                           //edm::EDGetTokenT<L1CSCTrackCollection>& cscTfTrackInputLabel_,
+                                           //edm::EDGetTokenT<L1MuRegionalCandCollection>& cscTfCandInputLabel_,
+                                           edm::EDGetTokenT<l1t::EMTFTrackCollection>& emtfTrackInputLabel_,
+                                           edm::EDGetTokenT< BXVector<l1t::RegionalMuonCand> >& gmtInputLabel_,
+                                           edm::EDGetTokenT<L1MuRegionalCandCollection>& dtTfCandInputLabel_,
+                                           edm::EDGetTokenT<L1MuRegionalCandCollection>& rpcfTfCandInputLabel_,
+                                           edm::EDGetTokenT<L1MuRegionalCandCollection>& rpcbTfCandInputLabel_,
                                            edm::EDGetTokenT<L1MuRegionalCandCollection>& gmtRegCandCSCInputLabel_,
                                            edm::EDGetTokenT<L1MuRegionalCandCollection>& gmtRegCandDTInputLabel_,
                                            edm::EDGetTokenT<L1MuRegionalCandCollection>& gmtRegCandRPCfInputLabel_,
@@ -50,49 +52,49 @@ SimTrackMatchManager::SimTrackMatchManager(const SimTrack& t,
                                            edm::EDGetTokenT<reco::TrackCollection>& recoTrackInputLabel_,
                                            edm::EDGetTokenT<reco::RecoChargedCandidateCollection>& recoChargedCandidateInputLabel_
 					   )
-: 
+:
   genMuons_(t, v, ps, ev, es, genParticleInput_)
-  ,simhits_(t, v, ps, ev, es, simVertexInput_, simTrackInput_, 
-           gemSimHitInput_, cscSimHitInput_, 
+  ,simhits_(t, v, ps, ev, es, simVertexInput_, simTrackInput_,
+           gemSimHitInput_, cscSimHitInput_,
            rpcSimHitInput_, me0SimHitInput_, dtSimHitInput_)
   , gem_digis_(simhits_, gemDigiInput_, gemPadDigiInput_, gemCoPadDigiInput_)
   , gem_rechits_(simhits_, gemRecHitInput_)
   , me0_digis_(simhits_, me0DigiInput_)
-  // , me0_rechits_(simhits_)
+  , me0_rechits_(me0_digis_, me0RecHitInput_, me0SegmentInput_)
   , rpc_digis_(simhits_, rpcDigiInput_)
   , rpc_rechits_(simhits_, rpcRecHitInput_)
   , csc_digis_(simhits_, cscComparatorDigiInput_, cscWireDigiInput_)
-  , csc_stubs_(simhits_, 
-               csc_digis_, gem_digis_, 
-               rpc_digis_, clctInputs_, 
+  , csc_stubs_(simhits_,
+               csc_digis_, gem_digis_,
+               rpc_digis_, clctInputs_,
                alctInputs_, lctInputs_, mplctInputs_)
-  , csc_rechits_(simhits_, 
+  , csc_rechits_(simhits_,
                  cscRecHit2DInput_, cscSegmentInput_)
   , dt_digis_(simhits_, dtDigiInput_)
   , dt_stubs_(simhits_, dtStubInput_)
-  , dt_rechits_(simhits_, 
-                dtRecHit1DPairInput_, dtRecSegment2DInput_, 
+  , dt_rechits_(simhits_,
+                dtRecHit1DPairInput_, dtRecSegment2DInput_,
                 dtRecSegment4DInput_)
   , l1_tracks_(csc_stubs_, emtfTrackInputLabel_, gmtInputLabel_)
-  //, l1_tracks_(csc_stubs_, dt_digis_, rpc_digis_, 
+  //, l1_tracks_(csc_stubs_, dt_digis_, rpc_digis_,
   //	  	cscTfTrackInputLabel_, cscTfCandInputLabel_)
   , l1_tf_tracks_(simhits_)//, cscTfTrackInputLabel_)
-  , l1_tf_cands_(simhits_, 
-  //               cscTfCandInputLabel_, 
-                 dtTfCandInputLabel_, 
+  , l1_tf_cands_(simhits_,
+  //               cscTfCandInputLabel_,
+                 dtTfCandInputLabel_,
                  rpcfTfCandInputLabel_, rpcbTfCandInputLabel_)
-  , l1_gmt_cands_(simhits_, 
-                  gmtRegCandCSCInputLabel_, gmtRegCandDTInputLabel_, 
-                  gmtRegCandRPCfInputLabel_, gmtRegCandRPCbInputLabel_, 
+  , l1_gmt_cands_(simhits_,
+                  gmtRegCandCSCInputLabel_, gmtRegCandDTInputLabel_,
+                  gmtRegCandRPCfInputLabel_, gmtRegCandRPCbInputLabel_,
                   gmtCandInputLabel_, l1ExtraMuonInputLabel_)
-  , hlt_tracks_(csc_rechits_, dt_rechits_, rpc_rechits_, gem_rechits_, 
+  , hlt_tracks_(csc_rechits_, dt_rechits_, rpc_rechits_, gem_rechits_,
                 recoTrackExtraInputLabel_, recoTrackInputLabel_, recoChargedCandidateInputLabel_)
-		
+
 {
   //  std::cout <<"Constructing new SimTrackMatchManager" << std::endl;
 }
 
-SimTrackMatchManager::~SimTrackMatchManager() 
+SimTrackMatchManager::~SimTrackMatchManager()
 {
   //  std::cout <<"Removing SimTrackMatchManager" << std::endl;
 }
