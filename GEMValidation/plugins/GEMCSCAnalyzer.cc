@@ -2902,8 +2902,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     const ME0DetId id(d);
     std::cout <<"ME0 Detid "<< id << std::endl;
     auto me0Segment(match_me0rh.findbestME0Segment(match_me0rh.me0SegmentsInSuperChamber(d)));
+    cout << "me0Segment " << me0Segment << endl;
     if (fabs(me0Segment.chi2()) < 0.00001 and fabs(me0Segment.time()) < 0.00001 and fabs(me0Segment.timeErr()) < 0.0001)
-	continue;
+      continue;
     double chi2 = me0Segment.chi2(); float dPhi = me0Segment.deltaPhi(); float time = me0Segment.time();
     float timeErr = me0Segment.timeErr(); int nRecHits = me0Segment.nRecHits();
     GlobalPoint gp(match_me0rh.globalPoint(me0Segment));

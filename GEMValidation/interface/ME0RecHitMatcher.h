@@ -82,6 +82,7 @@ private:
   bool runME0Segment_;
   int maxBXME0Segment_;
   int minBXME0Segment_;
+  int minNHitsSegment_;
 
   //ME0Segment bestMe0Seg_;
   std::map<unsigned int, ME0Segment> superChamber_to_bestME0Segment_;

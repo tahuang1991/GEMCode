@@ -98,7 +98,7 @@ SimTrackMatching = cms.PSet(
     ),
     me0DigiPreReco = cms.PSet(
         verbose = cms.int32(0),
-        validInputTags = cms.InputTag("simMuonME0ReDigis"),
+        validInputTags = cms.InputTag("simMuonME0ReDigis192"),
         run = cms.bool(True),
         minBX = cms.int32(0),
         maxBX = cms.int32(0),
@@ -106,7 +106,7 @@ SimTrackMatching = cms.PSet(
         minNHitsChamber = cms.int32(4),
     ),
     me0RecHit = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.InputTag("me0RecHits192"),
         run = cms.bool(True),
         minBX = cms.int32(0),
@@ -114,11 +114,12 @@ SimTrackMatching = cms.PSet(
         minNHitsChamber = cms.int32(4),
     ),
     me0Segment = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.InputTag("me0Segments192"),
         run = cms.bool(True),
         minBX = cms.int32(0),
         maxBX = cms.int32(0),
+        minNHits = cms.int32(4),
     ),
     me0Muon = cms.PSet(
         verbose = cms.int32(0),

@@ -21,6 +21,7 @@ ME0RecHitMatcher::ME0RecHitMatcher(ME0DigiMatcher& dg,
   minBXME0Segment_ = me0Segment.getParameter<int>("minBX");
   verboseME0Segment_ = me0Segment.getParameter<int>("verbose");
   runME0Segment_ = me0Segment.getParameter<bool>("run");
+  minNHitsSegment_ = me0Segment.getParameter<int>("minNHits");
 
   if (hasME0Geometry_) {
     edm::Handle<ME0RecHitCollection> me0_rechits;
@@ -47,14 +48,16 @@ ME0RecHitMatcher::matchME0RecHitsToSimTrack(const ME0RecHitCollection& rechits)
     auto rechits_in_det = rechits.get(p_id);
     for (auto rr = rechits_in_det.first; rr != rechits_in_det.second; ++rr) {
 
+      // check that the rechit is within BX range
+      if (rr->tof() < minBXME0RecHit_ || rr->tof() > maxBXME0RecHit_) continue;
+
       if (verboseME0RecHit_) cout<<"rechit "<<p_id<<" "<<*rr << endl;;
 
       // match the rechit to the digis if the TOF, x and y are the same
       bool match = false;
       ME0DigiPreRecoContainer digis = digi_matcher_->digisInDetId(id);
       for (const auto& digi: digis){
-        if (std::abs(digi.tof() - rr->tof())<0.001 and
-            std::abs(digi.x() - rr->localPosition().x())<0.001 and
+        if (std::abs(digi.x() - rr->localPosition().x())<0.001 and
             std::abs(digi.y() - rr->localPosition().y())<0.001 ) {
           match = true;
         }
@@ -98,13 +101,16 @@ ME0RecHitMatcher::matchME0SegmentsToSimTrack(const ME0SegmentCollection& me0Segm
       auto recHits(d->recHits());
 
       int rechitsFound = 0;
-      if (verboseME0Segment_) cout<< recHits.size() << " me0 rechits from segment "<<endl;
+      if (verboseME0Segment_) cout << "\t has " << recHits.size() << " me0 rechits"<<endl;
       for (auto& rh: recHits) {
         const ME0RecHit* me0rh(dynamic_cast<const ME0RecHit*>(rh));
-       	if (isME0RecHitMatched(*me0rh))
+        if (verboseME0Segment_) cout << "Candidate rechit " << *me0rh << endl;
+       	if (isME0RecHitMatched(*me0rh)) {
+          if (verboseME0Segment_) cout << "\t...was matched earlier to SimTrack!" << endl;
        	  ++rechitsFound;
+        }
       }
-      if (rechitsFound<4) continue;
+      if (rechitsFound<minNHitsSegment_) continue;
       if (verboseME0Segment_) {
         cout << "Found " << rechitsFound << " rechits out of " << me0RecHitsInSuperChamber(id).size() << endl;
         cout << "\t...was matched!" << endl;
@@ -113,7 +119,7 @@ ME0RecHitMatcher::matchME0SegmentsToSimTrack(const ME0SegmentCollection& me0Segm
     }
   }
   for (auto& p : superChamber_to_me0Segment_)
-      superChamber_to_bestME0Segment_[ p.first] = findbestME0Segment(p.second);
+    superChamber_to_bestME0Segment_[ p.first] = findbestME0Segment(p.second);
 }
 
 
@@ -214,10 +220,10 @@ ME0RecHitMatcher::me0Segments() const
 
 
 bool
-ME0RecHitMatcher::me0RecHitInContainer(const ME0RecHit& sg, const ME0RecHitContainer& c) const
+ME0RecHitMatcher::me0RecHitInContainer(const ME0RecHit& rh, const ME0RecHitContainer& c) const
 {
   bool isSame = false;
-  for (auto& segment: c) if (areME0RecHitsSame(sg,segment)) isSame = true;
+  for (auto& rechit: c) if (areME0RecHitsSame(rh,rechit)) isSame = true;
   return isSame;
 }
 
@@ -268,7 +274,12 @@ ME0RecHitMatcher::nME0Segments() const
 bool
 ME0RecHitMatcher::areME0RecHitsSame(const ME0RecHit& l,const ME0RecHit& r) const
 {
-  return l.localPosition() == r.localPosition();
+  return ( l.localPosition() == r.localPosition() and
+           l.localPositionError().xx() == r.localPositionError().xx() and
+           l.localPositionError().xy() == r.localPositionError().xy() and
+           l.localPositionError().yy() == r.localPositionError().yy() and
+           l.tof() == r.tof() and
+           l.me0Id() == r.me0Id() );
 }
 
 
