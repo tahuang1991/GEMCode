@@ -22,6 +22,7 @@ class TFCand
 
   void setDR(double);
   void setGlobalPhi(double x) { phi_ = x ; }
+  void setBx(int x ) { bx_= x;}
   void setMatchedTFTrack(TFTrack* trk)  { nTFStubs = trk->nStubs(); tftrack_ = trk; }
   void print();
 
@@ -37,7 +38,9 @@ class TFCand
   double phi_local() const {return phi_local_;}
   int quality() const {return quality_;}
   int charge() const {return charge_;}
+  int bx() const {return bx_;}
   double dr() const {return dr_;}
+  int tracktype() const {return trackType_; }
   unsigned int nStubs() const { return  nTFStubs; }
   
  private:
@@ -53,6 +56,8 @@ class TFCand
   double dr_;
   int quality_;
   int charge_;
+  int bx_;
+  int trackType_; 
   unsigned int nTFStubs;
 };
 

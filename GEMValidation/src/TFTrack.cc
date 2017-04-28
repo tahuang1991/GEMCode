@@ -5,7 +5,7 @@ TFTrack::TFTrack(const csc::L1Track* t, const CSCCorrelatedLCTDigiCollection* lc
 {
   l1track_ = t;
   nstubs = 0;
-  trackType = CSCTF_Track;
+  trackType_ = CSCTF_Track;
 
   for (auto detUnitIt = lcts->begin(); detUnitIt != lcts->end(); detUnitIt++) {
     const CSCDetId& id = (*detUnitIt).first;
@@ -27,16 +27,21 @@ TFTrack::TFTrack(const csc::L1Track* t, const CSCCorrelatedLCTDigiCollection* lc
 TFTrack::TFTrack(const l1t::EMTFTrack *t)
 {
 
-  trackType = EMTF_Track;
+  trackType_ = EMTF_Track;
   trackHits_ = t->PtrHits();
   pt_ = t->Pt();
   eta_ = t->Eta();
   phi_ = t->Phi_glob_rad();
   phi_local_ = t->Phi_loc_rad();
-  chargesign_ = t->Charge();
+  charge_ = t->Charge();
+  if (charge_>0) chargesign_ = 1;
+  else chargesign_ = 0;
   dPhi12_ = (unsigned)t->DPhi_12();
   dPhi23_ = (unsigned)t->DPhi_23();
+  quality_ = t->Quality();
+  bx_ = t->BX();
   nstubs = 0;
+  dr_ = 10.0;
   for (auto hit : *trackHits_)
       if (hit.Is_CSC_hit()) nstubs++;
 
@@ -76,6 +81,8 @@ TFTrack::init(edm::ESHandle< L1MuTriggerScales > &muScales,
   q_packed_ = quality & 0x3;
   pt_packed_ = gpt & 0x1f;
   chargesign_ = l1track_->charge_packed();
+  if (chargesign_ == 0) charge_ = -1;
+  else charge_ = 1;
   dPhi12_ = 1*(l1track_->ptLUTAddress() & 0xFF);
   dPhi23_ = 1*((l1track_->ptLUTAddress() & 0xF00)>>8);
   // calculate pt, eta and phi (don't forget to store the sign)                                                                                   
@@ -83,6 +90,7 @@ TFTrack::init(edm::ESHandle< L1MuTriggerScales > &muScales,
   pt_ = muPtScale->getPtScale()->getLowEdge(pt_packed_) + 1.e-6;
   eta_ = muScales->getRegionalEtaScale(2)->getCenter(l1track_->eta_packed()) * sign;
   phi_ = normalizedPhi(muScales->getPhiScale()->getLowEdge(phi_packed_));
+  dr_ = 10.0;
 }
 
 
@@ -95,12 +103,12 @@ TFTrack::setDR(double dr)
 bool 
 TFTrack::hasStubEndcap(int st) const
 {
-  if (trackType == CSCTF_Track){
+  if (trackType_ == CSCTF_Track){
       if(st==1 and l1track_->me1ID() > 0) return true;
       if(st==2 and l1track_->me2ID() > 0) return true;
       if(st==3 and l1track_->me3ID() > 0) return true;
       if(st==4 and l1track_->me4ID() > 0) return true;
-  }else if (trackType == EMTF_Track){
+  }else if (trackType_ == EMTF_Track){
       for (auto stub : *trackHits_)
 	  if (stub.Is_CSC_hit() and stub.Station() == st) return true;
   }
@@ -170,8 +178,8 @@ void
 TFTrack::print()
 {
   
-    std::cout<<"\tpt: "<<pt_<<"  eta: "<<eta_<<"  phi: "<<phi_<<"  dr: "<<dr_<<std::endl;
-  if (trackType == CSCTF_Track){
+    std::cout<<"TFTrack \t bx:"<<bx_<<" pt: "<<pt_<<"  eta: "<<eta_<<"  phi: "<<phi_ << " local phi "<< phi_local_ <<"  dr: "<<dr_<<" quality "<< quality_ <<std::endl;
+  if (trackType_ == CSCTF_Track){
 //    std::cout<<"#### TFTRACK PRINT: "<<msg<<" #####"<<std::endl;
     //std::cout<<"## L1MuRegionalCand print: ";
     //l1track_->print();
@@ -207,7 +215,7 @@ TFTrack::print()
 
 unsigned int TFTrack::digiInME(int st, int ring) const
 {
-  if (trackType == CSCTF_Track){
+  if (trackType_ == CSCTF_Track){
       if (triggerDigis_.size() != triggerIds_.size()) std::cout<<" BUG " <<std::endl;
       for (unsigned int i=0; i<triggerDigis_.size(); i++)
       {
@@ -215,7 +223,7 @@ unsigned int TFTrack::digiInME(int st, int ring) const
 	 if (id.station()==st && id.ring()==ring) return i;
 	 else continue;  
       }
-  }else if (trackType == EMTF_Track){
+  }else if (trackType_ == EMTF_Track){
       unsigned int i =0;
       for (auto hit : *trackHits_){
      	if (hit.Station() == st and hit.Ring() == ring and hit.Is_CSC_hit()) 

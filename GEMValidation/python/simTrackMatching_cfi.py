@@ -3,8 +3,8 @@ from L1Trigger.CSCTrackFinder.csctfTrackDigis_cfi import*
 
 SimTrackMatching = cms.PSet(
     # common
-    cscStations = cms.vstring("CSC_ALL", "CSC_ME11", "CSC_ME1a", "CSC_ME1b", "CSC_ME12", "CSC_ME13",
-                              "CSC_ME21", "CSC_ME22", "CSC_ME31", "CSC_ME32", "CSC_ME41", "CSC_ME42"),
+    cscStations = cms.vstring("CSC_ALL","CSC_ME11", "CSC_ME1a", "CSC_ME1b", "CSC_ME12", "CSC_ME13",
+                              "CSC_ME21", "CSC_ME22", "CSC_ME31", "CSC_ME32", "CSC_ME41", "CSC_ME42", "GEM_ME0"),
     dtStations = cms.vstring("DT_ALL",
                              "DT_MB01", "DT_MB02", "DT_MB03", "DT_MB04",
                              "DT_MB11p", "DT_MB12p", "DT_MB13p", "DT_MB14p",

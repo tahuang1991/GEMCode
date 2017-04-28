@@ -8,12 +8,14 @@ def getFiles(my_dir):
     for file in os.listdir(my_dir):
         if file.endswith('root'):
             if os.path.getsize(my_dir + file) > 20000000:
-                theInputFiles.extend(['file:' + my_dir + file])
+                #theInputFiles.extend(['file:' + my_dir + file])
+	    	theInputFiles.extend(['/store/group/lpcgem/'+my_dir[29:]+file])
     return theInputFiles
 
 fileNamesPU = cms.untracked.vstring()
 
 fileNamesPU.extend(getFiles("/eos/uscms/store/user/lpcgem/ME0TDRStudies/MinBias_20170228/GENSIM_10M_v1/"))
+#print "fileNamePU ",fileNamesPU
 fileNamesPU.extend(getFiles("/eos/uscms/store/user/lpcgem/ME0TDRStudies/MinBias_20170228/GENSIM_10M_v2/"))
 fileNamesPU.extend(getFiles("/eos/uscms/store/user/lpcgem/ME0TDRStudies/MinBias_20170228/GENSIM_10M_v3/"))
 fileNamesPU.extend(getFiles("/eos/uscms/store/user/lpcgem/ME0TDRStudies/MinBias_20170228/GENSIM_10M_v4/"))

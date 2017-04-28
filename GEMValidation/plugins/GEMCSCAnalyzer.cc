@@ -42,7 +42,7 @@
 using namespace std;
 using namespace matching;
 
-
+static const int NumOfTrees = 13;
 // "signed" LCT bend pattern
 const int LCT_BEND_PATTERN[11] = { -99,  -5,  4, -4,  3, -3,  2, -2,  1, -1,  0};
 
@@ -340,6 +340,10 @@ struct MyTrackEff
   Float_t phi_interStat13;
 
   Bool_t allstubs_matched_TF;
+  //L1Mu
+  Float_t bestdRGmtCand;
+  Float_t L1Mu_pt, L1Mu_eta, L1Mu_phi, L1Mu_quality, L1Mu_bx;
+  UInt_t L1Mu_charge;
 
   Int_t has_l1Extra;
   Float_t l1Extra_pt;
@@ -694,8 +698,8 @@ void MyTrackEff::init()
   has_gmtCand = -99;
 
   //csctf
-  trackpt = 0 ;
-  tracketa = 0;
+  trackpt = -1;
+  tracketa = -9;
   trackphi = -9;
   quality_packed = 0;
   pt_packed = 0;
@@ -764,6 +768,14 @@ void MyTrackEff::init()
   phi_interStat13 = -9;
 
   allstubs_matched_TF = false;
+
+  bestdRGmtCand = 99;
+  L1Mu_pt = -99;
+  L1Mu_eta = -99;
+  L1Mu_phi = -99;
+  L1Mu_quality = -99;
+  L1Mu_bx = -99;
+  L1Mu_charge = -99;
 
   has_l1Extra = 0;
   l1Extra_pt = -99;
@@ -1179,6 +1191,14 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
 
   t->Branch("allstubs_matched_TF",&allstubs_matched_TF);
 
+  t->Branch("bestdRGmtCand", &bestdRGmtCand);
+  t->Branch("L1Mu_pt", &L1Mu_pt);
+  t->Branch("L1Mu_eta", &L1Mu_eta);
+  t->Branch("L1Mu_phi", &L1Mu_phi);
+  t->Branch("L1Mu_quality", &L1Mu_quality);
+  t->Branch("L1Mu_bx", &L1Mu_bx);
+  t->Branch("L1Mu_charge", &L1Mu_charge);
+
   t->Branch("has_l1Extra", &has_l1Extra);
   t->Branch("l1Extra_pt", &l1Extra_pt);
   t->Branch("l1Extra_eta", &l1Extra_eta);
@@ -1252,6 +1272,7 @@ public:
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
+
 
 private:
 
@@ -1336,10 +1357,10 @@ private:
   std::vector<std::pair<int,int> > cscStationsCo_;
   std::set<int> stations_to_use_;
 
-  TTree *tree_eff_[12]; // for up to 9 stations
+  TTree *tree_eff_[NumOfTrees]; 
   TTree *tree_delta_;
 
-  MyTrackEff  etrk_[12];
+  MyTrackEff  etrk_[NumOfTrees];
   MyTrackChamberDelta dtrk_;
 
   int minNHitsChamberCSCSimHit_;
@@ -1566,6 +1587,7 @@ GEMCSCAnalyzer::GEMCSCAnalyzer(const edm::ParameterSet& ps)
   cscStationsCo_.push_back(std::make_pair(3,2));
   cscStationsCo_.push_back(std::make_pair(4,1));
   cscStationsCo_.push_back(std::make_pair(4,2));
+  cscStationsCo_.push_back(std::make_pair(0,1));
 }
 
 
@@ -1777,10 +1799,10 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   float pt = t.momentum().pt();
   // SimHits
   auto csc_simhits(match_sh.chamberIdsCSC(0));
-  GlobalPoint gp_sh_odd[12];
-  GlobalPoint gp_sh_even[12];
-  GlobalVector gv_sh_odd[12];
-  GlobalVector gv_sh_even[12];
+  GlobalPoint gp_sh_odd[NumOfTrees];
+  GlobalPoint gp_sh_even[NumOfTrees];
+  GlobalVector gv_sh_odd[NumOfTrees];
+  GlobalVector gv_sh_even[NumOfTrees];
   for(auto d: csc_simhits)
   {
 
@@ -3172,11 +3194,12 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   if (match_track.tfTracks().size()) {
     etrk_[0].has_tfTrack = 1;
     TFTrack* besttrack = match_track.bestTFTrack();
+    std::cout <<"tfTracks size "<< match_track.tfTracks().size() <<" bestTrack "; besttrack->print();
     etrk_[0].trackpt = besttrack->pt();
     etrk_[0].tracketa = besttrack->eta();
     etrk_[0].trackphi = besttrack->phi();
   //  quality_packed;
-    if (besttrack->gettrackType() == 0){
+    if (besttrack->tracktype() == 0){
        etrk_[0].pt_packed = besttrack->ptPacked();
        etrk_[0].eta_packed = besttrack->etaPacked();
        etrk_[0].phi_packed = besttrack->phiPacked();
@@ -3341,6 +3364,20 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     }*/
   }
 
+  auto l1GmtCands(match_track.gmts());
+  if (l1GmtCands.size() and match_track.bestGMTCand()) {
+
+    etrk_[0].has_gmtCand = 1;
+    TFCand* bestGmtCand = match_track.bestGMTCand();
+    std::cout <<"size of l1GMTs "<< l1GmtCands.size() <<" bestGMTCand in GEMCSC "; bestGmtCand->print();
+    etrk_[0].bestdRGmtCand = bestGmtCand->dr();
+    etrk_[0].L1Mu_pt = bestGmtCand->pt();
+    etrk_[0].L1Mu_eta = bestGmtCand->eta();
+    etrk_[0].L1Mu_phi = bestGmtCand->phi();
+    etrk_[0].L1Mu_charge = bestGmtCand->charge();
+    etrk_[0].L1Mu_bx = bestGmtCand->bx();
+  }
+  
   /*if (match_track.tfCands().size()) {
     etrk_[0].has_tfCand = 1;
     std::cout << "SimTrack has matched CSCTF Cand" << std::endl;

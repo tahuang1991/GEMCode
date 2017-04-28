@@ -13,6 +13,11 @@ TFCand::TFCand(const l1t::RegionalMuonCand* cand )
   phi_local_ = cand->hwPhi() * 2.0 * 3.1415926/576.0;
   pt_ = cand->hwPt() * 0.5;
   charge_ = cand->hwSign() == 0? 1 : -1; 
+  quality_ = cand->hwQual();
+  trackType_ = cand->trackFinderType();
+  dr_ = 10.0;
+  phi_ = -9;
+
 }
 
 TFCand::TFCand(const TFCand& rhs)
@@ -29,6 +34,7 @@ TFCand::init(CSCTFPtLUT* ptLUT,
   pt_ = muPtScale->getPtScale()->getLowEdge(l1Cand_->pt_packed()) + 1.e-6;
   eta_ = muScales->getRegionalEtaScale(2)->getCenter(l1Cand_->eta_packed());
   phi_ = normalizedPhi(muScales->getPhiScale()->getLowEdge(l1Cand_->phi_packed()));
+  dr_ = 10.0;
 
   /*
     nTFStubs = -1;
@@ -66,5 +72,5 @@ TFCand::setDR(double dr)
 void 
 TFCand::print()
 {
-    std::cout <<"TFCand eta "<< eta_ << " phi "<< phi_ << " local phi "<< phi_local_ <<" pt "<< pt_ << " quality "<< quality_ <<" dR "<< dr_ << std::endl;
+    std::cout<<"TFCand \t bx:"<<bx_<<" pt: "<<pt_<<"  eta: "<<eta_<<"  phi: "<< phi_<< " local phi "<< phi_local_ <<"  dr: "<<dr_<<" quality "<< quality_ <<std::endl;
 }

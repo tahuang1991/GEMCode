@@ -50,6 +50,7 @@ class TFTrack
   /// destructor
   ~TFTrack();  
 
+  //l1t::tftype = enum{bmtf, omtf_neg, omtf_pos, emtf_neg, emtf_pos};
   enum {CSCTF_Track, EMTF_Track, OMTF_Track};
   void init(edm::ESHandle< L1MuTriggerScales > &muScales,
 	    edm::ESHandle< L1MuTriggerPtScale > &muPtScale);
@@ -74,11 +75,7 @@ class TFTrack
   void addTriggerEtaPhi(const std::pair<float,float>&);
   void addTriggerStub(const csctf::TrackStub&);
 
-  int gettrackType() const { return trackType; }
-  /// track sign
-  bool sign() const {return l1track_->sign();}
-  /// bunch crossing 
-  int bx() const {return l1track_->bx();}
+  int tracktype() const { return trackType_; }
   /// how many stubs?
   unsigned int nStubs(bool mb1, bool me1, bool me2, bool me3, bool me4) const;
   unsigned int nStubs() const {return nstubs;}
@@ -108,17 +105,20 @@ class TFTrack
   unsigned phiPacked() const {return phi_packed_;}
   unsigned qPacked() const {return q_packed_;}
   unsigned int chargesign() const {return chargesign_;}
+  int charge() const {return charge_;}
   double pt() const {return pt_;}
   double eta() const {return eta_;}
   double phi() const {return phi_;}
   double phi_local() const {return phi_local_;}
   double dr() const {return dr_;}
+  int quality() const {return quality_;}
+  int bx() const {return bx_;}
   std::vector<bool> deltaOk();
   bool debug() const {return debug_;}
   bool passDPhicutTFTrack(int st, float pt) const;
    
  private:
-  int trackType;
+  int trackType_;
   const csc::L1Track* l1track_;
   std::vector<const CSCCorrelatedLCTDigi*> triggerDigis_;
   const l1t::EMTFHitCollection * trackHits_; //similar to triggerDigis_ + triggerDigis_
@@ -134,11 +134,14 @@ class TFTrack
   unsigned dPhi12_;
   unsigned dPhi23_; 
   unsigned int chargesign_;
+  int charge_;
   double phi_;
   double phi_local_;
   double eta_;
   double pt_;
   double dr_;
+  int quality_;
+  int bx_;
   unsigned int nstubs;
   std::vector<bool> deltaOk_;
   bool debug_;
