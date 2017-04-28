@@ -145,8 +145,8 @@ struct MyTrackEff
 
   Char_t chamber_ME1_csc_sh;//bit1:odd, bit2:even
   Char_t chamber_ME2_csc_sh;
-  Char_t chamber_odd; // bit1: has GEM pad   bit2: has CSC LCT
-  Char_t chamber_even; // bit1: has GEM pad   bit2: has CSC LCT
+  Int_t chamber_lct_odd, chamber_dg_odd, chamber_sh_odd; //
+  Int_t chamber_lct_even, chamber_dg_even, chamber_sh_even; // 
   Float_t bending_sh;
   Float_t phi_cscsh_even, phi_cscsh_odd, eta_cscsh_even, eta_cscsh_odd;
   Float_t phi_layer1_sh_even, eta_layer1_sh_even, phi_layer1_sh_odd,eta_layer1_sh_odd, perp_layer1_sh_odd, perp_layer1_sh_even;
@@ -181,6 +181,10 @@ struct MyTrackEff
   Float_t eta_lct_even;
   Float_t dphi_lct_odd; // dphi stored as data member in LCT
   Float_t dphi_lct_even;
+  Float_t chi2_lct_odd, chi2_lct_even;
+  Float_t timeErr_lct_odd, timeErr_lct_even;
+  Int_t nHits_lct_odd, nHits_lct_even;
+  Float_t dR_sim_lct_odd, dR_sim_lct_even;
   Float_t perp_lct_odd;
   Float_t perp_lct_even;
   Bool_t passdphi_odd;
@@ -467,8 +471,8 @@ void MyTrackEff::init()
 
   chamber_ME1_csc_sh=0;
   chamber_ME2_csc_sh=0;
-  chamber_odd = 0;
-  chamber_even = 0;
+  chamber_sh_odd = -1;
+  chamber_sh_even = -1;
   quality_odd = 0;
   quality_even = 0;
   bending_sh = -10;
@@ -543,11 +547,15 @@ void MyTrackEff::init()
   phi_layer6_fit_even =-9.0;
   phi_layer6_fit_odd =-9.0;
   has_csc_sh = 0;
+  chamber_dg_odd = -1;
+  chamber_dg_even = -1;
   has_csc_strips = 0;
   has_csc_wires = 0;
   has_alct = 0;
   has_clct = 0;
   has_lct = 0;
+  chamber_lct_odd = -1;
+  chamber_lct_even = -1;
   bend_lct_odd = -9;
   bend_lct_even = -9;
   bx_lct_odd = -9;
@@ -562,6 +570,14 @@ void MyTrackEff::init()
   eta_lct_even = -9.;
   dphi_lct_odd = -9.;
   dphi_lct_even = -9.;
+  chi2_lct_odd = 0;
+  chi2_lct_even = 0.0;
+  timeErr_lct_odd = 0.0;
+  timeErr_lct_even = 0.0;
+  nHits_lct_odd = 0;
+  nHits_lct_even = 0;
+  dR_sim_lct_odd = 10;
+  dR_sim_lct_even = 10;
   passdphi_odd = false;
   passdphi_even = false;
   perp_lct_odd = -1;
@@ -890,8 +906,8 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
 
   t->Branch("chamber_ME1_csc_sh", &chamber_ME1_csc_sh);
   t->Branch("chamber_ME2_csc_sh", &chamber_ME2_csc_sh);
-  t->Branch("chamber_odd", &chamber_odd);
-  t->Branch("chamber_even", &chamber_even);
+  t->Branch("chamber_sh_odd", &chamber_sh_odd);
+  t->Branch("chamber_sh_even", &chamber_sh_even);
   t->Branch("quality_odd", &quality_odd);
   t->Branch("quality_even", &quality_even);
   t->Branch("bending_sh", &bending_sh);
@@ -959,6 +975,10 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("csc_bending_angle12_xfactor_L1_3", &csc_bending_angle12_xfactor_L1_3);
   */
 
+  t->Branch("chamber_dg_odd", &chamber_dg_odd);
+  t->Branch("chamber_dg_even", &chamber_dg_even);
+  t->Branch("chamber_lct_odd", &chamber_lct_odd);
+  t->Branch("chamber_lct_even", &chamber_lct_even);
   t->Branch("phi_layer1_fit_even", &phi_layer1_fit_even);
   t->Branch("phi_layer1_fit_odd", &phi_layer1_fit_odd);
   t->Branch("phi_layer3_fit_even", &phi_layer3_fit_even);
@@ -989,6 +1009,14 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("fitperp_lct_even", &fitperp_lct_even);
   t->Branch("dphi_lct_odd", &dphi_lct_odd);
   t->Branch("dphi_lct_even", &dphi_lct_even);
+  t->Branch("chi2_lct_odd", &chi2_lct_odd);
+  t->Branch("chi2_lct_even", &chi2_lct_even);
+  t->Branch("timeErr_lct_odd", &timeErr_lct_odd);
+  t->Branch("timeErr_lct_even", &timeErr_lct_even);
+  t->Branch("nHits_lct_odd", &nHits_lct_odd);
+  t->Branch("nHits_lct_even", &nHits_lct_even);
+  t->Branch("dR_sim_lct_odd", &dR_sim_lct_odd);
+  t->Branch("dR_sim_lct_even", &dR_sim_lct_even);
   t->Branch("passdphi_odd", &passdphi_odd);
   t->Branch("passdphi_even", &passdphi_even);
 
@@ -1273,6 +1301,8 @@ public:
 
   static void fillDescriptions(edm::ConfigurationDescriptions& descriptions);
 
+  enum {ME0=12};
+
 
 private:
 
@@ -1364,8 +1394,10 @@ private:
   MyTrackChamberDelta dtrk_;
 
   int minNHitsChamberCSCSimHit_;
+  int minNHitsChamberME0SimHit_;
   int minNHitsChamberCSCWireDigi_;
   int minNHitsChamberCSCStripDigi_;
+  int minNHitsChamberME0Digi_;
   int minNHitsChamberCLCT_;
   int minNHitsChamberALCT_;
   int minNHitsChamberLCT_;
@@ -1438,6 +1470,7 @@ GEMCSCAnalyzer::GEMCSCAnalyzer(const edm::ParameterSet& ps)
 
   auto me0SimHit_ = cfg_.getParameter<edm::ParameterSet>("me0SimHit");
   me0SimHitInput_ = consumes<edm::PSimHitContainer>(me0SimHit_.getParameter<edm::InputTag>("validInputTags"));
+  minNHitsChamberME0SimHit_ = me0SimHit_.getParameter<int>("minNHitsChamber");
 
   auto rpcSimHit_ = cfg_.getParameter<edm::ParameterSet>("rpcSimHit");
   rpcSimHitInput_ = consumes<edm::PSimHitContainer>(rpcSimHit_.getParameter<edm::InputTag>("validInputTags"));
@@ -1459,6 +1492,7 @@ GEMCSCAnalyzer::GEMCSCAnalyzer(const edm::ParameterSet& ps)
 
   auto me0Digi_= cfg_.getParameter<edm::ParameterSet>("me0DigiPreReco");
   me0DigiInput_ = consumes<ME0DigiPreRecoCollection>(me0Digi_.getParameter<edm::InputTag>("validInputTags"));
+  minNHitsChamberME0Digi_ =  me0Digi_.getParameter<int>("minNHitsChamber");
 
   auto me0RecHit_ = cfg_.getParameter<edm::ParameterSet>("me0RecHit");
   me0RecHitInput_ = consumes<ME0RecHitCollection>(me0RecHit_.getParameter<edm::InputTag>("validInputTags"));
@@ -1729,7 +1763,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   const GEMDigiMatcher& match_gd = match.gemDigis();
   const RPCDigiMatcher& match_rd = match.rpcDigis();
   const CSCDigiMatcher& match_cd = match.cscDigis();
+  const ME0DigiMatcher& match_me0digi = match.me0Digis();
   const CSCStubMatcher& match_lct = match.cscStubs();
+  const ME0RecHitMatcher& match_me0rh = match.me0RecHits();
   //const L1TrackMatcher& match_track = match.l1Tracks();
   const UpgradeL1TrackMatcher& match_track = match.l1Tracks();
   //const L1GlobalMuonTriggerMatcher& match_l1_gmt = match.l1GMTCands();
@@ -1877,6 +1913,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 		}
     }
 
+    if (odd) etrk_[st].chamber_sh_odd = id.chamber();
+    else etrk_[st].chamber_sh_even = id.chamber();
     if (odd) etrk_[st].nlayers_csc_sh_odd = nlayers;
     else etrk_[st].nlayers_csc_sh_even = nlayers;
 
@@ -1913,6 +1951,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       if (odd) etrk_[1].nlayers_csc_sh_odd = nlayers;
       else etrk_[1].nlayers_csc_sh_even = nlayers;
 
+      if (odd) etrk_[st].chamber_sh_odd = id.chamber();
+      else etrk_[st].chamber_sh_even = id.chamber();
       if (odd) gp_sh_odd[1] = keygp;
       else gp_sh_even[1] = keygp;
       if (odd) gv_sh_odd[1] = ym;
@@ -1956,6 +1996,73 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
   }
 
+  //ME0 simhits
+  auto me0_simhits(match_sh.superChamberIdsME0());
+  std::cout <<"me0 simthits , chamber id size "<< me0_simhits.size() << std::endl;
+  for (auto d : me0_simhits){
+    const ME0DetId id(d);
+    int nlayers = match_sh.nLayersWithHitsInSuperChamber(d);
+    std::cout <<"ME0 Detid "<< id <<" nlayer hits "<< nlayers << std::endl;
+    if (nlayers < minNHitsChamberME0SimHit_) continue;
+    bool odd(id.chamber()%2 == 1);
+    //ME0DetId(int region, int layer,int chamber, int roll)
+    GlobalVector ym = match_sh.simHitsMeanMomentum(match_sh.hitsInSuperChamber(d));
+    GlobalPoint keygp(match_sh.simHitsMeanPosition(match_sh.hitsInSuperChamber(d)));
+    //etrk_[ME0].bending_sh = match_sh.LocalBendingInChamber(d);
+    const ME0DetId id1(id.region(), id.station(), 1, id.chamber(), 0);
+    const ME0DetId id6(id.region(), id.station(), 6, id.chamber(), 0);
+    GlobalPoint gp1 = match_sh.simHitsMeanPosition(match_sh.hitsInChamber(id1.rawId()));
+    GlobalPoint gp6 = match_sh.simHitsMeanPosition(match_sh.hitsInChamber(id6.rawId()));
+    if (odd)  etrk_[ME0].nlayers_csc_sh_odd = nlayers;
+    else  etrk_[ME0].nlayers_csc_sh_even = nlayers;
+    if (odd) etrk_[ME0].has_csc_sh |= 1;
+    else etrk_[ME0].has_csc_sh |= 2;
+    if (odd) etrk_[ME0].chamber_sh_odd = id.chamber();
+    else etrk_[ME0].chamber_sh_even = id.chamber();
+    if (odd) etrk_[ME0].eta_cscsh_odd = keygp.eta();
+    else     etrk_[ME0].eta_cscsh_even = keygp.eta();
+    if (odd) etrk_[ME0].phi_cscsh_odd = keygp.phi();
+    else     etrk_[ME0].phi_cscsh_even = keygp.phi();
+    if (odd) etrk_[ME0].perp_cscsh_odd = keygp.perp();
+    if (odd) etrk_[ME0].perp_cscsh_even = keygp.perp();
+    if (odd){
+    	etrk_[ME0].pteta_sh_odd = ym.eta();
+    	etrk_[ME0].ptphi_sh_odd = ym.phi();
+    	etrk_[ME0].pt_sh_odd = ym.perp();
+    }else{
+    	etrk_[ME0].pteta_sh_even = ym.eta();
+    	etrk_[ME0].ptphi_sh_even = ym.phi();
+    	etrk_[ME0].pt_sh_even = ym.perp();
+    }
+    if (odd){
+    	if (match_sh.hitsInChamber(id1.rawId()).size()>0){
+		etrk_[ME0].eta_layer1_sh_odd = gp1.eta();
+		etrk_[ME0].phi_layer1_sh_odd = gp1.phi();
+		etrk_[ME0].perp_layer1_sh_odd = gp1.perp();
+		std::cout <<"layer1 id "<< id1 <<" phi "<< gp1.phi() <<" eta "<< gp1.eta() <<" x "<< gp1.x()<<" y "<< gp1.y()<<" z "<< gp1.z() <<" perp "<< gp1.perp() << std::endl;
+		}
+    	if (match_sh.hitsInChamber(id6.rawId()).size()>0){
+		etrk_[ME0].eta_layer6_sh_odd = gp6.eta();
+		etrk_[ME0].phi_layer6_sh_odd = gp6.phi();
+		etrk_[ME0].perp_layer6_sh_odd = gp6.perp();
+		std::cout <<"layer6 id "<< id6 <<" phi "<< gp6.phi() <<" eta "<< gp6.eta() <<" x "<< gp6.x()<<" y "<< gp6.y()<<" z "<< gp6.z() <<" perp "<< gp6.perp() << std::endl;
+		}
+    }else{
+    	if (match_sh.hitsInChamber(id1.rawId()).size()>0){
+		etrk_[ME0].eta_layer1_sh_even = gp1.eta();
+		etrk_[ME0].phi_layer1_sh_even = gp1.phi();
+		etrk_[ME0].perp_layer1_sh_even = gp1.perp();
+		std::cout <<"layer1 id "<< id1 <<" phi "<< gp1.phi() <<" eta "<< gp1.eta() <<" x "<< gp1.x()<<" y "<< gp1.y()<<" z "<< gp1.z() <<" perp "<< gp1.perp() << std::endl;
+		}
+    	if (match_sh.hitsInChamber(id6.rawId()).size()>0){
+		etrk_[ME0].eta_layer6_sh_even = gp6.eta();
+		etrk_[ME0].phi_layer6_sh_even = gp6.phi();
+		etrk_[ME0].perp_layer6_sh_even = gp6.perp();
+		std::cout <<"layer6 id "<< id6 <<" phi "<< gp6.phi() <<" eta "<< gp6.eta() <<" x "<< gp6.x()<<" y "<< gp6.y()<<" z "<< gp6.z() <<" perp "<< gp6.perp() << std::endl;
+		}
+    }
+  
+  }
   if (verbose_) std::cout <<"GEMCSCAnalyzer step2 "<< std::endl;
   // CSC strip digis
   for(auto d: match_cd.chamberIdsStrip(0))
@@ -2024,6 +2131,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     auto clct = match_lct.clctInChamber(d);
 
     //std::cout <<"CSC CLCT, CSCid "<< id <<" clct "<< clct << std::endl;
+    if (odd) etrk_[st].chamber_dg_odd = id.chamber();
+    else etrk_[st].chamber_dg_even = id.chamber();
     if (odd) etrk_[st].halfstrip_odd = digi_channel(clct);
     else etrk_[st].halfstrip_even = digi_channel(clct);
 
@@ -2139,7 +2248,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       etrk_[st].bx_lct_odd = digi_bx(lct);
       etrk_[st].hs_lct_odd = digi_channel(lct);
       etrk_[st].wg_lct_odd = digi_wg(lct);
-      etrk_[st].chamber_odd |= 2;
+      etrk_[st].chamber_lct_odd = id.chamber() ;
       etrk_[st].quality_odd = digi_quality(lct);
       etrk_[st].passdphi_odd = match_lct.passDPhicut(id, chargesign, digi_dphi(lct), pt);
     }
@@ -2157,7 +2266,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       etrk_[st].bx_lct_even = digi_bx(lct);
       etrk_[st].hs_lct_even = digi_channel(lct);
       etrk_[st].wg_lct_even = digi_wg(lct);
-      etrk_[st].chamber_even |= 2;
+      etrk_[st].chamber_lct_even = id.chamber();
       etrk_[st].quality_even = digi_quality(lct);
       etrk_[st].passdphi_even = match_lct.passDPhicut(id, chargesign, digi_dphi(lct), pt);
     }
@@ -2176,7 +2285,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         etrk_[1].bx_lct_odd = digi_bx(lct);
         etrk_[1].hs_lct_odd = digi_channel(lct);
         etrk_[1].wg_lct_odd = digi_wg(lct);
-        etrk_[1].chamber_odd |= 2;
+        etrk_[1].chamber_lct_odd = id.chamber();
         etrk_[1].quality_odd = digi_quality(lct);
         etrk_[1].passdphi_odd = match_lct.passDPhicut(id, chargesign, digi_dphi(lct), pt);
       }
@@ -2192,7 +2301,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         etrk_[1].bx_lct_even = digi_bx(lct);
         etrk_[1].hs_lct_even = digi_channel(lct);
         etrk_[1].wg_lct_even = digi_wg(lct);
-        etrk_[1].chamber_even |= 2;
+        etrk_[1].chamber_lct_even = id.chamber();
         etrk_[1].quality_even = digi_quality(lct);
         etrk_[1].passdphi_even = match_lct.passDPhicut(id, chargesign, digi_dphi(lct), pt);
       }
@@ -2462,7 +2571,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       {
         best_pad_odd[st] = bestgem_dg_and_gp.second;
         etrk_[st].has_gem_pad |= 1;
-        etrk_[st].chamber_odd |= 1;
+        etrk_[st].chamber_lct_odd = id.chamber();
         etrk_[st].pad_odd = digi_channel(bestgem_dg_and_gp.first);
         etrk_[st].hsfromgem_odd = match_gd.extrapolateHsfromGEMPad( d, digi_channel(bestgem_dg_and_gp.first));
         etrk_[st].phi_pad_odd = best_pad_odd[st].phi();
@@ -2484,7 +2593,6 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       {
         best_pad_even[st] = bestgem_dg_and_gp.second;
       	etrk_[st].has_gem_pad |= 2;
-        etrk_[st].chamber_even |= 1;
         etrk_[st].pad_even = digi_channel(bestgem_dg_and_gp.first);
         etrk_[st].hsfromgem_even = match_gd.extrapolateHsfromGEMPad( d, digi_channel(bestgem_dg_and_gp.first));
         etrk_[st].phi_pad_even = best_pad_even[st].phi();
@@ -2555,7 +2663,6 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       {
         best_pad_odd[st] = bestgem_dg_and_gp.second;
       	etrk_[st].has_gem_pad |= 1;
-      	etrk_[st].chamber_odd |= 1;
         etrk_[st].pad_odd = digi_channel(bestgem_dg_and_gp.first);
         etrk_[st].hsfromgem_odd = match_gd.extrapolateHsfromGEMPad( d, digi_channel(bestgem_dg_and_gp.first));
         etrk_[st].phi_pad_odd = best_pad_odd[st].phi();
@@ -2574,7 +2681,6 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       {
         best_pad_even[st] = bestgem_dg_and_gp.second;
       	etrk_[st].has_gem_pad |= 2;
-      	etrk_[st].chamber_even |= 1;
         etrk_[st].pad_even = digi_channel(bestgem_dg_and_gp.first);
         etrk_[st].hsfromgem_even = match_gd.extrapolateHsfromGEMPad( d, digi_channel(bestgem_dg_and_gp.first));
         etrk_[st].phi_pad_even = best_pad_even[st].phi();
@@ -2760,7 +2866,75 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
   }
 
+  //ME0 digis
+  auto me0digis(match_me0digi.superChamberIds());
+  std::cout <<"me0 digis , chamber id size "<< me0digis.size() << std::endl;
+  for (auto d: me0digis){
+    const ME0DetId id(d);
+    int nlayers = match_me0digi.nLayersWithDigisInSuperChamber(d); 
+    std::cout <<"ME0 Detid "<< id <<" nlayer hits "<< nlayers << std::endl;
+    if (nlayers < minNHitsChamberME0Digi_) continue;
+    bool odd(id.chamber()%2 == 1);
+    if (odd) etrk_[ME0].has_csc_strips |= 1;
+    else etrk_[ME0].has_csc_strips |= 2;
+    if (odd) etrk_[ME0].nlayers_st_dg_odd = nlayers;
+    else etrk_[ME0].nlayers_st_dg_even = nlayers;
+  }
 
+
+  //ME0 RecHits
+  auto me0Segs(match_me0rh.superChamberIdsME0Segment());
+  std::cout <<"me0 Segs , chamber id size "<< me0Segs.size() << std::endl;
+  for (auto d: me0Segs){
+    const ME0DetId id(d);
+    std::cout <<"ME0 Detid "<< id << std::endl;
+    auto me0Segment(match_me0rh.findbestME0Segment(match_me0rh.me0SegmentsInSuperChamber(d)));
+    if (fabs(me0Segment.chi2()) < 0.00001 and fabs(me0Segment.time()) < 0.00001 and fabs(me0Segment.timeErr()) < 0.0001)
+	continue;
+    double chi2 = me0Segment.chi2(); float dPhi = me0Segment.deltaPhi(); float time = me0Segment.time(); 
+    float timeErr = me0Segment.timeErr(); int nRecHits = me0Segment.nRecHits(); 
+    GlobalPoint gp(match_me0rh.globalPoint(me0Segment));
+    GlobalPoint gp_pragated(match_me0rh.propagateToZ(AVERAGE_ME0_Z));
+    float dR = deltaR(float(gp.eta()), float(gp.phi()), float(gp_pragated.eta()), float(gp_pragated.phi()));
+    bool odd(id.chamber()%2 == 1);
+    if (odd) etrk_[ME0].chamber_lct_odd = id.chamber();
+    else etrk_[ME0].chamber_lct_even = id.chamber();
+    if (odd) etrk_[ME0].has_lct |= 1;
+    else etrk_[ME0].has_lct |= 2;
+
+    if (me0_simhits.find(d) == me0_simhits.end())
+	std::cout <<"failed to find simhits in ME0 "<< id <<" but find Me0segment " << me0Segment << std::endl;
+    if (odd)
+    {
+      etrk_[ME0].phi_lct_odd = gp.phi();
+      etrk_[ME0].eta_lct_odd = gp.eta();
+      etrk_[ME0].perp_lct_odd = gp.perp();
+      //if (fabs(etrk_[ME0].perp_lct_odd-etrk_[ME0].perp_cscsh_odd)>5.0 and etrk_[ME0].perp_cscsh_odd>10.0)
+	  //std::cout <<"CSCid "<< id <<" perp_cscsh_odd "<< etrk_[ME0].perp_cscsh_odd<<" perp_lct_odd "<< etrk_[ME0].perp_lct_odd<<" csc_phi "<< etrk_[ME0].phi_cscsh_odd<<" phi_lct_odd "<< etrk_[ME0].phi_lct_odd << std::endl;
+      etrk_[ME0].dphi_lct_odd = dPhi;
+      etrk_[ME0].chi2_lct_odd = chi2;
+      etrk_[ME0].bx_lct_odd = time;
+      etrk_[ME0].timeErr_lct_odd = timeErr;
+      etrk_[ME0].nHits_lct_odd = nRecHits;
+      etrk_[ME0].chamber_lct_odd = id.chamber() ;
+      etrk_[ME0].dR_sim_lct_odd = dR;
+    }
+    else
+    {
+      etrk_[ME0].phi_lct_even = gp.phi();
+      etrk_[ME0].eta_lct_even = gp.eta();
+      etrk_[ME0].perp_lct_even = gp.perp();
+      //if (fabs(etrk_[ME0].perp_lct_even-etrk_[ME0].perp_cscsh_even)>5.0 and etrk_[ME0].perp_cscsh_even>10.0)
+	  //std::cout <<"CSCid "<< id <<" perp_cscsh_even "<< etrk_[ME0].perp_cscsh_even <<" perp_lct_even "<< etrk_[ME0].perp_lct_even <<" csc_phi "<< etrk_[ME0].phi_cscsh_even <<" phi_lct_even "<< etrk_[ME0].phi_lct_even << std::endl;
+      etrk_[ME0].dphi_lct_even = dPhi;
+      etrk_[ME0].chi2_lct_even = chi2;
+      etrk_[ME0].timeErr_lct_even = timeErr;
+      etrk_[ME0].nHits_lct_even = nRecHits;
+      etrk_[ME0].bx_lct_even = time;
+      etrk_[ME0].chamber_lct_even = id.chamber() ;
+      etrk_[ME0].dR_sim_lct_even = dR;
+    }
+  }
 
   if (verbose_) std::cout <<"GEMCSCAnalyzer step7 "<< std::endl;
   // placeholders for best mtching rpcstrips
@@ -2796,7 +2970,6 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     if (odd)
     {
       etrk_[st].has_rpc_dg |= 1;
-//       etrk_[st].chamber_odd |= 3;
       etrk_[st].strip_rpcdg_odd = rpc_medianstrip;
       etrk_[st].hsfromrpc_odd = match_rd.extrapolateHsfromRPC( d, rpc_medianstrip);
       if (is_valid(lct_odd[st]))
@@ -2813,7 +2986,6 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     else
     {
       etrk_[st].has_rpc_dg |= 2;
-//       etrk_[st].chamber_even |= 3;
       etrk_[st].strip_rpcdg_even = rpc_medianstrip;
       etrk_[st].hsfromrpc_even = match_rd.extrapolateHsfromRPC( d, rpc_medianstrip);
       if (is_valid(lct_even[st]))
@@ -3376,6 +3548,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     etrk_[0].L1Mu_phi = bestGmtCand->phi();
     etrk_[0].L1Mu_charge = bestGmtCand->charge();
     etrk_[0].L1Mu_bx = bestGmtCand->bx();
+    etrk_[0].L1Mu_quality = bestGmtCand->quality();
   }
   
   /*if (match_track.tfCands().size()) {

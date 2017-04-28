@@ -111,6 +111,8 @@ ME0RecHitMatcher::matchME0SegmentsToSimTrack(const ME0SegmentCollection& me0Segm
       superChamber_to_me0Segment_[ p_id.rawId() ].push_back(*d);
     }
   }
+  for (auto& p : superChamber_to_me0Segment_)
+      superChamber_to_bestME0Segment_[ p.first] = findbestME0Segment(p.second);
 }
 
 
@@ -279,22 +281,25 @@ ME0RecHitMatcher::areME0SegmentsSame(const ME0Segment& l,const ME0Segment& r) co
 ME0Segment
 ME0RecHitMatcher::bestME0Segment(unsigned int id)
 {
-  ME0Segment emptySegment;
-  double chi2overNdf = 99;
-  int index=0;
-  int foundIndex=-99;
+  return superChamber_to_bestME0Segment_[id];
+}
 
-  for (auto& seg: superChamber_to_me0Segment_[id]){
+ME0Segment
+ME0RecHitMatcher::findbestME0Segment(ME0SegmentContainer allSegs) const 
+{
+  ME0Segment bestSegment;
+  double chi2overNdf = 99;
+
+  for (auto& seg: allSegs){
     double newChi2overNdf(seg.chi2()/seg.degreesOfFreedom());
     if (newChi2overNdf < chi2overNdf) {
       chi2overNdf = newChi2overNdf;
-      foundIndex = index;
+      bestSegment = seg;
     }
-    ++index;
   }
-  if (foundIndex != -99) return superChamber_to_me0Segment_[id][foundIndex];
-  return emptySegment;
+  return bestSegment;
 }
+
 
 GlobalPoint
 ME0RecHitMatcher::globalPoint(const ME0Segment& c) const

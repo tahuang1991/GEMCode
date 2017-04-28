@@ -62,6 +62,7 @@ public:
   int nME0SegmentsInSuperChamber(unsigned int) const;
 
   ME0Segment bestME0Segment(unsigned int);
+  ME0Segment findbestME0Segment(ME0SegmentContainer allSegs) const ;
 
   GlobalPoint globalPoint(const ME0Segment&) const;
 
@@ -81,6 +82,9 @@ private:
   bool runME0Segment_;
   int maxBXME0Segment_;
   int minBXME0Segment_;
+
+  //ME0Segment bestMe0Seg_;
+  std::map<unsigned int, ME0Segment> superChamber_to_bestME0Segment_;
 
   std::map<unsigned int, ME0RecHitContainer> chamber_to_me0RecHit_;
   std::map<unsigned int, ME0RecHitContainer> superChamber_to_me0RecHit_;

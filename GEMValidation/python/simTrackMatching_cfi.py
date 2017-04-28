@@ -21,7 +21,7 @@ SimTrackMatching = cms.PSet(
                               "RPC_MB21n", "RPC_MB22n", "RPC_MB23n", "RPC_MB24n"),
     gemStations = cms.vstring("GEM_ALL", "GEM_ME11", "GEM_ME21"),
     me0Stations = cms.vstring("ME0"),
-    cscStationsToUse = cms.vint32(0,1,2,3,4,5,6,7,8,9,10,11),
+    cscStationsToUse = cms.vint32(0,1,2,3,4,5,6,7,8,9,10,11, 12),
     dtStationsToUse = cms.vint32(0,1,2,3,4,5,6,7,8,9,10,11,
                                  12,13,14,15,16,17,18,19,20),
     rpcStationsToUse = cms.vint32(0,1,2,3,4,5,6,7,8,9,10,11,
@@ -94,6 +94,7 @@ SimTrackMatching = cms.PSet(
         run = cms.bool(True),
         simMuOnly = cms.bool(True),
         discardEleHits = cms.bool(True),
+        minNHitsChamber = cms.int32(4),
     ),
     me0DigiPreReco = cms.PSet(
         verbose = cms.int32(0),
@@ -102,6 +103,7 @@ SimTrackMatching = cms.PSet(
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
         matchDeltaStrip = cms.int32(1),
+        minNHitsChamber = cms.int32(4),
     ),
     me0RecHit = cms.PSet(
         verbose = cms.int32(0),
@@ -109,6 +111,7 @@ SimTrackMatching = cms.PSet(
         run = cms.bool(True),
         minBX = cms.int32(0),
         maxBX = cms.int32(0),
+        minNHitsChamber = cms.int32(4),
     ),
     me0Segment = cms.PSet(
         verbose = cms.int32(0),
