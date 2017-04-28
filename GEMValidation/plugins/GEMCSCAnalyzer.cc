@@ -2009,8 +2009,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     GlobalVector ym = match_sh.simHitsMeanMomentum(match_sh.hitsInSuperChamber(d));
     GlobalPoint keygp(match_sh.simHitsMeanPosition(match_sh.hitsInSuperChamber(d)));
     //etrk_[ME0].bending_sh = match_sh.LocalBendingInChamber(d);
-    const ME0DetId id1(id.region(), id.station(), 1, id.chamber(), 0);
-    const ME0DetId id6(id.region(), id.station(), 6, id.chamber(), 0);
+    const ME0DetId id1(id.region(), 1, id.chamber(), 0);
+    const ME0DetId id6(id.region(), 6, id.chamber(), 0);
     GlobalPoint gp1 = match_sh.simHitsMeanPosition(match_sh.hitsInChamber(id1.rawId()));
     GlobalPoint gp6 = match_sh.simHitsMeanPosition(match_sh.hitsInChamber(id6.rawId()));
     if (odd)  etrk_[ME0].nlayers_csc_sh_odd = nlayers;
