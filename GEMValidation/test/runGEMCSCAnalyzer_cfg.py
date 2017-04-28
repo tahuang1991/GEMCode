@@ -23,11 +23,9 @@ process.source = cms.Source("PoolSource",
 	fileNames = cms.untracked.vstring('/store/user/dildick/DarkSUSY_mH_125_mGammaD_20000_cT_0_14TeV_GEN_SIM_90X/DarkSUSY_mH_125_mGammaD_20000_cT_0_14TeV_PU0_DIGI_L1/170116_230113/0000/step2_1.root')
 )
 
-from GEMCode.SimMuL1.GEMCSCTriggerSamplesLib import *
+InputDir = ['/eos/uscms/store/user/lpcgem/SingleMu_91X_FlatPt05_50_eta20_28_phase2_realistic_Extended2023D4_GEN_SIM_v2/DIGI_L1_ME0Reco_PU0/170426_052508/0000/']
 from GEMCode.GEMValidation.InputFileHelpers import *
-InputDir = ['/eos/uscms/store/user/rdking/SingleMu1to100_14TeV_GEN_SIM_90X/DarkSUSY_mH_125_mGammaD_20000_cT_0_14TeV_PU140_DIGI_L1/170125_170819/0000/']
 process = useInputDir(process, InputDir, True)
-#process = useInputDir(process, files['_gem98_pt2-50_PU0_pt0_new'], False)
 
 process.TFileService = cms.Service("TFileService",
     fileName = cms.string("out_ana.root")

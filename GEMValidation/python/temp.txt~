@@ -1,0 +1,13 @@
+cmsDriver.py step2 \
+--conditions auto:phase2_realistic \
+-n 10 --era Phase2C2_timing \
+--eventcontent FEVTDEBUGHLT \
+-s DIGI:pdigi_valid,L1 \
+--datatier GEN-SIM-DIGI \
+--pileup AVE_200_BX_25ns \
+--customise GEMCode/GEMValidation/addpileup.addpileup
+--geometry Extended2023D4 \
+--python DigiFullPU_2023tiltedPU200.py \
+--no_exec \
+--filein file:step1.root \
+--fileout file:step2.root

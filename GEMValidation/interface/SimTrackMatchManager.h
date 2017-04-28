@@ -17,7 +17,7 @@
 #include "GEMCode/GEMValidation/interface/GEMDigiMatcher.h"
 #include "GEMCode/GEMValidation/interface/GEMRecHitMatcher.h"
 #include "GEMCode/GEMValidation/interface/ME0DigiMatcher.h"
-//#include "GEMCode/GEMValidation/interface/ME0RecHitMatcher.h"
+#include "GEMCode/GEMValidation/interface/ME0RecHitMatcher.h"
 #include "GEMCode/GEMValidation/interface/RPCDigiMatcher.h"
 #include "GEMCode/GEMValidation/interface/RPCRecHitMatcher.h"
 #include "GEMCode/GEMValidation/interface/CSCDigiMatcher.h"
@@ -36,11 +36,11 @@
 class SimTrackMatchManager
 {
 public:
-  
-  SimTrackMatchManager(const SimTrack& t, 
+
+  SimTrackMatchManager(const SimTrack& t,
                        const SimVertex& v,
-                       const edm::ParameterSet& ps, 
-                       const edm::Event& ev, 
+                       const edm::ParameterSet& ps,
+                       const edm::Event& ev,
                        const edm::EventSetup& es,
                        edm::EDGetTokenT<reco::GenParticleCollection>& genParticleInput_,
                        edm::EDGetTokenT<edm::SimVertexContainer>& simVertexInput_,
@@ -55,6 +55,8 @@ public:
                        edm::EDGetTokenT<GEMCoPadDigiCollection>& gemCoPadDigiInput_,
                        edm::EDGetTokenT<GEMRecHitCollection>& gemRecHitInput_,
                        edm::EDGetTokenT<ME0DigiPreRecoCollection>& me0DigiInput_,
+                       edm::EDGetTokenT<ME0RecHitCollection>& me0RecHitInput_,
+                       edm::EDGetTokenT<ME0SegmentCollection>& me0SegmentInput_,
                        edm::EDGetTokenT<CSCComparatorDigiCollection>& cscComparatorDigiInput_,
                        edm::EDGetTokenT<CSCWireDigiCollection>& cscWireDigiInput_,
                        edm::EDGetTokenT<CSCCLCTDigiCollection>& clctInputs_,
@@ -70,13 +72,13 @@ public:
                        edm::EDGetTokenT<DTRecSegment4DCollection>& dtRecSegment4DInput_,
                        edm::EDGetTokenT<RPCDigiCollection>& rpcDigiInput_,
                        edm::EDGetTokenT<RPCRecHitCollection>& rpcRecHitInput_,
-                       //edm::EDGetTokenT<L1CSCTrackCollection>& cscTfTrackInputLabel_, 
-                       //edm::EDGetTokenT<L1MuRegionalCandCollection>& cscTfCandInputLabel_, 
-		       edm::EDGetTokenT<l1t::EMTFTrackCollection> &emtfTrackInputLabel_,
-		       edm::EDGetTokenT< BXVector<l1t::RegionalMuonCand> > & gmtInputLabel_,
-                       edm::EDGetTokenT<L1MuRegionalCandCollection>& dtTfCandInputLabel_, 
-                       edm::EDGetTokenT<L1MuRegionalCandCollection>& rpcfTfCandInputLabel_, 
-                       edm::EDGetTokenT<L1MuRegionalCandCollection>& rpcbTfCandInputLabel_, 
+                       //edm::EDGetTokenT<L1CSCTrackCollection>& cscTfTrackInputLabel_,
+                       //edm::EDGetTokenT<L1MuRegionalCandCollection>& cscTfCandInputLabel_,
+                       edm::EDGetTokenT<l1t::EMTFTrackCollection> &emtfTrackInputLabel_,
+                       edm::EDGetTokenT< BXVector<l1t::RegionalMuonCand> > & gmtInputLabel_,
+                       edm::EDGetTokenT<L1MuRegionalCandCollection>& dtTfCandInputLabel_,
+                       edm::EDGetTokenT<L1MuRegionalCandCollection>& rpcfTfCandInputLabel_,
+                       edm::EDGetTokenT<L1MuRegionalCandCollection>& rpcbTfCandInputLabel_,
                        edm::EDGetTokenT<L1MuRegionalCandCollection>& gmtRegCandCSCInputLabel_,
                        edm::EDGetTokenT<L1MuRegionalCandCollection>& gmtRegCandDTInputLabel_,
                        edm::EDGetTokenT<L1MuRegionalCandCollection>& gmtRegCandRPCfInputLabel_,
@@ -87,7 +89,7 @@ public:
                        edm::EDGetTokenT<reco::TrackCollection>& recoTrackInputLabel_,
                        edm::EDGetTokenT<reco::RecoChargedCandidateCollection>& recoChargedCandidateInputLabel_
                        );
-  
+
   ~SimTrackMatchManager();
 
   const DisplacedGENMuonMatcher& genMuons() const {return genMuons_;}
@@ -95,7 +97,7 @@ public:
   const GEMDigiMatcher& gemDigis() const {return gem_digis_;}
   const GEMRecHitMatcher& gemRecHits() const {return gem_rechits_;}
   const ME0DigiMatcher& me0Digis() const {return me0_digis_;}
-  //  const ME0RecHitMatcher& me0RecHits() const {return me0_rechits_;}
+  const ME0RecHitMatcher& me0RecHits() const {return me0_rechits_;}
   const RPCDigiMatcher& rpcDigis() const {return rpc_digis_;}
   const RPCRecHitMatcher& rpcRecHits() const {return rpc_rechits_;}
   const CSCDigiMatcher& cscDigis() const {return csc_digis_;}
@@ -103,14 +105,14 @@ public:
   const CSCRecHitMatcher& cscRecHits() const {return csc_rechits_;}
   const DTDigiMatcher& dtDigis() const {return dt_digis_;}
   const DTStubMatcher& dtStubs() const {return dt_stubs_;}
-  const DTRecHitMatcher& dtRecHits() const {return dt_rechits_;} 
+  const DTRecHitMatcher& dtRecHits() const {return dt_rechits_;}
   //const L1TrackMatcher& l1Tracks() const {return l1_tracks_;}
   const UpgradeL1TrackMatcher& l1Tracks() const {return l1_tracks_;}
   const L1TrackFinderTrackMatcher& l1TfTracks() const {return l1_tf_tracks_;} // not used yet
   const L1TrackFinderCandidateMatcher& l1TfCands() const {return l1_tf_cands_;}
   const L1GlobalMuonTriggerMatcher& l1GMTCands() const {return l1_gmt_cands_;}
   const HLTTrackMatcher& hltTracks() const {return hlt_tracks_;}
-  
+
 private:
 
   DisplacedGENMuonMatcher genMuons_;
@@ -118,7 +120,7 @@ private:
   GEMDigiMatcher gem_digis_;
   GEMRecHitMatcher gem_rechits_;
   ME0DigiMatcher me0_digis_;
-  //  ME0RecHitMatcher me0_rechits_;
+  ME0RecHitMatcher me0_rechits_;
   RPCDigiMatcher rpc_digis_;
   RPCRecHitMatcher rpc_rechits_;
   CSCDigiMatcher csc_digis_;
@@ -126,7 +128,7 @@ private:
   CSCRecHitMatcher csc_rechits_;
   DTDigiMatcher dt_digis_;
   DTStubMatcher dt_stubs_;
-  DTRecHitMatcher dt_rechits_; 
+  DTRecHitMatcher dt_rechits_;
   //L1TrackMatcher l1_tracks_;
   UpgradeL1TrackMatcher l1_tracks_;
   L1TrackFinderTrackMatcher l1_tf_tracks_;

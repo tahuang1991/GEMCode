@@ -89,7 +89,7 @@ process.maxEvents = cms.untracked.PSet(
 # Input source
 process.source = cms.Source("PoolSource",
     dropDescendantsOfDroppedBranches = cms.untracked.bool(False),
-    fileNames = cms.untracked.vstring('file:step1.root'),
+    fileNames = cms.untracked.vstring('file:/eos/uscms/store/user/lpcgem/SingleNu_91X_FlatPt05_50_phase2_realistic_Extended2023D4_GEN_SIM/SingleNu_91X_FlatPt05_50_phase2_realistic_Extended2023D4_GEN_SIM/170426_051113/0000/step1_1.root'),
     inputCommands = cms.untracked.vstring('keep *',
         'drop *_genParticles_*_*',
         'drop *_genParticlesForJets_*_*',
