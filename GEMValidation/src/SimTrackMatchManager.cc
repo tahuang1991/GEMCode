@@ -50,13 +50,12 @@ SimTrackMatchManager::SimTrackMatchManager(const SimTrack& t,
                                            edm::EDGetTokenT<l1extra::L1MuonParticleCollection>& l1ExtraMuonInputLabel_,
                                            edm::EDGetTokenT<reco::TrackExtraCollection>& recoTrackExtraInputLabel_,
                                            edm::EDGetTokenT<reco::TrackCollection>& recoTrackInputLabel_,
-                                           edm::EDGetTokenT<reco::RecoChargedCandidateCollection>& recoChargedCandidateInputLabel_
-					   )
+                                           edm::EDGetTokenT<reco::RecoChargedCandidateCollection>& recoChargedCandidateInputLabel_)
 :
   genMuons_(t, v, ps, ev, es, genParticleInput_)
-  ,simhits_(t, v, ps, ev, es, simVertexInput_, simTrackInput_,
-           gemSimHitInput_, cscSimHitInput_,
-           rpcSimHitInput_, me0SimHitInput_, dtSimHitInput_)
+  , simhits_(t, v, ps, ev, es, simVertexInput_, simTrackInput_,
+             gemSimHitInput_, cscSimHitInput_,
+             rpcSimHitInput_, me0SimHitInput_, dtSimHitInput_)
   , gem_digis_(simhits_, gemDigiInput_, gemPadDigiInput_, gemCoPadDigiInput_)
   , gem_rechits_(simhits_, gemRecHitInput_)
   , me0_digis_(simhits_, me0DigiInput_)
