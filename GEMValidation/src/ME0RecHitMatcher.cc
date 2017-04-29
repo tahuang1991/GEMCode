@@ -95,7 +95,7 @@ ME0RecHitMatcher::matchME0SegmentsToSimTrack(const ME0SegmentCollection& me0Segm
     // get the segments
     auto segments_in_det = me0Segments.get(p_id);
     for (auto d = segments_in_det.first; d != segments_in_det.second; ++d) {
-      if (verboseME0Segment_) cout<<"segment "<<p_id<<" "<<*d<<endl;
+      if (verboseME0Segment_) cout<<"segment "<<p_id<<" "<<*d <<" dphi "<< d->deltaPhi() <<endl;
 
       //access the rechits
       auto recHits(d->recHits());
@@ -317,4 +317,14 @@ GlobalPoint
 ME0RecHitMatcher::globalPoint(const ME0Segment& c) const
 {
   return getME0Geometry()->idToDet(c.me0DetId())->surface().toGlobal(c.localPosition());
+}
+
+float 
+ME0RecHitMatcher::me0DeltaPhi(ME0Segment Seg) const
+{
+  auto chamber = getME0Geometry()->chamber(Seg.me0DetId());
+  float dPhi = chamber->computeDeltaPhi(Seg.localPosition(), Seg.localDirection());
+  //std::cout <<"ME0detId "<< Seg.me0DetId()<<" Segment "<< Seg <<" dPhi here "<< dPhi << std::endl;
+  return dPhi;
+
 }

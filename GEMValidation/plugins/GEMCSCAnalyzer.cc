@@ -563,6 +563,8 @@ void MyTrackEff::init()
   chamber_lct_even = -1;
   bend_lct_odd = -9;
   bend_lct_even = -9;
+  dphi_lct_odd = -9;
+  dphi_lct_even = -9;
   bx_lct_odd = -9;
   bx_lct_even = -9;
   hs_lct_odd = 0;
@@ -2925,9 +2927,10 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     allmatchedSegments.insert(allmatchedSegments.begin(), allSegs.begin(), allSegs.end());
     auto me0Segment(match_me0rh.findbestME0Segment(match_me0rh.me0SegmentsInSuperChamber(d)));
     cout << "me0Segment " << me0Segment << " dphi  "<<  me0Segment.deltaPhi() << endl;
+    float dPhi = match_me0rh.me0DeltaPhi(me0Segment);
     if (fabs(me0Segment.chi2()) < 0.0000001 and fabs(me0Segment.time()) < 0.00000001 and fabs(me0Segment.timeErr()) < 0.000001 and fabs(me0Segment.deltaPhi())<.0001)
       continue;
-    double chi2 = me0Segment.chi2(); float dPhi = me0Segment.deltaPhi(); float time = me0Segment.time();
+    double chi2 = me0Segment.chi2(); float time = me0Segment.time();
     float timeErr = me0Segment.timeErr(); int nRecHits = me0Segment.nRecHits();
     bool odd(id.chamber()%2 == 1);
     GlobalPoint gp(match_me0rh.globalPoint(me0Segment));

@@ -60,6 +60,7 @@ public:
   int nME0RecHitsInChamber(unsigned int) const;
   int nME0RecHitsInSuperChamber(unsigned int) const;
   int nME0SegmentsInSuperChamber(unsigned int) const;
+  float me0DeltaPhi(ME0Segment Seg) const;
 
   ME0Segment bestME0Segment(unsigned int);
   ME0Segment findbestME0Segment(ME0SegmentContainer allSegs) const ;
