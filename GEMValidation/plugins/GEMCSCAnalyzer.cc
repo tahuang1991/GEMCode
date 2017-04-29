@@ -352,6 +352,7 @@ struct MyTrackEff
   Float_t bestdRGmtCand;
   Float_t L1Mu_pt, L1Mu_eta, L1Mu_phi, L1Mu_quality, L1Mu_bx;
   UInt_t L1Mu_charge;
+  Float_t L1Mu_me0_eta, L1Mu_me0_phi, L1Mu_me0_dPhi, L1Mu_me0_dR;
 
   Int_t has_l1Extra;
   Float_t l1Extra_pt;
@@ -576,10 +577,10 @@ void MyTrackEff::init()
   phi_me0_st2_even = -9.;
   eta_me0_st2_odd = -9.;
   eta_me0_st2_even = -9.;
-  chi2_lct_odd = 0;
-  chi2_lct_even = 0.0;
-  timeErr_lct_odd = 0.0;
-  timeErr_lct_even = 0.0;
+  chi2_lct_odd = -99999;
+  chi2_lct_even = -99999;
+  timeErr_lct_odd = -9999;
+  timeErr_lct_even = -9999;
   nHits_lct_odd = 0;
   nHits_lct_even = 0;
   dR_sim_lct_odd = 10;
@@ -798,6 +799,10 @@ void MyTrackEff::init()
   L1Mu_quality = -99;
   L1Mu_bx = -99;
   L1Mu_charge = -99;
+  L1Mu_me0_eta = -9;
+  L1Mu_me0_phi = -9;
+  L1Mu_me0_dPhi = -9;
+  L1Mu_me0_dR = 10;
 
   has_l1Extra = 0;
   l1Extra_pt = -99;
@@ -1236,6 +1241,10 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("L1Mu_quality", &L1Mu_quality);
   t->Branch("L1Mu_bx", &L1Mu_bx);
   t->Branch("L1Mu_charge", &L1Mu_charge);
+  t->Branch("L1Mu_me0_eta", &L1Mu_me0_eta);
+  t->Branch("L1Mu_me0_phi", &L1Mu_me0_phi);
+  t->Branch("L1Mu_me0_dPhi", &L1Mu_me0_dPhi);
+  t->Branch("L1Mu_me0_dR", &L1Mu_me0_dR);
 
   t->Branch("has_l1Extra", &has_l1Extra);
   t->Branch("l1Extra_pt", &l1Extra_pt);
@@ -2049,26 +2058,26 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 		etrk_[ME0].eta_layer1_sh_odd = gp1.eta();
 		etrk_[ME0].phi_layer1_sh_odd = gp1.phi();
 		etrk_[ME0].perp_layer1_sh_odd = gp1.perp();
-		std::cout <<"layer1 id "<< id1 <<" phi "<< gp1.phi() <<" eta "<< gp1.eta() <<" x "<< gp1.x()<<" y "<< gp1.y()<<" z "<< gp1.z() <<" perp "<< gp1.perp() << std::endl;
+		//std::cout <<"layer1 id "<< id1 <<" phi "<< gp1.phi() <<" eta "<< gp1.eta() <<" x "<< gp1.x()<<" y "<< gp1.y()<<" z "<< gp1.z() <<" perp "<< gp1.perp() << std::endl;
 		}
     	if (match_sh.hitsInChamber(id6.rawId()).size()>0){
 		etrk_[ME0].eta_layer6_sh_odd = gp6.eta();
 		etrk_[ME0].phi_layer6_sh_odd = gp6.phi();
 		etrk_[ME0].perp_layer6_sh_odd = gp6.perp();
-		std::cout <<"layer6 id "<< id6 <<" phi "<< gp6.phi() <<" eta "<< gp6.eta() <<" x "<< gp6.x()<<" y "<< gp6.y()<<" z "<< gp6.z() <<" perp "<< gp6.perp() << std::endl;
+		//std::cout <<"layer6 id "<< id6 <<" phi "<< gp6.phi() <<" eta "<< gp6.eta() <<" x "<< gp6.x()<<" y "<< gp6.y()<<" z "<< gp6.z() <<" perp "<< gp6.perp() << std::endl;
 		}
     }else{
     	if (match_sh.hitsInChamber(id1.rawId()).size()>0){
 		etrk_[ME0].eta_layer1_sh_even = gp1.eta();
 		etrk_[ME0].phi_layer1_sh_even = gp1.phi();
 		etrk_[ME0].perp_layer1_sh_even = gp1.perp();
-		std::cout <<"layer1 id "<< id1 <<" phi "<< gp1.phi() <<" eta "<< gp1.eta() <<" x "<< gp1.x()<<" y "<< gp1.y()<<" z "<< gp1.z() <<" perp "<< gp1.perp() << std::endl;
+		//std::cout <<"layer1 id "<< id1 <<" phi "<< gp1.phi() <<" eta "<< gp1.eta() <<" x "<< gp1.x()<<" y "<< gp1.y()<<" z "<< gp1.z() <<" perp "<< gp1.perp() << std::endl;
 		}
     	if (match_sh.hitsInChamber(id6.rawId()).size()>0){
 		etrk_[ME0].eta_layer6_sh_even = gp6.eta();
 		etrk_[ME0].phi_layer6_sh_even = gp6.phi();
 		etrk_[ME0].perp_layer6_sh_even = gp6.perp();
-		std::cout <<"layer6 id "<< id6 <<" phi "<< gp6.phi() <<" eta "<< gp6.eta() <<" x "<< gp6.x()<<" y "<< gp6.y()<<" z "<< gp6.z() <<" perp "<< gp6.perp() << std::endl;
+		//std::cout <<"layer6 id "<< id6 <<" phi "<< gp6.phi() <<" eta "<< gp6.eta() <<" x "<< gp6.x()<<" y "<< gp6.y()<<" z "<< gp6.z() <<" perp "<< gp6.perp() << std::endl;
 		}
     }
 
@@ -2897,7 +2906,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   std::cout <<"me0 rechits , chamber id size "<< me0RecHitsChamber.size() << std::endl;
   for (auto d: me0RecHitsChamber){
     const ME0DetId id(d);
-    auto me0RecHits(match_me0rh.me0RecHitsInSuperChamber(d));
+    auto me0RecHits(match_me0rh.me0RecHitsInChamber(d));
     std::cout <<"ME0 Detid "<< id<<" matched Rechits num "<< me0RecHits.size() << std::endl;
     //std::cout << "Available rechits in chamber" << std::endl;
     //for (auto rh: me0RecHits){
@@ -2915,14 +2924,14 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     auto allSegs(match_me0rh.me0SegmentsInSuperChamber(d));
     allmatchedSegments.insert(allmatchedSegments.begin(), allSegs.begin(), allSegs.end());
     auto me0Segment(match_me0rh.findbestME0Segment(match_me0rh.me0SegmentsInSuperChamber(d)));
-    cout << "me0Segment " << me0Segment << endl;
-    if (fabs(me0Segment.chi2()) < 0.00001 and fabs(me0Segment.time()) < 0.00001 and fabs(me0Segment.timeErr()) < 0.0001)
+    cout << "me0Segment " << me0Segment << " dphi  "<<  me0Segment.deltaPhi() << endl;
+    if (fabs(me0Segment.chi2()) < 0.0000001 and fabs(me0Segment.time()) < 0.00000001 and fabs(me0Segment.timeErr()) < 0.000001 and fabs(me0Segment.deltaPhi())<.0001)
       continue;
     double chi2 = me0Segment.chi2(); float dPhi = me0Segment.deltaPhi(); float time = me0Segment.time();
     float timeErr = me0Segment.timeErr(); int nRecHits = me0Segment.nRecHits();
     bool odd(id.chamber()%2 == 1);
     GlobalPoint gp(match_me0rh.globalPoint(me0Segment));
-    GlobalPoint gp_propagated(match_me0rh.propagateToZ(AVERAGE_ME0_Z));
+    GlobalPoint gp_propagated(match_me0rh.propagateToZ(AVERAGE_ME0_Z*id.region()));
     GlobalPoint gp_ME0_st2(match_me0rh.propagateFromME0ToCSC(me0Segment, 2, odd)); 
     float dR = deltaR(float(gp.eta()), float(gp.phi()), float(gp_propagated.eta()), float(gp_propagated.phi()));
     if (odd) etrk_[ME0].chamber_lct_odd = id.chamber();
@@ -3581,9 +3590,20 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     etrk_[0].L1Mu_charge = bestGmtCand->charge();
     etrk_[0].L1Mu_bx = bestGmtCand->bx();
     etrk_[0].L1Mu_quality = bestGmtCand->quality();
-    if (allmatchedSegments.size() > 0){
-	    std::cout <<"match ME0 stub to L1Mu "<< std::endl;
-	    }
+    float tfeta = bestGmtCand->tftrack()->eta();
+    float tfphi = bestGmtCand->tftrack()->phi();
+    float mindR = 10.0;
+    for (auto me0Segment : allmatchedSegments){
+      GlobalPoint gp_ME0_st2(match_me0rh.propagateFromME0ToCSC(me0Segment, 2, me0Segment.me0DetId().chamber()%2==1)); 
+      float dR = deltaR(tfeta, tfphi, float(gp_ME0_st2.eta()), float(gp_ME0_st2.phi()));
+      if (dR < mindR){
+	  mindR = dR;
+	  etrk_[0].L1Mu_me0_eta = gp_ME0_st2.eta();
+	  etrk_[0].L1Mu_me0_phi = gp_ME0_st2.phi();
+	  etrk_[0].L1Mu_me0_dR = dR;
+	  etrk_[0].L1Mu_me0_dPhi = me0Segment.deltaPhi();
+      }
+    }
   }
 
   /*if (match_track.tfCands().size()) {

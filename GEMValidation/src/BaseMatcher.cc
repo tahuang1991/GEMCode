@@ -5,6 +5,7 @@
 #include "DataFormats/GeometrySurface/interface/Plane.h"
 #include "GEMCode/GEMValidation/interface/Helpers.h"
 #include "DataFormats/GeometrySurface/interface/Cylinder.h"
+#include <L1Trigger/CSCCommonTrigger/interface/CSCConstants.h>
 //#include "DataFormats/GeometrySurface/interface/BoundCylinder.h"
 
 
@@ -208,6 +209,29 @@ BaseMatcher::propagatedPositionSt2() const
   float AVERAGE_Z = (AVERAGE_ME21_EVEN_Z+AVERAGE_ME21_ODD_Z)/2.0;
   if (abs(eta)<1.2) return propagateToR(AVERAGE_DT2_R);
   else return  propagateToZ(endcap*AVERAGE_Z);
+}
+
+
+GlobalPoint
+BaseMatcher::propagateFromME0ToCSC(ME0Segment segment, int st, bool evenodd) const
+{
+  int chamber = (evenodd? 1:2);
+  int ring = 1;
+  ME0DetId me0Id(segment.me0DetId());
+  int endcap = (me0Id.region()>0) ? 1 : 2;
+  auto me0Chamber(me0Geometry_->chamber(me0Id));
+  const CSCDetId csclayerId(endcap, st, ring, chamber,  CSCConstants::KEY_CLCT_LAYER);  
+  //std::cout <<"ME0Id "<< me0Id <<" CSC endcap "<< me0Id.region() <<" st "<< st <<" ring "<< ring <<" chamber "<< chamber<<" cscid "<< csclayerId << std::endl;
+  const CSCLayer* csclayer(cscGeometry_->layer(csclayerId));
+  const GlobalPoint gp_csc = csclayer->centerOfWireGroup(10);
+  //float propagate_z = (evenodd ? AVERAGE_ME11_ODD_Z : AVERAGE_ME11_EVEN_Z) * me0Id.region();
+  float propagate_z = gp_csc.z();
+  LocalPoint lp(segment.localPosition());
+  GlobalPoint SegPos(me0Chamber->toGlobal(lp));
+  LocalVector lv(segment.localDirection());
+  GlobalVector SegVec(me0Chamber->toGlobal(lv));
+  return propagateToZ(SegPos, SegVec, propagate_z);
+
 }
 
 
