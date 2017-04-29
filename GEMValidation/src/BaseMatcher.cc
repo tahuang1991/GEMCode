@@ -157,8 +157,9 @@ BaseMatcher::propagateToZ(GlobalPoint &inner_point, GlobalVector &inner_vec, flo
 
   TrajectoryStateOnSurface tsos(propagator_->propagate(state_start, *my_plane));
   if (!tsos.isValid()) tsos = propagatorOpposite_->propagate(state_start, *my_plane);
-  std::cout <<"propagateToZ GP "<< tsos.globalPosition() <<" eta "<< tsos.globalPosition().eta()<<" phi "<< tsos.globalPosition().phi()<< std::endl;
-  if (!tsos.isValid()) std::cout <<" tsos not valid "<< std::endl;
+  //broken here  when propagating ME0
+  //std::cout <<"propagateToZ GP "<< tsos.globalPosition() <<" eta "<< tsos.globalPosition().eta()<<" phi "<< tsos.globalPosition().phi()<< std::endl;
+  //if (!tsos.isValid()) std::cout <<" tsos not valid "<< std::endl;
 
   if (tsos.isValid()) return tsos.globalPosition();
   return GlobalPoint();
