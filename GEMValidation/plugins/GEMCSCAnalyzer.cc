@@ -3599,12 +3599,14 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     for (auto me0Segment : allmatchedSegments){
       GlobalPoint gp_ME0_st2(match_me0rh.propagateFromME0ToCSC(me0Segment, 2, me0Segment.me0DetId().chamber()%2==1)); 
       float dR = deltaR(tfeta, tfphi, float(gp_ME0_st2.eta()), float(gp_ME0_st2.phi()));
+      std::cout <<"L1Mu eta "<< tfeta <<" phi "<< tfphi <<" propagated ME0 eta "<< gp_ME0_st2.eta() <<" phi "<< gp_ME0_st2.phi() << std::endl;
       if (dR < mindR){
 	  mindR = dR;
+	  float dPhi = match_me0rh.me0DeltaPhi(me0Segment);
 	  etrk_[0].L1Mu_me0_eta = gp_ME0_st2.eta();
 	  etrk_[0].L1Mu_me0_phi = gp_ME0_st2.phi();
 	  etrk_[0].L1Mu_me0_dR = dR;
-	  etrk_[0].L1Mu_me0_dPhi = me0Segment.deltaPhi();
+	  etrk_[0].L1Mu_me0_dPhi = dPhi;
       }
     }
   }
