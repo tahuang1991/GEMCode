@@ -145,6 +145,8 @@ struct MyTrackEff
 
   Char_t chamber_ME1_csc_sh;//bit1:odd, bit2:even
   Char_t chamber_ME2_csc_sh;
+  Int_t nlayers_csc_sh_odd;
+  Int_t nlayers_csc_sh_even;
   Int_t chamber_lct_odd, chamber_dg_odd, chamber_sh_odd; //
   Int_t chamber_lct_even, chamber_dg_even, chamber_sh_even; //
   Float_t bending_sh;
@@ -158,12 +160,20 @@ struct MyTrackEff
   Char_t has_csc_sh; // #layers with SimHits > minHitsChamber    bit1: in odd, bit2: even
   Char_t has_csc_strips; // #layers with comparator digis > minHitsChamber    bit1: in odd, bit2: even
   Char_t has_csc_wires; // #layers with wire digis > minHitsChamber    bit1: in odd, bit2: even
-  Float_t phi_layer1_fit_even, phi_layer3_fit_even, phi_layer6_fit_even, phi_layer1_fit_odd, phi_layer3_fit_odd, phi_layer6_fit_odd;
+  Int_t nlayers_wg_dg_odd;
+  Int_t nlayers_st_dg_odd;
+  Int_t nlayers_wg_dg_even;
+  Int_t nlayers_st_dg_even;
+
+  Char_t has_rechits;
+  Int_t nlayers_rechits_odd;
+  Int_t nlayers_rechits_even;
 
   Char_t has_clct; // bit1: in odd, bit2: even
   Char_t has_alct; // bit1: in odd, bit2: even
   Char_t has_lct; // bit1: in odd, bit2: even
 
+  Float_t phi_layer1_fit_even, phi_layer3_fit_even, phi_layer6_fit_even, phi_layer1_fit_odd, phi_layer3_fit_odd, phi_layer6_fit_odd;
   Char_t bend_lct_odd;
   Char_t bend_lct_even;
   Char_t bx_lct_odd;
@@ -208,12 +218,6 @@ struct MyTrackEff
   Int_t quality_alct_odd;
   Int_t quality_alct_even;
 
-  Int_t nlayers_csc_sh_odd;
-  Int_t nlayers_wg_dg_odd;
-  Int_t nlayers_st_dg_odd;
-  Int_t nlayers_csc_sh_even;
-  Int_t nlayers_wg_dg_even;
-  Int_t nlayers_st_dg_even;
   Int_t pad_odd;
   Int_t pad_even;
   Int_t Copad_odd;
@@ -481,6 +485,8 @@ void MyTrackEff::init()
   chamber_ME2_csc_sh=0;
   chamber_sh_odd = -1;
   chamber_sh_even = -1;
+  nlayers_csc_sh_odd = -1;
+  nlayers_csc_sh_even = -1;
   quality_odd = 0;
   quality_even = 0;
   bending_sh = -10;
@@ -536,17 +542,17 @@ void MyTrackEff::init()
   position_pt = 0.0;
   direction_noge21_pt = 0.0;
   direction_ge21_pt = 0.0;
-  /*
-  csc_bending_angle12_gemcsc = -9;
-  csc_bending_angle12_xfactor = -9;
-  csc_bending_angle12_xfactor_smear0 = -9;
-  csc_bending_angle12_xfactor_smear1 = -9;
-  csc_bending_angle12_xfactor_smear2 = -9;
-  csc_bending_angle12_xfactor_smear3 = -9;
-  csc_bending_angle12_xfactor_L1_1 = -9;
-  csc_bending_angle12_xfactor_L1_2 = -9;
-  csc_bending_angle12_xfactor_L1_3 = -9;
-  */
+
+  has_csc_strips = 0;
+  has_csc_wires = 0;
+  has_rechits = 0;
+  nlayers_wg_dg_odd = -1;
+  nlayers_st_dg_odd = -1;
+  nlayers_wg_dg_even = -1;
+  nlayers_st_dg_even = -1;
+  nlayers_rechits_odd = -1;
+  nlayers_rechits_even = -1;
+
 
   phi_layer1_fit_even =-9.0;
   phi_layer1_fit_odd =-9.0;
@@ -557,8 +563,6 @@ void MyTrackEff::init()
   has_csc_sh = 0;
   chamber_dg_odd = -1;
   chamber_dg_even = -1;
-  has_csc_strips = 0;
-  has_csc_wires = 0;
   has_alct = 0;
   has_clct = 0;
   has_lct = 0;
@@ -611,12 +615,6 @@ void MyTrackEff::init()
   quality_clct_even = -1;
   quality_alct_odd = -1;
   quality_alct_even = -1;
-  nlayers_csc_sh_odd = -1;
-  nlayers_wg_dg_odd = -1;
-  nlayers_st_dg_odd = -1;
-  nlayers_csc_sh_even = -1;
-  nlayers_wg_dg_even = -1;
-  nlayers_st_dg_even = -1;
   pad_odd = -1;
   pad_even = -1;
   Copad_odd = -1;
@@ -929,6 +927,8 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("chamber_ME2_csc_sh", &chamber_ME2_csc_sh);
   t->Branch("chamber_sh_odd", &chamber_sh_odd);
   t->Branch("chamber_sh_even", &chamber_sh_even);
+  t->Branch("nlayers_csc_sh_odd", &nlayers_csc_sh_odd);
+  t->Branch("nlayers_csc_sh_even", &nlayers_csc_sh_even);
   t->Branch("quality_odd", &quality_odd);
   t->Branch("quality_even", &quality_even);
   t->Branch("bending_sh", &bending_sh);
@@ -998,6 +998,21 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
 
   t->Branch("chamber_dg_odd", &chamber_dg_odd);
   t->Branch("chamber_dg_even", &chamber_dg_even);
+  t->Branch("has_csc_sh", &has_csc_sh);
+  t->Branch("has_csc_strips", &has_csc_strips);
+  t->Branch("has_csc_wires", &has_csc_wires);
+  t->Branch("has_rechits", &has_rechits);
+  t->Branch("nlayers_wg_dg_odd", &nlayers_wg_dg_odd);
+  t->Branch("nlayers_wg_dg_even", &nlayers_wg_dg_even);
+  t->Branch("nlayers_st_dg_odd", &nlayers_st_dg_odd);
+  t->Branch("nlayers_st_dg_even", &nlayers_st_dg_even);
+  t->Branch("nlayers_rechits_odd", &nlayers_rechits_odd);
+  t->Branch("nlayers_rechits_even", &nlayers_rechits_even);
+
+
+  t->Branch("has_clct", &has_clct);
+  t->Branch("has_alct", &has_alct);
+  t->Branch("has_lct", &has_lct);
   t->Branch("chamber_lct_odd", &chamber_lct_odd);
   t->Branch("chamber_lct_even", &chamber_lct_even);
   t->Branch("phi_layer1_fit_even", &phi_layer1_fit_even);
@@ -1006,12 +1021,6 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("phi_layer3_fit_odd", &phi_layer3_fit_odd);
   t->Branch("phi_layer6_fit_even", &phi_layer6_fit_even);
   t->Branch("phi_layer6_fit_odd", &phi_layer6_fit_odd);
-  t->Branch("has_csc_sh", &has_csc_sh);
-  t->Branch("has_csc_strips", &has_csc_strips);
-  t->Branch("has_csc_wires", &has_csc_wires);
-  t->Branch("has_clct", &has_clct);
-  t->Branch("has_alct", &has_alct);
-  t->Branch("has_lct", &has_lct);
   t->Branch("bend_lct_odd", &bend_lct_odd);
   t->Branch("bend_lct_even", &bend_lct_even);
   t->Branch("bx_lct_odd", &bx_lct_odd);
@@ -1057,12 +1066,6 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("quality_clct_even", &quality_clct_even);
   t->Branch("quality_alct_odd", &quality_alct_odd);
   t->Branch("quality_alct_even", &quality_alct_even);
-  t->Branch("nlayers_csc_sh_odd", &nlayers_csc_sh_odd);
-  t->Branch("nlayers_csc_sh_even", &nlayers_csc_sh_even);
-  t->Branch("nlayers_wg_dg_odd", &nlayers_wg_dg_odd);
-  t->Branch("nlayers_wg_dg_even", &nlayers_wg_dg_even);
-  t->Branch("nlayers_st_dg_odd", &nlayers_st_dg_odd);
-  t->Branch("nlayers_st_dg_even", &nlayers_st_dg_even);
 
   t->Branch("pad_odd", &pad_odd);
   t->Branch("pad_even", &pad_even);
@@ -1430,6 +1433,7 @@ private:
   int minNHitsChamberCSCWireDigi_;
   int minNHitsChamberCSCStripDigi_;
   int minNHitsChamberME0Digi_;
+  int minNHitsChamberME0RecHit_;
   int minNHitsChamberCLCT_;
   int minNHitsChamberALCT_;
   int minNHitsChamberLCT_;
@@ -1528,6 +1532,7 @@ GEMCSCAnalyzer::GEMCSCAnalyzer(const edm::ParameterSet& ps)
 
   auto me0RecHit_ = cfg_.getParameter<edm::ParameterSet>("me0RecHit");
   me0RecHitInput_ = consumes<ME0RecHitCollection>(me0RecHit_.getParameter<edm::InputTag>("validInputTags"));
+  minNHitsChamberME0RecHit_ =  me0RecHit_.getParameter<int>("minNHitsChamber");
 
   auto me0Segment_ = cfg_.getParameter<edm::ParameterSet>("me0Segment");
   me0SegmentInput_ = consumes<ME0SegmentCollection>(me0Segment_.getParameter<edm::InputTag>("validInputTags"));
@@ -2925,6 +2930,18 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     //for (auto rh: me0RecHits){
       //std::cout << rh.me0Id() << " " << rh << std::endl;
     //}
+  }
+  auto me0RecHitsSuperChamber(match_me0rh.superChamberIdsME0RecHit());
+  std::cout <<"me0 rechits , superchamber id size "<< me0RecHitsSuperChamber.size() << std::endl;
+  for (auto d: me0RecHitsSuperChamber){
+    const ME0DetId id(d);
+    int nlayers = match_me0rh.nLayersWithRecHitsInSuperChamber(d);
+    if (nlayers < minNHitsChamberME0RecHit_) continue;
+    bool odd(id.chamber()%2 == 1);
+    if (odd) etrk_[ME0].has_rechits |= 1;
+    else etrk_[ME0].has_rechits |= 2;
+    if (odd) etrk_[ME0].nlayers_rechits_odd = nlayers;
+    else etrk_[ME0].nlayers_rechits_even = nlayers;
   }
 
   //ME0 Segments

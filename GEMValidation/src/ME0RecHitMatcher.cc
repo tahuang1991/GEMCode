@@ -95,7 +95,7 @@ ME0RecHitMatcher::matchME0SegmentsToSimTrack(const ME0SegmentCollection& me0Segm
     // get the segments
     auto segments_in_det = me0Segments.get(p_id);
     for (auto d = segments_in_det.first; d != segments_in_det.second; ++d) {
-      if (verboseME0Segment_) cout<<"segment "<<p_id<<" "<<*d <<" dphi "<< d->deltaPhi() <<endl;
+      if (verboseME0Segment_) cout<<"segment "<<p_id<<" "<<*d  <<endl;
 
       //access the rechits
       auto recHits(d->recHits());
@@ -109,6 +109,12 @@ ME0RecHitMatcher::matchME0SegmentsToSimTrack(const ME0SegmentCollection& me0Segm
           if (verboseME0Segment_) cout << "\t...was matched earlier to SimTrack!" << endl;
        	  ++rechitsFound;
         }
+      }
+      if ((rechitsFound<minNHitsSegment_ and nLayersWithRecHitsInSuperChamber(id)>= minNHitsSegment_)){
+	  cout<<"Matched nlayer  "<< nLayersWithRecHitsInSuperChamber(id) <<" hit me0 rechits" <<endl;
+	  for (auto rh: me0_rechits) cout << "\t"<< rh << endl;
+	  cout <<"this Segment "<< p_id<<" "<<*d  <<endl;
+	  cout<<endl;
       }
       if (rechitsFound<minNHitsSegment_) continue;
       if (verboseME0Segment_) {
@@ -289,6 +295,20 @@ ME0RecHitMatcher::areME0SegmentsSame(const ME0Segment& l,const ME0Segment& r) co
   return (l.localPosition() == r.localPosition() and l.localDirection() == r.localDirection());
 }
 
+int
+ME0RecHitMatcher::nLayersWithRecHitsInSuperChamber(unsigned int detid) const
+{
+  set<int> layers;
+  ME0DetId sch_id(detid);
+  for (int iLayer=1; iLayer<=6; iLayer++){
+    ME0DetId ch_id(sch_id.region(), iLayer, sch_id.chamber(), 0);
+    auto rechits = me0RecHitsInChamber(ch_id.rawId());
+    if (rechits.size()>0){
+      layers.insert(iLayer);
+    }
+  }
+  return layers.size();
+}
 
 ME0Segment
 ME0RecHitMatcher::bestME0Segment(unsigned int id)
