@@ -189,6 +189,8 @@ struct MyTrackEff
   Float_t timeErr_lct_odd, timeErr_lct_even;
   Int_t nHits_lct_odd, nHits_lct_even;
   Float_t dR_sim_lct_odd, dR_sim_lct_even;
+  Float_t me0_st1_dphi_odd, me0_st1_dphi_even;
+  Bool_t me0_st1_isEven_odd, me0_st1_isEven_even;
   Float_t perp_lct_odd;
   Float_t perp_lct_even;
   Bool_t passdphi_odd;
@@ -323,6 +325,7 @@ struct MyTrackEff
   Bool_t passGE11_simpt, passGE21_simpt;
   Float_t deltaR;
   Float_t lctdphi12;
+  /*
   Float_t eta_propagated_ME1;
   Float_t eta_propagated_ME2;
   Float_t eta_propagated_ME3;
@@ -346,13 +349,15 @@ struct MyTrackEff
   Float_t phi_interStat23;
   Float_t eta_interStat13;
   Float_t phi_interStat13;
+  */
 
   Bool_t allstubs_matched_TF;
   //L1Mu
   Float_t bestdRGmtCand;
   Float_t L1Mu_pt, L1Mu_eta, L1Mu_phi, L1Mu_quality, L1Mu_bx;
   UInt_t L1Mu_charge;
-  Float_t L1Mu_me0_eta, L1Mu_me0_phi, L1Mu_me0_dPhi, L1Mu_me0_dR;
+  Float_t L1Mu_me0_eta, L1Mu_me0_phi, L1Mu_me0_dPhi, L1Mu_me0_dR, L1Mu_me0_st1_dphi, L1Mu_me0_st2_eta, L1Mu_me0_st2_phi;
+  Bool_t L1Mu_me0_st1_isEven;
 
   Int_t has_l1Extra;
   Float_t l1Extra_pt;
@@ -405,8 +410,6 @@ struct MyTrackEff
   Int_t npar_L1;
   Float_t pt_position_sh, pt_direction_sh;
   Float_t pt_position, pt_direction_gemcsc, pt_direction_gemcsc_central, pt_direction_xfactor;
-  Float_t pt_direction_xfactor_smear0, pt_direction_xfactor_smear1,pt_direction_xfactor_smear2,pt_direction_xfactor_smear3;
-  Float_t pt_direction_xfactor_L1_1,pt_direction_xfactor_L1_2;
   Float_t pt_position_smeared, pt_direction_gemcsc_smeared;
   Float_t pt_position_fit;
   Int_t npar;
@@ -593,6 +596,12 @@ void MyTrackEff::init()
   perp_lct_even = -1;
   fitperp_lct_odd = -1;
   fitperp_lct_even = -1;
+  me0_st1_dphi_odd = -9;
+  me0_st1_dphi_even = -9;
+  me0_st1_isEven_odd = false;
+  me0_st1_isEven_even = false;
+
+
 
   wiregroup_odd = -1;
   wiregroup_even =-1;
@@ -767,7 +776,7 @@ void MyTrackEff::init()
   nstubs = 0;
   deltaR = 10;
   lctdphi12 = -99;
-
+  /*
   eta_propagated_ME1 = -9;
   eta_propagated_ME2 = -9;
   eta_propagated_ME3 = -9;
@@ -791,6 +800,7 @@ void MyTrackEff::init()
   phi_interStat23 = -9;
   eta_interStat13 = -9;
   phi_interStat13 = -9;
+  */
 
   allstubs_matched_TF = false;
 
@@ -803,8 +813,13 @@ void MyTrackEff::init()
   L1Mu_charge = -99;
   L1Mu_me0_eta = -9;
   L1Mu_me0_phi = -9;
+  L1Mu_me0_st2_eta = -9;
+  L1Mu_me0_st2_phi = -9;
   L1Mu_me0_dPhi = -9;
   L1Mu_me0_dR = 10;
+  L1Mu_me0_st1_dphi = -9;
+  L1Mu_me0_st1_isEven = false;
+
 
   has_l1Extra = 0;
   l1Extra_pt = -99;
@@ -849,13 +864,6 @@ void MyTrackEff::init()
   pt_direction_gemcsc = -1;
   pt_direction_sh=-1;
   pt_direction_gemcsc_smeared=-1;
-  pt_direction_xfactor = -1;
-  pt_direction_xfactor_smear0 = -1;
-  pt_direction_xfactor_smear1 = -1;
-  pt_direction_xfactor_smear2 = -1;
-  pt_direction_xfactor_smear3 = -1;
-  pt_direction_xfactor_L1_1 = -1;
-  pt_direction_xfactor_L1_2 = -1;
   hasSt1St2St3=false;
   hasSt3orSt4_sh=false;
 }
@@ -1034,6 +1042,10 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("nHits_lct_even", &nHits_lct_even);
   t->Branch("dR_sim_lct_odd", &dR_sim_lct_odd);
   t->Branch("dR_sim_lct_even", &dR_sim_lct_even);
+  t->Branch("me0_st1_dphi_odd", &me0_st1_dphi_odd);
+  t->Branch("me0_st1_dphi_even", &me0_st1_dphi_even);
+  t->Branch("me0_st1_isEven_odd", &me0_st1_isEven_odd);
+  t->Branch("me0_st1_isEven_even", &me0_st1_isEven_even);
   t->Branch("passdphi_odd", &passdphi_odd);
   t->Branch("passdphi_even", &passdphi_even);
 
@@ -1210,6 +1222,7 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("deltaR",&deltaR);
   t->Branch("lctdphi12",&lctdphi12);
 
+  /*
   t->Branch("eta_propagated_ME1",&eta_propagated_ME1);
   t->Branch("eta_propagated_ME2",&eta_propagated_ME2);
   t->Branch("eta_propagated_ME3",&eta_propagated_ME3);
@@ -1233,6 +1246,7 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("phi_interStat23",&phi_interStat23);
   t->Branch("eta_interStat13",&eta_interStat13);
   t->Branch("phi_interStat13",&phi_interStat13);
+  */
 
   t->Branch("allstubs_matched_TF",&allstubs_matched_TF);
 
@@ -1245,8 +1259,12 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("L1Mu_charge", &L1Mu_charge);
   t->Branch("L1Mu_me0_eta", &L1Mu_me0_eta);
   t->Branch("L1Mu_me0_phi", &L1Mu_me0_phi);
+  t->Branch("L1Mu_me0_st2_eta", &L1Mu_me0_st2_eta);
+  t->Branch("L1Mu_me0_st2_phi", &L1Mu_me0_st2_phi);
   t->Branch("L1Mu_me0_dPhi", &L1Mu_me0_dPhi);
   t->Branch("L1Mu_me0_dR", &L1Mu_me0_dR);
+  t->Branch("L1Mu_me0_st1_dphi", &L1Mu_me0_st1_dphi);
+  t->Branch("L1Mu_me0_st1_isEven", &L1Mu_me0_st1_isEven);
 
   t->Branch("has_l1Extra", &has_l1Extra);
   t->Branch("l1Extra_pt", &l1Extra_pt);
@@ -1292,13 +1310,6 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("pt_position_fit", &pt_position_fit);
   t->Branch("pt_direction_sh", &pt_direction_sh);
   t->Branch("pt_direction_gemcsc", &pt_direction_gemcsc);
-  t->Branch("pt_direction_xfactor", &pt_direction_xfactor);
-  t->Branch("pt_direction_xfactor_smear0", &pt_direction_xfactor_smear0);
-  t->Branch("pt_direction_xfactor_smear1", &pt_direction_xfactor_smear1);
-  t->Branch("pt_direction_xfactor_smear2", &pt_direction_xfactor_smear2);
-  t->Branch("pt_direction_xfactor_smear3", &pt_direction_xfactor_smear3);
-  t->Branch("pt_direction_xfactor_L1_1", &pt_direction_xfactor_L1_1);
-  t->Branch("pt_direction_xfactor_L1_2", &pt_direction_xfactor_L1_2);
   t->Branch("pt_direction_gemcsc_smeared", &pt_direction_gemcsc_smeared);
   t->Branch("hasSt1St2St3", &hasSt1St2St3);
   t->Branch("hasSt3orSt4_sh", &hasSt3orSt4_sh);
@@ -2935,8 +2946,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     bool odd(id.chamber()%2 == 1);
     GlobalPoint gp(match_me0rh.globalPoint(me0Segment));
     GlobalPoint gp_propagated(match_me0rh.propagateToZ(AVERAGE_ME0_Z*id.region()));
-    GlobalPoint gp_ME0_st2(match_me0rh.propagateFromME0ToCSC(me0Segment, 2, odd)); 
+    GlobalPoint gp_ME0_st2(match_me0rh.propagateFromME0ToCSC(me0Segment, t.momentum().pt(), 2, odd)); 
     float dR = deltaR(float(gp.eta()), float(gp.phi()), float(gp_propagated.eta()), float(gp_propagated.phi()));
+    std::cout <<"Sim Pt "<< t.momentum().pt() <<" gp_ME0_st2 "<<  gp_ME0_st2 <<" eta "<< gp_ME0_st2.eta() <<" phi  "<< gp_ME0_st2.phi() << std::endl;
     if (odd) etrk_[ME0].chamber_lct_odd = id.chamber();
     else etrk_[ME0].chamber_lct_even = id.chamber();
     if (odd) etrk_[ME0].has_lct |= 1;
@@ -2960,6 +2972,14 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       etrk_[ME0].nHits_lct_odd = nRecHits;
       etrk_[ME0].chamber_lct_odd = id.chamber() ;
       etrk_[ME0].dR_sim_lct_odd = dR;
+      //deltaPhi(lct, me0)
+      if (fabs(etrk_[1].phi_lct_even) < 4 and abs(etrk_[1].chamber_lct_even/2- id.chamber()) <= 1){
+	  etrk_[ME0].me0_st1_dphi_odd = deltaPhi(etrk_[1].phi_lct_even, gp.phi());
+	  etrk_[ME0].me0_st1_isEven_odd = true;
+      }else if (fabs(etrk_[1].phi_lct_odd) < 4 and abs(etrk_[1].chamber_lct_odd/2- id.chamber()) <= 1){
+	  etrk_[ME0].me0_st1_dphi_odd = deltaPhi(etrk_[1].phi_lct_odd, gp.phi());
+	  etrk_[ME0].me0_st1_isEven_odd = false;
+      }else etrk_[ME0].me0_st1_dphi_odd = -9;
     }
     else
     {
@@ -2977,6 +2997,13 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       etrk_[ME0].bx_lct_even = time;
       etrk_[ME0].chamber_lct_even = id.chamber() ;
       etrk_[ME0].dR_sim_lct_even = dR;
+      if (fabs(etrk_[1].phi_lct_even) < 4 and abs(etrk_[1].chamber_lct_even/2- id.chamber()) <= 1){
+	  etrk_[ME0].me0_st1_dphi_even = deltaPhi(etrk_[1].phi_lct_even, gp.phi());
+	  etrk_[ME0].me0_st1_isEven_even = true;
+      }else if (fabs(etrk_[1].phi_lct_odd) < 4 and abs(etrk_[1].chamber_lct_odd/2- id.chamber()) <= 1){
+	  etrk_[ME0].me0_st1_dphi_even = deltaPhi(etrk_[1].phi_lct_odd, gp.phi());
+	  etrk_[ME0].me0_st1_isEven_even = false;
+      }else etrk_[ME0].me0_st1_dphi_even = -9;
     }
   }
 
@@ -3597,14 +3624,25 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     float tfphi = bestGmtCand->tftrack()->phi();
     float mindR = 10.0;
     for (auto me0Segment : allmatchedSegments){
-      GlobalPoint gp_ME0_st2(match_me0rh.propagateFromME0ToCSC(me0Segment, 2, me0Segment.me0DetId().chamber()%2==1)); 
+      GlobalPoint gp_ME0_st2(match_me0rh.propagateFromME0ToCSC(me0Segment, etrk_[0].L1Mu_pt, 2, me0Segment.me0DetId().chamber()%2==1)); 
+      GlobalPoint gp(match_me0rh.globalPoint(me0Segment));
       float dR = deltaR(tfeta, tfphi, float(gp_ME0_st2.eta()), float(gp_ME0_st2.phi()));
       std::cout <<"L1Mu eta "<< tfeta <<" phi "<< tfphi <<" propagated ME0 eta "<< gp_ME0_st2.eta() <<" phi "<< gp_ME0_st2.phi() << std::endl;
       if (dR < mindR){
 	  mindR = dR;
+	  int chamber = me0Segment.me0DetId().chamber();
+	  if (fabs(etrk_[1].phi_lct_even) < 4 and abs(etrk_[1].chamber_lct_even/2-chamber) <= 1){
+	      etrk_[0].L1Mu_me0_st1_dphi = deltaPhi(etrk_[1].phi_lct_even, gp.phi());
+	      etrk_[0].L1Mu_me0_st1_isEven = true;
+	  }else if (fabs(etrk_[1].phi_lct_odd) < 4 and abs(etrk_[1].chamber_lct_odd/2-chamber) <= 1){
+	      etrk_[0].L1Mu_me0_st1_dphi = deltaPhi(etrk_[1].phi_lct_odd, gp.phi());
+	      etrk_[0].L1Mu_me0_st1_isEven = false;
+	  }else etrk_[0].L1Mu_me0_st1_dphi = -9;
 	  float dPhi = match_me0rh.me0DeltaPhi(me0Segment);
-	  etrk_[0].L1Mu_me0_eta = gp_ME0_st2.eta();
-	  etrk_[0].L1Mu_me0_phi = gp_ME0_st2.phi();
+	  etrk_[0].L1Mu_me0_st2_eta = gp_ME0_st2.eta();
+	  etrk_[0].L1Mu_me0_st2_phi = gp_ME0_st2.phi();
+	  etrk_[0].L1Mu_me0_eta = gp.eta();
+	  etrk_[0].L1Mu_me0_phi = gp.phi();
 	  etrk_[0].L1Mu_me0_dR = dR;
 	  etrk_[0].L1Mu_me0_dPhi = dPhi;
       }
@@ -4200,13 +4238,13 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
 	  else std::cout << "stub in TF can NOT be matched to simtrack" << std::endl;
 
 	   }*/
-     std::cout << " propagated information " << std::endl;
+     //std::cout << " propagated information " << std::endl;
     // std::cout << " eta " << etrk_[0].eta_propagated_ME1 << " phi " << etrk_[0].phi_propagated_ME1 << std::endl;
     // std::cout << " eta " << etrk_[0].eta_propagated_ME2 << " phi " << etrk_[0].phi_propagated_ME2 << std::endl;
     // std::cout << " eta " << etrk_[0].eta_propagated_ME3 << " phi " << etrk_[0].phi_propagated_ME3 << std::endl;
-     std::cout << " propagated phi in  ME1 " << etrk_[0].phi_propagated_ME1 <<" stub phi in ME1 " <<etrk_[0].phi_ME1_TF << std::endl;
-     std::cout << " propagated phi in  ME2 " << etrk_[0].phi_interStat12 <<" stub phi in ME2 " << etrk_[0].phi_ME2_TF << std::endl;
-     std::cout << " propagated phi in  ME3 " << etrk_[0].phi_interStat23 <<" stub phi in ME3 " << etrk_[0].phi_ME3_TF << std::endl;
+     //std::cout << " propagated phi in  ME1 " << etrk_[0].phi_propagated_ME1 <<" stub phi in ME1 " <<etrk_[0].phi_ME1_TF << std::endl;
+     //std::cout << " propagated phi in  ME2 " << etrk_[0].phi_interStat12 <<" stub phi in ME2 " << etrk_[0].phi_ME2_TF << std::endl;
+     ///std::cout << " propagated phi in  ME3 " << etrk_[0].phi_interStat23 <<" stub phi in ME3 " << etrk_[0].phi_ME3_TF << std::endl;
 
 
   }

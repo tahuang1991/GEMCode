@@ -154,12 +154,14 @@ BaseMatcher::propagateToZ(GlobalPoint &inner_point, GlobalVector &inner_vec, flo
   Plane::PlanePointer my_plane(Plane::build(pos, rot));
 
   FreeTrajectoryState state_start(inner_point, inner_vec, trk_.charge(), &*magfield_);
+  //std::cout <<"state_start  position "<< state_start.position()<<" momentum "<< state_start.momentum()<<" charge "<<state_start.charge() << std::endl;
+  if (state_start.hasError()) std::cout <<"state_start has error  "<< std::endl;
 
   TrajectoryStateOnSurface tsos(propagator_->propagate(state_start, *my_plane));
+  if (!tsos.isValid()) std::cout <<" tsos not valid "<< std::endl;
   if (!tsos.isValid()) tsos = propagatorOpposite_->propagate(state_start, *my_plane);
   //broken here  when propagating ME0
   //std::cout <<"propagateToZ GP "<< tsos.globalPosition() <<" eta "<< tsos.globalPosition().eta()<<" phi "<< tsos.globalPosition().phi()<< std::endl;
-  //if (!tsos.isValid()) std::cout <<" tsos not valid "<< std::endl;
 
   if (tsos.isValid()) return tsos.globalPosition();
   return GlobalPoint();
@@ -216,7 +218,7 @@ BaseMatcher::propagatedPositionSt2() const
 
 
 GlobalPoint
-BaseMatcher::propagateFromME0ToCSC(ME0Segment segment, int st, bool evenodd) const
+BaseMatcher::propagateFromME0ToCSC(ME0Segment segment,float pt, int st, bool evenodd) const
 {
   int chamber = (evenodd? 1:2);
   int ring = 1;
@@ -232,8 +234,10 @@ BaseMatcher::propagateFromME0ToCSC(ME0Segment segment, int st, bool evenodd) con
   LocalPoint lp(segment.localPosition());
   GlobalPoint SegPos(me0Chamber->toGlobal(lp));
   LocalVector lv(segment.localDirection());
-  GlobalVector SegVec(me0Chamber->toGlobal(lv));
-  std::cout <<"CSC z "<< propagate_z <<" ME0 GP "<< SegPos << " GV "<< SegVec << std::endl;
+  GlobalVector SegDir(me0Chamber->toGlobal(lv));
+  float ratio = pt/SegDir.perp();
+  GlobalVector SegVec(SegDir.x()*ratio, SegDir.y()*ratio, SegDir.z()*ratio);
+  //std::cout <<"CSC z "<< propagate_z <<" ME0 GP "<< SegPos << " GV "<< SegVec <<" GV.mag "<< SegVec.mag() <<" ratio "<< ratio << std::endl;
   return propagateToZ(SegPos, SegVec, propagate_z);
 
 }

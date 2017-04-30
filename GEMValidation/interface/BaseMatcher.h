@@ -84,7 +84,7 @@ public:
   GlobalPoint propagatedPositionGEM() const;
 
   /// propaate from ME0 to CSC
-  GlobalPoint propagateFromME0ToCSC(ME0Segment segment, int st, bool evenodd) const;
+  GlobalPoint propagateFromME0ToCSC(ME0Segment segment, float pt, int st, bool evenodd) const;
 
   /// geometry
   void setGEMGeometry(const GEMGeometry *geom) {gemGeometry_ = geom;}
