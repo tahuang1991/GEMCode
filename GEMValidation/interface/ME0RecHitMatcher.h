@@ -90,6 +90,7 @@ private:
   //ME0Segment bestMe0Seg_;
   std::map<unsigned int, ME0Segment> superChamber_to_bestME0Segment_;
 
+  std::map<unsigned int, ME0RecHitContainer> layer_to_me0RecHit_;
   std::map<unsigned int, ME0RecHitContainer> chamber_to_me0RecHit_;
   std::map<unsigned int, ME0RecHitContainer> superChamber_to_me0RecHit_;
   std::map<unsigned int, ME0SegmentContainer> superChamber_to_me0Segment_;

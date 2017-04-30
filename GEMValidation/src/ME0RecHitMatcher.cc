@@ -66,7 +66,10 @@ ME0RecHitMatcher::matchME0RecHitsToSimTrack(const ME0RecHitCollection& rechits)
       // this rechit was matched to a matching digi
       if (match) {
         if (verboseME0RecHit_) cout << "\t...was matched!" << endl;
-        chamber_to_me0RecHit_[id].push_back(*rr);
+	layer_to_me0RecHit_[id].push_back(*rr);
+	ME0DetId ch_id(p_id.region(), p_id.layer(), p_id.chamber(), 0);
+	if (verboseME0RecHit_) cout <<"layerid "<< p_id <<" chamberid "<< ch_id <<" superId "<< p_id.chamberId() << endl;
+        chamber_to_me0RecHit_[ch_id.rawId()].push_back(*rr);
         superChamber_to_me0RecHit_[p_id.chamberId().rawId()].push_back(*rr);
       }
     }
@@ -88,11 +91,12 @@ ME0RecHitMatcher::matchME0SegmentsToSimTrack(const ME0SegmentCollection& me0Segm
     auto me0_rechits(me0RecHitsInSuperChamber(id));
     if (verboseME0Segment_) {
       cout<<"hit me0 rechits" <<endl;
-      for (auto rh: me0_rechits) cout << "\t"<< rh << endl;
+      for (auto rh: me0_rechits) cout << "\t"<< rh.me0Id() <<" "<< rh << endl;
       cout<<endl;
     }
 
     // get the segments
+    bool FoundME0Segment = false;
     auto segments_in_det = me0Segments.get(p_id);
     for (auto d = segments_in_det.first; d != segments_in_det.second; ++d) {
       if (verboseME0Segment_) cout<<"segment "<<p_id<<" "<<*d  <<endl;
@@ -110,18 +114,19 @@ ME0RecHitMatcher::matchME0SegmentsToSimTrack(const ME0SegmentCollection& me0Segm
        	  ++rechitsFound;
         }
       }
-      if ((rechitsFound<minNHitsSegment_ and nLayersWithRecHitsInSuperChamber(id)>= minNHitsSegment_)){
-	  cout<<"Matched nlayer  "<< nLayersWithRecHitsInSuperChamber(id) <<" hit me0 rechits" <<endl;
-	  for (auto rh: me0_rechits) cout << "\t"<< rh << endl;
-	  cout <<"this Segment "<< p_id<<" "<<*d  <<endl;
-	  cout<<endl;
-      }
       if (rechitsFound<minNHitsSegment_) continue;
+      FoundME0Segment  = true;
       if (verboseME0Segment_) {
         cout << "Found " << rechitsFound << " rechits out of " << me0RecHitsInSuperChamber(id).size() << endl;
         cout << "\t...was matched!" << endl;
       }
       superChamber_to_me0Segment_[ p_id.rawId() ].push_back(*d);
+    }
+    if ((not(FoundME0Segment) and nLayersWithRecHitsInSuperChamber(id)>= minNHitsSegment_)){
+	  cout <<"Failed to find Segment "<< endl;
+	  cout<<"Matched nlayer  "<< nLayersWithRecHitsInSuperChamber(id) <<" hit me0 rechits" <<endl;
+	  for (auto rh: me0_rechits) cout << "\t"<< rh.me0Id() <<" "<< rh << endl;
+	  cout<<endl;
     }
   }
   for (auto& p : superChamber_to_me0Segment_)

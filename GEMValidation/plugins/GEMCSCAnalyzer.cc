@@ -2936,6 +2936,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   for (auto d: me0RecHitsSuperChamber){
     const ME0DetId id(d);
     int nlayers = match_me0rh.nLayersWithRecHitsInSuperChamber(d);
+    std::cout <<"ME0 Detid "<< id<<" nlayers with rechits " << nlayers << std::endl; 
     if (nlayers < minNHitsChamberME0RecHit_) continue;
     bool odd(id.chamber()%2 == 1);
     if (odd) etrk_[ME0].has_rechits |= 1;
