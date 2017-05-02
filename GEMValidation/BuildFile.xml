@@ -37,7 +37,6 @@
 <use   name="CommonTools/UtilAlgos"/>
 <use   name="Utilities/General"/>
 <use   name="L1Trigger/CSCCommonTrigger"/>
-<use   name="L1Trigger/CSCTrackFinder"/>
 <use   name="L1Trigger/CSCTriggerPrimitives"/>
 <use   name="L1Trigger/DTUtilities"/>
 <use   name="L1Trigger/DTBti"/>
