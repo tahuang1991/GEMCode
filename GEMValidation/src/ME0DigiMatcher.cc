@@ -49,16 +49,16 @@ ME0DigiMatcher::matchPreRecoDigisToSimTrack(const ME0DigiPreRecoCollection& digi
 
       for (const auto& hit: simhit_matcher_->hitsInDetId(id)){
 	if (verboseDigi_)
-	    cout << "\tCandidate ME0 simhit " << hit << " " << hit.localPosition().x() << " " << hit.localPosition().y() << " pdgid " << hit.particleType() << endl;
+	    cout << "\tCandidate ME0 simhit " << hit << " local (x,y)= " << hit.localPosition().x() << " " << hit.localPosition().y()<< " tof "<< hit.tof() << " pdgid " << hit.particleType() << endl;
         // check that the digi position matches a simhit position (within 5 sigma)
         //if (d->x() - 5 * d->ex() < hit.localPosition().x() and
         //    d->x() + 5 * d->ex() > hit.localPosition().x() and
         //    d->y() - 5 * d->ey() < hit.localPosition().y() and
         //    d->y() + 5 * d->ey() > hit.localPosition().y() ) {
-	if (std::fabs(d->tof() - hit.tof()) > 0.10) continue;
+	if (std::fabs(d->tof() - hit.tof()) > 50) continue;
         // check that the digi position matches a simhit position (within 3 sigma)
         if (std::fabs(d->x() - hit.localPosition().x()) < .5  and
-            std::fabs(d->y() - hit.localPosition().y()) < .5 ){
+            std::fabs(d->y() - hit.localPosition().y()) < 2.5*6 ){
           match = true;
           cout << "\t...matches this digi!" << endl;
           break;
