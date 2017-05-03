@@ -40,25 +40,27 @@ ME0DigiMatcher::matchPreRecoDigisToSimTrack(const ME0DigiPreRecoCollection& digi
       if (d->tof() < minBXME0_ || d->tof() > maxBXME0_) continue;
 
       // check that the pdgid is 13 for muon!
-      if (std::abs(d->pdgid()) != 13) continue;
+      if (std::abs(d->pdgid()) != 13 and std::abs(d->pdgid()) != 11) continue;
 
-      if (verboseDigi_) cout<<"gdigi "<<p_id<<" "<<*d<<endl;
+      if (verboseDigi_) cout<<"ME0 digi "<<p_id<<" "<<*d<<endl;
 
       bool match = false;
 
       for (const auto& hit: simhit_matcher_->hitsInDetId(id)){
-        // check that the digi position matches a simhit position (within 3 sigma)
-        if (d->x() - 3 * d->ex() < hit.localPosition().x() and
-            d->x() + 3 * d->ex() > hit.localPosition().x() and
-            d->y() - 3 * d->ey() < hit.localPosition().y() and
-            d->y() + 3 * d->ey() > hit.localPosition().y() ) {
+        cout << "\tCandidate ME0 simhit " << hit << " " << hit.localPosition().x() << " " << hit.localPosition().y() << " pdgid " << hit.particleType() << endl;
+        // check that the digi position matches a simhit position (within 5 sigma)
+        if (d->x() - 5 * d->ex() < hit.localPosition().x() and
+            d->x() + 5 * d->ex() > hit.localPosition().x() and
+            d->y() - 5 * d->ey() < hit.localPosition().y() and
+            d->y() + 5 * d->ey() > hit.localPosition().y() ) {
           match = true;
+          cout << "\t...matches this digi!" << endl;
           break;
         }
       }
 
       if (match) {
-        if (verboseDigi_) cout<<"oki"<<endl;
+        if (verboseDigi_) cout<<"-->Digi was matched"<<endl;
         detid_to_digis_[id].push_back(*d);
         chamber_to_digis_[ p_id.layerId().rawId() ].push_back(*d);
         superchamber_to_digis_[ p_id.chamberId().rawId() ].push_back(*d);

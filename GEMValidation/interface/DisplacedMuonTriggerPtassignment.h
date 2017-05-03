@@ -42,12 +42,12 @@
 #include "DataFormats/GEMDigi/interface/GEMPadDigiCollection.h"
 #include "L1Trigger/DTTrackFinder/interface/L1MuDTTrack.h"
 #include "L1Trigger/DTTrackFinder/src/L1MuDTTrackSegPhi.h"
-#include "DataFormats/L1CSCTrackFinder/interface/L1CSCTrackCollection.h"
+#include "DataFormats/L1TMuon/interface/EMTFTrack.h"
 
-#include "CondFormats/L1TObjects/interface/L1MuTriggerScales.h"
-#include "CondFormats/L1TObjects/interface/L1MuTriggerPtScale.h"
-#include "CondFormats/DataRecord/interface/L1MuTriggerPtScaleRcd.h"
-#include "CondFormats/DataRecord/interface/L1MuTriggerScalesRcd.h"
+/* #include "CondFormats/L1TObjects/interface/L1MuTriggerScales.h" */
+/* #include "CondFormats/L1TObjects/interface/L1MuTriggerPtScale.h" */
+/* #include "CondFormats/DataRecord/interface/L1MuTriggerPtScaleRcd.h" */
+/* #include "CondFormats/DataRecord/interface/L1MuTriggerScalesRcd.h" */
 
 #include "GEMCode/GEMValidation/interface/Helpers.h"
 
@@ -100,8 +100,8 @@ public:
                                    const edm::Event& iEvent);
 
   // starting from a CSC TF Track and the CSC LCT collection
-  DisplacedMuonTriggerPtassignment(const L1CSCTrack&,
-                                   const L1CSCTrackCollection&,
+  DisplacedMuonTriggerPtassignment(const l1t::EMTFTrack&,
+                                   const l1t::EMTFTrackCollection&,
                                    const CSCCorrelatedLCTDigiCollection&,
                                    bool doStubRecovery,
                                    bool matchGEMPads,
@@ -187,9 +187,8 @@ public:
 
   //pad/stub recovery functions in case we are not using simTrack matched objects
   double phiL1DTTrack(const L1MuDTTrack& track);
-  double phiL1CSCTrack(const csc::L1Track& track);
 
-  bool stubInCSCTFTracks(const CSCCorrelatedLCTDigi& candidateStub, const L1CSCTrackCollection& l1Tracks) const;
+  bool stubInCSCTFTracks(const CSCCorrelatedLCTDigi& candidateStub, const l1t::EMTFTrackCollection& l1Tracks) const;
   bool stubInDTTFTracks(const L1MuDTTrackSegPhi& candidateStub, const L1MuDTTrackCollection& l1Tracks) const;
   CSCCorrelatedLCTDigiId pickBestMatchingStub(float xref, float yref,
                                               const CSCCorrelatedLCTDigiId& oldStub,
@@ -226,7 +225,7 @@ public:
   // setup functions
   void initVariables();
   void setupGeometry(const edm::EventSetup& es);
-  void setupTriggerScales(const edm::EventSetup& es);
+  /* void setupTriggerScales(const edm::EventSetup& es); */
 
   // geometry members
   bool hasGEMGeometry_;
@@ -260,14 +259,14 @@ public:
   edm::Handle< CSCComparatorDigiCollection > hCSCComparators;
 
   // trigger scale
-  bool hasMuScales_;
-  bool hasMuPtScale_;
+  /* bool hasMuScales_; */
+  /* bool hasMuPtScale_; */
 
-  unsigned long long  muScalesCacheID_;
-  unsigned long long  muPtScaleCacheID_;
+  /* unsigned long long  muScalesCacheID_; */
+  /* unsigned long long  muPtScaleCacheID_; */
 
-  edm::ESHandle< L1MuTriggerScales > muScales_;
-  edm::ESHandle< L1MuTriggerPtScale > muPtScale_;
+  /* edm::ESHandle< L1MuTriggerScales > muScales_; */
+  /* edm::ESHandle< L1MuTriggerPtScale > muPtScale_; */
 
 
   void globalPositionOfLCT(const CSCCorrelatedLCTDigi stub, CSCDetId chid);

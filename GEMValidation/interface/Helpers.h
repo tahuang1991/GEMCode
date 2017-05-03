@@ -175,7 +175,7 @@ getByToken(const edm::EDGetTokenT<PROD>& tag, edm::Handle<PROD>& result, const e
     //    if (verbose) std::cout << tag << " is a valid inputTag " << std::endl;
     inputTagIsNotValid = false;
   } else {
-    //if (verbose) std::cout << tag << " is an invalid inputTag " << std::endl;
+    //    if (verbose) std::cout << tag << " is an invalid inputTag " << std::endl;
   }
   return (!inputTagIsNotValid);
 }

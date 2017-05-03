@@ -4,6 +4,8 @@
 //#include "GEMCode/GEMValidation/interface/PtassignmentHelper.h"
 #include "GEMCode/GEMValidation/interface/TFTrack.h"
 #include "DataFormats/L1TMuon/interface/RegionalMuonCand.h"
+#include "DataFormats/L1GlobalMuonTrigger/interface/L1MuRegionalCand.h"
+
 
 class TFCand
 {
@@ -16,9 +18,9 @@ class TFCand
   /// destructor
   ~TFCand();
 
-  void init(CSCTFPtLUT* ptLUT, 
-	    edm::ESHandle< L1MuTriggerScales > &muScales, 
- 	    edm::ESHandle< L1MuTriggerPtScale > &muPtScale); 
+  /* void init(CSCTFPtLUT* ptLUT, */
+	/*     edm::ESHandle< L1MuTriggerScales > &muScales, */
+ 	/*     edm::ESHandle< L1MuTriggerPtScale > &muPtScale); */
 
   void setDR(double);
   void setGlobalPhi(double x) { phi_ = x ; }
@@ -42,7 +44,7 @@ class TFCand
   double dr() const {return dr_;}
   int tracktype() const {return trackType_; }
   unsigned int nStubs() const { return  nTFStubs; }
-  
+
  private:
 
   const L1MuRegionalCand* l1Cand_;
@@ -57,7 +59,7 @@ class TFCand
   int quality_;
   int charge_;
   int bx_;
-  int trackType_; 
+  int trackType_;
   unsigned int nTFStubs;
 };
 

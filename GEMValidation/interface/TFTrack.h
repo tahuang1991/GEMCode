@@ -16,17 +16,17 @@
 
 #include "DataFormats/L1Trigger/interface/L1MuonParticleFwd.h"
 #include "DataFormats/L1Trigger/interface/L1MuonParticle.h"
-#include "L1Trigger/CSCTrackFinder/interface/CSCTFSectorProcessor.h"
-#include "L1Trigger/CSCTrackFinder/interface/CSCSectorReceiverLUT.h"
-#include "L1Trigger/CSCTrackFinder/interface/CSCTrackFinderDataTypes.h"
-#include "DataFormats/L1CSCTrackFinder/interface/L1CSCTrackCollection.h"
+/* #include "L1Trigger/CSCTrackFinder/interface/CSCTFSectorProcessor.h" */
+/* #include "L1Trigger/CSCTrackFinder/interface/CSCSectorReceiverLUT.h" */
+/* #include "L1Trigger/CSCTrackFinder/interface/CSCTrackFinderDataTypes.h" */
+/* #include "DataFormats/L1CSCTrackFinder/interface/L1CSCTrackCollection.h" */
 #include "DataFormats/L1TMuon/interface/EMTFTrack.h"
 #include "DataFormats/L1TMuon/interface/EMTFHit.h"
 
 #include "DataFormats/CSCDigi/interface/CSCCorrelatedLCTDigiCollection.h"
 
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
- 
+
 #include "DataFormats/Math/interface/normalizedPhi.h"
 #include "DataFormats/Math/interface/deltaPhi.h"
 #include "DataFormats/Math/interface/deltaR.h"
@@ -42,55 +42,57 @@ class TFTrack
 {
  public:
   /// constructor
-  TFTrack(const csc::L1Track* t, const CSCCorrelatedLCTDigiCollection*);
+  /* TFTrack(const csc::L1Track* t, const CSCCorrelatedLCTDigiCollection*); */
 
   TFTrack(const l1t::EMTFTrack *t);
   /// copy constructor
   TFTrack(const TFTrack&);
   /// destructor
-  ~TFTrack();  
+  ~TFTrack();
 
   //l1t::tftype = enum{bmtf, omtf_neg, omtf_pos, emtf_neg, emtf_pos};
   enum {CSCTF_Track, EMTF_Track, OMTF_Track};
-  void init(edm::ESHandle< L1MuTriggerScales > &muScales,
-	    edm::ESHandle< L1MuTriggerPtScale > &muPtScale);
-  
+  /* void init(edm::ESHandle< L1MuTriggerScales > &muScales, */
+	/*     edm::ESHandle< L1MuTriggerPtScale > &muPtScale); */
+
   void setDR(double dr);
 
   /// L1 track
-  const csc::L1Track* getL1Track() const {return l1track_;}
+  /* const csc::L1Track* getL1Track() const {return l1track_;} */
   /// collection of trigger digis
-  std::vector<const CSCCorrelatedLCTDigi*> getTriggerDigis() const {return triggerDigis_;} 
+  std::vector<const CSCCorrelatedLCTDigi*> getTriggerDigis() const {return triggerDigis_;}
   /// collection of MPC LCTs
   std::vector<CSCDetId> getTriggerDigisIds() const {return triggerIds_;}
   std::vector<std::pair<float, float>> getTriggerEtaPhis() {return triggerEtaPhis_;}
-  std::vector<csctf::TrackStub> getTriggerStubs() const {return triggerStubs_;}
+  //std::vector<csctf::TrackStub> getTriggerStubs() const {return triggerStubs_;}
   std::vector<matching::Digi*> getTriggerMPLCTs() const {return mplcts_;}
   std::vector<CSCDetId> getChamberIds() const {return ids_;}
- 
+
   unsigned int digiInME(int st, int ring) const;
 
   void addTriggerDigi(const CSCCorrelatedLCTDigi*);
   void addTriggerDigiId(const CSCDetId&);
   void addTriggerEtaPhi(const std::pair<float,float>&);
-  void addTriggerStub(const csctf::TrackStub&);
+  /* void addTriggerStub(const csctf::TrackStub&); */
 
   int tracktype() const { return trackType_; }
+  unsigned int nStubs() const {return l1track_->NumHits();}
   /// how many stubs?
-  unsigned int nStubs(bool mb1, bool me1, bool me2, bool me3, bool me4) const;
-  unsigned int nStubs() const {return nstubs;}
-  /// how many stubs in CSC? 
-  unsigned int nStubsCSCOk(bool me1, bool me2, bool me3, bool me4) const;
-  /// has stub in muon barrel/endcap
-  bool hasStubStation(int wheel) const; 
-  /// has stub in muon barrel?
-  bool hasStubBarrel() const;  
-  /// has stub in muon endcap?
+  /* unsigned int nStubs(bool mb1, bool me1, bool me2, bool me3, bool me4) const; */
+  /* unsigned int nStubs() const {return nstubs;} */
+  /* /// how many stubs in CSC? */
+  /* unsigned int nStubsCSCOk(bool me1, bool me2, bool me3, bool me4) const; */
+  /* /// has stub in muon barrel/endcap */
+  /* bool hasStubStation(int wheel) const; */
+  /* /// has stub in muon barrel? */
+  /* bool hasStubBarrel() const; */
+  /* /// has stub in muon endcap? */
   bool hasStubEndcap(int station) const;
-  /// matches CSC stubs?
-  bool hasStubCSCOk(int st) const;
-  /// has stubs that pass match?
-  bool passStubsMatch(double eta, int minLowHStubs, int minMidHStubs, int minHighHStubs) const;
+  /* /// matches CSC stubs? */
+  /* /\* bool hasStubCSCOk(int st) const; *\/ */
+  /* /// has stubs that pass match? */
+  /* bool passStubsMatch(double eta, int minLowHStubs, int minMidHStubs, int minHighHStubs) const */;
+
   /// print some information
   void print();
 
@@ -116,15 +118,15 @@ class TFTrack
   std::vector<bool> deltaOk();
   bool debug() const {return debug_;}
   bool passDPhicutTFTrack(int st, float pt) const;
-   
+
  private:
   int trackType_;
-  const csc::L1Track* l1track_;
+  const l1t::EMTFTrack* l1track_;
   std::vector<const CSCCorrelatedLCTDigi*> triggerDigis_;
   const l1t::EMTFHitCollection * trackHits_; //similar to triggerDigis_ + triggerDigis_
   std::vector<CSCDetId> triggerIds_;
   std::vector<std::pair<float, float>> triggerEtaPhis_;
-  std::vector<csctf::TrackStub> triggerStubs_;
+  /* std::vector<csctf::TrackStub> triggerStubs_; */
   std::vector<matching::Digi*> mplcts_;
   std::vector<CSCDetId> ids_; // chamber ids
   unsigned phi_packed_;
@@ -132,7 +134,7 @@ class TFTrack
   unsigned pt_packed_;
   unsigned q_packed_;
   unsigned dPhi12_;
-  unsigned dPhi23_; 
+  unsigned dPhi23_;
   unsigned int chargesign_;
   int charge_;
   double phi_;
