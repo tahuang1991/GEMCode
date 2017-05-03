@@ -49,7 +49,7 @@ ME0RecHitMatcher::matchME0RecHitsToSimTrack(const ME0RecHitCollection& rechits)
     for (auto rr = rechits_in_det.first; rr != rechits_in_det.second; ++rr) {
 
       // check that the rechit is within BX range
-      if (rr->tof() < minBXME0RecHit_ || rr->tof() > maxBXME0RecHit_) continue;
+      //if (rr->tof() < minBXME0RecHit_ || rr->tof() > maxBXME0RecHit_) continue;
 
       if (verboseME0RecHit_) cout<<"rechit "<<p_id<<" "<<*rr << endl;;
 
@@ -57,8 +57,9 @@ ME0RecHitMatcher::matchME0RecHitsToSimTrack(const ME0RecHitCollection& rechits)
       bool match = false;
       ME0DigiPreRecoContainer digis = digi_matcher_->digisInDetId(id);
       for (const auto& digi: digis){
-        if (std::abs(digi.x() - rr->localPosition().x())<0.001 and
-            std::abs(digi.y() - rr->localPosition().y())<0.001 ) {
+	if (std::fabs(digi.tof() - rr->tof()) > .1) continue;
+        if (std::fabs(digi.x() - rr->localPosition().x())<0.01 and
+            std::fabs(digi.y() - rr->localPosition().y())<0.01 ) {
           match = true;
         }
       }
@@ -81,6 +82,7 @@ void
 ME0RecHitMatcher::matchME0SegmentsToSimTrack(const ME0SegmentCollection& me0Segments)
 {
   if (verboseME0Segment_) cout << "Matching simtrack to segments" << endl;
+  if (verboseME0Segment_)  dumpAllME0Segments(me0Segments);
   // fetch all chamberIds with digis
   auto chamber_ids = digi_matcher_->superChamberIds();
   if (verboseME0Segment_) cout << "Number of matched me0 segments " << chamber_ids.size() << endl;
@@ -133,6 +135,24 @@ ME0RecHitMatcher::matchME0SegmentsToSimTrack(const ME0SegmentCollection& me0Segm
     superChamber_to_bestME0Segment_[ p.first] = findbestME0Segment(p.second);
 }
 
+
+void ME0RecHitMatcher::dumpAllME0Segments(const ME0SegmentCollection& segments) const 
+{
+    cout <<"dumpt all ME0 Segments" << endl;
+    for(auto iC = segments.id_begin(); iC != segments.id_end(); ++iC){
+	auto ch_segs = segments.get(*iC);
+	for(auto iS = ch_segs.first; iS != ch_segs.second; ++iS){
+	    cout <<"ME0Detid "<< iS->me0DetId()<<" segment "<< *iS << std::endl;
+	    auto recHits(iS->recHits());
+	    cout << "\t has " << recHits.size() << " me0 rechits"<<endl;
+            for (auto& rh: recHits) {
+	       const ME0RecHit* me0rh(dynamic_cast<const ME0RecHit*>(rh));
+	       cout <<"detid "<< me0rh->me0Id()<<" rechit "<< *me0rh << endl;
+	    }
+        }
+    }
+
+}
 
 std::set<unsigned int>
 ME0RecHitMatcher::chamberIdsME0RecHit() const

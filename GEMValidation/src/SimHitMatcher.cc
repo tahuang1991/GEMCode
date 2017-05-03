@@ -55,6 +55,7 @@ SimHitMatcher::SimHitMatcher(const SimTrack& t, const SimVertex& v,
   discardEleHitsDT_ = dtSimHit_.getParameter<bool>("discardEleHits");
   runDTSimHit_ = dtSimHit_.getParameter<bool>("run");
 
+   verboseSimTrack_ = (verboseCSC_ || verboseGEM_ || verboseME0_ || verboseRPC_ || verboseDT_);
   //simInputLabel_ = conf().getUntrackedParameter<std::string>("simInputLabel", "g4SimHits");
 
   event().getByToken(simTrackInput_, sim_tracks);
@@ -151,7 +152,7 @@ SimHitMatcher::SimHitMatcher(const SimTrack& t, const SimVertex& v,
         matchME0SimHitsToSimTrack(track_ids, *me0_hits.product());
 
         if (verboseME0_) {
-          cout<<"nSimHits "<<no<<" nTrackIds "<<track_ids.size()<<" nSelectedME0SimHits "<<(*me0_hits.product()).size()<<endl;
+          cout<<"nSimHits "<<no<<" nTrackIds "<<track_ids.size()<<" ME0SimHits "<<(*me0_hits.product()).size()<<endl;
           cout << "detids ME0 " << detIdsME0().size() << endl;
 
           auto me0_ch_ids = detIdsME0();
@@ -252,6 +253,7 @@ SimHitMatcher::getIdsOfSimTrackShower(unsigned int initial_trk_id,
   for (auto& t: sim_tracks)
   {
     SimTrack last_trk = t;
+    //if (std::abs(t.type()) != 13) continue;
     bool is_child = 0;
     while (1)
     {
@@ -410,10 +412,11 @@ SimHitMatcher::matchME0SimHitsToSimTrack(std::vector<unsigned int> track_ids, co
     for (auto& h: me0_hits)
     {
       if (h.trackId() != track_id) continue;
+      if (verboseME0_) cout <<"simhit in ME0 detid "<< ME0DetId(h.detUnitId()) <<" id "<< h.particleType() <<" position x "<< h.entryPoint().x()<<" y "<< h.entryPoint().y()<< endl;
       int pdgid = h.particleType();
-      if (simMuOnlyME0_ && std::abs(pdgid) != 13) continue;
+      //if (simMuOnlyME0_ && std::abs(pdgid) != 13) continue;
       // discard electron hits in the ME0 chambers
-      if (discardEleHitsME0_ && pdgid == 11) continue;
+      if (discardEleHitsME0_ && std::abs(pdgid) == 11) continue;
 
       me0_detid_to_hits_[ h.detUnitId() ].push_back(h);
       me0_hits_.push_back(h);

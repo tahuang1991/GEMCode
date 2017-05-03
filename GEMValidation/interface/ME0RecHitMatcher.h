@@ -38,6 +38,7 @@ public:
   // superChamber detIds with ME0Segment
   std::set<unsigned int> superChamberIdsME0Segment() const;
 
+  void dumpAllME0Segments(const ME0SegmentCollection& segments) const;
   //ME0 rechits from a particular chamber or superChamber
   const ME0RecHitContainer& me0RecHitsInChamber(unsigned int) const;
   const ME0RecHitContainer& me0RecHitsInSuperChamber(unsigned int) const;

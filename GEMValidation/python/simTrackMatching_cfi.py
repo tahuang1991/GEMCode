@@ -292,7 +292,7 @@ SimTrackMatching = cms.PSet(
     ),
     ## TrackFinder tracks
     upgradeEmtfTrack = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         run = cms.bool(True),
         validInputTags = cms.InputTag("simEmtfDigis"),
         minBX = cms.int32(-1),
@@ -300,7 +300,7 @@ SimTrackMatching = cms.PSet(
         deltaR = cms.double(0.5),
     ),
     upgradeGMT = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         run = cms.bool(True),
         validInputTags = cms.InputTag("simEmtfDigis","EMTF"),
         minBX = cms.int32(-1),

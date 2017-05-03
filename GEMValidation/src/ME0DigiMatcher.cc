@@ -37,22 +37,28 @@ ME0DigiMatcher::matchPreRecoDigisToSimTrack(const ME0DigiPreRecoCollection& digi
     for (auto d = digis_in_det.first; d != digis_in_det.second; ++d)
     {
       // check that the digi is within BX range
-      if (d->tof() < minBXME0_ || d->tof() > maxBXME0_) continue;
+     // if (d->tof() < minBXME0_ || d->tof() > maxBXME0_) continue;
 
       // check that the pdgid is 13 for muon!
       if (std::abs(d->pdgid()) != 13 and std::abs(d->pdgid()) != 11) continue;
+      //if (std::abs(d->pdgid()) != 13) continue;
 
       if (verboseDigi_) cout<<"ME0 digi "<<p_id<<" "<<*d<<endl;
 
       bool match = false;
 
       for (const auto& hit: simhit_matcher_->hitsInDetId(id)){
-        cout << "\tCandidate ME0 simhit " << hit << " " << hit.localPosition().x() << " " << hit.localPosition().y() << " pdgid " << hit.particleType() << endl;
+	if (verboseDigi_)
+	    cout << "\tCandidate ME0 simhit " << hit << " " << hit.localPosition().x() << " " << hit.localPosition().y() << " pdgid " << hit.particleType() << endl;
         // check that the digi position matches a simhit position (within 5 sigma)
-        if (d->x() - 5 * d->ex() < hit.localPosition().x() and
-            d->x() + 5 * d->ex() > hit.localPosition().x() and
-            d->y() - 5 * d->ey() < hit.localPosition().y() and
-            d->y() + 5 * d->ey() > hit.localPosition().y() ) {
+        //if (d->x() - 5 * d->ex() < hit.localPosition().x() and
+        //    d->x() + 5 * d->ex() > hit.localPosition().x() and
+        //    d->y() - 5 * d->ey() < hit.localPosition().y() and
+        //    d->y() + 5 * d->ey() > hit.localPosition().y() ) {
+	if (std::fabs(d->tof() - hit.tof()) > 0.10) continue;
+        // check that the digi position matches a simhit position (within 3 sigma)
+        if (std::fabs(d->x() - hit.localPosition().x()) < .5  and
+            std::fabs(d->y() - hit.localPosition().y()) < .5 ){
           match = true;
           cout << "\t...matches this digi!" << endl;
           break;

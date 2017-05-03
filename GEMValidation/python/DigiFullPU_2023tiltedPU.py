@@ -85,7 +85,7 @@ process.me0DigiRecoSequence = cms.Sequence(
 
 
 process.maxEvents = cms.untracked.PSet(
-    input = cms.untracked.int32(10)
+    input = cms.untracked.int32(100)
 )
 
 # Input source

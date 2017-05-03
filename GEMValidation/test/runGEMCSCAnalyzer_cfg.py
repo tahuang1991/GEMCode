@@ -19,8 +19,8 @@ process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorOp
 process.load('TrackPropagation.SteppingHelixPropagator.SteppingHelixPropagatorAlong_cfi')
 
 process.source = cms.Source("PoolSource",
-	#fileNames = cms.untracked.vstring('file:out_L1.root'),
-	fileNames = cms.untracked.vstring('/store/user/dildick/DarkSUSY_mH_125_mGammaD_20000_cT_0_14TeV_GEN_SIM_90X/DarkSUSY_mH_125_mGammaD_20000_cT_0_14TeV_PU0_DIGI_L1/170116_230113/0000/step2_1.root')
+	fileNames = cms.untracked.vstring('file:step2.root'),
+	#fileNames = cms.untracked.vstring('/store/user/dildick/DarkSUSY_mH_125_mGammaD_20000_cT_0_14TeV_GEN_SIM_90X/DarkSUSY_mH_125_mGammaD_20000_cT_0_14TeV_PU0_DIGI_L1/170116_230113/0000/step2_1.root')
 )
 
 InputDir = ['/eos/uscms/store/user/lpcgem/SingleMu_91X_FlatPt05_50_eta20_28_phase2_realistic_Extended2023D4_GEN_SIM_v2/DIGI_L1_ME0Reco_PU0/170426_052508/0000/']
@@ -51,6 +51,9 @@ process.GEMCSCAnalyzer = cms.EDAnalyzer("GEMCSCAnalyzer",
 matching = process.GEMCSCAnalyzer.simTrackMatching
 matching.simTrack.minPt = 1.5
 matching.matchprint = cms.bool(False)
+matching.me0DigiPreReco.validInputTags = cms.InputTag("simMuonME0ReDigis384")
+matching.me0RecHit.validInputTags = cms.InputTag("me0RecHits384")
+matching.me0Segment.validInputTags = cms.InputTag("me0Segments384")
 """
 matching.gemRecHit.input = ""
 matching.cscTfTrack.input = ""
@@ -68,7 +71,7 @@ if doGem:
   matching.cscLCT.minNHitsChamber = 3
   matching.cscMPLCT.minNHitsChamber = 3
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2000) )
 
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 
