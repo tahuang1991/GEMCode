@@ -143,6 +143,7 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const l1t::EM
   std::map<unsigned int, CSCCorrelatedLCTDigiContainer> chamberid_lct;
   auto stubCollection = tftrack.Hits();
   for (const auto& hit: stubCollection) {
+    if (not hit.Is_CSC_hit()) continue;
     const CSCDetId& ch_id = hit.CSC_DetId()();
     // empty vector for stubs
     CSCCorrelatedLCTDigiContainer v;
