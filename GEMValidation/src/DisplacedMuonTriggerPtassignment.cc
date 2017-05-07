@@ -70,6 +70,8 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
         if (((chid.station() == 1 and gemid.station() == 1) or (chid.station()==2 and gemid.station() ==3))
             and chid.chamber() == gemid.chamber()){
           //if gp_ge11 or gp_ge21 are taken from GME pad in layer1, then ignore the layer2
+	  //for now ignore 2nd layer in GE21!!
+	  if (gemid.station()==3 and gemid.layer()==2) continue;
           if (hasGEMPad_st1 and gemid.station()==1 and gemid.layer()==2)  continue;
           if (hasGEMPad_st2 and gemid.station()==3 and gemid.layer()==2)  continue;
           if (gemid.station() == 1 ) hasGEMPad_st1 = true;
@@ -77,6 +79,7 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
           else if (verbose_>0)
             std::cout <<" gemid "<< gemid <<" CSC chamber id "<< chid << std::endl;
           //maybe also check the dR(csc, gem)
+	  //get global position of GEMPad
           globalPositionOfGEMPad(idgempads.second[0], gemid);
         }
       }
