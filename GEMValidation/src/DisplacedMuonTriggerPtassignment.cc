@@ -67,7 +67,7 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
       //find GEMPads
       for (auto idgempads : detid_pads){
         GEMDetId gemid(idgempads.first);
-        if (((chid.station() == 1 and gemid.station() == 1) or (chid.station()==2 and gemid.station() ==3))
+        if (idgempads.second.size() > 0 and ((chid.station() == 1 and gemid.station() == 1) or (chid.station()==2 and gemid.station() ==3))
             and chid.chamber() == gemid.chamber()){
           //if gp_ge11 or gp_ge21 are taken from GME pad in layer1, then ignore the layer2
 	  //for now ignore 2nd layer in GE21!!
@@ -78,6 +78,7 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
           else if (gemid.station() == 3) hasGEMPad_st2 = true;
           else if (verbose_>0)
             std::cout <<" gemid "<< gemid <<" CSC chamber id "<< chid << std::endl;
+	  std::cout <<"GEMId "<< gemid <<" gempads size "<< idgempads.second.size() << std::endl;
           //maybe also check the dR(csc, gem)
 	  //get global position of GEMPad
           globalPositionOfGEMPad(idgempads.second[0], gemid);
