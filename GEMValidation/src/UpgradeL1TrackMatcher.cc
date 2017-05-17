@@ -154,12 +154,10 @@ void UpgradeL1TrackMatcher::matchRegionalMuonCandToSimTrack(const BXVector<l1t::
 
 void UpgradeL1TrackMatcher::matchGMTToSimTrack(const BXVector<l1t::Muon>& gmtCands)
 {
-   std::cout <<"matchGMTToSimTrack, tftracks size "<< tfTracks_.size() << std::endl;
    if (tfTracks_.size()  ==  0) return;
    float mindPtRel = 0.5;
    mindRGMT = deltaRGMT_;
    for (int bx = gmtCands.getFirstBX(); bx <= gmtCands.getLastBX(); bx++ ){
-       std::cout <<"matching L1Mu to EMTF track,  bx "<< bx << std::endl;
        if ( bx < minBXGMT_ or bx > maxBXGMT_) continue;
        for (std::vector<l1t::Muon>::const_iterator cand = gmtCands.begin(bx); cand != gmtCands.end(bx); ++cand ){
 	   TFCand *L1Mu = new TFCand(&(*cand));
