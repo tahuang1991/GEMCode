@@ -20,6 +20,21 @@ TFCand::TFCand(const l1t::RegionalMuonCand* cand )
 
 }
 
+TFCand::TFCand(const l1t::Muon* cand )
+{
+  //const l1t::RegionalMuonCand* cand(&t);
+  eta_ = cand->eta();
+  //local phi from GMT
+  phi_ = cand->phi() * 2.0 * 3.1415926/576.0;
+  pt_ = cand->pt() * 0.5;
+  charge_ = cand->charge();
+  quality_ = cand->hwQual();
+//trackType_ = cand->trackFinderType();
+  dr_ = 10.0;
+  phi_local_ = -9;
+
+}
+
 TFCand::TFCand(const TFCand& rhs)
 {}
 

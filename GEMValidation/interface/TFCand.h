@@ -5,6 +5,7 @@
 #include "GEMCode/GEMValidation/interface/TFTrack.h"
 #include "DataFormats/L1TMuon/interface/RegionalMuonCand.h"
 #include "DataFormats/L1GlobalMuonTrigger/interface/L1MuRegionalCand.h"
+#include "DataFormats/L1Trigger/interface/Muon.h"
 
 
 class TFCand
@@ -13,6 +14,7 @@ class TFCand
   /// constructor
   TFCand(const L1MuRegionalCand* t);
   TFCand(const l1t::RegionalMuonCand* t);
+  TFCand(const l1t::Muon* t);
   /// copy constructor
   TFCand(const TFCand&);
   /// destructor

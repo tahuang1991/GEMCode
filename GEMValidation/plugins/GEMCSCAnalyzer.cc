@@ -1391,7 +1391,8 @@ private:
   //edm::EDGetTokenT<L1CSCTrackCollection> cscTfTrackInputLabel_;
   //edm::EDGetTokenT<L1MuRegionalCandCollection> cscTfCandInputLabel_;
   edm::EDGetTokenT<l1t::EMTFTrackCollection> emtfTrackInputLabel_;
-  edm::EDGetTokenT<BXVector<l1t::RegionalMuonCand>> gmtInputLabel_;
+  edm::EDGetTokenT<BXVector<l1t::RegionalMuonCand>> regMuonCandInputLabel_;
+  edm::EDGetTokenT<BXVector<l1t::Muon>> gmtInputLabel_;
   edm::EDGetTokenT<L1MuRegionalCandCollection> dtTfCandInputLabel_;
   edm::EDGetTokenT<L1MuRegionalCandCollection> rpcfTfCandInputLabel_;
   edm::EDGetTokenT<L1MuRegionalCandCollection> rpcbTfCandInputLabel_;
@@ -1595,8 +1596,11 @@ GEMCSCAnalyzer::GEMCSCAnalyzer(const edm::ParameterSet& ps)
 
   //auto tfCand = cfg_.getParameter<edm::ParameterSet>("cscTfCand");
   //cscTfCandInputLabel_ = consumes<L1MuRegionalCandCollection>(tfCand.getParameter<edm::InputTag>("validInputTags"));
+  auto upgradeemtfCand = cfg_.getParameter<edm::ParameterSet>("upgradeEmtfCand");
+  regMuonCandInputLabel_ = consumes< BXVector<l1t::RegionalMuonCand> >(upgradeemtfCand.getParameter<edm::InputTag>("validInputTags"));
+
   auto upgradegmt = cfg_.getParameter<edm::ParameterSet>("upgradeGMT");
-  gmtInputLabel_ = consumes< BXVector<l1t::RegionalMuonCand> >(upgradegmt.getParameter<edm::InputTag>("validInputTags"));
+  gmtInputLabel_ = consumes< BXVector<l1t::Muon> >(upgradegmt.getParameter<edm::InputTag>("validInputTags"));
 
   auto dtTfCand = cfg_.getParameter<edm::ParameterSet>("dtTfCand");
   dtTfCandInputLabel_ = consumes<L1MuRegionalCandCollection>(dtTfCand.getParameter<edm::InputTag>("validInputTags"));
@@ -1751,6 +1755,7 @@ void GEMCSCAnalyzer::analyze(const edm::Event& ev, const edm::EventSetup& es)
                                //cscTfTrackInputLabel_,
                                //cscTfCandInputLabel_,
                                emtfTrackInputLabel_,
+                               regMuonCandInputLabel_,
                                gmtInputLabel_,
                                dtTfCandInputLabel_,
                                rpcfTfCandInputLabel_,

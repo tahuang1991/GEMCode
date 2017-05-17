@@ -38,7 +38,8 @@ SimTrackMatchManager::SimTrackMatchManager(const SimTrack& t,
                                            //edm::EDGetTokenT<L1CSCTrackCollection>& cscTfTrackInputLabel_,
                                            //edm::EDGetTokenT<L1MuRegionalCandCollection>& cscTfCandInputLabel_,
                                            edm::EDGetTokenT<l1t::EMTFTrackCollection>& emtfTrackInputLabel_,
-                                           edm::EDGetTokenT< BXVector<l1t::RegionalMuonCand> >& gmtInputLabel_,
+                                           edm::EDGetTokenT< BXVector<l1t::RegionalMuonCand> >& regMuonCandInputLabel_,
+                                           edm::EDGetTokenT< BXVector<l1t::Muon> >& gmtInputLabel_,
                                            edm::EDGetTokenT<L1MuRegionalCandCollection>& dtTfCandInputLabel_,
                                            edm::EDGetTokenT<L1MuRegionalCandCollection>& rpcfTfCandInputLabel_,
                                            edm::EDGetTokenT<L1MuRegionalCandCollection>& rpcbTfCandInputLabel_,
@@ -74,7 +75,7 @@ SimTrackMatchManager::SimTrackMatchManager(const SimTrack& t,
   , dt_rechits_(simhits_,
                 dtRecHit1DPairInput_, dtRecSegment2DInput_,
                 dtRecSegment4DInput_)
-  , l1_tracks_(csc_stubs_, emtfTrackInputLabel_, gmtInputLabel_)
+  , l1_tracks_(csc_stubs_, emtfTrackInputLabel_, regMuonCandInputLabel_, gmtInputLabel_)
   //, l1_tracks_(csc_stubs_, dt_digis_, rpc_digis_,
   //	  	cscTfTrackInputLabel_, cscTfCandInputLabel_)
   , l1_tf_tracks_(simhits_)//, cscTfTrackInputLabel_)
