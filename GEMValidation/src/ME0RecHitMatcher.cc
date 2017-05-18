@@ -28,7 +28,10 @@ ME0RecHitMatcher::ME0RecHitMatcher(ME0DigiMatcher& dg,
     if (gemvalidation::getByToken(me0RecHitInput_, me0_rechits, event())) if (runME0RecHit_) matchME0RecHitsToSimTrack(*me0_rechits.product());
 
     edm::Handle<ME0SegmentCollection> me0_segments;
-    if (gemvalidation::getByToken(me0SegmentInput_, me0_segments, event())) if (runME0Segment_) matchME0SegmentsToSimTrack(*me0_segments.product());
+    if (gemvalidation::getByToken(me0SegmentInput_, me0_segments, event()) and runME0Segment_){
+	matchME0SegmentsToSimTrack(*me0_segments.product());
+	matchME0SegmentsToSimTrackBydR(*me0_segments.product());
+    }
   }
 }
 
@@ -131,10 +134,39 @@ ME0RecHitMatcher::matchME0SegmentsToSimTrack(const ME0SegmentCollection& me0Segm
 	  cout<<endl;
     }
   }
+
   for (auto& p : superChamber_to_me0Segment_)
     superChamber_to_bestME0Segment_[ p.first] = findbestME0Segment(p.second);
 }
 
+void
+ME0RecHitMatcher::matchME0SegmentsToSimTrackBydR(const ME0SegmentCollection& segments)
+{
+    if (verboseME0Segment_) cout <<"\t matchME0SegmentsToSimTrackBydR "<< endl;
+    const int endcap((trk().momentum().eta() > 0.) ? 1 : -1);
+    GlobalPoint gp_propagated(propagateToZ(AVERAGE_ME0_Z*endcap));
+    for(auto iC = segments.id_begin(); iC != segments.id_end(); ++iC){
+	auto ch_segs = segments.get(*iC);
+	for(auto iS = ch_segs.first; iS != ch_segs.second; ++iS){
+	    GlobalPoint gpME0(globalPoint(*iS));
+	    if (verboseME0Segment_)
+		cout <<"ME0Detid "<< iS->me0DetId()<<" segment "<< *iS << std::endl;
+	    if (verboseME0Segment_)
+		cout <<"gp_propagated eta "<< gp_propagated.eta() <<" phi "<< gp_propagated.phi() <<" gpME0 eta "<< gpME0.eta()<<" phi "<< gpME0.phi() << endl;
+	    float dPhi = gpME0.phi()- gp_propagated.phi();
+	    float dEta = gpME0.eta() - gp_propagated.eta();
+	    float dR = std::sqrt(dPhi*dPhi + dEta*dEta);
+	    if (dR < 0.4){
+		if (verboseME0Segment_) cout << "\t matched "<< endl;
+		superChamber_to_me0Segment_bydR_[ iS->me0DetId().rawId() ].push_back(*iS);
+	    }
+        }
+    }
+
+  for (auto& p : superChamber_to_me0Segment_bydR_)
+    superChamber_to_bestME0Segment_bydR_[ p.first] = findbestME0Segment_bydR(p.second, gp_propagated);
+
+}
 
 void ME0RecHitMatcher::dumpAllME0Segments(const ME0SegmentCollection& segments) const 
 {
@@ -180,6 +212,14 @@ ME0RecHitMatcher::superChamberIdsME0Segment() const
   return result;
 }
 
+std::set<unsigned int>
+ME0RecHitMatcher::superChamberIdsME0Segment_bydR() const
+{
+  std::set<unsigned int> result;
+  for (auto& p: superChamber_to_me0Segment_bydR_) result.insert(p.first);
+  return result;
+}
+
 
 const ME0RecHitMatcher::ME0RecHitContainer&
 ME0RecHitMatcher::me0RecHitsInChamber(unsigned int detid) const
@@ -204,6 +244,13 @@ ME0RecHitMatcher::me0SegmentsInSuperChamber(unsigned int detid) const
   return superChamber_to_me0Segment_.at(detid);
 }
 
+const ME0RecHitMatcher::ME0SegmentContainer&
+ME0RecHitMatcher::me0SegmentsInSuperChamber_bydR(unsigned int detid) const
+{
+  if (superChamber_to_me0Segment_bydR_.find(detid) == superChamber_to_me0Segment_bydR_.end()) return no_me0Segments_;
+  return superChamber_to_me0Segment_bydR_.at(detid);
+}
+
 
 int
 ME0RecHitMatcher::nME0RecHitsInChamber(unsigned int detid) const
@@ -223,6 +270,12 @@ int
 ME0RecHitMatcher::nME0SegmentsInSuperChamber(unsigned int detid) const
 {
   return me0SegmentsInSuperChamber(detid).size();
+}
+
+int
+ME0RecHitMatcher::nME0SegmentsInSuperChamber_bydR(unsigned int detid) const
+{
+  return me0SegmentsInSuperChamber_bydR(detid).size();
 }
 
 
@@ -249,6 +302,16 @@ ME0RecHitMatcher::me0Segments() const
   return result;
 }
 
+const ME0RecHitMatcher::ME0SegmentContainer
+ME0RecHitMatcher::me0Segments_bydR() const
+{
+  ME0RecHitMatcher::ME0SegmentContainer result;
+  for (auto id: superChamberIdsME0Segment_bydR()){
+    auto segmentsInSuperChamber(me0SegmentsInSuperChamber_bydR(id));
+    result.insert(result.end(), segmentsInSuperChamber.begin(), segmentsInSuperChamber.end());
+  }
+  return result;
+}
 
 bool
 ME0RecHitMatcher::me0RecHitInContainer(const ME0RecHit& rh, const ME0RecHitContainer& c) const
@@ -338,7 +401,18 @@ ME0RecHitMatcher::nLayersWithRecHitsInSuperChamber(unsigned int detid) const
 ME0Segment
 ME0RecHitMatcher::bestME0Segment(unsigned int id)
 {
-  return superChamber_to_bestME0Segment_[id];
+  if (superChamber_to_bestME0Segment_.find(id) == superChamber_to_bestME0Segment_.end()) return ME0Segment();
+  else return superChamber_to_bestME0Segment_[id];
+}
+
+ME0Segment
+ME0RecHitMatcher::bestME0Segment_bydR(unsigned int id) const 
+{
+  if (superChamber_to_bestME0Segment_bydR_.find(id) == superChamber_to_bestME0Segment_bydR_.end()) return no_me0segment_;
+  else  {
+      ME0Segment segment(superChamber_to_bestME0Segment_bydR_.at(id));
+      return segment;
+  }
 }
 
 ME0Segment
@@ -357,6 +431,26 @@ ME0RecHitMatcher::findbestME0Segment(ME0SegmentContainer allSegs) const
   return bestSegment;
 }
 
+ME0Segment
+ME0RecHitMatcher::findbestME0Segment_bydR(ME0SegmentContainer allSegs, GlobalPoint gp_propagated) const
+{
+  ME0Segment bestSegment;
+  float mindR = 0.4;
+
+  for (auto& seg: allSegs){
+    GlobalPoint gpME0(globalPoint(seg));
+    cout <<"gp_propagated eta "<< gp_propagated.eta() <<" phi "<< gp_propagated.phi() <<" gpME0 eta "<< gpME0.eta()<<" phi "<< gpME0.phi() << endl;
+    float dPhi = gpME0.phi()- gp_propagated.phi();
+    float dEta = gpME0.eta() - gp_propagated.eta();
+    float dR = std::sqrt(dPhi*dPhi + dEta*dEta);
+    if (dR < mindR){
+	bestSegment = seg;
+	mindR = dR;
+    }
+  }
+  if (mindR>=.4)cout <<"failed to bestSegment "<< endl;
+  return bestSegment;
+}
 
 GlobalPoint
 ME0RecHitMatcher::globalPoint(const ME0Segment& c) const

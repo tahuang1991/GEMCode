@@ -360,7 +360,7 @@ struct MyTrackEff
   Float_t bestdRGmtCand;
   Float_t L1Mu_pt, L1Mu_eta, L1Mu_phi, L1Mu_quality, L1Mu_bx;
   UInt_t L1Mu_charge;
-  Float_t L1Mu_me0_eta, L1Mu_me0_phi, L1Mu_me0_dPhi, L1Mu_me0_dR, L1Mu_me0_st1_dphi, L1Mu_me0_st2_eta, L1Mu_me0_st2_phi;
+  Float_t L1Mu_me0_eta, L1Mu_me0_phi, L1Mu_me0_dPhi, L1Mu_me0_mindPhi1, L1Mu_me0_mindPhi2, L1Mu_me0_dR, L1Mu_me0_st1_dphi, L1Mu_me0_st2_eta, L1Mu_me0_st2_phi;
   Bool_t L1Mu_me0_st1_isEven;
 
   Int_t has_l1Extra;
@@ -815,6 +815,8 @@ void MyTrackEff::init()
   L1Mu_me0_st2_phi = -9;
   L1Mu_me0_dPhi = -9;
   L1Mu_me0_dR = 10;
+  L1Mu_me0_mindPhi1 = 10;
+  L1Mu_me0_mindPhi2 = 10;
   L1Mu_me0_st1_dphi = -9;
   L1Mu_me0_st1_isEven = false;
 
@@ -1266,6 +1268,8 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("L1Mu_me0_st2_phi", &L1Mu_me0_st2_phi);
   t->Branch("L1Mu_me0_dPhi", &L1Mu_me0_dPhi);
   t->Branch("L1Mu_me0_dR", &L1Mu_me0_dR);
+  t->Branch("L1Mu_me0_mindPhi1", &L1Mu_me0_mindPhi1);
+  t->Branch("L1Mu_me0_mindPhi2", &L1Mu_me0_mindPhi2);
   t->Branch("L1Mu_me0_st1_dphi", &L1Mu_me0_st1_dphi);
   t->Branch("L1Mu_me0_st1_isEven", &L1Mu_me0_st1_isEven);
 
@@ -2952,18 +2956,23 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
   //ME0 Segments
   std::vector<ME0Segment> allmatchedSegments;
-  auto me0Segs(match_me0rh.superChamberIdsME0Segment());
+  auto me0Segs(match_me0rh.superChamberIdsME0Segment_bydR());
   std::cout <<"me0 Segs , chamber id size "<< me0Segs.size() << std::endl;
   for (auto d: me0Segs){
     const ME0DetId id(d);
     std::cout <<"ME0 Detid "<< id << std::endl;
-    auto allSegs(match_me0rh.me0SegmentsInSuperChamber(d));
+    auto allSegs(match_me0rh.me0SegmentsInSuperChamber_bydR(d));
     allmatchedSegments.insert(allmatchedSegments.begin(), allSegs.begin(), allSegs.end());
-    auto me0Segment(match_me0rh.findbestME0Segment(match_me0rh.me0SegmentsInSuperChamber(d)));
-    cout << "me0Segment " << me0Segment << " dphi  "<<  me0Segment.deltaPhi() << endl;
-    float dPhi = match_me0rh.me0DeltaPhi(me0Segment);
-    if (fabs(me0Segment.chi2()) < 0.0000001 and fabs(me0Segment.time()) < 0.00000001 and fabs(me0Segment.timeErr()) < 0.000001 and fabs(me0Segment.deltaPhi())<.0001)
+    auto me0Segment(match_me0rh.bestME0Segment_bydR(d));
+    if (fabs(me0Segment.chi2()) < 0.0000001 and fabs(me0Segment.time()) < 0.00000001 and fabs(me0Segment.timeErr()) < 0.000001 and fabs(me0Segment.deltaPhi())<.0001 and me0Segment.specificRecHits().size()<3){
+      std::cout <<"has valid ME0 id "<< id <<" but empty ME0 segment, allSegs size  "<< allSegs.size() << std::endl;
+      for (auto  seg : allSegs)
+	  std::cout <<" matched seg , detid "<< seg.me0DetId() <<" "<< seg << std::endl;
       continue;
+    }
+    
+    float dPhi = match_me0rh.me0DeltaPhi(me0Segment);
+    cout << "me0Segment " << me0Segment << " dphi  "<<  me0Segment.deltaPhi() <<" dphi in matcher "<< dPhi << endl;
     double chi2 = me0Segment.chi2(); float time = me0Segment.time();
     float timeErr = me0Segment.timeErr(); int nRecHits = me0Segment.nRecHits();
     bool odd(id.chamber()%2 == 1);
@@ -2972,6 +2981,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     GlobalPoint gp_ME0_st2(match_me0rh.propagateFromME0ToCSC(me0Segment, t.momentum().pt(), 2, odd)); 
     float dR = deltaR(float(gp.eta()), float(gp.phi()), float(gp_propagated.eta()), float(gp_propagated.phi()));
     std::cout <<"Sim Pt "<< t.momentum().pt() <<" gp_ME0_st2 "<<  gp_ME0_st2 <<" eta "<< gp_ME0_st2.eta() <<" phi  "<< gp_ME0_st2.phi() << std::endl;
+
     if (odd) etrk_[ME0].chamber_lct_odd = id.chamber();
     else etrk_[ME0].chamber_lct_even = id.chamber();
     if (odd) etrk_[ME0].has_lct |= 1;
@@ -3643,16 +3653,22 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     etrk_[0].L1Mu_charge = bestGmtCand->charge();
     etrk_[0].L1Mu_bx = bestGmtCand->bx();
     etrk_[0].L1Mu_quality = bestGmtCand->quality();
-    float tfeta = bestGmtCand->tftrack()->eta();
-    float tfphi = bestGmtCand->tftrack()->phi();
-    float mindR = 10.0;
+
+    float tfeta = bestGmtCand->eta();
+    float tfphi = bestGmtCand->phi();
+    float mindPhi = .40;
+
     for (auto me0Segment : allmatchedSegments){
       GlobalPoint gp_ME0_st2(match_me0rh.propagateFromME0ToCSC(me0Segment, etrk_[0].L1Mu_pt, 2, me0Segment.me0DetId().chamber()%2==1)); 
       GlobalPoint gp(match_me0rh.globalPoint(me0Segment));
-      float dR = deltaR(tfeta, tfphi, float(gp_ME0_st2.eta()), float(gp_ME0_st2.phi()));
-      std::cout <<"L1Mu eta "<< tfeta <<" phi "<< tfphi <<" propagated ME0 eta "<< gp_ME0_st2.eta() <<" phi "<< gp_ME0_st2.phi() << std::endl;
-      if (dR < mindR){
-	  mindR = dR;
+      float dR = deltaR(tfeta, tfphi, float(gp.eta()), float(gp_ME0_st2.phi()));
+      float dPhi_L1Mu_ME0_propagate = deltaPhi(tfphi, float(gp_ME0_st2.phi()));
+      float dPhi_L1Mu_ME0 = deltaPhi(tfphi, float(gp.phi()));
+      std::cout <<"L1Mu eta "<< tfeta <<" phi "<< tfphi <<" propagated ME0 eta "<< gp_ME0_st2.eta() <<" phi "<< gp_ME0_st2.phi()<<" ME0 eta "<< gp.eta() <<" phi "<< gp.phi() <<" dPhi "<< dPhi_L1Mu_ME0 << std::endl;
+
+
+      if (fabs(dPhi_L1Mu_ME0_propagate) < mindPhi and fabs(gp.eta() - tfeta)<0.25){
+	  mindPhi = std::fabs(dPhi_L1Mu_ME0);
 	  int chamber = me0Segment.me0DetId().chamber();
 	  if (fabs(etrk_[1].phi_lct_even) < 4 and abs(etrk_[1].chamber_lct_even/2-chamber) <= 1){
 	      etrk_[0].L1Mu_me0_st1_dphi = deltaPhi(etrk_[1].phi_lct_even, gp.phi());
@@ -3661,12 +3677,15 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	      etrk_[0].L1Mu_me0_st1_dphi = deltaPhi(etrk_[1].phi_lct_odd, gp.phi());
 	      etrk_[0].L1Mu_me0_st1_isEven = false;
 	  }else etrk_[0].L1Mu_me0_st1_dphi = -9;
+
 	  float dPhi = match_me0rh.me0DeltaPhi(me0Segment);
 	  etrk_[0].L1Mu_me0_st2_eta = gp_ME0_st2.eta();
 	  etrk_[0].L1Mu_me0_st2_phi = gp_ME0_st2.phi();
 	  etrk_[0].L1Mu_me0_eta = gp.eta();
 	  etrk_[0].L1Mu_me0_phi = gp.phi();
 	  etrk_[0].L1Mu_me0_dR = dR;
+	  etrk_[0].L1Mu_me0_mindPhi1 = dPhi_L1Mu_ME0;
+	  etrk_[0].L1Mu_me0_mindPhi2 = dPhi_L1Mu_ME0_propagate;
 	  etrk_[0].L1Mu_me0_dPhi = dPhi;
       }
     }
