@@ -73,7 +73,7 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
             and chid.chamber() == gemid.chamber()){
 
 	   //check GEMPads size 
-	  if (idgempads.second.size() > 0 ) continue;
+	  if (idgempads.second.size() ==0 ) continue;
 
 	  //for now ignore 2nd layer in GE21!!
 	  if (gemid.station()==3 and gemid.layer()==2) continue;
