@@ -36,7 +36,7 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const CSCCorr
 
 //chamberid_lcts: LCTs matched to simmuon and their associated chamberid, detid_pads: gempads matched to simmuon and their associated detid_pads
 DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsigned int, CSCCorrelatedLCTDigiContainer> chamberid_lcts, std::map<unsigned int, GEMCSCPadDigiContainer> detid_pads, const edm::EventSetup& es, const edm::Event& ev, int stripBits_, bool useFit_)
-  : ev_(ev), es_(es), verbose_(0), stripBits(stripBits_), useFit(useFit_)
+  : ev_(ev), es_(es), verbose_(1), stripBits(stripBits_), useFit(useFit_)
 {
   setupGeometry(es);
   chamberid_lcts_ = chamberid_lcts;
@@ -71,6 +71,10 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
         GEMDetId gemid(idgempads.first);
         if (idgempads.second.size() > 0 and ((chid.station() == 1 and gemid.station() == 1) or (chid.station()==2 and gemid.station() ==3))
             and chid.chamber() == gemid.chamber()){
+
+	   //check GEMPads size 
+	  if (idgempads.second.size() > 0 ) continue;
+
 	  //for now ignore 2nd layer in GE21!!
 	  if (gemid.station()==3 and gemid.layer()==2) continue;
 
