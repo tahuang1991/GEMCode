@@ -800,16 +800,15 @@ void DisplacedMuonTriggerPtassignment::globalPositionOfGEMPad(GEMCSCPadDigiConta
   GEMDetId ch_id(gemid.region(), gemid.ring(), gemid.station(), gemid.layer(), gemid.chamber(), 0);
   const GEMChamber* gemChamber(gemGeometry_->chamber(ch_id.rawId()));
   auto gemRoll(gemChamber->etaPartition(gemid.roll()));//any roll
-  const int nGEMPads(gemRoll->npads());
+  //const int nGEMPads(gemRoll->npads());
   int st = gemid.station();
   if (st==3) st=2;//use CSC station as reference
   for (auto gempad : gempads){
-  	if (gempad.pad() > nGEMPads or gempad.pad() < 0){
-      		std::cout <<" gempad.pad() is within pad range gempad "<< gempad <<" npad "<< nGEMPads << std::endl;
-      		return;
-	}
-  	const LocalPoint lpGEM(gemRoll->centreOfPad(gempad.pad()));
+  	LocalPoint lpGEM(gemRoll->centreOfStrip(float(gempad.pad()*2.0-1.0)));
+	if (st == 1)
+	    lpGEM = gemRoll->centreOfPad(gempad.pad());
   	GlobalPoint gp_pad = GlobalPoint(gemRoll->toGlobal(lpGEM));
+
 	if (hasStub_st[st-1] and   fabs(deltaPhi(gp_pad.phi(), gp_st_layer3[st-1].phi())) < minGEMCSCdPhi_
 		and fabs(deltaPhi(gp_pad.phi(), gp_st_layer3[st-1].phi()))<fabs(dphi_gemcsc_st[st-1]) ){
 

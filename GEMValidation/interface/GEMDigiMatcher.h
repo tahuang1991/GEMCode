@@ -106,12 +106,16 @@ private:
   void matchDigisToSimTrack(const GEMDigiCollection&);
   void matchPadsToSimTrack(const GEMCSCPadDigiCollection&);
   void matchCoPadsToSimTrack(const GEMCSCPadDigiCollection&);
+  void addFakeGEMPad2(const GEMDigiCollection& digis);
 
   std::set<unsigned int> selectDetIds(const Id2DigiContainer &, int) const;
   
   std::vector<edm::InputTag> gemDigiInput_;
   std::vector<edm::InputTag> gemPadDigiInput_;
   std::vector<edm::InputTag> gemCoPadDigiInput_;
+
+  bool addFakeGE21DigiPad_;
+  edm::InputTag fakeGE21Digi_input;
 
   int minBXGEMDigi_, maxBXGEMDigi_;
   int minBXGEMPad_, maxBXGEMPad_;
