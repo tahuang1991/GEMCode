@@ -42,6 +42,8 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
   chamberid_lcts_ = chamberid_lcts;
   detid_pads_ = detid_pads;
   ev.getByLabel("simMuonCSCDigis", "MuonCSCComparatorDigi", hCSCComparators);
+  if (verbose_)
+      std::cout <<"stripBits "<< stripBits_ <<" useFit? "<<(useFit_ ? "true":"false") << std::endl;
 
   initVariables();
   for (auto idlcts : chamberid_lcts_){
@@ -69,19 +71,20 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
         GEMDetId gemid(idgempads.first);
         if (idgempads.second.size() > 0 and ((chid.station() == 1 and gemid.station() == 1) or (chid.station()==2 and gemid.station() ==3))
             and chid.chamber() == gemid.chamber()){
-          //if gp_ge11 or gp_ge21 are taken from GME pad in layer1, then ignore the layer2
 	  //for now ignore 2nd layer in GE21!!
 	  if (gemid.station()==3 and gemid.layer()==2) continue;
-          if (hasGEMPad_st1 and gemid.station()==1 and gemid.layer()==2)  continue;
-          if (hasGEMPad_st2 and gemid.station()==3 and gemid.layer()==2)  continue;
-          if (gemid.station() == 1 ) hasGEMPad_st1 = true;
-          else if (gemid.station() == 3) hasGEMPad_st2 = true;
+
+          //if (hasGEMPad_st1 and gemid.station()==1 and gemid.layer()==2)  continue;
+          //if (hasGEMPad_st2 and gemid.station()==3 and gemid.layer()==2)  continue;
           else if (verbose_>0)
             std::cout <<" gemid "<< gemid <<" CSC chamber id "<< chid << std::endl;
 	  std::cout <<"GEMId "<< gemid <<" gempads size "<< idgempads.second.size() << std::endl;
           //maybe also check the dR(csc, gem)
 	  //get global position of GEMPad
-          globalPositionOfGEMPad(idgempads.second[0], gemid);
+          globalPositionOfGEMPad(idgempads.second, gemid);
+	  //only allows GEM pads close to stub
+          if (gemid.station() == 1 and dphi_gemcsc_st[0] < minGEMCSCdPhi_) hasGEMPad_st1 = true;
+          else if (gemid.station() == 3 and dphi_gemcsc_st[1] < minGEMCSCdPhi_) hasGEMPad_st2 = true;
         }
       }
     }
@@ -803,9 +806,22 @@ void DisplacedMuonTriggerPtassignment::globalPositionOfGEMPad(GEMCSCPadDigiConta
 	}
   	const LocalPoint lpGEM(gemRoll->centreOfPad(gempad.pad()));
   	GlobalPoint gp_pad = GlobalPoint(gemRoll->toGlobal(lpGEM));
-	if (hasStub_st[st-1] and fabs(deltaPhi(gp_pad.phi(), gp_st_layer3[st-1].phi()))<fabs(dphi_gemcsc_st[st-1]) ){
-		gp_ge11 = GlobalPoint(gp_pad);
-		dphi_gemcsc_st[st-1] = fabs(deltaPhi(gp_pad.phi(), gp_st_layer3[st-1].phi()));
+	if (hasStub_st[st-1] and   fabs(deltaPhi(gp_pad.phi(), gp_st_layer3[st-1].phi())) < minGEMCSCdPhi_
+		and fabs(deltaPhi(gp_pad.phi(), gp_st_layer3[st-1].phi()))<fabs(dphi_gemcsc_st[st-1]) ){
+
+	  dphi_gemcsc_st[st-1] = fabs(deltaPhi(gp_pad.phi(), gp_st_layer3[st-1].phi()));
+	  if (gemid.station() == 1){
+		gp_ge11 = gp_pad;
+		phi_gem[0] = gp_ge11.phi();
+		if (verbose_>0) std::cout <<" gempad in GE11 id " << gemid <<" gp eta "<< gp_ge11.eta()<<" phi "<< gp_ge11.phi()<<" pad "<<gempad.pad()<< std::endl;
+	  }else if (gemid.station() == 3){
+		const LocalPoint lpGEM(gemRoll->centreOfStrip(float(gempad.pad()*2.0-1.0)));
+		gp_ge21 = gp_pad;
+		phi_gem[1] = gp_ge21.phi();
+		if (verbose_>0) std::cout <<" gempad in GE21 id "<< gemid <<" gp eta "<< gp_ge21.eta()<<" phi "<< gp_ge21.phi()<<" pad "<<gempad.pad()<< std::endl;
+	  }else if (verbose_>0)
+	      std::cout <<" gemid "<< gemid  <<" not in station 1 or 3" << std::endl;
+
 	}
 
   }

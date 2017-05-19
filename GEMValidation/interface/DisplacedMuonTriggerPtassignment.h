@@ -266,6 +266,7 @@ public:
 
   int verbose_;
   unsigned int region_;
+  float minGEMCSCdPhi_ = 0.2;
 
   //edm::ESHandle<MagneticField> magfield_;
   //edm::ESHandle<Propagator> propagator_;
