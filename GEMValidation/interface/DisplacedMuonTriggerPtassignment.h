@@ -96,20 +96,24 @@ public:
   //step2 calculate all variables used pt assignment, requires eta,phi,radius,Z
   //step3 assgin L1 pt according to LUTs (in short future)
   DisplacedMuonTriggerPtassignment(const CSCCorrelatedLCTDigiCollection* lcts,
+	  			   const edm::ParameterSet& ps,
                                    const edm::EventSetup& es,
                                    const edm::Event& iEvent); // region_=2, not used yet
 
   DisplacedMuonTriggerPtassignment(const CSCCorrelatedLCTDigiContainer lcts,
+	  			   const edm::ParameterSet& ps,
                                    const CSCDetIdContainer cscids,
                                    const edm::EventSetup& es,
                                    const edm::Event& iEvent);//not used yet
 
   DisplacedMuonTriggerPtassignment(std::map<unsigned int, CSCCorrelatedLCTDigiContainer> chamberid_lct,
                                    std::map<unsigned int, GEMCSCPadDigiContainer> detid_pads,
+				   const edm::ParameterSet& ps,
                                    const edm::EventSetup& es,
                                    const edm::Event& iEvent, 
 				   int stripBits_ = -1, 
-				   bool useFit_ = true);
+				   bool useFit_ = true, 
+				   bool useSingleGE21 = false);
 
   // starting from a CSC TF Track and the CSC LCT collection
   DisplacedMuonTriggerPtassignment(const L1CSCTrack&,
@@ -117,6 +121,7 @@ public:
                                    const CSCCorrelatedLCTDigiCollection&,
                                    bool doStubRecovery,
                                    bool matchGEMPads,
+				   const edm::ParameterSet& ps,
                                    const edm::EventSetup& es,
                                    const edm::Event& iEvent);
 
@@ -127,11 +132,13 @@ public:
                                    GlobalPoint gp_ge11,
                                    GlobalPoint gp_ge21,
                                    int npar,
+				   const edm::ParameterSet& ps,
                                    const edm::EventSetup& es,
                                    const  edm::Event& iEvent); //sim level
 
   // constructor for barrel
   DisplacedMuonTriggerPtassignment(const L1MuDTTrackSegPhiContainer&,
+	  			   const edm::ParameterSet& ps,
                                    const edm::EventSetup& es,
                                    const edm::Event& iEvent);
 
@@ -261,12 +268,14 @@ public:
   const ME0Geometry* me0Geometry_;
   const DTGeometry* dtGeometry_;
 
+  const edm::ParameterSet& ps_;
   const edm::Event& ev_;
   const edm::EventSetup& es_;
 
   int verbose_;
   unsigned int region_;
   float minGEMCSCdPhi_ = 0.2;
+  bool useGE21SingleLayer_;
 
   //edm::ESHandle<MagneticField> magfield_;
   //edm::ESHandle<Propagator> propagator_;
