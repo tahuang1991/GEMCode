@@ -143,6 +143,7 @@ void
 ME0RecHitMatcher::matchME0SegmentsToSimTrackBydR(const ME0SegmentCollection& segments)
 {
     if (verboseME0Segment_) cout <<"\t matchME0SegmentsToSimTrackBydR "<< endl;
+    if (verboseME0Segment_) dumpAllME0Segments( segments );
     const int endcap((trk().momentum().eta() > 0.) ? 1 : -1);
     GlobalPoint gp_propagated(propagateToZ(AVERAGE_ME0_Z*endcap));
     for(auto iC = segments.id_begin(); iC != segments.id_end(); ++iC){

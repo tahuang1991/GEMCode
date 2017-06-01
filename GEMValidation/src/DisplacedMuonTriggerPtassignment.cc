@@ -21,6 +21,8 @@
 //step1 get fitting positions from fitting compara digis after assoicating comparator digis to LCTs
 //step2 calculate all variables used pt in assignment, requires eta,phi,radius,Z
 //step3 assgin L1 pt according to LUTs (in short future)
+
+/*
 DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const CSCCorrelatedLCTDigiCollection* lcts, const edm::EventSetup& es, const edm::Event& ev)
   : ev_(ev), es_(es), verbose_(0)
 {
@@ -31,20 +33,33 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const CSCCorr
   : ev_(ev), es_(es), verbose_(0)
 {
   setupGeometry(es);
-}
+}*/
 
 //chamberid_lcts: LCTs matched to simmuon and their associated chamberid, detid_pads: gempads matched to simmuon and their associated detid_pads
-DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsigned int, CSCCorrelatedLCTDigiContainer> chamberid_lcts, std::map<unsigned int, GEMPadDigiContainer> detid_pads, const edm::EventSetup& es, const edm::Event& ev)
-  : ev_(ev), es_(es), verbose_(0)
+DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsigned int, CSCCorrelatedLCTDigiContainer> chamberid_lcts, 
+								   //std::map<unsigned int, GEMPadDigiContainer> detid_pads,  
+								   edm::EDGetTokenT<GEMPadDigiCollection>& gemPadDigiInput_,
+								   edm::EDGetTokenT<ME0SegmentCollection>& me0SegmentInput_,
+								   const edm::ParameterSet& ps, 
+								   const edm::EventSetup& es, 
+								   const edm::Event& ev)
+  : ps_(ps), ev_(ev), es_(es)
 {
   setupGeometry(es);
   chamberid_lcts_ = chamberid_lcts;
-  detid_pads_ = detid_pads;
+  //detid_pads_ = detid_pads;
   ev.getByLabel("simMuonCSCDigis", "MuonCSCComparatorDigi", hCSCComparators);
+  minGEMCSCdPhi_ = ps_.getParameter<double>("minGEMCSCdPhi");
+  minGEMCSCdEta_ = ps_.getParameter<double>("minGEMCSCdEta");
+  verbose_ = ps_.getParameter<int>("verbose");
+
+  //me0SegmentInput_ = consumes<ME0SegmentCollection>(ps_.getParameter<edm::InputTag>("me0SegmentInput")); 
+  me0MinEta_ = ps_.getParameter<double>("me0MinEta");//eta range to use ME0
 
   initVariables();
   for (auto idlcts : chamberid_lcts_){
     CSCDetId chid(idlcts.first);
+    int endcap(chid.endcap() == 1 ? 1:-1);
     //check the ring number that muon is flying through, 2nd station as reference
     //later use this one to check whether we should use GE21 or ME21only
     if (chid.station()==2) meRing = chid.ring();
@@ -62,25 +77,50 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
     if (idlcts.second.size()>1 and verbose_>0)
 	std::cout <<"more than one LCT  available in chamber id "<< chid <<" LCT size "<< idlcts.second.size()<<std::endl;
     globalPositionOfLCT(idlcts.second, chid);
-    if (chid.station() == 1 or chid.station()==2){
-      //find GEMPads
-      for (auto idgempads : detid_pads){
+    //find GEMPads
+    if ((chid.station() == 1 and (chid.ring()==1 or chid.ring()==4) and fabs(gp_st_layer3[0].eta()) <= me0MinEta_) 
+	or (chid.station()==2 and chid.ring()==1)){  
+
+      /*for (auto idgempads : detid_pads){
         GEMDetId gemid(idgempads.first);
-        if ((chid.station() == gemid.station())
+        if (endcap*gemid.region() > 0 and
+	    (chid.station() == gemid.station())
             and chid.chamber() == gemid.chamber()){
-          //if gp_ge11 or gp_ge21 are taken from GME pad in layer1, then ignore the layer2
-          if (hasGEMPad_st1 and gemid.station()==1 and gemid.layer()==2)  continue;
-          if (hasGEMPad_st2 and gemid.station()==2 and gemid.layer()==2)  continue;
-          if (gemid.station() == 1 ) hasGEMPad_st1 = true;
-          else if (gemid.station() == 2) hasGEMPad_st2 = true;
-          else if (verbose_>0)
-            std::cout <<" gemid "<< gemid <<" CSC chamber id "<< chid << std::endl;
-          //maybe also check the dR(csc, gem)
-          globalPositionOfGEMPad(idgempads.second[0], gemid);
+
+	  if (idgempads.second.size() ==0 ) continue;
+          //matching GEMPads to CSC stubs
+          globalPositionOfGEMPad(idgempads.second, gemid);
+          if (gemid.station() == 1 and fabs(dphi_gemcsc_st[0]) < minGEMCSCdPhi_) {
+	      hasGEMPad_st1 = true;
+	  }else if (gemid.station() == 2 and fabs(dphi_gemcsc_st[1]) < minGEMCSCdPhi_) {
+	      hasGEMPad_st2 = true;
+	  }else {
+	      ;//do nothing here
+	  }
+
         }
-      }
+      }*/
+      GEMDetId id(endcap, 1, chid.station(), 1, chid.chamber(), 0);//GEM superchamber
+      edm::Handle<GEMPadDigiCollection> gem_pads;
+      if (gemvalidation::getByToken(gemPadDigiInput_, gem_pads, ev_)) 
+	  matchGEMPadsToTrack(*gem_pads.product(), id);
+      else std::cout <<"error failed to readout GEMPad "<< std::endl;
+      if (not hasGEMPad_st[chid.station() - 1]) std::cout <<"failed to find matched GEM Pad, station "<< chid.station() << std::endl;
+
     }
+
+    if (chid.station() == 1 and (chid.ring()==1 or chid.ring()==4) and fabs(gp_st_layer3[0].eta()) >= me0MinEta_){
+      //ME0DetId id(endcap, 0, chid.chamber()/2, 0);//region, layer, chamber, roll
+      edm::Handle<ME0SegmentCollection> me0_segments;
+      if (gemvalidation::getByToken(me0SegmentInput_, me0_segments, ev_))
+	    //matchME0SegmentsToTrack(*me0_segments.product(), id);
+	    matchME0SegmentsToTrack(*me0_segments.product());
+      else std::cout <<"error failed to readout ME0Segment "<< std::endl;
+      if (not hasME0) std::cout <<"failed to find matched ME0 segment "<< std::endl;
+    }
+
   }
+
   nstubs = 0;
   for (int i=0; i<4; i++)
   	if (hasStub_st[i]){
@@ -105,8 +145,8 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
 	    }
     }
   }else
+      npar = -1;
 
-  npar = -1;
   if (nstubs >= 3){
   	//find fitting radius
      fitTrackRadius(gp_st_layer3, radius_st_ME);
@@ -132,12 +172,14 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const l1t::EM
                                                                    const CSCCorrelatedLCTDigiCollection& CSCCorrelatedLCTs,
                                                                    bool doStubRecovery,
                                                                    bool matchGEMPads,
+								   const edm::ParameterSet& ps, 
                                                                    const edm::EventSetup& es,
                                                                    const edm::Event& ev)
-  : ev_(ev), es_(es), verbose_(0)
+  : ps_(ps), ev_(ev), es_(es)
 {
   setupGeometry(es);
   initVariables();
+  verbose_ = ps_.getParameter<int>("verbose");
 
   // first step: collect all stubs associated to the CSC TF Track
   std::map<unsigned int, CSCCorrelatedLCTDigiContainer> chamberid_lct;
@@ -259,12 +301,24 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const l1t::EM
 }
 
 
-DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(GlobalPoint gp1, GlobalPoint gp2, GlobalPoint gp3, GlobalPoint gp4, GlobalPoint gp5, GlobalPoint gp6, int npar_in, const edm::EventSetup& es, const edm::Event& ev)
-: ev_(ev), es_(es), verbose_(0)
+DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(GlobalPoint gp1, 
+								   GlobalPoint gp2, 
+								   GlobalPoint gp3, 
+								   GlobalPoint gp4, 
+								   GlobalPoint gp5, 
+								   GlobalPoint gp6, 
+								   int npar_in, 
+								   const edm::ParameterSet& ps, 
+								   const edm::EventSetup& es, 
+								   const edm::Event& ev)
+: ps_(ps), ev_(ev), es_(es)
 { //sim level
 
   setupGeometry(es);
   initVariables();
+  verbose_ = ps_.getParameter<int>("verbose");
+
+
   gp_st_layer3[0] = GlobalPoint(gp1);
   //use z>100 to make sure this is valid globalpoint
   if (fabs(gp1.z())>100) hasStub_st[0] = true;
@@ -281,26 +335,26 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(GlobalPoint g
   gp_st_layer3[3] = GlobalPoint(gp4);
   if (fabs(gp4.z())>100) hasStub_st[3] = true;
 
-  gp_ge11 = GlobalPoint(gp5);
-  if (fabs(gp_ge11.z())>100) hasGEMPad_st1 = true;
+  gp_ge[0] = GlobalPoint(gp5);
+  if (fabs(gp_ge[0].z())>100) hasGEMPad_st[0] = true;
   else if (verbose_>0)
-      std::cout <<" gp_ge11 x "<< gp_ge11.x()<<" y "<< gp_ge11.y()<<" z "<< gp_ge11.z()<< " eta "<< gp_ge11.eta()<<" phi "<< gp_ge11.phi()<< std::endl;
-  gp_ge21 = GlobalPoint(gp6);
-  if (fabs(gp_ge21.z())>100) hasGEMPad_st2 = true;
+      std::cout <<" gp_ge11 x "<< gp_ge[0].x()<<" y "<< gp_ge[0].y()<<" z "<< gp_ge[0].z()<< " eta "<< gp_ge[0].eta()<<" phi "<< gp_ge[0].phi()<< std::endl;
+  gp_ge[1] = GlobalPoint(gp6);
+  if (fabs(gp_ge[1].z())>100) hasGEMPad_st[1] = true;
   else if (verbose_>0)
-      std::cout <<" gp_ge21 x "<< gp_ge21.x()<<" y "<< gp_ge21.y()<<" z "<< gp_ge21.z()<< " eta "<< gp_ge21.eta()<<" phi "<< gp_ge21.phi()<< std::endl;
+      std::cout <<" gp_ge21 x "<< gp_ge[1].x()<<" y "<< gp_ge[1].y()<<" z "<< gp_ge[1].z()<< " eta "<< gp_ge[1].eta()<<" phi "<< gp_ge[1].phi()<< std::endl;
 
   if (hasStub_st[0] and hasStub_st[1])
   	npar = npar_in;
   else
       npar = -1;
 
-  if (hasGEMPad_st1)
-  	phi_gem[0] = gp_ge11.phi();
-  if (hasGEMPad_st2)
-  	phi_gem[1] = gp_ge21.phi();
+  if (hasGEMPad_st[0])
+  	phi_gem[0] = gp_ge[0].phi();
+  if (hasGEMPad_st[1])
+  	phi_gem[1] = gp_ge[1].phi();
 
-  if (hasStub_st[1] and fabs(gp2.eta())<1.6 and fabs(gp2.eta())>=1.2 and not(hasGEMPad_st2))
+  if (hasStub_st[1] and fabs(gp2.eta())<1.6 and fabs(gp2.eta())>=1.2 and not(hasGEMPad_st[1]))
       meRing =2;
   else if (hasStub_st[1] and fabs(gp2.eta())<=2.4 and fabs(gp2.eta())>=1.6)
       meRing =1;
@@ -317,12 +371,14 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(GlobalPoint g
 //}
 
 DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(const L1MuDTTrackSegPhiContainer& tracks,
+								   const edm::ParameterSet& ps, 
                                                                    const edm::EventSetup& es,
                                                                    const edm::Event& ev)
-  : ev_(ev), es_(es), verbose_(0)
+  : ps_(ps), ev_(ev), es_(es)
 {
   setupGeometry(es);
   initVariables();
+  verbose_ = ps_.getParameter<int>("verbose");
 }
 
 
@@ -334,8 +390,11 @@ DisplacedMuonTriggerPtassignment::~DisplacedMuonTriggerPtassignment(){
 void DisplacedMuonTriggerPtassignment::initVariables()
 {
   eta_st2 = -9;
-  hasGEMPad_st1 = false;
-  hasGEMPad_st2 = false;
+  dphi_me0_st1 = -9;
+  hasME0 = false;
+  hasGEMPad_st[0] = false;
+  hasGEMPad_st[1] = false;
+
   npar = -1;
   meRing = -1;
   //position-based
@@ -658,14 +717,14 @@ void DisplacedMuonTriggerPtassignment::globalPositionOfGEMPad(const GEMPadDigi g
 
   if (gemid.station() == 1){
   	const LocalPoint lpGEM(gemRoll->centreOfPad(gempad.pad()));
-  	gp_ge11 = GlobalPoint(gemRoll->toGlobal(lpGEM));
-	phi_gem[0] = gp_ge11.phi();
-	if (verbose_>0) std::cout <<" gempad in GE11 id " << gemid <<" gp eta "<< gp_ge11.eta()<<" phi "<< gp_ge11.phi()<<" pad "<<gempad.pad()<< std::endl;
+  	gp_ge[0] = GlobalPoint(gemRoll->toGlobal(lpGEM));
+	phi_gem[0] = gp_ge[0].phi();
+	if (verbose_>0) std::cout <<" gempad in GE11 id " << gemid <<" gp eta "<< gp_ge[0].eta()<<" phi "<< gp_ge[0].phi()<<" pad "<<gempad.pad()<< std::endl;
   }else if (gemid.station() == 2){
   	const LocalPoint lpGEM(gemRoll->centreOfStrip(float(gempad.pad()*2.0-1.0)));
-  	gp_ge21 = GlobalPoint(gemRoll->toGlobal(lpGEM));
-	phi_gem[1] = gp_ge21.phi();
-	if (verbose_>0) std::cout <<" gempad in GE21 id "<< gemid <<" gp eta "<< gp_ge21.eta()<<" phi "<< gp_ge21.phi()<<" pad "<<gempad.pad()<< std::endl;
+  	gp_ge[1] = GlobalPoint(gemRoll->toGlobal(lpGEM));
+	phi_gem[1] = gp_ge[1].phi();
+	if (verbose_>0) std::cout <<" gempad in GE21 id "<< gemid <<" gp eta "<< gp_ge[1].eta()<<" phi "<< gp_ge[1].phi()<<" pad "<<gempad.pad()<< std::endl;
   }else if (verbose_>0)
       std::cout <<" gemid "<< gemid  <<" not in station 1 or 3" << std::endl;
 
@@ -686,13 +745,82 @@ void DisplacedMuonTriggerPtassignment::globalPositionOfGEMPad(GEMPadDigiContaine
 	}
   	const LocalPoint lpGEM(gemRoll->centreOfPad(gempad.pad()));
   	GlobalPoint gp_pad = GlobalPoint(gemRoll->toGlobal(lpGEM));
-	if (hasStub_st[st-1] and fabs(deltaPhi(float(gp_pad.phi()), float(gp_st_layer3[st-1].phi())))<fabs(dphi_gemcsc_st[st-1]) ){
-		gp_ge11 = GlobalPoint(gp_pad);
+	float dphi = fabs(deltaPhi(float(gp_pad.phi()), float(gp_st_layer3[st-1].phi())));
+	if (hasStub_st[st-1]
+	    and fabs(dphi) < minGEMCSCdPhi_ 
+	    and fabs(gp_pad.eta() - gp_st_layer3[st-1].eta()) < minGEMCSCdEta_ 
+	    and fabs(dphi) < fabs(dphi_gemcsc_st[st-1])){
+		gp_ge[st-1] = GlobalPoint(gp_pad);
 		dphi_gemcsc_st[st-1] = fabs(deltaPhi(float(gp_pad.phi()), float(gp_st_layer3[st-1].phi())));
+	        std::cout <<"GEMid "<< gemid <<" found matched GEMPad phi "<< phi_gem[st-1] <<" dphi "<< dphi_gemcsc_st[st-1] << std::endl;
 	}
   }
 
 }
+
+
+void DisplacedMuonTriggerPtassignment::matchGEMPadsToTrack(const GEMPadDigiCollection& gemPads, GEMDetId id)
+{
+    int st = id.station();
+
+    for (auto iC = gemPads.begin(); iC != gemPads.end(); iC++){
+	GEMDetId p_id((*iC).first);
+
+	if (p_id.station() != id.station() or p_id.chamber() != id.chamber() or p_id.region() != id.region()) continue;
+
+	auto pads(gemPads.get(p_id));
+	GEMDetId ch_id(p_id.region(), p_id.ring(), p_id.station(), p_id.layer(), p_id.chamber(), 0);
+	const GEMChamber* gemChamber(gemGeometry_->chamber(ch_id.rawId()));
+	auto gemRoll(gemChamber->etaPartition(p_id.roll()));//any roll
+
+	for (auto d = pads.first; d != pads.second; d++){
+
+	    const LocalPoint lpGEM(gemRoll->centreOfPad(d->pad()));
+	    GlobalPoint gp_pad = GlobalPoint(gemRoll->toGlobal(lpGEM));
+	    float dphi = fabs(deltaPhi(float(gp_pad.phi()), float(gp_st_layer3[st-1].phi())));
+
+	    if (hasStub_st[st-1]
+		and fabs(dphi) < minGEMCSCdPhi_ 
+		and fabs(gp_pad.eta() - gp_st_layer3[st-1].eta()) < minGEMCSCdEta_ 
+		and fabs(dphi) < fabs(dphi_gemcsc_st[st-1])){
+
+		    gp_ge[st-1] = gp_pad;
+		    dphi_gemcsc_st[st-1] = fabs(deltaPhi(float(gp_pad.phi()), float(gp_st_layer3[st-1].phi())));
+		    phi_gem[st-1] = gp_pad.phi();
+		    hasGEMPad_st[st-1] = true;
+
+		    std::cout <<"GEMid "<< p_id <<" found matched GEMPad "<< d->pad() <<" phi "<< phi_gem[st-1] <<" dphi "<< dphi_gemcsc_st[st-1] << std::endl;
+	    }
+
+	}
+     }
+
+}
+
+void DisplacedMuonTriggerPtassignment::matchME0SegmentsToTrack(const ME0SegmentCollection& me0segments)
+{
+  for(auto iC = me0segments.id_begin(); iC != me0segments.id_end(); ++iC){
+    auto ch_segs = me0segments.get(*iC);
+    for(auto iS = ch_segs.first; iS != ch_segs.second; ++iS){
+	GlobalPoint gpME0( me0Geometry_->idToDet( *iC )->surface().toGlobal(iS->localPosition()) );
+	if (verbose_)
+	    std::cout <<"ME0Detid "<< iS->me0DetId()<<" segment "<< *iS << std::endl;
+	if (verbose_)
+	    std::cout <<"CSC stub gp eta "<< gp_st_layer3[0].eta() <<" phi "<< gp_st_layer3[0].phi() <<" gpME0 eta "<< gpME0.eta()<<" phi "<< gpME0.phi() << std::endl;
+	float dPhi = gpME0.phi()- gp_st_layer3[0].phi();
+	float dEta = gpME0.eta() - gp_st_layer3[0].eta();
+	if (fabs(dPhi) < minGEMCSCdPhi_ and fabs(dEta) < minGEMCSCdEta_ and fabs(dPhi) < fabs(dphi_me0_st1)){
+	    //if (verbose_) 
+		std::cout <<"Found matched ME0, id "<< iS->me0DetId() <<" phi "<< gpME0.phi() <<" eta "<< gpME0.eta() << std::endl;
+	    phi_me0 = gpME0.phi();
+	    gp_me0 = gpME0;
+	    dphi_me0_st1 = dPhi;
+	    hasME0 = true;
+	}
+    }
+  }
+}
+
 
 float DisplacedMuonTriggerPtassignment::deltaYcalculation(GlobalPoint gp1, GlobalPoint gp2) const
 {
@@ -726,7 +854,11 @@ float DisplacedMuonTriggerPtassignment::phiMomentum_Xfactor(float phi_CSC, float
 {
 
 
-   if (fabs(phi_CSC) > M_PI or fabs(phi_GEM) > M_PI) return -9;
+   if (fabs(phi_CSC) > M_PI or fabs(phi_GEM) > M_PI) {
+       std::cout <<"warning phi is not vaild , phi_CSC "<< phi_CSC <<" phi_GEM "<< phi_GEM << std::endl;
+       return -9;
+   }
+
    float dphi = deltaPhi(phi_CSC,phi_GEM);
    float y = 1.0-cos(dphi)- xfactor;
 
@@ -772,14 +904,14 @@ bool DisplacedMuonTriggerPtassignment::runPositionbased()
 }
 
 // run the direction based algorithm. Option to include GE21 hits or not
-bool DisplacedMuonTriggerPtassignment::runDirectionbased(bool useGE21)
+bool DisplacedMuonTriggerPtassignment::runDirectionbased(bool useGE21, bool useME0)
 {
-  if (useGE21 and meRing==1) return runDirectionbasedGE21();
-  else return runDirectionbasedCSConly();
+  if (useGE21 and meRing==1) return runDirectionbasedGE21(useME0);
+  else return runDirectionbasedCSConly(useME0);
 }
 
 //use GE21 if GE21 pads are available. use GE11 if GE11 pads are available
-bool DisplacedMuonTriggerPtassignment::runDirectionbasedGE21()
+bool DisplacedMuonTriggerPtassignment::runDirectionbasedGE21(bool useME0)
 {
    //if (not (npar<4 and npar>=0 and hasGEMPad_st1 and hasGEMPad_st2)) return false;
    if (not (npar<4 and npar>=0)) return false;
@@ -787,21 +919,47 @@ bool DisplacedMuonTriggerPtassignment::runDirectionbasedGE21()
 
    float xfactor_st1 = 0.0;
    float xfactor_st2 = 0.0;
-   if (meRing==1 and hasGEMPad_st1){
-	xfactor_st1 = xfactor*fabs(gp_ge11.z() - gp_st_layer3[0].z());
-   	phiM_st1 = phiMomentum_Xfactor(gp_st_layer3[0].phi(), gp_ge11.phi(), xfactor_st1);//
-   }else{
+
+   //phiM_st1
+   if (meRing==1 and fabs(gp_st_layer3[0].eta()) <= me0MinEta_){
+
+        if (not hasGEMPad_st[0]) return false;
+	xfactor_st1 = xfactor*fabs(gp_ge[0].z() - gp_st_layer3[0].z());
+   	phiM_st1 = phiMomentum_Xfactor(gp_st_layer3[0].phi(), gp_ge[0].phi(), xfactor_st1);//
+
+   }else if (meRing == 1 and fabs(gp_st_layer3[0].eta()) >= me0MinEta_ and useME0){
+
+        if (not hasME0) return false;
+	xfactor_st1 = xfactor*fabs(gp_me0.z() - gp_st_layer3[0].z());
+   	phiM_st1 = phiMomentum_Xfactor(gp_st_layer3[0].phi(), gp_me0.phi(), xfactor_st1);//
+
+   }else if (meRing == 1 and fabs(gp_st_layer3[0].eta()) >= me0MinEta_ and not(useME0)){
+   //}else if (meRing == 1 and not(useME0)){ //
+
         xfactor_st1 = xfactor*fabs(z_st_layers[0][0] - z_st_layers[0][5])/(xfactor*fabs(gp_st_layer3[0].z() - z_st_layers[0][5])+1);
    	phiM_st1 = phiMomentum_Xfactor(gp_st_layer6[0].phi(), gp_st_layer1[0].phi(), xfactor_st1);//
-   }
 
-   if (meRing==1 and hasGEMPad_st2){
-	xfactor_st2 = xfactor*fabs(gp_ge21.z() - gp_st_layer3[1].z())/(xfactor*fabs(gp_st_layer3[0].z() - gp_st_layer3[1].z())+1);
+   }else if (meRing == 2){
+
+        xfactor_st1 = xfactor*fabs(z_st_layers[0][0] - z_st_layers[0][5])/(xfactor*fabs(gp_st_layer3[0].z() - z_st_layers[0][5])+1);
+   	phiM_st1 = phiMomentum_Xfactor(gp_st_layer6[0].phi(), gp_st_layer1[0].phi(), xfactor_st1);//
+
+   }else 
+       return false;
+
+   //phiM_st2
+   if (meRing==1 and hasGEMPad_st[1]){
+
+	xfactor_st2 = xfactor*fabs(gp_ge[1].z() - gp_st_layer3[1].z())/(xfactor*fabs(gp_st_layer3[0].z() - gp_st_layer3[1].z())+1);
    	phiM_st2 = phiMomentum_Xfactor(gp_st_layer3[1].phi(), phi_gem[1], xfactor_st2);
-   }else{
+
+   }else if (meRing == 2){
+
    	xfactor_st2 = xfactor*fabs(z_st_layers[1][0] - z_st_layers[1][5])/(xfactor*fabs(gp_st_layer3[0].z() - z_st_layers[1][5])+1);
    	phiM_st2 = phiMomentum_Xfactor(gp_st_layer6[1].phi(), gp_st_layer1[1].phi(), xfactor_st2);//
-   }
+
+   }else 
+       return false;
 
    float xfactor_st12 = xfactor*fabs(gp_st_layer3[0].z() - gp_st_layer3[1].z())/(xfactor*fabs(gp_st_layer3[0].z() - gp_st_layer3[1].z())+1);
    float xfactor_st23 = xfactor*fabs(gp_st_layer3[1].z() - gp_st_layer3[2].z())/(xfactor*fabs(gp_st_layer3[0].z() - gp_st_layer3[2].z())+1);
@@ -816,7 +974,12 @@ bool DisplacedMuonTriggerPtassignment::runDirectionbasedGE21()
    dPhi_dir_st2_st23 = (fabs(phiM_st2)<4 and fabs(phiM_st23)<4)? deltaPhi(phiM_st2, phiM_st23):-9;
    dPhi_dir_st12_st23 = (fabs(phiM_st12)<4 and fabs(phiM_st23)<4)? deltaPhi(phiM_st12, phiM_st23):-9;
 
-   if (npar>=0 and npar<=3){
+   if (fabs(dPhi_dir_st1_st2) > 4){
+   	std::cout <<"error in runDirectionbased withGE21, dPhi_dir_st1_st2 "<< dPhi_dir_st1_st2 <<" phiM_st1 "<< phiM_st1 <<" phiM_st2 "<< phiM_st2 <<std::endl;
+	return false;
+   }
+
+   /*if (npar>=0 and npar<=3){
         direction_pt = 2.0;
    	int neta = PtassignmentHelper::GetEtaPartition(eta_st2);
    	for (int i=0; i<PtassignmentHelper::NPt2; i++){
@@ -827,32 +990,54 @@ bool DisplacedMuonTriggerPtassignment::runDirectionbasedGE21()
 		if (verbose_>0)
 		    std::cout <<"eta "<< eta_st2 <<" neta "<< neta <<" npar "<< npar <<" fabs dphi "<< fabs(dPhi_dir_st1_st2) <<" cut "<< PtassignmentHelper::DirectionbasedDeltaPhiLUT[i][neta][npar] <<" direction pt "<< direction_pt<<std::endl;
 	}
-   }
+   }*/
    return true;
 }
 
 
-bool DisplacedMuonTriggerPtassignment::runDirectionbasedCSConly()
+bool DisplacedMuonTriggerPtassignment::runDirectionbasedCSConly(bool useME0)
 {
 
    //z_st_layers should be used at sim level, set Z and phi for layer1 and layer6 at sim level, or rebuild constructor?
    if (not ( npar<4 and npar>=0)) return false;
    float xfactor_st1 = 0.0;
    float xfactor_st2 = 0.0;
-   if (meRing==1 and hasGEMPad_st1){
-   	xfactor_st1 = xfactor*fabs(gp_ge11.z() - gp_st_layer3[0].z());
-   	phiM_st1 = phiMomentum_Xfactor(gp_st_layer3[0].phi(), gp_ge11.phi(), xfactor_st1);//
-   }else{
-   	//xfactor_st1 = xfactor*fabs(gp_st1_layer1.z() - gp_st1_layer6.z())/(xfactor*fabs(gp_st1.z() - gp_st1_layer6.z())+1);
-   	xfactor_st1 = xfactor*fabs(z_st_layers[0][0] - z_st_layers[0][5])/(xfactor*fabs(gp_st_layer3[0].z() - z_st_layers[0][5])+1);
-   	phiM_st1 = phiMomentum_Xfactor(phi_st_layers[0][5], phi_st_layers[0][0], xfactor_st1);//
-   }
+   
+   //phiM_st1
+   if (meRing==1 and fabs(gp_st_layer3[0].eta()) <= me0MinEta_){
+
+        if (not hasGEMPad_st[0]) return false;
+	xfactor_st1 = xfactor*fabs(gp_ge[0].z() - gp_st_layer3[0].z());
+   	phiM_st1 = phiMomentum_Xfactor(gp_st_layer3[0].phi(), gp_ge[0].phi(), xfactor_st1);//
+
+   }else if (meRing == 1 and fabs(gp_st_layer3[0].eta()) >= me0MinEta_ and useME0){
+
+        if (not hasME0) return false;
+	xfactor_st1 = xfactor*fabs(gp_me0.z() - gp_st_layer3[0].z());
+   	phiM_st1 = phiMomentum_Xfactor(gp_st_layer3[0].phi(), gp_me0.phi(), xfactor_st1);//
+
+   }else if (meRing == 1 and fabs(gp_st_layer3[0].eta()) >= me0MinEta_ and not(useME0)){
+
+        xfactor_st1 = xfactor*fabs(z_st_layers[0][0] - z_st_layers[0][5])/(xfactor*fabs(gp_st_layer3[0].z() - z_st_layers[0][5])+1);
+   	phiM_st1 = phiMomentum_Xfactor(gp_st_layer6[0].phi(), gp_st_layer1[0].phi(), xfactor_st1);//
+
+   }else if (meRing == 2){
+
+        xfactor_st1 = xfactor*fabs(z_st_layers[0][0] - z_st_layers[0][5])/(xfactor*fabs(gp_st_layer3[0].z() - z_st_layers[0][5])+1);
+   	phiM_st1 = phiMomentum_Xfactor(gp_st_layer6[0].phi(), gp_st_layer1[0].phi(), xfactor_st1);//
+
+   }else 
+       return false;
+
+
+
    xfactor_st2 = xfactor*fabs(z_st_layers[1][0] - z_st_layers[1][5])/(xfactor*fabs(gp_st_layer3[0].z() - z_st_layers[1][5])+1);
    float xfactor_st12 = xfactor*fabs(gp_st_layer3[0].z() - gp_st_layer3[1].z())/(xfactor*fabs(gp_st_layer3[0].z() - gp_st_layer3[1].z())+1);
    float xfactor_st23 = xfactor*fabs(gp_st_layer3[1].z() - gp_st_layer3[2].z())/(xfactor*fabs(gp_st_layer3[0].z() - gp_st_layer3[2].z())+1);
    phiM_st2 = phiMomentum_Xfactor(phi_st_layers[1][5], phi_st_layers[1][0], xfactor_st2);
    phiM_st12 = phiMomentum_Xfactor(gp_st_layer3[1].phi(), gp_st_layer3[0].phi(), xfactor_st12);
    phiM_st23 = phiMomentum_Xfactor(gp_st_layer3[2].phi(), gp_st_layer3[1].phi(), xfactor_st23);
+
    //if phi in layer1 and layer6 in station1 and 2 are not set, then here phiM return -9
    if (verbose_>0)  std::cout <<"DisplacedMuonTrigger CSConly direction, meRing "<< meRing <<" xfactor_st1 "<< xfactor_st1 <<" phiM_st1 "<< phiM_st1
        			<<" xfactor_st2 "<< xfactor_st2 <<" phiM_st2 "<< phiM_st2 << std::endl;
@@ -862,7 +1047,12 @@ bool DisplacedMuonTriggerPtassignment::runDirectionbasedCSConly()
    dPhi_dir_st2_st23 = (fabs(phiM_st2)<4 and fabs(phiM_st23)<4)? deltaPhi(phiM_st2, phiM_st23):-9;
    dPhi_dir_st12_st23 = (fabs(phiM_st12)<4 and fabs(phiM_st23)<4)? deltaPhi(phiM_st12, phiM_st23):-9;
 
-   if (npar>=0 and npar<=3){
+   if (fabs(dPhi_dir_st1_st2) > 4){
+   	std::cout <<"error in runDirectionbased withoutGE21, dPhi_dir_st1_st2 "<< dPhi_dir_st1_st2 <<" phiM_st1 "<< phiM_st1 <<" phiM_st2 "<< phiM_st2 <<std::endl;
+	return false;
+   }
+
+   /*if (npar>=0 and npar<=3){
         direction_pt = 2.0;
    	int neta = PtassignmentHelper::GetEtaPartition(eta_st2);
    	for (int i=0; i<PtassignmentHelper::NPt2; i++){
@@ -874,7 +1064,7 @@ bool DisplacedMuonTriggerPtassignment::runDirectionbasedCSConly()
 		    std::cout <<"eta "<< eta_st2 <<" neta "<< neta <<" npar "<< npar <<" fabs dphi "<< fabs(dPhi_dir_st1_st2) <<" cut "<< PtassignmentHelper::DirectionbasedDeltaPhiME21CSConlyLUT[i][neta][npar] <<" direction pt "<< direction_pt<<std::endl;
 	}
 
-   }
+   }*/
    return true;
 }
 
@@ -885,10 +1075,8 @@ void DisplacedMuonTriggerPtassignment::runHybrid(bool useGE21)
    //firstly to run through position-based and direction-based
    hybrid_pt = 2.0;
    runPositionbased();
-   if (useGE21)
-   	runDirectionbasedGE21();
-   else
- 	runDirectionbasedCSConly();
+   runDirectionbased(useGE21);
+   
    if (npar>=0 and npar<=3){
 	if (fabs(ddY123)>=40 or fabs(dPhi_dir_st1_st2)>=1.0){
 	   hybrid_pt = 2.0;

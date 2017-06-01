@@ -89,7 +89,7 @@ SimTrackMatching = cms.PSet(
     ),
     ## ME0
     me0SimHit = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.InputTag("g4SimHits", "MuonME0Hits"),
         run = cms.bool(True),
         simMuOnly = cms.bool(False),
@@ -97,7 +97,7 @@ SimTrackMatching = cms.PSet(
         minNHitsChamber = cms.int32(4),
     ),
     me0DigiPreReco = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.InputTag("simMuonME0Digis192"),
         run = cms.bool(True),
         minBX = cms.int32(0),
@@ -106,7 +106,7 @@ SimTrackMatching = cms.PSet(
         minNHitsChamber = cms.int32(4),
     ),
     me0ReDigiPreReco = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.InputTag("simMuonME0ReDigis192"),
         run = cms.bool(True),
         minBX = cms.int32(0),
@@ -115,7 +115,7 @@ SimTrackMatching = cms.PSet(
         minNHitsChamber = cms.int32(4),
     ),
     me0RecHit = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.InputTag("me0RecHits192"),
         run = cms.bool(True),
         minBX = cms.int32(0),
@@ -123,7 +123,7 @@ SimTrackMatching = cms.PSet(
         minNHitsChamber = cms.int32(4),
     ),
     me0Segment = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.InputTag("me0Segments192"),
         run = cms.bool(True),
         minBX = cms.int32(0),
@@ -377,6 +377,13 @@ SimTrackMatching = cms.PSet(
 	validInputTags = cms.InputTag("genParticles"),
 	verbose = cms.int32(0),
 	run = cms.bool(True),
+    ),
+    displacedMuPtAssignment = cms.PSet(
+	verbose = cms.int32(0),
+	minGEMCSCdPhi = cms.double(0.3),
+	minGEMCSCdEta = cms.double(0.25),
+	me0MinEta = cms.double(2.1),
+	
     ),
     sectorProcessor = csctfTrackDigis.SectorProcessor,
 #       SRLUT = cms.PSet(

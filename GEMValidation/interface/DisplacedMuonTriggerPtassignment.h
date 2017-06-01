@@ -15,8 +15,10 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/Framework/interface/ESHandle.h"
+#include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "FWCore/Utilities/interface/InputTag.h"
+#include "FWCore/ServiceRegistry/interface/Service.h"
 
 #include "MagneticField/Engine/interface/MagneticField.h"
 #include "TrackingTools/GeomPropagators/interface/Propagator.h"
@@ -43,6 +45,7 @@
 #include "L1Trigger/DTTrackFinder/interface/L1MuDTTrack.h"
 #include "L1Trigger/DTTrackFinder/src/L1MuDTTrackSegPhi.h"
 #include "DataFormats/L1TMuon/interface/EMTFTrack.h"
+#include "DataFormats/GEMRecHit/interface/ME0SegmentCollection.h"
 
 /* #include "CondFormats/L1TObjects/interface/L1MuTriggerScales.h" */
 /* #include "CondFormats/L1TObjects/interface/L1MuTriggerPtScale.h" */
@@ -85,17 +88,24 @@ public:
   //step1 get fitting positions from fitting compara digis after assoicating comparator digis to LCTs
   //step2 calculate all variables used pt assignment, requires eta,phi,radius,Z
   //step3 assgin L1 pt according to LUTs (in short future)
-  DisplacedMuonTriggerPtassignment(const CSCCorrelatedLCTDigiCollection* lcts,
+
+  /*DisplacedMuonTriggerPtassignment(const CSCCorrelatedLCTDigiCollection* lcts,
+				   const edm::ParameterSet& ps,
                                    const edm::EventSetup& es,
                                    const edm::Event& iEvent); // region_=2, not used yet
 
   DisplacedMuonTriggerPtassignment(const CSCCorrelatedLCTDigiContainer lcts,
                                    const CSCDetIdContainer cscids,
+				   const edm::ParameterSet& ps,
                                    const edm::EventSetup& es,
                                    const edm::Event& iEvent);//not used yet
+				   */
 
   DisplacedMuonTriggerPtassignment(std::map<unsigned int, CSCCorrelatedLCTDigiContainer> chamberid_lct,
-                                   std::map<unsigned int, GEMPadDigiContainer> detid_pads,
+                                   //std::map<unsigned int, GEMPadDigiContainer> detid_pads,
+				   edm::EDGetTokenT<GEMPadDigiCollection>& gemPadDigiInput_,
+				   edm::EDGetTokenT<ME0SegmentCollection>& me0SegmentInput_,
+				   const edm::ParameterSet& ps,
                                    const edm::EventSetup& es,
                                    const edm::Event& iEvent);
 
@@ -105,6 +115,7 @@ public:
                                    const CSCCorrelatedLCTDigiCollection&,
                                    bool doStubRecovery,
                                    bool matchGEMPads,
+				   const edm::ParameterSet& ps,
                                    const edm::EventSetup& es,
                                    const edm::Event& iEvent);
 
@@ -115,11 +126,13 @@ public:
                                    GlobalPoint gp_ge11,
                                    GlobalPoint gp_ge21,
                                    int npar,
+				   const edm::ParameterSet& ps,
                                    const edm::EventSetup& es,
                                    const  edm::Event& iEvent); //sim level
 
   // constructor for barrel
   DisplacedMuonTriggerPtassignment(const L1MuDTTrackSegPhiContainer&,
+				   const edm::ParameterSet& ps,
                                    const edm::EventSetup& es,
                                    const edm::Event& iEvent);
 
@@ -148,10 +161,10 @@ public:
 
   // pT assignment algorithms
   bool runPositionbased();
-  bool runDirectionbased(bool useGE21);
+  bool runDirectionbased(bool useGE21, bool useME0=true);
   bool runPositionbasedBarrel();
-  bool runDirectionbasedGE21();
-  bool runDirectionbasedCSConly();
+  bool runDirectionbasedGE21(bool useME0);
+  bool runDirectionbasedCSConly(bool useME0);
   bool runHybrid(float pt, bool useGE21);
   void runHybrid(bool useGE21);
 
@@ -173,7 +186,10 @@ public:
   float getlocalPhiDirection(int st) const;
   float getdeltaPhiDirection(int st1, int st2) const;
   float getRadiusSt(int st) const  { return radius_st_ME[st-1]; }
-  float getPhiGEM(int st) const {return phi_gem[st-1]; }
+  float getGEMPhi(int st) const {return phi_gem[st-1]; }
+  float getCSCPhi(int st) const {return gp_st_layer3[st-1].phi(); }
+  float getCSCEta(int st) const {return gp_st_layer3[st-1].eta(); }
+  bool checkME0Region() const { return (fabs(gp_st_layer3[0].eta()) >= me0MinEta_); }
   float getNStubs() const { return nstubs; }
 
 
@@ -218,7 +234,9 @@ public:
                          float* fit_phi_layers, float* fit_z_layers, float& perp);
   void fitTrackRadius(GlobalPoint* gps, float* radius);
 
-
+  //void matchME0SegmentsToTrack(const ME0SegmentCollection& me0segments, ME0DetId id);
+  void matchME0SegmentsToTrack(const ME0SegmentCollection& me0segments);
+  void matchGEMPadsToTrack(const GEMPadDigiCollection& gemPads, GEMDetId id);
 
  private:
 
@@ -240,11 +258,17 @@ public:
   const ME0Geometry* me0Geometry_;
   const DTGeometry* dtGeometry_;
 
+  const edm::ParameterSet& ps_;
   const edm::Event& ev_;
   const edm::EventSetup& es_;
 
   int verbose_;
   unsigned int region_;
+  
+  float minGEMCSCdPhi_;
+  float minGEMCSCdEta_;
+  float me0MinEta_;
+  //edm::EDGetTokenT<ME0SegmentCollection> me0SegmentInput_;
 
   //edm::ESHandle<MagneticField> magfield_;
   //edm::ESHandle<Propagator> propagator_;
@@ -280,8 +304,8 @@ public:
   int nstubs;
   bool hasStub_st[4] = {false, false, false, false};
   bool isEven[4]={false, false, false, false};
-  bool hasGEMPad_st1;
-  bool hasGEMPad_st2;
+  bool hasGEMPad_st[2] = {false, false};
+  bool hasME0;
   float radius_st_ME[4] = {-1.0, -1.0, -1.0, -1.0};
   float xfactor;
   float eta_st2;
@@ -289,7 +313,9 @@ public:
   int meRing ;
   float eta_st[4] = {-9, -9, -9, -9};
   float phi_gem[2] = {-9, -9};
+  float phi_me0 = -9;
   float dphi_gemcsc_st[2] = {-99, -99};
+  float dphi_me0_st1 = -9;
   float phi_st_layers[4][6] = {{-9, -9, -9, -9, -9, -9},
       			       {-9, -9, -9, -9, -9, -9},
       			       {-9, -9, -9, -9, -9, -9},
@@ -301,7 +327,9 @@ public:
   GlobalPoint gp_st_layer3[4];
   GlobalPoint gp_st_layer1[4];
   GlobalPoint gp_st_layer6[4];
-  GlobalPoint gp_ge11, gp_ge21;
+  //GlobalPoint gp_ge11, gp_ge21;
+  GlobalPoint gp_ge[2];//
+  GlobalPoint gp_me0;
 
   //position-based
   float ddY123;

@@ -60,7 +60,7 @@ ME0DigiMatcher::matchPreRecoDigisToSimTrack(const ME0DigiPreRecoCollection& digi
         if (std::fabs(d->x() - hit.localPosition().x()) < .5  and
             std::fabs(d->y() - hit.localPosition().y()) < 2.5*6 ){
           match = true;
-          cout << "\t...matches this digi!" << endl;
+          //cout << "\t...matches this digi!" << endl;
           break;
         }
       }
