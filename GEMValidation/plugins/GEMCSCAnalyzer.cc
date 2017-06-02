@@ -137,6 +137,7 @@ struct MyTrackEff
   Float_t genGdMu_vz;
   Float_t genGdMu_dxy;
   Float_t genGdMu_dR;
+  Float_t genGdMu_lxy;
 
   Float_t beamSpot_x;
   Float_t beamSpot_y;
@@ -476,6 +477,7 @@ void MyTrackEff::init()
   genGdMu_vz =0.0;
   genGdMu_dxy =0.0;
   genGdMu_dR = 10.0;
+  genGdMu_lxy = 0.0;
 
   beamSpot_x =0.0;
   beamSpot_y =0.0;
@@ -922,6 +924,7 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("genGdMu_vy", &genGdMu_vy, "genGdMu_vy/F");
   t->Branch("genGdMu_vz", &genGdMu_vz, "genGdMu_vz/F");
   t->Branch("genGdMu_dxy", &genGdMu_dxy, "genGdMu_dxy/F");
+  t->Branch("genGdMu_lxy", &genGdMu_lxy, "genGdMu_lxy/F");
   t->Branch("genGdMu_dR", &genGdMu_dR, "genGdMu_dR/F");
 
 
@@ -1806,9 +1809,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   const SimTrack &t = match_sh.trk();
 
 
+  /*
   auto matchedDarkBoson(match_gen.getMatchedDarkBoson());
   auto matchedGENMuon(match_gen.getMatchedGENMuon());
-  /*
   if (match_gen.checkRunOK()){
   	std::cout <<" matched dark boson mass "<< matchedDarkBoson->mass() << std::endl;
  	std::cout <<"matched muon pt "<< matchedGENMuon->pt()<<" phi "<< matchedGENMuon->phi()<<" eta "<< matchedGENMuon->eta() <<" dR "<< match_gen.matchedGenMudR()<<" dxy "<< match_gen.matchedGenMudxy() <<std::endl;
@@ -1832,37 +1835,42 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     etrk_[s].endcap = (etrk_[s].eta > 0.) ? 1 : -1;
 
   if (match_gen.checkRunOK()){
-    // Dark photon
-    etrk_[s].genGd_m = matchedDarkBoson->mass();
-    etrk_[s].genGd_E = matchedDarkBoson->energy();
-    etrk_[s].genGd_p = matchedDarkBoson->p();
-    etrk_[s].genGd_pt = matchedDarkBoson->pt();
-    etrk_[s].genGd_px = matchedDarkBoson->px();
-    etrk_[s].genGd_py = matchedDarkBoson->py();
-    etrk_[s].genGd_pz = matchedDarkBoson->pz();
-    etrk_[s].genGd_eta = matchedDarkBoson->eta();
-    etrk_[s].genGd_phi = matchedDarkBoson->phi();
-    etrk_[s].genGd_vx = matchedDarkBoson->vx();
-    etrk_[s].genGd_vy = matchedDarkBoson->vy();
-    etrk_[s].genGd_vz = matchedDarkBoson->vz();
-
-     etrk_[s].genGd_index = match_gen.darkBosonIndex();
-     etrk_[s].genGdMu_index = match_gen.genMuonIndex();
-     etrk_[s].genGdMu_p = matchedGENMuon->p();
-     etrk_[s].genGdMu_pt = matchedGENMuon->pt();
-     etrk_[s].genGdMu_px = matchedGENMuon->px();
-     etrk_[s].genGdMu_py = matchedGENMuon->py();
-     etrk_[s].genGdMu_pz = matchedGENMuon->pz();
-     etrk_[s].genGdMu_eta = matchedGENMuon->eta();
-     etrk_[s].genGdMu_phi = matchedGENMuon->phi();
-     etrk_[s].genGdMu_vx = matchedGENMuon->vx();
-     etrk_[s].genGdMu_vy = matchedGENMuon->vy();
-     etrk_[s].genGdMu_vz = matchedGENMuon->vz();
-     etrk_[s].genGdMu_dxy = match_gen.matchedGenMudxy();
-     etrk_[s].genGdMu_dR = match_gen.matchedGenMudR();
+    auto matchedDarkBoson(match_gen.getMatchedDarkBoson());
+    auto matchedGENMuon(match_gen.getMatchedGENMuon());
+    if (matchedDarkBoson){
+	etrk_[s].genGd_m = matchedDarkBoson->mass();
+	etrk_[s].genGd_E = matchedDarkBoson->energy();
+	etrk_[s].genGd_p = matchedDarkBoson->p();
+	etrk_[s].genGd_pt = matchedDarkBoson->pt();
+	etrk_[s].genGd_px = matchedDarkBoson->px();
+	etrk_[s].genGd_py = matchedDarkBoson->py();
+	etrk_[s].genGd_pz = matchedDarkBoson->pz();
+	etrk_[s].genGd_eta = matchedDarkBoson->eta();
+	etrk_[s].genGd_phi = matchedDarkBoson->phi();
+	etrk_[s].genGd_vx = matchedDarkBoson->vx();
+	etrk_[s].genGd_vy = matchedDarkBoson->vy();
+	etrk_[s].genGd_vz = matchedDarkBoson->vz();
+	 etrk_[s].genGd_index = match_gen.darkBosonIndex();
+	 etrk_[s].genGdMu_index = match_gen.genMuonIndex();
+    }
+    if (matchedGENMuon){
+	 etrk_[s].genGdMu_p = matchedGENMuon->p();
+	 etrk_[s].genGdMu_pt = matchedGENMuon->pt();
+	 etrk_[s].genGdMu_px = matchedGENMuon->px();
+	 etrk_[s].genGdMu_py = matchedGENMuon->py();
+	 etrk_[s].genGdMu_pz = matchedGENMuon->pz();
+	 etrk_[s].genGdMu_eta = matchedGENMuon->eta();
+	 etrk_[s].genGdMu_phi = matchedGENMuon->phi();
+	 etrk_[s].genGdMu_vx = matchedGENMuon->vx();
+	 etrk_[s].genGdMu_vy = matchedGENMuon->vy();
+	 etrk_[s].genGdMu_vz = matchedGENMuon->vz();
+	 etrk_[s].genGdMu_lxy = std::sqrt(etrk_[s].genGdMu_vx*etrk_[s].genGdMu_vx + etrk_[s].genGdMu_vy*etrk_[s].genGdMu_vy);
+	 etrk_[s].genGdMu_dxy = match_gen.matchedGenMudxy();
+	 etrk_[s].genGdMu_dR = match_gen.matchedGenMudR();
+    }
+  }
   }
 
-  }
 
   int chargesign = (t.charge()>0? 1:0);
   float pt = t.momentum().pt();

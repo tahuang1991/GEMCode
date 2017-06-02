@@ -9,10 +9,19 @@ DisplacedGENMuonMatcher::DisplacedGENMuonMatcher(const SimTrack& t, const SimVer
   auto displacedGenMu_= conf().getParameter<edm::ParameterSet>("displacedGenMu");
   verbose_ = displacedGenMu_.getParameter<int>("verbose");
   run_ = displacedGenMu_.getParameter<bool>("run");
+  sampleType_ = displacedGenMu_.getParameter<int>("sampleType");
 
   edm::Handle<reco::GenParticleCollection> genParticles;
   runOK_ = false;
-  if(gemvalidation::getByToken(inputToken_, genParticles, event()) and run_) matchDisplacedGENMuonMatcherToSimTrack(*genParticles.product());
+  matchedGENMuon_ = NULL;
+  matchedDarkBoson_ = NULL;
+  matchedGenMu_dxy = 0.0;
+
+  //if(gemvalidation::getByToken(inputToken_, genParticles, event()) and run_) matchDisplacedGENMuonMatcherToSimTrack(*genParticles.product());
+  bool getProduct = gemvalidation::getByToken(inputToken_, genParticles, event());
+  if(getProduct and run_ and sampleType_ == DarkSUSY) matchDisplacedGENMuonMatcherToSimTrack(*genParticles.product());
+  else if (getProduct and run_ and sampleType_ == MuonGun) matchDisplacedGENMuonFromMuonGunMatcherToSimTrack(*genParticles.product());
+  else if (not getProduct) std::cout <<"Can NOT readout GenParticles collections" << std::endl;
 
 }
 
@@ -288,6 +297,41 @@ DisplacedGENMuonMatcher::matchDisplacedGENMuonMatcherToSimTrack(const reco::GenP
   matchedGENMuons_.push_back(genMuonGroups[index1][0]);
   matchedGENMuons_.push_back(genMuonGroups[index1][1]);
   matchedDarkBoson_ = genGd[index1];
+}
+
+
+void
+DisplacedGENMuonMatcher::matchDisplacedGENMuonFromMuonGunMatcherToSimTrack(const reco::GenParticleCollection& genParticles)
+{
+
+  beamSpot_x = 0;//beamSpot->position().x();
+  beamSpot_y = 0;//beamSpot->position().y();
+  beamSpot_z = 0;//beamSpot->position().z();
+
+  float minDeltaR = 0.6;
+  int counterGenParticle = 0;
+  for(reco::GenParticleCollection::const_iterator iGenParticle = genParticles.begin();  iGenParticle != genParticles.end();  ++iGenParticle) {
+    counterGenParticle++;
+    // Check if gen particle is muon (pdgId = +/-13) and stable (status = 1)
+    if ( fabs( iGenParticle->pdgId() ) == 13 and iGenParticle->status() == 1 ) {
+      if (verbose_) std::cout << "Muon " << counterGenParticle << " " << iGenParticle->status() << " (vx, vy, vz) " << iGenParticle->pdgId() << " " << iGenParticle->vx() << " " << iGenParticle->vy() << " " << iGenParticle->vz() <<" pt "<< iGenParticle->pt() <<" eta "<< iGenParticle->eta() <<" phi "<< iGenParticle->phi()<<" simTrack eta "<< trk().momentum().eta()<<" phi "<< trk().momentum().phi() << std::endl;
+	const double deltaR(reco::deltaR(iGenParticle->eta(), iGenParticle->phi(), trk().momentum().eta(), trk().momentum().phi()));
+	if (deltaR < minDeltaR) {
+	  minDeltaR = deltaR;
+	  matchedGENMuon_ = iGenParticle->clone();
+	  matchedGenMu_dR = deltaR;
+	}
+    }
+    if (matchedGENMuon_) {
+	runOK_ = true;
+	matchedGenMu_dxy = dxy(matchedGENMuon_->px(), matchedGENMuon_->py(), matchedGENMuon_->vx(), matchedGENMuon_->vy(), matchedGENMuon_->pt());
+    }
+
+    if (verbose_)
+	std::cout <<" minDR "<< minDeltaR << " matchedGenMu_dR "<< matchedGenMu_dR <<" matchedGenMu_dxy "<< matchedGenMu_dxy << std::endl;
+
+  }
+
 }
 
 double 

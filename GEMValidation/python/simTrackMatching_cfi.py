@@ -377,6 +377,7 @@ SimTrackMatching = cms.PSet(
 	validInputTags = cms.InputTag("genParticles"),
 	verbose = cms.int32(0),
 	run = cms.bool(True),
+	sampleType = cms.int32(0),
     ),
     displacedMuPtAssignment = cms.PSet(
 	verbose = cms.int32(0),

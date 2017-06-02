@@ -50,8 +50,11 @@ private:
 
   int verbose_;
   bool run_;
- 
+  enum {MuonGun, DarkSUSY};
+  int sampleType_;
+
   void matchDisplacedGENMuonMatcherToSimTrack(const reco::GenParticleCollection& genParticles);
+  void matchDisplacedGENMuonFromMuonGunMatcherToSimTrack(const reco::GenParticleCollection& genParticles);
 
   /* bool PtOrder (const reco::GenParticle* p1, const reco::GenParticle* p2); */
   double dxy(double px, double py, double vx, double vy, double pt);
