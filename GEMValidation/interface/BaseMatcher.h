@@ -69,6 +69,9 @@ public:
   /// general interface to propagation
   GlobalPoint propagateToZ(GlobalPoint &inner_point, GlobalVector &inner_vector, float z) const;
 
+  /// general interface to propagation
+  GlobalPoint propagateToZCharge(GlobalPoint &inner_point, GlobalVector &inner_vector, float z, int charge) const;
+
   /// propagation for a track starting from a vertex
   GlobalPoint propagateToZ(float z) const;
 
@@ -84,7 +87,7 @@ public:
   GlobalPoint propagatedPositionGEM() const;
 
   /// propaate from ME0 to CSC
-  GlobalPoint propagateFromME0ToCSC(ME0Segment segment, float pt, int st, bool evenodd) const;
+  GlobalPoint propagateFromME0ToCSC(ME0Segment segment, float pt, int charge, int st, bool evenodd) const;
 
   /// geometry
   void setGEMGeometry(const GEMGeometry *geom) {gemGeometry_ = geom;}

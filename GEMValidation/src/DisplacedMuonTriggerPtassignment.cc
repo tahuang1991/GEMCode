@@ -109,7 +109,7 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
 
     }
 
-    if (chid.station() == 1 and (chid.ring()==1 or chid.ring()==4) and fabs(gp_st_layer3[0].eta()) >= me0MinEta_){
+    if (chid.station() == 1 and (chid.ring()==1 or chid.ring()==4) and fabs(gp_st_layer3[0].eta()) > me0MinEta_-0.01){
       //ME0DetId id(endcap, 0, chid.chamber()/2, 0);//region, layer, chamber, roll
       edm::Handle<ME0SegmentCollection> me0_segments;
       if (gemvalidation::getByToken(me0SegmentInput_, me0_segments, ev_))
@@ -904,14 +904,14 @@ bool DisplacedMuonTriggerPtassignment::runPositionbased()
 }
 
 // run the direction based algorithm. Option to include GE21 hits or not
-bool DisplacedMuonTriggerPtassignment::runDirectionbased(bool useGE21, bool useME0)
+bool DisplacedMuonTriggerPtassignment::runDirectionbased(bool useME0GE11, bool useGE21)
 {
-  if (useGE21 and meRing==1) return runDirectionbasedGE21(useME0);
-  else return runDirectionbasedCSConly(useME0);
+  if (useGE21 and meRing==1) return runDirectionbasedGE21(useME0GE11);
+  else return runDirectionbasedCSConly(useME0GE11);
 }
 
 //use GE21 if GE21 pads are available. use GE11 if GE11 pads are available
-bool DisplacedMuonTriggerPtassignment::runDirectionbasedGE21(bool useME0)
+bool DisplacedMuonTriggerPtassignment::runDirectionbasedGE21(bool useME0GE11)
 {
    //if (not (npar<4 and npar>=0 and hasGEMPad_st1 and hasGEMPad_st2)) return false;
    if (not (npar<4 and npar>=0)) return false;
@@ -921,20 +921,21 @@ bool DisplacedMuonTriggerPtassignment::runDirectionbasedGE21(bool useME0)
    float xfactor_st2 = 0.0;
 
    //phiM_st1
-   if (meRing==1 and fabs(gp_st_layer3[0].eta()) <= me0MinEta_){
+   if (meRing==1 and fabs(gp_st_layer3[0].eta()) <= me0MinEta_ and useME0GE11){
 
         if (not hasGEMPad_st[0]) return false;
 	xfactor_st1 = xfactor*fabs(gp_ge[0].z() - gp_st_layer3[0].z());
    	phiM_st1 = phiMomentum_Xfactor(gp_st_layer3[0].phi(), gp_ge[0].phi(), xfactor_st1);//
 
-   }else if (meRing == 1 and fabs(gp_st_layer3[0].eta()) >= me0MinEta_ and useME0){
+   //}else if (meRing == 1 and fabs(gp_st_layer3[0].eta()) >= me0MinEta_-0.05 and useME0GE11){
+   }else if (meRing == 1 and fabs(gp_st_layer3[0].eta()) >= me0MinEta_ and useME0GE11){
 
         if (not hasME0) return false;
 	xfactor_st1 = xfactor*fabs(gp_me0.z() - gp_st_layer3[0].z());
    	phiM_st1 = phiMomentum_Xfactor(gp_st_layer3[0].phi(), gp_me0.phi(), xfactor_st1);//
 
-   }else if (meRing == 1 and fabs(gp_st_layer3[0].eta()) >= me0MinEta_ and not(useME0)){
-   //}else if (meRing == 1 and not(useME0)){ //
+   //}else if (meRing == 1 and fabs(gp_st_layer3[0].eta()) >= me0MinEta_ and not(useME0)){
+   }else if (meRing == 1 and not(useME0GE11)){ //
 
         xfactor_st1 = xfactor*fabs(z_st_layers[0][0] - z_st_layers[0][5])/(xfactor*fabs(gp_st_layer3[0].z() - z_st_layers[0][5])+1);
    	phiM_st1 = phiMomentum_Xfactor(gp_st_layer6[0].phi(), gp_st_layer1[0].phi(), xfactor_st1);//
@@ -995,7 +996,7 @@ bool DisplacedMuonTriggerPtassignment::runDirectionbasedGE21(bool useME0)
 }
 
 
-bool DisplacedMuonTriggerPtassignment::runDirectionbasedCSConly(bool useME0)
+bool DisplacedMuonTriggerPtassignment::runDirectionbasedCSConly(bool useME0GE11)
 {
 
    //z_st_layers should be used at sim level, set Z and phi for layer1 and layer6 at sim level, or rebuild constructor?
@@ -1004,19 +1005,20 @@ bool DisplacedMuonTriggerPtassignment::runDirectionbasedCSConly(bool useME0)
    float xfactor_st2 = 0.0;
    
    //phiM_st1
-   if (meRing==1 and fabs(gp_st_layer3[0].eta()) <= me0MinEta_){
+   if (meRing==1 and fabs(gp_st_layer3[0].eta()) <= me0MinEta_ and useME0GE11){
 
         if (not hasGEMPad_st[0]) return false;
 	xfactor_st1 = xfactor*fabs(gp_ge[0].z() - gp_st_layer3[0].z());
    	phiM_st1 = phiMomentum_Xfactor(gp_st_layer3[0].phi(), gp_ge[0].phi(), xfactor_st1);//
 
-   }else if (meRing == 1 and fabs(gp_st_layer3[0].eta()) >= me0MinEta_ and useME0){
+   }else if (meRing == 1 and fabs(gp_st_layer3[0].eta()) >= me0MinEta_ and useME0GE11){
 
         if (not hasME0) return false;
 	xfactor_st1 = xfactor*fabs(gp_me0.z() - gp_st_layer3[0].z());
    	phiM_st1 = phiMomentum_Xfactor(gp_st_layer3[0].phi(), gp_me0.phi(), xfactor_st1);//
 
-   }else if (meRing == 1 and fabs(gp_st_layer3[0].eta()) >= me0MinEta_ and not(useME0)){
+   //}else if (meRing == 1 and fabs(gp_st_layer3[0].eta()) >= me0MinEta_ and not(useME0)){
+   }else if (meRing == 1 and not(useME0GE11)){
 
         xfactor_st1 = xfactor*fabs(z_st_layers[0][0] - z_st_layers[0][5])/(xfactor*fabs(gp_st_layer3[0].z() - z_st_layers[0][5])+1);
    	phiM_st1 = phiMomentum_Xfactor(gp_st_layer6[0].phi(), gp_st_layer1[0].phi(), xfactor_st1);//
@@ -1068,14 +1070,14 @@ bool DisplacedMuonTriggerPtassignment::runDirectionbasedCSConly(bool useME0)
    return true;
 }
 
-
-void DisplacedMuonTriggerPtassignment::runHybrid(bool useGE21)
+//not use now
+void DisplacedMuonTriggerPtassignment::runHybrid(bool useME0GE11, bool useGE21)
 {
 
    //firstly to run through position-based and direction-based
    hybrid_pt = 2.0;
    runPositionbased();
-   runDirectionbased(useGE21);
+   runDirectionbased(useME0GE11, useGE21);
    
    if (npar>=0 and npar<=3){
 	if (fabs(ddY123)>=40 or fabs(dPhi_dir_st1_st2)>=1.0){

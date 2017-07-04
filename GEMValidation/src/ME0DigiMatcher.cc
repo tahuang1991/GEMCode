@@ -16,7 +16,8 @@ ME0DigiMatcher::ME0DigiMatcher(SimHitMatcher& sh, edm::EDGetTokenT<ME0DigiPreRec
 
   if (hasME0Geometry_) {
     edm::Handle<ME0DigiPreRecoCollection> me0_digis;
-    if (gemvalidation::getByToken(me0DigiInput_, me0_digis, event())) if (runME0Digi_) matchPreRecoDigisToSimTrack(*me0_digis.product());
+    if (gemvalidation::getByToken(me0DigiInput_, me0_digis, event()) and runME0Digi_) matchPreRecoDigisToSimTrack(*me0_digis.product());
+    else std::cout <<"Not running matchME0SegmentsToSimTrack "<< std::endl;
   }
 }
 

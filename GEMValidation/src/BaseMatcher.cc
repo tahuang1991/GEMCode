@@ -147,6 +147,28 @@ BaseMatcher::useCSCChamberType(int csc_type)
 
 
 GlobalPoint
+BaseMatcher::propagateToZCharge(GlobalPoint &inner_point, GlobalVector &inner_vec, float z, int charge) const
+{
+  Plane::PositionType pos(0.f, 0.f, z);
+  Plane::RotationType rot;
+  Plane::PlanePointer my_plane(Plane::build(pos, rot));
+
+  FreeTrajectoryState state_start(inner_point, inner_vec, charge, &*magfield_);
+  //std::cout <<"state_start  position "<< state_start.position()<<" momentum "<< state_start.momentum()<<" charge "<<state_start.charge() << std::endl;
+  if (state_start.hasError()) std::cout <<"state_start has error  "<< std::endl;
+
+  TrajectoryStateOnSurface tsos(propagator_->propagate(state_start, *my_plane));
+  if (!tsos.isValid()) std::cout <<" tsos not valid "<< std::endl;
+  if (!tsos.isValid()) tsos = propagatorOpposite_->propagate(state_start, *my_plane);
+  //broken here  when propagating ME0
+  //std::cout <<"propagateToZ GP "<< tsos.globalPosition() <<" eta "<< tsos.globalPosition().eta()<<" phi "<< tsos.globalPosition().phi()<< std::endl;
+
+  if (tsos.isValid()) return tsos.globalPosition();
+  return GlobalPoint();
+}
+
+
+GlobalPoint
 BaseMatcher::propagateToZ(GlobalPoint &inner_point, GlobalVector &inner_vec, float z) const
 {
   Plane::PositionType pos(0.f, 0.f, z);
@@ -218,7 +240,7 @@ BaseMatcher::propagatedPositionSt2() const
 
 
 GlobalPoint
-BaseMatcher::propagateFromME0ToCSC(ME0Segment segment,float pt, int st, bool evenodd) const
+BaseMatcher::propagateFromME0ToCSC(ME0Segment segment,float pt, int charge, int st, bool evenodd) const
 {
   int chamber = (evenodd? 1:2);
   int ring = 1;
@@ -238,7 +260,7 @@ BaseMatcher::propagateFromME0ToCSC(ME0Segment segment,float pt, int st, bool eve
   float ratio = pt/SegDir.perp();
   GlobalVector SegVec(SegDir.x()*ratio, SegDir.y()*ratio, SegDir.z()*ratio);
   //std::cout <<"CSC z "<< propagate_z <<" ME0 GP "<< SegPos << " GV "<< SegVec <<" GV.mag "<< SegVec.mag() <<" ratio "<< ratio << std::endl;
-  return propagateToZ(SegPos, SegVec, propagate_z);
+  return propagateToZCharge(SegPos, SegVec, propagate_z, charge);
 
 }
 

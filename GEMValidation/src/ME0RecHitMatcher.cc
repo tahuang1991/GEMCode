@@ -25,13 +25,14 @@ ME0RecHitMatcher::ME0RecHitMatcher(ME0DigiMatcher& dg,
 
   if (hasME0Geometry_) {
     edm::Handle<ME0RecHitCollection> me0_rechits;
-    if (gemvalidation::getByToken(me0RecHitInput_, me0_rechits, event())) if (runME0RecHit_) matchME0RecHitsToSimTrack(*me0_rechits.product());
+    if (gemvalidation::getByToken(me0RecHitInput_, me0_rechits, event()) and runME0RecHit_) matchME0RecHitsToSimTrack(*me0_rechits.product());
+    else std::cout <<"Not running matchME0RecHitsToSimTrack "<< std::endl;
 
     edm::Handle<ME0SegmentCollection> me0_segments;
     if (gemvalidation::getByToken(me0SegmentInput_, me0_segments, event()) and runME0Segment_){
 	matchME0SegmentsToSimTrack(*me0_segments.product());
 	matchME0SegmentsToSimTrackBydR(*me0_segments.product());
-    }
+    }else std::cout <<"Not running matchME0SegmentsToSimTrack "<< std::endl;
   }
 }
 
@@ -60,9 +61,9 @@ ME0RecHitMatcher::matchME0RecHitsToSimTrack(const ME0RecHitCollection& rechits)
       bool match = false;
       ME0DigiPreRecoContainer digis = digi_matcher_->digisInDetId(id);
       for (const auto& digi: digis){
-	if (std::fabs(digi.tof() - rr->tof()) > .1) continue;
-        if (std::fabs(digi.x() - rr->localPosition().x())<0.01 and
-            std::fabs(digi.y() - rr->localPosition().y())<0.01 ) {
+	if (std::fabs(digi.tof() - rr->tof()) > 1) continue;
+        if (std::fabs(digi.x() - rr->localPosition().x())<1 and
+            std::fabs(digi.y() - rr->localPosition().y())<1 ) {
           match = true;
         }
       }
@@ -175,7 +176,8 @@ void ME0RecHitMatcher::dumpAllME0Segments(const ME0SegmentCollection& segments) 
     for(auto iC = segments.id_begin(); iC != segments.id_end(); ++iC){
 	auto ch_segs = segments.get(*iC);
 	for(auto iS = ch_segs.first; iS != ch_segs.second; ++iS){
-	    cout <<"ME0Detid "<< iS->me0DetId()<<" segment "<< *iS << std::endl;
+	    GlobalPoint gpME0(globalPoint(*iS));
+	    cout <<"ME0Detid "<< iS->me0DetId()<<" segment "<< *iS <<" gp eta "<< gpME0.eta() <<" phi "<< gpME0.phi() << std::endl;
 	    auto recHits(iS->recHits());
 	    cout << "\t has " << recHits.size() << " me0 rechits"<<endl;
             for (auto& rh: recHits) {

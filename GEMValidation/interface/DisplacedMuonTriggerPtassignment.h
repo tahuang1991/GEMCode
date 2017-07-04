@@ -161,12 +161,12 @@ public:
 
   // pT assignment algorithms
   bool runPositionbased();
-  bool runDirectionbased(bool useGE21, bool useME0=true);
+  bool runDirectionbased(bool useME0GE11, bool useGE21);
   bool runPositionbasedBarrel();
-  bool runDirectionbasedGE21(bool useME0);
-  bool runDirectionbasedCSConly(bool useME0);
-  bool runHybrid(float pt, bool useGE21);
-  void runHybrid(bool useGE21);
+  bool runDirectionbasedGE21(bool useME0GE11);
+  bool runDirectionbasedCSConly(bool useME0GE11);
+  bool runHybrid(float pt,bool useME0GE11,  bool useGE21);
+  void runHybrid(bool useME0GE11, bool useGE21);
 
   // helper functions
   int getHalfStrip(const CSCComparatorDigi& digi);
@@ -189,7 +189,9 @@ public:
   float getGEMPhi(int st) const {return phi_gem[st-1]; }
   float getCSCPhi(int st) const {return gp_st_layer3[st-1].phi(); }
   float getCSCEta(int st) const {return gp_st_layer3[st-1].eta(); }
-  bool checkME0Region() const { return (fabs(gp_st_layer3[0].eta()) >= me0MinEta_); }
+  bool checkME0Region() const { return (fabs(gp_st_layer3[0].eta()) > me0MinEta_); }
+  bool  checkhasGEM(int st ) const {return hasGEMPad_st[st-1]; }
+  bool  checkhasME0() const {return hasME0; }
   float getNStubs() const { return nstubs; }
 
 
