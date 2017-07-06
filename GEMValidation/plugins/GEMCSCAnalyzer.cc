@@ -153,7 +153,9 @@ struct MyTrackEff
   Float_t bending_sh;
   Float_t phi_cscsh_even, phi_cscsh_odd, eta_cscsh_even, eta_cscsh_odd;
   Float_t phi_layer1_sh_even, eta_layer1_sh_even, phi_layer1_sh_odd,eta_layer1_sh_odd, perp_layer1_sh_odd, perp_layer1_sh_even;
+  Float_t z_layer1_sh_odd, z_layer1_sh_even;
   Float_t phi_layer6_sh_even, eta_layer6_sh_even, phi_layer6_sh_odd,eta_layer6_sh_odd, perp_layer6_sh_odd, perp_layer6_sh_even;
+  Float_t z_layer6_sh_odd, z_layer6_sh_even;
   Float_t perp_gemsh_even, perp_gemsh_odd, perp_cscsh_even, perp_cscsh_odd,centralperp_gemsh_even, centralperp_gemsh_odd;
   Float_t dphi_sh_even,dphi_sh_odd;
   Float_t dphipositionpt_cscsh_even, dphipositionpt_cscsh_odd, dphipositionpt_gemsh_even,dphipositionpt_gemsh_odd;
@@ -175,6 +177,7 @@ struct MyTrackEff
   Char_t has_lct; // bit1: in odd, bit2: even
 
   Float_t phi_layer1_fit_even, phi_layer3_fit_even, phi_layer6_fit_even, phi_layer1_fit_odd, phi_layer3_fit_odd, phi_layer6_fit_odd;
+  Float_t z_layer3_fit_even, z_layer3_fit_odd;
   Char_t bend_lct_odd;
   Char_t bend_lct_even;
   Char_t bx_lct_odd;
@@ -253,6 +256,8 @@ struct MyTrackEff
   Char_t bx_pad_even;
   Float_t phi_pad_odd;
   Float_t phi_pad_even;
+  Float_t z_pad_odd;
+  Float_t z_pad_even;
   Float_t eta_pad_odd;
   Float_t eta_pad_even;
 
@@ -510,12 +515,16 @@ void MyTrackEff::init()
   eta_layer1_sh_odd =-9.0;
   perp_layer1_sh_even = -1;
   perp_layer1_sh_odd = -1;
+  z_layer1_sh_even = 0.0;
+  z_layer1_sh_odd = 0.0;
   phi_layer6_sh_even =-9.0;
   phi_layer6_sh_odd =-9.0;
   eta_layer6_sh_even =-9.0;
   eta_layer6_sh_odd =-9.0;
   perp_layer6_sh_even = -1;
   perp_layer6_sh_odd = -1;
+  z_layer6_sh_even = 0.0;
+  z_layer6_sh_odd = 0.0;
   pt_sh_even = -9.0;
   pteta_sh_even = 0;
   ptphi_sh_even = -9.0;
@@ -539,6 +548,8 @@ void MyTrackEff::init()
 
   phi_layer1_fit_even =-9.0;
   phi_layer1_fit_odd =-9.0;
+  z_layer3_fit_even =-9.0;
+  z_layer3_fit_odd =-9.0;
   phi_layer3_fit_even =-9.0;
   phi_layer3_fit_odd =-9.0;
   phi_layer6_fit_even =-9.0;
@@ -647,6 +658,8 @@ void MyTrackEff::init()
   bx_pad_even = -9;
   phi_pad_odd = -9.;
   phi_pad_even = -9.;
+  z_pad_odd = -0.;
+  z_pad_even = -0.;
   eta_pad_odd = -9.;
   eta_pad_even = -9.;
   dphi_pad_odd = -9.;
@@ -956,12 +969,16 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("eta_layer1_sh_odd", &eta_layer1_sh_odd);
   t->Branch("perp_layer1_sh_even", &perp_layer1_sh_even);
   t->Branch("perp_layer1_sh_odd", &perp_layer1_sh_odd);
+  t->Branch("z_layer1_sh_even", &z_layer1_sh_even);
+  t->Branch("z_layer1_sh_odd", &z_layer1_sh_odd);
   t->Branch("phi_layer6_sh_even", &phi_layer6_sh_even);
   t->Branch("phi_layer6_sh_odd", &phi_layer6_sh_odd);
   t->Branch("eta_layer6_sh_even", &eta_layer6_sh_even);
   t->Branch("eta_layer6_sh_odd", &eta_layer6_sh_odd);
   t->Branch("perp_layer6_sh_even", &perp_layer6_sh_even);
   t->Branch("perp_layer6_sh_odd", &perp_layer6_sh_odd);
+  t->Branch("z_layer6_sh_even", &z_layer6_sh_even);
+  t->Branch("z_layer6_sh_odd", &z_layer6_sh_odd);
   t->Branch("eta_cscsh_even", &eta_cscsh_even);
   t->Branch("eta_cscsh_odd", &eta_cscsh_odd);
   t->Branch("pt_sh_even", &pt_sh_even);
@@ -990,6 +1007,8 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("has_lct", &has_lct);
   t->Branch("chamber_lct_odd", &chamber_lct_odd);
   t->Branch("chamber_lct_even", &chamber_lct_even);
+  t->Branch("z_layer3_fit_even", &z_layer3_fit_even);
+  t->Branch("z_layer3_fit_odd", &z_layer3_fit_odd);
   t->Branch("phi_layer1_fit_even", &phi_layer1_fit_even);
   t->Branch("phi_layer1_fit_odd", &phi_layer1_fit_odd);
   t->Branch("phi_layer3_fit_even", &phi_layer3_fit_even);
@@ -1087,6 +1106,8 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("bx_pad_even", &bx_pad_even);
   t->Branch("phi_pad_odd", &phi_pad_odd);
   t->Branch("phi_pad_even", &phi_pad_even);
+  t->Branch("z_pad_odd", &z_pad_odd);
+  t->Branch("z_pad_even", &z_pad_even);
   t->Branch("eta_pad_odd", &eta_pad_odd);
   t->Branch("eta_pad_even", &eta_pad_even);
   t->Branch("dphi_pad_odd", &dphi_pad_odd);
@@ -1940,12 +1961,14 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 		etrk_[st].eta_layer1_sh_odd = gp1.eta();
 		etrk_[st].phi_layer1_sh_odd = gp1.phi();
 		etrk_[st].perp_layer1_sh_odd = gp1.perp();
+		etrk_[st].z_layer1_sh_odd = gp1.z();
 		//std::cout <<"layer1 id "<< id1 <<" phi "<< gp1.phi() <<" eta "<< gp1.eta() <<" x "<< gp1.x()<<" y "<< gp1.y()<<" z "<< gp1.z() <<" perp "<< gp1.perp() << std::endl;
 		}
     	if (match_sh.hitsInDetId(id6.rawId()).size()>0){
 		etrk_[st].eta_layer6_sh_odd = gp6.eta();
 		etrk_[st].phi_layer6_sh_odd = gp6.phi();
 		etrk_[st].perp_layer6_sh_odd = gp6.perp();
+		etrk_[st].z_layer6_sh_odd = gp6.z();
 		//std::cout <<"layer6 id "<< id6 <<" phi "<< gp6.phi() <<" eta "<< gp6.eta() <<" x "<< gp6.x()<<" y "<< gp6.y()<<" z "<< gp6.z() <<" perp "<< gp6.perp() << std::endl;
 		}
     }else{
@@ -1953,12 +1976,14 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 		etrk_[st].eta_layer1_sh_even = gp1.eta();
 		etrk_[st].phi_layer1_sh_even = gp1.phi();
 		etrk_[st].perp_layer1_sh_even = gp1.perp();
+		etrk_[st].z_layer1_sh_even = gp1.z();
 		//std::cout <<"layer1 id "<< id1 <<" phi "<< gp1.phi() <<" eta "<< gp1.eta() <<" x "<< gp1.x()<<" y "<< gp1.y()<<" z "<< gp1.z() <<" perp "<< gp1.perp() << std::endl;
 		}
     	if (match_sh.hitsInDetId(id6.rawId()).size()>0){
 		etrk_[st].eta_layer6_sh_even = gp6.eta();
 		etrk_[st].phi_layer6_sh_even = gp6.phi();
 		etrk_[st].perp_layer6_sh_even = gp6.perp();
+		etrk_[st].z_layer6_sh_even = gp6.z();
 		//std::cout <<"layer6 id "<< id6 <<" phi "<< gp6.phi() <<" eta "<< gp6.eta() <<" x "<< gp6.x()<<" y "<< gp6.y()<<" z "<< gp6.z() <<" perp "<< gp6.perp() << std::endl;
 		}
     }
@@ -2023,22 +2048,26 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 		etrk_[1].eta_layer1_sh_odd = gp1.eta();
 		etrk_[1].phi_layer1_sh_odd = gp1.phi();
 		etrk_[1].perp_layer1_sh_odd = gp1.perp();
+		etrk_[1].z_layer1_sh_odd = gp1.z();
 		}
     	if (match_sh.hitsInDetId(id6.rawId()).size()>0){
 		etrk_[1].eta_layer6_sh_odd = gp6.eta();
 		etrk_[1].phi_layer6_sh_odd = gp6.phi();
 		etrk_[1].perp_layer6_sh_odd = gp6.perp();
+		etrk_[1].z_layer6_sh_odd = gp6.z();
 		}
     }else{
     	if (match_sh.hitsInDetId(id1.rawId()).size()>0){
 		etrk_[1].eta_layer1_sh_even = gp1.eta();
 		etrk_[1].phi_layer1_sh_even = gp1.phi();
 		etrk_[1].perp_layer1_sh_even = gp1.perp();
+		etrk_[1].z_layer1_sh_even = gp1.z();
 		}
     	if (match_sh.hitsInDetId(id6.rawId()).size()>0){
 		etrk_[1].eta_layer6_sh_even = gp6.eta();
 		etrk_[1].phi_layer6_sh_even = gp6.phi();
 		etrk_[1].perp_layer6_sh_even = gp6.perp();
+		etrk_[1].z_layer6_sh_even = gp6.z();
 		}
     }
       etrk_[1].bending_sh = match_sh.LocalBendingInChamber(d);
@@ -2089,26 +2118,30 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 		etrk_[ME0].eta_layer1_sh_odd = gp1.eta();
 		etrk_[ME0].phi_layer1_sh_odd = gp1.phi();
 		etrk_[ME0].perp_layer1_sh_odd = gp1.perp();
-		//std::cout <<"layer1 id "<< id1 <<" phi "<< gp1.phi() <<" eta "<< gp1.eta() <<" x "<< gp1.x()<<" y "<< gp1.y()<<" z "<< gp1.z() <<" perp "<< gp1.perp() << std::endl;
+		etrk_[ME0].z_layer1_sh_odd = gp1.z();
+		//std::cout <<"layer1 id "<< id1 <<" phi "<< gp1.phi() <<" eta "<< gp1.eta() <<" x "<< gp1.x()<<" y "<< gp1.y()<<" z "<< gp1.z() <<" perp "<< gp1.perp() << " z "<< gp1.z() << std::endl;
 		}
     	if (match_sh.hitsInChamber(id6.rawId()).size()>0){
 		etrk_[ME0].eta_layer6_sh_odd = gp6.eta();
 		etrk_[ME0].phi_layer6_sh_odd = gp6.phi();
 		etrk_[ME0].perp_layer6_sh_odd = gp6.perp();
-		//std::cout <<"layer6 id "<< id6 <<" phi "<< gp6.phi() <<" eta "<< gp6.eta() <<" x "<< gp6.x()<<" y "<< gp6.y()<<" z "<< gp6.z() <<" perp "<< gp6.perp() << std::endl;
+		etrk_[ME0].z_layer6_sh_odd = gp6.z();
+		//std::cout <<"layer6 id "<< id6 <<" phi "<< gp6.phi() <<" eta "<< gp6.eta() <<" x "<< gp6.x()<<" y "<< gp6.y()<<" z "<< gp6.z() <<" perp "<< gp6.perp()<< " z "<< gp6.z() << std::endl;
 		}
     }else{
     	if (match_sh.hitsInChamber(id1.rawId()).size()>0){
 		etrk_[ME0].eta_layer1_sh_even = gp1.eta();
 		etrk_[ME0].phi_layer1_sh_even = gp1.phi();
 		etrk_[ME0].perp_layer1_sh_even = gp1.perp();
-		//std::cout <<"layer1 id "<< id1 <<" phi "<< gp1.phi() <<" eta "<< gp1.eta() <<" x "<< gp1.x()<<" y "<< gp1.y()<<" z "<< gp1.z() <<" perp "<< gp1.perp() << std::endl;
+		etrk_[ME0].z_layer1_sh_even = gp1.z();
+		//std::cout <<"layer1 id "<< id1 <<" phi "<< gp1.phi() <<" eta "<< gp1.eta() <<" x "<< gp1.x()<<" y "<< gp1.y()<<" z "<< gp1.z() <<" perp "<< gp1.perp() << " z "<< gp1.z() << std::endl;
 		}
     	if (match_sh.hitsInChamber(id6.rawId()).size()>0){
 		etrk_[ME0].eta_layer6_sh_even = gp6.eta();
 		etrk_[ME0].phi_layer6_sh_even = gp6.phi();
 		etrk_[ME0].perp_layer6_sh_even = gp6.perp();
-		//std::cout <<"layer6 id "<< id6 <<" phi "<< gp6.phi() <<" eta "<< gp6.eta() <<" x "<< gp6.x()<<" y "<< gp6.y()<<" z "<< gp6.z() <<" perp "<< gp6.perp() << std::endl;
+		etrk_[ME0].z_layer6_sh_even = gp6.z();
+		//std::cout <<"layer6 id "<< id6 <<" phi "<< gp6.phi() <<" eta "<< gp6.eta() <<" x "<< gp6.x()<<" y "<< gp6.y()<<" z "<< gp6.z() <<" perp "<< gp6.perp() << " z "<< gp6.z() << std::endl;
 		}
     }
 
@@ -2421,6 +2454,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	if (id.station()==1 and (id.ring()==1 or id.ring()==4)){
 	    etrk_[1].phi_layer1_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 1));
 	    etrk_[1].phi_layer3_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 3));
+	    etrk_[1].z_layer3_fit_odd = match_lct.zpositionOfLayer(d, 3);
 	    etrk_[1].phi_layer6_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 6));
 	    //etrk_[1].phiM_fitxyz_odd = atan(betay/betax);
 	    gp_fit_odd[st] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
@@ -2429,6 +2463,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	}
 	etrk_[st].phi_layer1_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 1));
 	etrk_[st].phi_layer3_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 3));
+	etrk_[st].z_layer3_fit_odd = match_lct.zpositionOfLayer(d, 3);
 	etrk_[st].phi_layer6_fit_odd = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 6));
 	//etrk_[st].phiM_fitxyz_odd = atan(betay/betax);
 	gp_fit_odd[st] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
@@ -2437,6 +2472,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	if (id.station()==1 and (id.ring()==1 or id.ring() ==4)){
 	    etrk_[1].phi_layer1_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 1));
 	    etrk_[1].phi_layer3_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 3));
+	    etrk_[1].z_layer3_fit_even = match_lct.zpositionOfLayer(d, 3);
 	    etrk_[1].phi_layer6_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 6));
 	    //etrk_[1].phiM_fitxyz_even = atan(betay/betax);
 	    gp_fit_even[1] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
@@ -2444,6 +2480,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	}
 	etrk_[st].phi_layer1_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 1));
 	etrk_[st].phi_layer3_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 3));
+	etrk_[st].z_layer3_fit_even = match_lct.zpositionOfLayer(d, 3);
 	etrk_[st].phi_layer6_fit_even = PtassignmentHelper::normalizePhi(alpha+beta*match_lct.zpositionOfLayer(d, 6));
 	//etrk_[st].phiM_fitxyz_even = atan(betay/betax);
 	gp_fit_even[st] = GlobalPoint(GlobalPoint::Cylindrical(lctgp.perp(), alpha+beta*match_lct.zpositionOfLayer(d, 3), lctgp.z()));
@@ -2624,6 +2661,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
         etrk_[st].chamber_lct_odd = id.chamber();
         etrk_[st].pad_odd = digi_channel(bestgem_dg_and_gp.first);
         etrk_[st].hsfromgem_odd = match_gd.extrapolateHsfromGEMPad( d, digi_channel(bestgem_dg_and_gp.first));
+        etrk_[st].z_pad_odd = best_pad_odd[st].z();
         etrk_[st].phi_pad_odd = best_pad_odd[st].phi();
         etrk_[st].eta_pad_odd = best_pad_odd[st].eta();
 	//question: ME1a is not included here
@@ -2635,7 +2673,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	    etrk_[st].dphi_pad_odd = deltaPhi(etrk_[st].phi_lct_odd, etrk_[st].phi_pad_odd);
 	    etrk_[st].dphi_pad_fit_odd = deltaPhi(etrk_[st].phi_layer3_fit_odd, etrk_[st].phi_pad_odd);
 	    //std::cout <<"GEMid "<< id << std::endl;
-	    //std::cout <<"GEM sim phi "<< keygp.phi() <<" pad phi "<< etrk_[st].phi_pad_odd <<" phi_lct "<< etrk_[st].phi_lct_odd <<" phi_fit_lct "<< etrk_[st].phi_layer3_fit_odd<< std::endl;
+	    //std::cout <<"GEM sim phi "<< keygp.phi() <<" pad phi "<< etrk_[st].phi_pad_odd <<" phi_lct "<< etrk_[st].phi_lct_odd <<" phi_fit_lct "<< etrk_[st].phi_layer3_fit_odd <<" dist(GEM, CSC) " << fabs(etrk_[st].z_layer3_fit_odd - etrk_[st].z_pad_odd)<< std::endl;
 	    etrk_[st].deta_pad_odd = etrk_[st].eta_lct_odd - etrk_[st].eta_pad_odd;
       	}
     	}
@@ -2645,6 +2683,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       	etrk_[st].has_gem_pad |= 2;
         etrk_[st].pad_even = digi_channel(bestgem_dg_and_gp.first);
         etrk_[st].hsfromgem_even = match_gd.extrapolateHsfromGEMPad( d, digi_channel(bestgem_dg_and_gp.first));
+        etrk_[st].z_pad_even = best_pad_even[st].z();
         etrk_[st].phi_pad_even = best_pad_even[st].phi();
         etrk_[st].eta_pad_even = best_pad_even[st].eta();
         if (is_valid(lct_even[st]))
@@ -2655,7 +2694,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	    etrk_[st].dphi_pad_even = deltaPhi(etrk_[st].phi_lct_even, etrk_[st].phi_pad_even);
 	    etrk_[st].dphi_pad_fit_even = deltaPhi(etrk_[st].phi_layer3_fit_even, etrk_[st].phi_pad_even);
 	    //std::cout <<"GEMid "<< id << std::endl;
-	    //std::cout <<"GEM sim phi "<< keygp.phi() <<" pad phi "<< etrk_[st].phi_pad_even <<" phi_lct "<< etrk_[st].phi_lct_even <<" phi_fit_lct "<< etrk_[st].phi_layer3_fit_even<< std::endl;
+	    //std::cout <<"GEM sim phi "<< keygp.phi() <<" pad phi "<< etrk_[st].phi_pad_even <<" phi_lct "<< etrk_[st].phi_lct_even <<" phi_fit_lct "<< etrk_[st].phi_layer3_fit_even <<" dist(GEM, CSC) " <<  fabs(etrk_[st].z_layer3_fit_even - etrk_[st].z_pad_even)<< std::endl;
 	    etrk_[st].deta_pad_even = etrk_[st].eta_lct_even - etrk_[st].eta_pad_even;
       	}
     	}
