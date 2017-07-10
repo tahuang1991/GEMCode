@@ -59,6 +59,17 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
   initVariables();
   for (auto idlcts : chamberid_lcts_){
     CSCDetId chid(idlcts.first);
+    for (auto stub: idlcts.second){
+	if (stub.isValid()) hasStub_st[chid.station()-1] =true;
+	else {
+	    std::cout <<"chid "<< chid <<" stub " << stub <<" Not valid "<< std::endl;
+	}
+    }
+    if (not hasStub_st[chid.station()-1]) {
+	    std::cout <<" chid "<< chid <<"  number of lcts "<< idlcts.second.size() <<" NO valid stub "<< std::endl;
+	    continue;
+    }
+
     int endcap(chid.endcap() == 1 ? 1:-1);
     //check the ring number that muon is flying through, 2nd station as reference
     //later use this one to check whether we should use GE21 or ME21only
@@ -69,11 +80,6 @@ DisplacedMuonTriggerPtassignment::DisplacedMuonTriggerPtassignment(std::map<unsi
 	   ((isEven[1] and isEven[2]) or (not(isEven[1]) and not(isEven[2]))))
 	continue;
     if (chid.chamber()%2 == 0) isEven[chid.station()-1] = true;
-    if (idlcts.second.size()>0) hasStub_st[chid.station()-1] =true;
-    else {
-	    std::cout <<" chid "<< chid <<"  number of lcts "<< idlcts.second.size() << std::endl;
-	    continue;
-    }
     if (idlcts.second.size()>1 and verbose_>0)
 	std::cout <<"more than one LCT  available in chamber id "<< chid <<" LCT size "<< idlcts.second.size()<<std::endl;
     globalPositionOfLCT(idlcts.second, chid);
@@ -625,14 +631,22 @@ void DisplacedMuonTriggerPtassignment::fitTrackRadius(GlobalPoint* gps, float* r
   std::vector<float> gps_er;
   std::vector<float> gps_ez;
   std::vector<float> status;
+  int nstubs = 0;
   for (int i=0; i<4; i++){
   	if (not(hasStub_st[i])) continue;
+	nstubs ++; 
 	gps_r.push_back(gps[i].perp());
 	gps_z.push_back(gps[i].z());
 	gps_er.push_back(1.5);//how to set error on r?
 	gps_ez.push_back(0.);
 
   }
+
+  if (nstubs < 3){
+    std::cout <<"error!!! only "<< nstubs <<" stubs are found, need at least 3 "<< std::endl;
+    return ;
+  }
+
   float alpha = 0., beta = 0.;
   PtassignmentHelper::calculateAlphaBeta(gps_z, gps_r, gps_ez, gps_er, status, alpha, beta);
   for (int i=0; i<4; i++){
@@ -654,6 +668,9 @@ void DisplacedMuonTriggerPtassignment::globalPositionOfLCT(const CSCCorrelatedLC
 {
   float perp;
   int st = chid.station();
+  if (verbose_) std::cout <<"To find globalPositionOfLCT detid "<< chid <<" stub "<< stub << std::endl;
+  if (not stub.isValid()) return;
+
   fitComparatorsLCT(*hCSCComparators.product(), stub, chid, phi_st_layers[st-1], z_st_layers[st-1], perp);
   //gp calculated here can have negative Z!!! later use fabs() to get distance
 
@@ -684,6 +701,7 @@ void DisplacedMuonTriggerPtassignment::globalPositionOfLCT(CSCCorrelatedLCTDigiC
         unsigned int istub = -1;
   	for (auto stub : stubs){
 	    	istub++;
+		if (not stub.isValid()) continue;
   		globalPositionOfLCT(stub, chid);
 		//assign higher weight to phi comparison
     		float dphi = 10.*deltaPhi(float(gp_st_layer3[st-1].phi()), float(gp_ref.phi()));
@@ -695,11 +713,13 @@ void DisplacedMuonTriggerPtassignment::globalPositionOfLCT(CSCCorrelatedLCTDigiC
 		}
   	}
    }
-  if (beststub >= stubs.size())
-      std::cout <<"error beststub >= stubs.size() , beststub "<< beststub <<" stubs size "<< stubs.size() << std::endl;
+  if (beststub >= stubs.size() or dR >= 99)
+      std::cout <<"error beststub >= stubs.size() , beststub "<< beststub <<" stubs size "<< stubs.size() <<" dR "<< dR << std::endl;
+
   globalPositionOfLCT(stubs[beststub], chid);
   if (verbose_>0)
       std::cout <<"LCT position, chid "<< chid<<" hs "<<stubs[beststub].getStrip()+1<<" wg "<< stubs[beststub].getKeyWG()+1 <<" gp eta "<< gp_st_layer3[st-1].eta()<<" phi "<<gp_st_layer3[st-1].phi()<<" perp "<< gp_st_layer3[st-1].perp() << std::endl;
+
 }
 
 

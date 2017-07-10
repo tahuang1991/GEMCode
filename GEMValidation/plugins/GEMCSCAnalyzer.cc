@@ -1361,6 +1361,7 @@ public:
 
 
 private:
+  int ievent;
 
   void bookSimTracksDeltaTree();
 
@@ -1469,6 +1470,8 @@ GEMCSCAnalyzer::GEMCSCAnalyzer(const edm::ParameterSet& ps)
 : cfg_(ps.getParameterSet("simTrackMatching"))
 , verbose_(ps.getUntrackedParameter<int>("verbose", 0))
 {
+  ievent = 0;
+
   cscStations_ = cfg_.getParameter<std::vector<string> >("cscStations");
   ntupleTrackChamberDelta_ = cfg_.getParameter<bool>("ntupleTrackChamberDelta");
   ntupleTrackEff_ = cfg_.getParameter<bool>("ntupleTrackEff");
@@ -1720,6 +1723,7 @@ bool GEMCSCAnalyzer::isSimTrackGood(const SimTrack &t)
 
 void GEMCSCAnalyzer::analyze(const edm::Event& ev, const edm::EventSetup& es)
 {
+  ievent ++;
   edm::Handle<edm::SimTrackContainer> sim_tracks;
   ev.getByToken(simTrackInput_, sim_tracks);
   const edm::SimTrackContainer & sim_track = *sim_tracks.product();
@@ -1799,7 +1803,8 @@ void GEMCSCAnalyzer::analyze(const edm::Event& ev, const edm::EventSetup& es)
     if (ntupleTrackEff_) analyzeTrackEff(match, trk_no);
     ++trk_no;
 
-    // if (matchprint_) printout(match, trk_no);
+    if (matchprint_ and etrk_[0].pt>10  and etrk_[1].has_csc_sh>0 and !(etrk_[1].has_lct>0)) printout(match, trk_no, "GEMCSCAnalyzer printout, no ME11 LCT");
+    else if (matchprint_ and etrk_[0].pt>10 and etrk_[6].has_csc_sh>0 and !(etrk_[6].has_lct>0)) printout(match, trk_no, "GEMCSCAnalyzer printout, no ME21 LCT");
 
    // bool has_tftracks(etrk_[0].has_tfTrack>0 && !etrk_[0].allstubs_matched_TF && etrk_[0].nstubs>2);
     //bool phi_diff_ME1(abs(etrk_[0].phi_propagated_ME1-etrk_[0].phi_ME1_TF) < 0.02);
@@ -1810,11 +1815,6 @@ void GEMCSCAnalyzer::analyze(const edm::Event& ev, const edm::EventSetup& es)
     //bool Debug (etrk_[10].has_alct>0 && (etrk_[10].has_clct>0 || etrk_[10].has_rpc_dg>0) && etrk_[10].has_lct == 0);
     //bool Debug (etrk_[0].allstubs_matched_TF==0);
     //bool Debug (etrk_[1].pt<10 and (fabs(etrk_[1].phi_lct_even-etrk_[1].phi_cscsh_even)>0.008 and etrk_[1].phi_lct_even>-4 and etrk_[1].phi_cscsh_even>-4) or (fabs(etrk_[1].phi_lct_odd-etrk_[1].phi_cscsh_odd)>0.008 and etrk_[1].phi_lct_odd>-4 and etrk_[1].phi_cscsh_odd>-4));
-    bool Debug ((fabs(etrk_[1].dphi_sh_odd)>0.5 and fabs(etrk_[1].dphi_sh_odd)<9) or (fabs(etrk_[1].dphi_sh_even)>0.5 and fabs(etrk_[1].dphi_sh_even)<9));
-    if (matchprint_ and Debug){
-    	std::cout <<"ME11 phi_cscsh even "<<etrk_[1].phi_cscsh_even <<" odd "<<etrk_[1].phi_cscsh_odd<<" phi_gemsh even "<< etrk_[1].phi_gemsh_even <<" odd "<< etrk_[1].phi_gemsh_odd<<" dphi_sh even "<< etrk_[1].dphi_sh_even<<" odd "<< etrk_[1].dphi_sh_odd <<std::endl;
-	printout(match, trk_no, "to debug dephi at sim level");
-       }
 
   }
 }
@@ -4229,7 +4229,8 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
   std::cout << "  pt:"<<t.momentum().pt()
             << "  phi:"<<t.momentum().phi()
             << "  eta:"<<t.momentum().eta()
-            << "  chage:"<<t.charge() << std::endl;
+            << "  chage:"<<t.charge() 
+            << "  event: "<<etrk_[0].event <<" ievent "<< ievent << std::endl;
 
   std::cout << "######matching simhit to simtrack " << std::endl;
   for (auto d: match_sh.chamberIdsCSC(0))
@@ -4355,6 +4356,37 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
     	std::cout << p << std::endl;
 
   }
+
+
+  std::cout << "######matching ALCT to Simtrack " << std::endl;
+  for(auto d: match_lct.chamberIdsALCT(0))
+  {
+    CSCDetId id(d);
+    const int st(detIdToMEStation(id.station(),id.ring()));
+    if (stations_to_use_.count(st) == 0) continue;
+    std::cout << "-------matched alcts-------" << std::endl;
+    auto alcts_matched = match_lct.alctsInChamber(d);
+    for (auto q : alcts_matched)
+       std::cout<<id<< q <<std::endl;
+    std::cout << "-------    end     -------" << std::endl;
+
+  }
+
+  std::cout << "######matching CLCT to Simtrack " << std::endl;
+  for(auto d: match_lct.chamberIdsCLCT(0))
+  {
+    CSCDetId id(d);
+    const int st(detIdToMEStation(id.station(),id.ring()));
+    if (stations_to_use_.count(st) == 0) continue;
+    std::cout << "-------matched clcts-------" << std::endl;
+    auto clcts_matched = match_lct.clctsInChamber(d);
+    for (auto q : clcts_matched)
+       std::cout<<id<< q <<std::endl;
+    std::cout << "-------    end     -------" << std::endl;
+
+  }
+
+
 
   std::cout << "######matching LCT to Simtrack " << std::endl;
   for(auto d: match_lct.chamberIdsAllLCT(0))

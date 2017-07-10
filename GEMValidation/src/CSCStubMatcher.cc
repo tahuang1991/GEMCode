@@ -306,7 +306,7 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
     {
       if (!lct->isValid()) continue;
 
-      if (verbose()) cout<<"lct in detId "<<ch_id<<" "<<*lct<<endl;
+      if (verbose()) cout<<"\n lct in detId "<<ch_id<<" "<<*lct<<endl;
 
       int bx = lct->getBX();
 
@@ -351,7 +351,8 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
           lcts_tmp.push_back(lct21);
 	  CSCCorrelatedLCTDigi LCT21(0, 1, digi_quality(lct21), digi_wg(lct21), digi_channel(lct21), digi_pattern(lct21), 0, digi_bx(lct21));
 	  cscLcts_tmp.push_back(LCT21);
-          //cout<<"added ghosts"<<endl<<lct11<<"    "<<lct22<<endl <<lct12<<"    "<<lct21<<endl;
+	  if (verbose())
+	      cout<<"added ghosts"<<endl<<lct11<<"    "<<lct22<<endl <<lct12<<"    "<<lct21<<endl;
         }
       }
     } // lcts_in_det
@@ -406,7 +407,7 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
         for (unsigned int i=0; i<clct.size()+1;i++){
           
           if (verbose()) 
-            std::cout <<"lct size "<< lcts_tmp.size()<<" ilct "<< iLct++ << " available LCT " << lct << std::endl;
+            std::cout <<"lct size "<< lcts_tmp.size()<<" ilct "<< iLct << " available LCT " << lct << std::endl;
           if (verbose())
             std::cout <<"alcts size "<< alct.size() <<" jth "<<j<< " available ALCT " << alct[j] << std::endl;
           if (verbose() and i<clct.size()) 
