@@ -473,7 +473,7 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
           }
           
           //add hadPad here
-          if (matchAlctGem_ and caseAlctGem and !( my_bx == digi_bx(lct) and std::abs(my_hs_gemrpc - digi_channel(lct))<3 and my_wg == digi_wg(lct) ) ){
+          if (matchAlctGem_ and caseAlctGem and !(hasPad and  my_bx == digi_bx(lct) and std::abs(my_hs_gemrpc - digi_channel(lct))<3 and my_wg == digi_wg(lct) ) ){
             if (verbose()) cout<<"  BAD LCT in AlctGem case"<<endl;
             continue;
           }
