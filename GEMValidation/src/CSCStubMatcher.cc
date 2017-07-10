@@ -379,9 +379,11 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
     bool hasDigis = false;
     if ((ch_id.station()==1 or ch_id.station()==2) and ch_id.ring()==1){
 	// find a matching LCT
-	const GEMDetId gemDetId(GEMDetId(ch_id.zendcap(),1,ch_id.station(),1,ch_id.chamber(),0));
+	const GEMDetId gemDetId(GEMDetId(ch_id.zendcap(),1,ch_id.station(),0,ch_id.chamber(),0));
 	auto pads(gem_digi_matcher_->coPadsInSuperChamber(gemDetId));
 	hasPad = (pads.size()>0);
+	if (verbose())
+	    std::cout <<"GEMDetId "<< gemDetId << (hasPad ? " has CoPad ":" has NO CoPad") << std::endl;
     }
     if ((ch_id.station()==3 or ch_id.station()==4) and ch_id.ring()==1){
 	// find matching rpc chamber (only valid for me31 and me41)
@@ -514,6 +516,7 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
           if (verbose() and caseAlctClct)  std::cout << " this LCT is matched to simtrack in AlctClct case" << std::endl;
           if (verbose() and caseAlctGem)  std::cout << " this LCT is matched to simtrack in AlctGem case" << std::endl;
           if (verbose() and caseAlctRpc)  std::cout << " this LCT is matched to simtrack in AlctRpc case" << std::endl;
+	 
           break;
         } //clct loop over
         if (lct_matched) break;
