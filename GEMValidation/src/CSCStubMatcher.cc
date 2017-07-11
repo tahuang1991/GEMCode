@@ -380,7 +380,7 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
     if ((ch_id.station()==1 or ch_id.station()==2) and ch_id.ring()==1){
 	// find a matching LCT
 	const GEMDetId gemDetId(GEMDetId(ch_id.zendcap(),1,ch_id.station(),0,ch_id.chamber(),0));
-	auto pads(gem_digi_matcher_->coPadsInSuperChamber(gemDetId));
+	auto pads(gem_digi_matcher_->coPadsInSuperChamber(gemDetId.rawId()));
 	hasPad = (pads.size()>0);
 	if (verbose())
 	    std::cout <<"GEMDetId "<< gemDetId << (hasPad ? " has CoPad ":" has NO CoPad") << std::endl;
@@ -473,8 +473,8 @@ CSCStubMatcher::matchLCTsToSimTrack(const CSCCorrelatedLCTDigiCollection& lcts)
           }
           
           //add hadPad here
-          if (matchAlctGem_ and caseAlctGem and !(hasPad and  my_bx == digi_bx(lct) and std::abs(my_hs_gemrpc - digi_channel(lct))<3 and my_wg == digi_wg(lct) ) ){
-            if (verbose()) cout<<"  BAD LCT in AlctGem case"<<endl;
+          if (matchAlctGem_ and caseAlctGem and !(hasPad and  my_bx == digi_bx(lct) and std::abs(my_hs_gemrpc - digi_channel(lct))<4 and my_wg == digi_wg(lct) ) ){
+            if (verbose()) cout<<"  BAD LCT in AlctGem case, my_hs_gemrpc "<< my_hs_gemrpc <<" LCT hs "<< digi_channel(lct) <<endl;
             continue;
           }
           else if (caseAlctGem and !matchAlctGem_) continue;

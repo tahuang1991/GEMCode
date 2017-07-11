@@ -231,6 +231,7 @@ struct MyTrackEff
 
   Char_t has_gem_sh; // bit1: in odd, bit2: even
   Char_t has_gem_sh2; // has SimHits in 2 layers  bit1: in odd, bit2: even
+  Char_t has_gemcopad_sh; // has SimHits in 2 layers  bit1: in odd, bit2: even
   Char_t has_gem_dg; // bit1: in odd, bit2: even
   Char_t has_gem_dg2; // has pads in 2 layers  bit1: in odd, bit2: even
   Char_t has_gem_pad; // bit1: in odd, bit2: even
@@ -619,6 +620,7 @@ void MyTrackEff::init()
 
   has_gem_sh = 0;
   has_gem_sh2 = 0;
+  has_gemcopad_sh = 0;
   has_gem_dg = 0;
   has_gem_dg2 = 0;
   has_gem_pad = 0;
@@ -1071,6 +1073,7 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
 
   t->Branch("has_gem_sh", &has_gem_sh);
   t->Branch("has_gem_sh2", &has_gem_sh2);
+  t->Branch("has_gemcopad_sh", &has_gemcopad_sh);
   t->Branch("has_gem_dg", &has_gem_dg);
   t->Branch("has_gem_dg2", &has_gem_dg2);
   t->Branch("has_gem_pad", &has_gem_pad);
@@ -2585,8 +2588,15 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
     if (match_sh.nLayersWithHitsInSuperChamber(d) > 1)
     {
+	//std::cout <<"GEM detid "<< id <<" has at 2 layer hits "<< std::endl;
       if (odd) etrk_[st].has_gem_sh2 |= 1;
       else     etrk_[st].has_gem_sh2 |= 2;
+    }
+    auto copad_superids (match_sh.superChamberIdsGEMCoincidences());
+    if (copad_superids.find(d) != copad_superids.end()){
+	//std::cout <<"GEM detid "<< id <<" has copad hits "<< std::endl;
+      if (odd) etrk_[st].has_gemcopad_sh |= 1;
+      else     etrk_[st].has_gemcopad_sh |= 2;
     }
     //ME11 Case
     if (st==2 or st==3)
@@ -2598,13 +2608,17 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       if (odd) etrk_[1].strip_gemsh_odd = mean_strip;
       else     etrk_[1].strip_gemsh_even = mean_strip;
 
-    if (match_sh.nLayersWithHitsInSuperChamber(d) > 1)
-    {
-      if (odd) etrk_[1].has_gem_sh2 |= 1;
-      else etrk_[1].has_gem_sh2 |= 2;
+      if (match_sh.nLayersWithHitsInSuperChamber(d) > 1)
+      {
+        if (odd) etrk_[1].has_gem_sh2 |= 1;
+        else etrk_[1].has_gem_sh2 |= 2;
 
-    }
-  }//end of ME11 case
+      }
+      if (copad_superids.find(d) != copad_superids.end()){
+        if (odd) etrk_[1].has_gemcopad_sh |= 1;
+        else     etrk_[1].has_gemcopad_sh |= 2;
+      }
+    }//end of ME11 case
 
   }
 

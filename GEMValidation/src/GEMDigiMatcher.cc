@@ -141,19 +141,21 @@ GEMDigiMatcher::matchCoPadsToSimTrack(const GEMCoPadDigiCollection& co_pads)
     GEMDetId superch_id(p_id.region(), p_id.ring(), p_id.station(), 0, p_id.chamber(), 0);
 
     auto hit_co_pads = simhit_matcher_->hitCoPadsInDetId(id);
-    auto co_pads_in_det = co_pads.get(p_id);
+    auto co_pads_in_det = co_pads.get(superch_id);
 
     if (verboseCoPad_)
     {
-      cout<<"checkcopads "<<hit_co_pads.size()<<" "<<std::distance(co_pads_in_det.first, co_pads_in_det.second)<<" hit_pads: ";
+      cout<<"matching CoPads in detid "<< superch_id << std::endl;
+      cout<<"checkcopads from gemhits"<<hit_co_pads.size()<<" from copad collection "<<std::distance(co_pads_in_det.first, co_pads_in_det.second)<<" hit_pads: ";
       copy(hit_co_pads.begin(), hit_co_pads.end(), ostream_iterator<int>(cout," "));
       cout<<endl;
     }
 
     for (auto pad = co_pads_in_det.first; pad != co_pads_in_det.second; ++pad)
     {
-      if (verbosePad_) cout<<"CoPad: chp "<<*pad<<endl;
+      if (verboseCoPad_) cout<<"CoPad: chp "<<*pad<<endl;
       // check that the pad BX is within the range
+      if (pad->roll() != p_id.roll()) continue;
       if (pad->bx(1) < minBXGEMCoPad_ || pad->bx(1) > maxBXGEMCoPad_) continue;
       if (verboseCoPad_) cout<<"CoPad: chp1 "<<*pad<<endl;
       // check that it matches a pad that was hit by SimHits from our track

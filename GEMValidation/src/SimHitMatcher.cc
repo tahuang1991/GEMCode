@@ -374,32 +374,52 @@ SimHitMatcher::matchGEMSimHitsToSimTrack(std::vector<unsigned int> track_ids, co
   for (auto d: detids) {
     GEMDetId id1(d);
     if (id1.layer() != 1) continue;
-    GEMDetId id2(id1.region(), id1.ring(), id1.station(), 2, id1.chamber(), id1.roll());
-    // does layer 2 has simhits?
-    if (detids.find(id2()) == detids.end()) continue;
 
     // find pads with hits in layer1
     auto hits1 = hitsInDetId(d);
     auto roll1 = getGEMGeometry()->etaPartition(id1);
     set<int> pads1;
+    set<int> pads2;
+    set<int> copads;
+
     for (auto& h: hits1) {
       LocalPoint lp = h.entryPoint();
       pads1.insert( 1 + static_cast<int>(roll1->padTopology().channel(lp)) );
+      std::cout <<"GEMHits detid1 "<<id1 <<" pad1 "<< 1 + static_cast<int>(roll1->padTopology().channel(lp)) << std::endl;
     }
 
     // find pads with hits in layer2
-    auto hits2 = hitsInDetId(id2());
-    auto roll2 = getGEMGeometry()->etaPartition(id2);
-    set<int> pads2;
-    for (auto& h: hits2) {
-      LocalPoint lp = h.entryPoint();
-      pads2.insert( 1 + static_cast<int>(roll2->padTopology().channel(lp)) );
+    for (auto d2 : detids){
+	//staggered geometry???? improve here !!
+	GEMDetId id2(d2);
+	// does layer 2 has simhits?
+	if (id2.layer() !=2 or id2.region() != id1.region() or id2.ring()!=id1.ring() or id2.station()!=id1.station() or abs(id2.roll()-id1.roll())>1) 
+	    continue;
+	auto hits2 = hitsInDetId(id2());
+	auto roll2 = getGEMGeometry()->etaPartition(id2);
+	for (auto& h: hits2) {
+	  LocalPoint lp = h.entryPoint();
+	  pads2.insert( 1 + static_cast<int>(roll2->padTopology().channel(lp)) );
+	  std::cout <<"GEMHits detid2 "<<id2 <<" pad2 "<< 1 + static_cast<int>(roll2->padTopology().channel(lp)) << std::endl;
+	}
     }
 
-    set<int> copads;
-    std::set_intersection(pads1.begin(), pads1.end(), pads2.begin(), pads2.end(), std::inserter(copads, copads.begin()));
+
+    for (auto pad1 : pads1)
+	for (auto pad2 : pads2){
+	    if (abs(pad1-pad2) <= 1) 
+	    {
+		if (copads.find(pad1) == copads.end())
+		    copads.insert(pad1);
+		if (copads.find(pad2) == copads.end())
+		    copads.insert(pad2);
+	    }
+	}
+
+
+    //std::set_intersection(pads1.begin(), pads1.end(), pads2.begin(), pads2.end(), std::inserter(copads, copads.begin()));
     if (copads.empty()) continue;
-    gem_detids_to_copads_[d] = copads;
+    gem_detids_to_copads_[d] = copads;//detids here is layer1 id
   }
 }
 
@@ -682,8 +702,10 @@ SimHitMatcher::superChamberIdsGEMCoincidences() const
   std::set<unsigned int> result;
   for (auto& p: gem_detids_to_copads_)
   {
-    GEMDetId id(p.first);
-    result.insert(id.chamberId().rawId());
+    GEMDetId p_id(p.first);
+    GEMDetId superch_id(p_id.region(), p_id.ring(), p_id.station(), 0, p_id.chamber(), 0);
+    //std::cout <<"superChamberIdsGEMCoincidences id "<< superch_id << std::endl;
+    result.insert(superch_id.rawId());
   }
   return result;
 }
