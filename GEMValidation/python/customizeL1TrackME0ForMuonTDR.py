@@ -85,7 +85,7 @@ def customizeL1TrackME0ForMuonTDR(process):
   process.me0Segments192.algo_psets[1].algo_pset.maxPhiAdditional = cms.double(1.2*0.35/192)
   process.me0Segments192.algo_psets[1].algo_pset.maxPhiSeeds = cms.double(1.2*0.35/192)
 
-  process.L1simulation_step = cms.Path(process.SimL1Emulator*process.me0DigiRecoSequence)
+  process.L1simulation_step = cms.Path(process.SimL1TMuon*process.me0DigiRecoSequence)
   process.L1TrackTrigger_step = cms.Path(process.L1TrackTrigger)
 
   process.schedule = cms.Schedule(process.digitisation_step,
