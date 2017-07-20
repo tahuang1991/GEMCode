@@ -161,6 +161,9 @@ process.me0DigiRecoSequence = cms.Sequence(
     process.me0Segments192
     )
 
+process.load("L1Trigger.L1TTrackMatch.L1TkMuonProducer_cfi")
+process.pL1TkMuon = cms.Path( process.L1TkMuons )
+
 # Other statements
 process.mix.input.nbPileupEvents.averageNumber = cms.double(200.000000)
 process.mix.bunchspace = cms.int32(25)
@@ -192,9 +195,12 @@ process.FEVTDEBUGHLToutput_step = cms.EndPath(process.FEVTDEBUGHLToutput)
 
 # Schedule definition
 process.schedule = cms.Schedule(process.digitisation_step,
+                                process.L1TrackTrigger_step,
                                 process.TTClusterStub,
                                 process.TTTracksWithTruth,
-                                process.L1simulation_step,process.endjob_step,process.FEVTDEBUGHLToutput_step)
+                                process.L1simulation_step,
+                                process.pL1TkMuon,
+                                process.endjob_step,process.FEVTDEBUGHLToutput_step)
 from PhysicsTools.PatAlgos.tools.helpers import associatePatAlgosToolsTask
 associatePatAlgosToolsTask(process)
 
