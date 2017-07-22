@@ -27,6 +27,7 @@
 #include "GEMCode/GEMValidation/interface/Helpers.h"
 #include "GEMCode/GEMValidation/interface/PtassignmentHelper.h"
 #include "GEMCode/GEMValidation/interface/DisplacedMuonTriggerPtassignment.h"
+#include "GEMCode/GEMValidation/interface/L1TrackTriggerVeto.h"
 #include "CLHEP/Random/RandomEngine.h"
 #include "CLHEP/Random/Randomize.h"
 
@@ -433,6 +434,14 @@ struct MyTrackEff
   Int_t npar_lct;
   Bool_t hasSt1St2St3;
   Bool_t hasSt3orSt4_sh;
+
+  // track veto
+  Bool_t isSimLooseVeto;
+  Bool_t isSimMediumVeto;
+  Bool_t isSimTightVeto;
+  Bool_t isL1LooseVeto;
+  Bool_t isL1MediumVeto;
+  Bool_t isL1TightVeto;
 };
 
 void MyTrackEff::init()
@@ -648,7 +657,7 @@ void MyTrackEff::init()
   phiM_gemcsc_even =-9;
   phiM_fitxyz_odd = -9;
   phiM_fitxyz_even =-9;
- 
+
 
 
   strip_gemdg_odd = -9;
@@ -898,6 +907,13 @@ void MyTrackEff::init()
   pt_direction_sh=-1;
   hasSt1St2St3=false;
   hasSt3orSt4_sh=false;
+
+  isSimLooseVeto = false;
+  isSimMediumVeto = false;
+  isSimTightVeto = false;
+  isL1LooseVeto = false;
+  isL1MediumVeto = false;
+  isL1TightVeto = false;
 }
 
 
@@ -1359,6 +1375,13 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("hasSt1St2St3", &hasSt1St2St3);
   t->Branch("hasSt3orSt4_sh", &hasSt3orSt4_sh);
 
+  // track trigger veto
+  t->Branch("isSimLooseVeto", &isSimLooseVeto);
+  t->Branch("isSimMediumVeto", &isSimMediumVeto);
+  t->Branch("isSimTightVeto", &isSimTightVeto);
+  t->Branch("isL1LooseVeto", &isL1LooseVeto);
+  t->Branch("isL1MediumVeto", &isL1MediumVeto);
+  t->Branch("isL1TightVeto", &isL1TightVeto);
   return t;
 }
 
@@ -1859,7 +1882,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   //const HLTTrackMatcher& match_hlt_track = match.hltTracks();
   const SimTrack &t = match_sh.trk();
 
-
+  L1TrackTriggerVeto trkVeto(cfg_, match_sh.eventSetup(), match_sh.event(),
+                             t.momentum().eta(), normalizedPhi((float)t.momentum().phi()));
   /*
   auto matchedDarkBoson(match_gen.getMatchedDarkBoson());
   auto matchedGENMuon(match_gen.getMatchedGENMuon());
@@ -1875,6 +1899,9 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   if (verbose_) std::cout <<"GEMCSCAnalyzer step1 "<< std::endl;
   for (auto s: stations_to_use_)
   {
+    etrk_[s].isSimLooseVeto = trkVeto.isLooseVeto();
+    etrk_[s].isSimMediumVeto = trkVeto.isMediumVeto();
+    etrk_[s].isSimTightVeto = trkVeto.isTightVeto();
 
     etrk_[s].init();
     etrk_[s].run = match.simhits().event().id().run();
@@ -3024,7 +3051,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   for (auto d: me0RecHitsSuperChamber){
     const ME0DetId id(d);
     int nlayers = match_me0rh.nLayersWithRecHitsInSuperChamber(d);
-    std::cout <<"ME0 Detid "<< id<<" nlayers with rechits " << nlayers << std::endl; 
+    std::cout <<"ME0 Detid "<< id<<" nlayers with rechits " << nlayers << std::endl;
     if (nlayers < minNHitsChamberME0RecHit_) continue;
     bool odd(id.chamber()%2 == 1);
     if (odd) etrk_[ME0].has_rechits |= 1;
@@ -3050,14 +3077,14 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 	  std::cout <<" matched seg , detid "<< seg.me0DetId() <<" "<< seg << std::endl;
       continue;
     }
-    
+
     float dPhi = match_me0rh.me0DeltaPhi(me0Segment);
     double chi2 = me0Segment.chi2(); float time = me0Segment.time();
     float timeErr = me0Segment.timeErr(); int nRecHits = me0Segment.nRecHits();
     bool odd(id.chamber()%2 == 1);
     GlobalPoint gp(match_me0rh.globalPoint(me0Segment));  gpME0 = gp;
     GlobalPoint gp_propagated(match_me0rh.propagateToZ(AVERAGE_ME0_Z*id.region()));
-    GlobalPoint gp_ME0_st2(match_me0rh.propagateFromME0ToCSC(me0Segment, t.momentum().pt(), t.charge(), 2, odd)); 
+    GlobalPoint gp_ME0_st2(match_me0rh.propagateFromME0ToCSC(me0Segment, t.momentum().pt(), t.charge(), 2, odd));
     float dR = deltaR(float(gp.eta()), float(gp.phi()), float(gp_propagated.eta()), float(gp_propagated.phi()));
     cout << "me0Segment " << me0Segment <<" gp eta "<< gp.eta() <<" phi "<< gp.phi() << " dphi  "<<  me0Segment.deltaPhi() <<" dphi in matcher "<< dPhi << endl;
     std::cout <<"Sim Pt "<< t.momentum().pt() <<" gp_ME0_st2 "<<  gp_ME0_st2 <<" eta "<< gp_ME0_st2.eta() <<" phi  "<< gp_ME0_st2.phi() << std::endl;
@@ -3272,18 +3299,18 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
   if (etrk_[0].meRing > 0){
       //std::cout <<"gp1 phi "<< gp1.phi() <<" gv1 phi "<< gv1.phi() <<" gp2 phi "<< gp2.phi()<<" gv2 phi "<< gv2.phi() <<" gp_ge11 phi "<< gp_ge11.phi() <<" gp_ge21 phi "<< gp_ge21.phi()<< std::endl;
-      etrk_[0].phiM_st1_sh =  gv1.phi(); 
-      etrk_[0].phiM_st2_sh =  gv2.phi(); 
+      etrk_[0].phiM_st1_sh =  gv1.phi();
+      etrk_[0].phiM_st2_sh =  gv2.phi();
       etrk_[0].dphi_dir_st1_st2_sh = deltaPhi( etrk_[0].phiM_st1_sh , etrk_[0].phiM_st2_sh);
   }
 
 
-  DisplacedMuonTriggerPtassignment displacedMuonL1Pt(match_lct.allLctsMatched2SimMuon(), 
-	  					     //match_gd.allGempadsMatch2SimMuon_2strip(), 
+  DisplacedMuonTriggerPtassignment displacedMuonL1Pt(match_lct.allLctsMatched2SimMuon(),
+	  					     //match_gd.allGempadsMatch2SimMuon_2strip(),
 						     gemPadDigiInput_,
 						     me0SegmentInput_,
-						     displacedMuPt_cfg_, 
-						     match_lct.eventSetup(), 
+						     displacedMuPt_cfg_,
+						     match_lct.eventSetup(),
 						     match_lct.event());
   displacedMuonL1Pt.setCharge(etrk_[0].charge);
   if (displacedMuonL1Pt.getNParity() >= 0)  std::cout <<"DisplacedMuon get npar "<< displacedMuonL1Pt.getNParity()<<" ring "<<displacedMuonL1Pt.getMeRing() << std::endl;
@@ -3291,14 +3318,14 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
   int npar =displacedMuonL1Pt.getNParity();
   DisplacedMuonTriggerPtassignment displacedMuonL1Pt_sim(gp1,
-	  						 gp2, 
-							 gp3, 
-							 gp4, 
-							 gp_ge11, 
-							 gp_ge21, 
-							 npar, 
+	  						 gp2,
+							 gp3,
+							 gp4,
+							 gp_ge11,
+							 gp_ge21,
+							 npar,
 							 displacedMuPt_cfg_,
-							 match_lct.eventSetup(), 
+							 match_lct.eventSetup(),
 							 match_lct.event());
   displacedMuonL1Pt_sim.setCharge(etrk_[0].charge);
 
@@ -3369,10 +3396,10 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
 
 	etrk_[0].direction_noge21_pt = displacedMuonL1Pt.getDirectionPt();
 	//std::cout <<"Direction based no ge21 pt "<< etrk_[0].direction_noge21_pt  << std::endl;
-	
+
        if (etrk_[0].meRing == 1)
 	   std::cout <<"dphi12 noME0_noGE21 "<< etrk_[0].dphi_dir_ME11only_ME21only_L1 <<" phiM_st1 "<<displacedMuonL1Pt.getlocalPhiDirection(1)<<" phiM_st2 "<< displacedMuonL1Pt.getlocalPhiDirection(2) << std::endl;
-	
+
      }
 
 
@@ -3784,7 +3811,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     }*/
   }
 
-  auto l1GmtCands(match_track.gmts());
+  const auto& l1GmtCands(match_track.gmts());
   if (l1GmtCands.size() and match_track.bestGMTCand()) {
 
     etrk_[0].has_gmtCand = 1;
@@ -3816,7 +3843,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     std::cout <<"etrk_[0].charge "<< t.charge() <<" L1Mu charge "<< etrk_[0].L1Mu_charge <<" L1Mu_st1_dR "<< etrk_[0].L1Mu_st1_dR << std::endl;
 
     for (auto me0Segment : allmatchedSegments){
-      GlobalPoint gp_ME0_st2(match_me0rh.propagateFromME0ToCSC(me0Segment, etrk_[0].L1Mu_pt, etrk_[0].L1Mu_charge, 2, me0Segment.me0DetId().chamber()%2==1)); 
+      GlobalPoint gp_ME0_st2(match_me0rh.propagateFromME0ToCSC(me0Segment, etrk_[0].L1Mu_pt, etrk_[0].L1Mu_charge, 2, me0Segment.me0DetId().chamber()%2==1));
       GlobalPoint gp(match_me0rh.globalPoint(me0Segment));
       float dR = deltaR(tfeta, tfphi, float(gp.eta()), float(gp_ME0_st2.phi()));
       float dPhi_L1Mu_ME0_propagate = deltaPhi(tfphi, float(gp_ME0_st2.phi()));
@@ -3847,6 +3874,12 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
       }
     }
   }
+
+  // track trigger veto
+  L1TrackTriggerVeto trkVeto2(cfg_, match_sh.eventSetup(), match_sh.event(), etrk_[0].L1Mu_eta, normalizedPhi((float)etrk_[0].L1Mu_phi));
+  etrk_[0].isL1LooseVeto = trkVeto2.isLooseVeto();
+  etrk_[0].isL1MediumVeto = trkVeto2.isMediumVeto();
+  etrk_[0].isL1TightVeto = trkVeto2.isTightVeto();
 
   /*if (match_track.tfCands().size()) {
     etrk_[0].has_tfCand = 1;
@@ -4277,7 +4310,7 @@ void GEMCSCAnalyzer::bookSimTracksDeltaTree()
   std::cout << "  pt:"<<t.momentum().pt()
             << "  phi:"<<t.momentum().phi()
             << "  eta:"<<t.momentum().eta()
-            << "  chage:"<<t.charge() 
+            << "  chage:"<<t.charge()
             << "  event: "<<etrk_[0].event <<" ievent "<< ievent << std::endl;
 
   std::cout << "######matching simhit to simtrack " << std::endl;
