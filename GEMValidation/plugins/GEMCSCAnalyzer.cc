@@ -91,6 +91,8 @@ struct MyTrackEff
   Int_t lumi;
   Int_t run;
   Int_t event;
+  Float_t rand01_v1;
+  Float_t rand01_v2;
 
   Float_t pt, eta, phi, pz;
   Char_t charge;
@@ -369,6 +371,8 @@ struct MyTrackEff
   Int_t L1Mu_charge;
   Float_t L1Mu_me0_eta, L1Mu_me0_phi, L1Mu_me0_dPhi, L1Mu_me0_mindPhi1, L1Mu_me0_mindPhi2, L1Mu_me0_dR, L1Mu_me0_st1_dphi, L1Mu_me0_st2_eta, L1Mu_me0_st2_phi;
   Bool_t L1Mu_me0_st1_isEven;
+  Float_t L1Mu_st1_eta, L1Mu_st1_phi, L1Mu_st1_dR;
+  Bool_t L1Mu_st1_isEven;
 
   Int_t has_l1Extra;
   Float_t l1Extra_pt;
@@ -436,6 +440,8 @@ void MyTrackEff::init()
   lumi = -99;
   run = -99;
   event = -99;
+  rand01_v1 = 99;
+  rand01_v2 = 99;
 
   pt = 0.;
   phi = 0.;
@@ -803,6 +809,10 @@ void MyTrackEff::init()
   L1Mu_me0_mindPhi2 = 10;
   L1Mu_me0_st1_dphi = -9;
   L1Mu_me0_st1_isEven = false;
+  L1Mu_st1_dR = 10;
+  L1Mu_st1_eta = -9;
+  L1Mu_st1_phi = -9;
+  L1Mu_st1_isEven = -9;
 
 
   has_l1Extra = 0;
@@ -899,6 +909,8 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("lumi", &lumi);
   t->Branch("run", &run);
   t->Branch("event", &event);
+  t->Branch("rand01_v1", &rand01_v1);
+  t->Branch("rand01_v2", &rand01_v2);
 
   t->Branch("pt", &pt);
   t->Branch("pz", &pz);
@@ -1253,6 +1265,12 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("L1Mu_me0_mindPhi2", &L1Mu_me0_mindPhi2);
   t->Branch("L1Mu_me0_st1_dphi", &L1Mu_me0_st1_dphi);
   t->Branch("L1Mu_me0_st1_isEven", &L1Mu_me0_st1_isEven);
+
+  t->Branch("L1Mu_st1_eta", &L1Mu_st1_eta);
+  t->Branch("L1Mu_st1_phi", &L1Mu_st1_phi);
+  t->Branch("L1Mu_st1_dR", &L1Mu_st1_dR);
+  t->Branch("L1Mu_st1_isEven", &L1Mu_st1_isEven);
+
 
   t->Branch("has_l1Extra", &has_l1Extra);
   t->Branch("l1Extra_pt", &l1Extra_pt);
@@ -1852,6 +1870,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   std::cout <<"Sim trk_no " << trk_no <<" eta "<< t.momentum().eta() << " phi "<< t.momentum().phi() << " pt "<< t.momentum().pt()<<" pz "<<  t.momentum().pz()<<std::endl;
   */
 
+  float randtest1 = CLHEP::RandFlat::shoot(0.0,1.0) ;
+  float randtest2 = CLHEP::RandFlat::shoot(0.0,1.0) ;
   if (verbose_) std::cout <<"GEMCSCAnalyzer step1 "<< std::endl;
   for (auto s: stations_to_use_)
   {
@@ -1860,6 +1880,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     etrk_[s].run = match.simhits().event().id().run();
     etrk_[s].lumi = match.simhits().event().id().luminosityBlock();
     etrk_[s].event = match.simhits().event().id().event();
+    etrk_[s].rand01_v1 = randtest1;
+    etrk_[s].rand01_v2 = randtest2;
     etrk_[s].pt = t.momentum().pt();
     etrk_[s].pz = t.momentum().pz();
     etrk_[s].phi = t.momentum().phi();
@@ -3780,7 +3802,19 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     float tfphi = bestGmtCand->phi();
     float mindPhi = .70;
 
-    std::cout <<"etrk_[0].charge "<< t.charge() <<" L1Mu charge "<< etrk_[0].L1Mu_charge << std::endl;
+    if ((etrk_[1].has_lct&1)>0){
+	etrk_[0].L1Mu_st1_eta = etrk_[1].eta_lct_odd;
+	etrk_[0].L1Mu_st1_phi = etrk_[1].phi_lct_odd;
+	etrk_[0].L1Mu_st1_dR  = deltaR(tfeta, tfphi, etrk_[1].eta_lct_odd, etrk_[1].phi_lct_odd);
+	etrk_[0].L1Mu_st1_isEven = false;
+    }else if ((etrk_[1].has_lct&2)>0){
+	etrk_[0].L1Mu_st1_eta = etrk_[1].eta_lct_even;
+	etrk_[0].L1Mu_st1_phi = etrk_[1].phi_lct_even;
+	etrk_[0].L1Mu_st1_dR  = deltaR(tfeta, tfphi, etrk_[1].eta_lct_even, etrk_[1].phi_lct_even);
+	etrk_[0].L1Mu_st1_isEven = true;
+    }
+    std::cout <<"etrk_[0].charge "<< t.charge() <<" L1Mu charge "<< etrk_[0].L1Mu_charge <<" L1Mu_st1_dR "<< etrk_[0].L1Mu_st1_dR << std::endl;
+
     for (auto me0Segment : allmatchedSegments){
       GlobalPoint gp_ME0_st2(match_me0rh.propagateFromME0ToCSC(me0Segment, etrk_[0].L1Mu_pt, etrk_[0].L1Mu_charge, 2, me0Segment.me0DetId().chamber()%2==1)); 
       GlobalPoint gp(match_me0rh.globalPoint(me0Segment));
