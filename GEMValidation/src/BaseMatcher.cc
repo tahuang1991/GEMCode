@@ -56,7 +56,7 @@ BaseMatcher::BaseMatcher(const SimTrack& t, const SimVertex& v,
   // Get the magnetic field
   es.get<IdealMagneticFieldRecord>().get(magfield_);
 
-  // Get the propagators                                                                                  
+  // Get the propagators
   es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator_);
   es.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorOpposite", propagatorOpposite_);
 
@@ -117,33 +117,49 @@ BaseMatcher::~BaseMatcher()
 }
 
 
-bool 
+bool
 BaseMatcher::useGEMChamberType(int gem_type)
 {
   if (gem_type < 0 || gem_type > GEM_ME21) return false;
   return useGEMChamberTypes_[gem_type];
 }
 
-bool 
+bool
 BaseMatcher::useRPCChamberType(int rpc_type)
 {
   if (rpc_type < 0 || rpc_type > RPC_MB24n) return false;
   return useRPCChamberTypes_[rpc_type];
 }
 
-bool 
+bool
 BaseMatcher::useDTChamberType(int dt_type)
 {
   if (dt_type < 0 || dt_type > DT_MB24n) return false;
   return useDTChamberTypes_[dt_type];
 }
 
-bool 
+bool
 BaseMatcher::useCSCChamberType(int csc_type)
 {
   if (csc_type < 0 || csc_type > CSC_ME42) return false;
   return useCSCChamberTypes_[csc_type];
 }
+
+float
+BaseMatcher::dxy() const
+{
+  // calculate the simTrack dxy from the vertex and the momentum!!
+
+  //Source: https://cmssdt.cern.ch/SDT/lxr/source/DataFormats/TrackReco/interface/TrackBase.h#119
+  const float vx(vtx_.position().x());
+  const float vy(vtx_.position().y());
+  const float px(trk_.momentum().x());
+  const float py(trk_.momentum().y());
+  const float pt(trk_.momentum().pt());
+
+  return (- vx * py + vy * px ) / pt;
+}
+
 
 
 GlobalPoint
@@ -247,7 +263,7 @@ BaseMatcher::propagateFromME0ToCSC(ME0Segment segment,float pt, int charge, int 
   ME0DetId me0Id(segment.me0DetId());
   int endcap = (me0Id.region()>0) ? 1 : 2;
   auto me0Chamber(me0Geometry_->chamber(me0Id));
-  const CSCDetId csclayerId(endcap, st, ring, chamber,  CSCConstants::KEY_CLCT_LAYER);  
+  const CSCDetId csclayerId(endcap, st, ring, chamber,  CSCConstants::KEY_CLCT_LAYER);
   //std::cout <<"ME0Id "<< me0Id <<" CSC endcap "<< me0Id.region() <<" st "<< st <<" ring "<< ring <<" chamber "<< chamber<<" cscid "<< csclayerId << std::endl;
   const CSCLayer* csclayer(cscGeometry_->layer(csclayerId));
   const GlobalPoint gp_csc = csclayer->centerOfWireGroup(10);
@@ -266,7 +282,7 @@ BaseMatcher::propagateFromME0ToCSC(ME0Segment segment,float pt, int charge, int 
 
 
 
-double 
+double
 BaseMatcher::phiHeavyCorr(double pt, double eta, double phi, double charge) const
 {
     // float resEta = eta;
@@ -289,9 +305,9 @@ bool BaseMatcher::passDPhicut(CSCDetId id, int chargesign, float dphi, float pt)
 	!(id.station()==2 and id.ring()==1))  return true;
   auto GEMdPhi( id.station()==1 ? ME11GEMdPhi : ME21GEMdPhi);
    // std::copy(&ME11GEMdPhi[0][0], &ME11GEMdPhi[0][0]+9*3,&GEMdPhi[0][0]);
-   //else if (id.station()==2 and id.ring()==1) 
+   //else if (id.station()==2 and id.ring()==1)
    // std::copy(&ME21GEMdPhi[0][0], &ME21GEMdPhi[0][0]+9*3,&GEMdPhi[0][0]);
-  int st = id.station(); 
+  int st = id.station();
   bool is_odd(id.chamber()%2==1);
   bool pass = false;
   unsigned int LUTsize = (st==1)? sizeof(ME11GEMdPhi)/sizeof(ME11GEMdPhi[0]) :sizeof(ME21GEMdPhi)/sizeof(ME21GEMdPhi[0]);
@@ -302,7 +318,7 @@ bool BaseMatcher::passDPhicut(CSCDetId id, int chargesign, float dphi, float pt)
 //if (st==2) std::cout <<"BaseMatcher LUTpt "<<GEMdPhi[b][0] << " odd " << GEMdPhi[b][1]  <<" even " << GEMdPhi[b][2] <<" dphi "<<dphi <<std::endl;
 	if (double(pt) >= GEMdPhi[b][0])
 	{
-		
+
 	    if ((is_odd && GEMdPhi[b][1] > fabs(dphi)) ||
 		(!is_odd && GEMdPhi[b][2] > fabs(dphi)))
 		    pass = true;
@@ -327,12 +343,12 @@ bool BaseMatcher::passDPhicut(CSCDetId id, int chargesign, float dphi, float pt)
 
 
 const CSCLayerGeometry*
-BaseMatcher::retriveCSCKeyLayerGeometry(int rawid) const 
+BaseMatcher::retriveCSCKeyLayerGeometry(int rawid) const
 {
   const CSCChamber* cscChamber(cscGeometry_->chamber(CSCDetId(rawid)));
   const CSCLayer* cscKeyLayer(cscChamber->layer(3));
   const CSCLayerGeometry* cscKeyLayerGeometry(cscKeyLayer->geometry());
-  return cscKeyLayerGeometry; 
+  return cscKeyLayerGeometry;
 
 
 }

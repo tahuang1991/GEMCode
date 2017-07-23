@@ -38,7 +38,7 @@
 class BaseMatcher
 {
 public:
-  
+
 
   BaseMatcher(const SimTrack& t, const SimVertex& v,
       const edm::ParameterSet& ps, const edm::Event& ev, const edm::EventSetup& es);
@@ -62,9 +62,12 @@ public:
   bool useGEMChamberType(int gem_type);
   bool useDTChamberType(int dt_type);
   bool useRPCChamberType(int rpc_type);
-  
+
   void setVerbose(int v) { verbose_ = v; }
   int verbose() const { return verbose_; }
+
+  /// calculate the simTrack impact parameter
+  float dxy() const;
 
   /// general interface to propagation
   GlobalPoint propagateToZ(GlobalPoint &inner_point, GlobalVector &inner_vector, float z) const;
@@ -83,7 +86,7 @@ public:
   /// propagation for a track starting from a vertex
   GlobalPoint propagatedPositionSt2() const;
 
-  /// propagate the track to average GEM z-position                                               
+  /// propagate the track to average GEM z-position
   GlobalPoint propagatedPositionGEM() const;
 
   /// propaate from ME0 to CSC
@@ -108,13 +111,13 @@ public:
   const CSCLayerGeometry* retriveCSCKeyLayerGeometry(int rawid) const;
 
  protected:
-  
+
   bool hasGEMGeometry_;
   bool hasRPCGeometry_;
   bool hasME0Geometry_;
   bool hasCSCGeometry_;
-  bool hasDTGeometry_; 
-  
+  bool hasDTGeometry_;
+
   edm::ParameterSet simTrackPSet_;
   bool verboseSimTrack_;
 
