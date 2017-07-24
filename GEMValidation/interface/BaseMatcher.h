@@ -67,6 +67,8 @@ public:
   int verbose() const { return verbose_; }
 
   /// calculate the simTrack impact parameter
+  float lxy() const;
+  /// calculate the simTrack impact parameter
   float dxy() const;
 
   /// general interface to propagation

@@ -146,6 +146,19 @@ BaseMatcher::useCSCChamberType(int csc_type)
 }
 
 float
+BaseMatcher::lxy() const
+{
+  // calculate the simTrack dxy from the vertex and the momentum!!
+
+  //Source: https://cmssdt.cern.ch/SDT/lxr/source/DataFormats/TrackReco/interface/TrackBase.h#119
+  const float vx(vtx_.position().x());
+  const float vy(vtx_.position().y());
+
+  return sqrt(vx*vx+vy*vy);
+}
+
+
+float
 BaseMatcher::dxy() const
 {
   // calculate the simTrack dxy from the vertex and the momentum!!
@@ -174,7 +187,7 @@ BaseMatcher::propagateToZCharge(GlobalPoint &inner_point, GlobalVector &inner_ve
   if (state_start.hasError()) std::cout <<"state_start has error  "<< std::endl;
 
   TrajectoryStateOnSurface tsos(propagator_->propagate(state_start, *my_plane));
-  if (!tsos.isValid()) std::cout <<" tsos not valid "<< std::endl;
+  if (!tsos.isValid()) std::cout <<" propagateToZCharge tsos not valid "<< std::endl;
   if (!tsos.isValid()) tsos = propagatorOpposite_->propagate(state_start, *my_plane);
   //broken here  when propagating ME0
   //std::cout <<"propagateToZ GP "<< tsos.globalPosition() <<" eta "<< tsos.globalPosition().eta()<<" phi "<< tsos.globalPosition().phi()<< std::endl;
@@ -196,7 +209,7 @@ BaseMatcher::propagateToZ(GlobalPoint &inner_point, GlobalVector &inner_vec, flo
   if (state_start.hasError()) std::cout <<"state_start has error  "<< std::endl;
 
   TrajectoryStateOnSurface tsos(propagator_->propagate(state_start, *my_plane));
-  if (!tsos.isValid()) std::cout <<" tsos not valid "<< std::endl;
+  if (!tsos.isValid()) std::cout <<" propagateToZ tsos not valid "<< std::endl;
   if (!tsos.isValid()) tsos = propagatorOpposite_->propagate(state_start, *my_plane);
   //broken here  when propagating ME0
   //std::cout <<"propagateToZ GP "<< tsos.globalPosition() <<" eta "<< tsos.globalPosition().eta()<<" phi "<< tsos.globalPosition().phi()<< std::endl;

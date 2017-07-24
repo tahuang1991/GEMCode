@@ -95,7 +95,7 @@ struct MyTrackEff
   Float_t rand01_v1;
   Float_t rand01_v2;
 
-  Float_t pt, eta, phi, pz, dxy;
+  Float_t pt, eta, phi, pz, dxy, lxy;
   Char_t charge;
   Char_t endcap;
 
@@ -456,6 +456,7 @@ void MyTrackEff::init()
   phi = 0.;
   eta = -9.;
   dxy = -999.;
+  lxy = -999.;
   charge = -9;
   endcap = -9;
 
@@ -933,6 +934,7 @@ TTree* MyTrackEff::book(TTree *t, const std::string & name)
   t->Branch("pz", &pz);
   t->Branch("eta", &eta);
   t->Branch("dxy", &dxy);
+  t->Branch("lxy", &lxy);
   t->Branch("phi", &phi);
   t->Branch("charge", &charge);
   t->Branch("endcap", &endcap);
@@ -1921,6 +1923,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
     etrk_[s].phi = t.momentum().phi();
     etrk_[s].eta = t.momentum().eta();
     etrk_[s].dxy = match.simhits().dxy();
+    etrk_[s].lxy = match.simhits().lxy();
     etrk_[s].charge = t.charge();
     etrk_[s].endcap = (etrk_[s].eta > 0.) ? 1 : -1;
 

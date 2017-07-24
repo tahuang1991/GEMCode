@@ -432,7 +432,8 @@ SimHitMatcher::matchME0SimHitsToSimTrack(std::vector<unsigned int> track_ids, co
     for (auto& h: me0_hits)
     {
       if (h.trackId() != track_id) continue;
-      if (verboseME0_) cout <<"simhit in ME0 detid "<< ME0DetId(h.detUnitId()) <<" id "<< h.particleType() <<" position x "<< h.entryPoint().x()<<" y "<< h.entryPoint().y()<< endl;
+      ME0DetId layer_id( h.detUnitId() );
+      if (verboseME0_) cout <<"simhit in ME0 detid "<< ME0DetId(h.detUnitId()) <<" layerid "<< layer_id.layerId() <<" chamberid "<< layer_id.chamberId() <<" id "<< h.particleType() <<" position x "<< h.entryPoint().x()<<" y "<< h.entryPoint().y()<< endl;
       int pdgid = h.particleType();
       //if (simMuOnlyME0_ && std::abs(pdgid) != 13) continue;
       // discard electron hits in the ME0 chambers
@@ -440,9 +441,10 @@ SimHitMatcher::matchME0SimHitsToSimTrack(std::vector<unsigned int> track_ids, co
 
       me0_detid_to_hits_[ h.detUnitId() ].push_back(h);
       me0_hits_.push_back(h);
-      ME0DetId layer_id( h.detUnitId() );
       me0_chamber_to_hits_[ layer_id.layerId().rawId() ].push_back(h);
-      me0_superchamber_to_hits_[ layer_id.chamberId().rawId() ].push_back(h);
+      //region, layer, chamebr, roll
+      ME0DetId superch_id(layer_id.region(), 0, layer_id.chamber(), 0);
+      me0_superchamber_to_hits_[ superch_id.rawId() ].push_back(h);
     }
   }
 }
@@ -808,6 +810,7 @@ SimHitMatcher::hitsInSuperChamber(unsigned int detid) const
   if (gemvalidation::is_me0(detid))
   {
     const ME0DetId id(detid);
+    if (id.roll() != 0) std::cout <<"To find hitsInSuperChamber, me0detid "<< id <<" chamberId "<< id.chamberId() << std::endl;
     if (me0_superchamber_to_hits_.find(id.chamberId().rawId()) == me0_superchamber_to_hits_.end()) return no_hits_;
     return me0_superchamber_to_hits_.at(id.chamberId().rawId());
   }

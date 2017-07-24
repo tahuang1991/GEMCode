@@ -373,11 +373,17 @@ SimTrackMatching = cms.PSet(
         maxBX = cms.int32(1),
         deltaR = cms.double(0.05),
     ),
+    l1track = cms.PSet(
+        verbose = cms.int32(0),
+        run = cms.bool(True),
+	validInputTags = cms.VInputTag(cms.InputTag("TTTracksFromPixelDigis", "Level1TTTracks")),
+    ),
     displacedGenMu = cms.PSet(
 	validInputTags = cms.InputTag("genParticles"),
 	verbose = cms.int32(0),
 	run = cms.bool(True),
-	sampleType = cms.int32(0),
+	# enum {MuonGun, DarkSUSY};
+	sampleType = cms.int32(1),
     ),
     displacedMuPtAssignment = cms.PSet(
 	verbose = cms.int32(0),
