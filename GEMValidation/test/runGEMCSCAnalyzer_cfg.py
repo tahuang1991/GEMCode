@@ -6,10 +6,7 @@ process = cms.Process("GEMCSCANA")
 process.load('Configuration.StandardSequences.Services_cff')
 process.load('FWCore.MessageService.MessageLogger_cfi')
 process.load('Configuration.EventContent.EventContent_cff')
-#process.load('Configuration.Geometry.GeometryExtended2023D1_cff')
-#process.load('Configuration.Geometry.GeometryExtended2023D1Reco_cff')
-process.load('Configuration.Geometry.GeometryExtended2023D4Reco_cff')
-#process.load('Configuration.StandardSequences.MagneticField_38T_PostLS1_cff')
+process.load('Configuration.Geometry.GeometryExtended2023D17Reco_cff')
 process.load('Configuration.StandardSequences.MagneticField_cff')
 process.load('Configuration.StandardSequences.EndOfProcess_cff')
 process.load('Configuration.StandardSequences.FrontierConditions_GlobalTag_cff')
@@ -23,7 +20,7 @@ process.source = cms.Source("PoolSource",
 	#fileNames = cms.untracked.vstring('/store/user/dildick/DarkSUSY_mH_125_mGammaD_20000_cT_0_14TeV_GEN_SIM_90X/DarkSUSY_mH_125_mGammaD_20000_cT_0_14TeV_PU0_DIGI_L1/170116_230113/0000/step2_1.root')
 )
 
-InputDir = ['/eos/uscms/store/user/lpcgem/SingleMu_91X_FlatPt05_50_eta20_28_phase2_realistic_Extended2023D4_GEN_SIM_v2/DIGI_L1_ME0Reco_PU0/170426_052508/0000/']
+InputDir = ['/eos/uscms/store/user/dildick/DarkSUSY_mH_125_mGammaD_20_cT_0_14TeV/DarkSUSY_mH_125_mGammaD_20_cT_0_14TeV_REGEN/170723_232821/0000/']
 from GEMCode.GEMValidation.InputFileHelpers import *
 process = useInputDir(process, InputDir, True)
 
@@ -71,7 +68,7 @@ if doGem:
   matching.cscLCT.minNHitsChamber = 3
   matching.cscMPLCT.minNHitsChamber = 3
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(2000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.options = cms.untracked.PSet( wantSummary = cms.untracked.bool(True) )
 
