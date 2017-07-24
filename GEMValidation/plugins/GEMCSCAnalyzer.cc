@@ -1474,6 +1474,8 @@ private:
   edm::EDGetTokenT<L1MuGMTCandCollection> gmtCandInputLabel_;
   edm::EDGetTokenT<l1extra::L1MuonParticleCollection> l1ExtraMuonInputLabel_;
 
+  edm::EDGetTokenT<std::vector< TTTrack< Ref_Phase2TrackerDigi_ > > > trackInputLabel_;
+
   edm::EDGetTokenT<reco::TrackExtraCollection> recoTrackExtraInputLabel_;
   edm::EDGetTokenT<reco::TrackCollection> recoTrackInputLabel_;
   edm::EDGetTokenT<reco::RecoChargedCandidateCollection> recoChargedCandidateInputLabel_;
@@ -1698,6 +1700,9 @@ GEMCSCAnalyzer::GEMCSCAnalyzer(const edm::ParameterSet& ps)
   gmtCandInputLabel_ = consumes<L1MuGMTCandCollection>(gmtCand.getParameter<edm::InputTag>("validInputTags"));
   l1ExtraMuonInputLabel_ = consumes<l1extra::L1MuonParticleCollection>(l1ExtraMuonParticle.getParameter<edm::InputTag>("validInputTags"));
 
+  auto l1Track = cfg_.getParameter<edm::ParameterSet>("l1track");
+  trackInputLabel_ = consumes<std::vector< TTTrack< Ref_Phase2TrackerDigi_ > >>(l1Track.getParameter<edm::InputTag>("validInputTags"));
+
   auto recoTrackExtra = cfg_.getParameter<edm::ParameterSet>("recoTrackExtra");
   recoTrackExtraInputLabel_ = consumes<reco::TrackExtraCollection>(recoTrackExtra.getParameter<edm::InputTag>("validInputTags"));
 
@@ -1884,7 +1889,7 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   //const HLTTrackMatcher& match_hlt_track = match.hltTracks();
   const SimTrack &t = match_sh.trk();
 
-  L1TrackTriggerVeto trkVeto(cfg_, match_sh.eventSetup(), match_sh.event(),
+  L1TrackTriggerVeto trkVeto(cfg_, match_sh.eventSetup(), match_sh.event(), trackInputLabel_,
                              t.momentum().eta(), normalizedPhi((float)t.momentum().phi()));
   /*
   auto matchedDarkBoson(match_gen.getMatchedDarkBoson());
@@ -3879,7 +3884,8 @@ void GEMCSCAnalyzer::analyzeTrackEff(SimTrackMatchManager& match, int trk_no)
   }
 
   // track trigger veto
-  L1TrackTriggerVeto trkVeto2(cfg_, match_sh.eventSetup(), match_sh.event(), etrk_[0].L1Mu_eta, normalizedPhi((float)etrk_[0].L1Mu_phi));
+  L1TrackTriggerVeto trkVeto2(cfg_, match_sh.eventSetup(), match_sh.event(), trackInputLabel_,
+                              etrk_[0].L1Mu_eta, normalizedPhi((float)etrk_[0].L1Mu_phi));
   etrk_[0].isL1LooseVeto = trkVeto2.isLooseVeto();
   etrk_[0].isL1MediumVeto = trkVeto2.isMediumVeto();
   etrk_[0].isL1TightVeto = trkVeto2.isTightVeto();

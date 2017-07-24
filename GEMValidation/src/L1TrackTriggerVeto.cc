@@ -6,6 +6,7 @@
 L1TrackTriggerVeto::L1TrackTriggerVeto(const edm::ParameterSet& ps,
                                        const edm::EventSetup& es,
                                        const edm::Event& ev,
+                                       edm::EDGetTokenT<std::vector< TTTrack< Ref_Phase2TrackerDigi_ > > > trackInput_,
                                        float eta, float phi)
   : ps_(ps), ev_(ev), es_(es), etaReference_(eta), phiReference_(phi)
 {
@@ -15,12 +16,12 @@ L1TrackTriggerVeto::L1TrackTriggerVeto(const edm::ParameterSet& ps,
   isTightVeto_ = 0;
 
   auto l1track = ps_.getParameter<edm::ParameterSet>("l1track");
-  trackInput_ = l1track.getParameter<std::vector<edm::InputTag>>("validInputTags");
+  // trackInput_ = l1track.getParameter<edm::InputTag>("validInputTags");
   verbose_ = l1track.getParameter<int>("verbose");
   run_ = l1track.getParameter<bool>("run");
 
   edm::Handle< std::vector< TTTrack< Ref_Phase2TrackerDigi_ > > > TTTrackHandle;
-  if (gemvalidation::getByLabel(trackInput_, TTTrackHandle, ev_) and run_) {
+  if (gemvalidation::getByToken(trackInput_, TTTrackHandle, ev_) and run_) {
       //std::cout <<"start to run Tracker track veto "<< std::endl;
       es_.get<IdealMagneticFieldRecord>().get(magfield_);
       es_.get<TrackingComponentsRecord>().get("SteppingHelixPropagatorAlong", propagator_);

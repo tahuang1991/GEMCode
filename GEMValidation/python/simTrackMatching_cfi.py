@@ -326,7 +326,7 @@ SimTrackMatching = cms.PSet(
     ),
     dtTfTrack = cms.PSet(
         verbose = cms.int32(0),
-        validInputTags = cms.VInputTag(cms.InputTag("simDttfDigis", "DTTF")),
+        validInputTags = cms.InputTag("simDttfDigis", "DTTF"),
         run = cms.bool(False),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
@@ -334,7 +334,7 @@ SimTrackMatching = cms.PSet(
     ),
     rpcTfTrack = cms.PSet(
         verbose = cms.int32(0),
-        validInputTags = cms.VInputTag(cms.InputTag("simMuonRPCDigis")),
+        validInputTags = cms.InputTag("simMuonRPCDigis"),
         run = cms.bool(False),
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
@@ -384,7 +384,7 @@ SimTrackMatching = cms.PSet(
 	minGEMCSCdPhi = cms.double(0.3),
 	minGEMCSCdEta = cms.double(0.25),
 	me0MinEta = cms.double(2.1),
-	
+
     ),
     sectorProcessor = csctfTrackDigis.SectorProcessor,
 #       SRLUT = cms.PSet(
@@ -452,6 +452,11 @@ SimTrackMatching = cms.PSet(
         minBX = cms.int32(-1),
         maxBX = cms.int32(1),
         deltaR = cms.double(0.2),
+    ),
+    l1track = cms.PSet(
+        verbose = cms.int32(0),
+        run = cms.bool(True),
+        validInputTags = cms.InputTag("TTTracksFromTracklet","Level1TTTracks"),
     ),
     ## HLT Tracks
     recoTrackExtra = cms.PSet(

@@ -34,6 +34,7 @@ class L1TrackTriggerVeto
   L1TrackTriggerVeto(const edm::ParameterSet& ps,
                      const edm::EventSetup& es,
                      const edm::Event& iEvent,
+                     edm::EDGetTokenT<std::vector< TTTrack< Ref_Phase2TrackerDigi_ > > >,
                      float eta, float phi);
 
   // TT Track veto
@@ -50,7 +51,6 @@ class L1TrackTriggerVeto
   float etaReference_;
   float phiReference_;
 
-  std::vector<edm::InputTag> trackInput_;
   int verbose_;
   bool run_;
 
