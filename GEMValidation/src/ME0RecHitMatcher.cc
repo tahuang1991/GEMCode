@@ -26,13 +26,13 @@ ME0RecHitMatcher::ME0RecHitMatcher(ME0DigiMatcher& dg,
   if (hasME0Geometry_) {
     edm::Handle<ME0RecHitCollection> me0_rechits;
     if (gemvalidation::getByToken(me0RecHitInput_, me0_rechits, event()) and runME0RecHit_) matchME0RecHitsToSimTrack(*me0_rechits.product());
-    else std::cout <<"Not running matchME0RecHitsToSimTrack "<< std::endl;
+    else if (verboseME0RecHit_) std::cout <<"Not running matchME0RecHitsToSimTrack "<< std::endl;
 
     edm::Handle<ME0SegmentCollection> me0_segments;
     if (gemvalidation::getByToken(me0SegmentInput_, me0_segments, event()) and runME0Segment_){
-	matchME0SegmentsToSimTrack(*me0_segments.product());
-	matchME0SegmentsToSimTrackBydR(*me0_segments.product());
-    }else std::cout <<"Not running matchME0SegmentsToSimTrack "<< std::endl;
+      matchME0SegmentsToSimTrack(*me0_segments.product());
+      matchME0SegmentsToSimTrackBydR(*me0_segments.product());
+    }else if (runME0Segment_) std::cout <<"Not running matchME0SegmentsToSimTrack "<< std::endl;
   }
 }
 
@@ -170,7 +170,7 @@ ME0RecHitMatcher::matchME0SegmentsToSimTrackBydR(const ME0SegmentCollection& seg
 
 }
 
-void ME0RecHitMatcher::dumpAllME0Segments(const ME0SegmentCollection& segments) const 
+void ME0RecHitMatcher::dumpAllME0Segments(const ME0SegmentCollection& segments) const
 {
     cout <<"dumpt all ME0 Segments" << endl;
     for(auto iC = segments.id_begin(); iC != segments.id_end(); ++iC){
@@ -409,7 +409,7 @@ ME0RecHitMatcher::bestME0Segment(unsigned int id)
 }
 
 ME0Segment
-ME0RecHitMatcher::bestME0Segment_bydR(unsigned int id) const 
+ME0RecHitMatcher::bestME0Segment_bydR(unsigned int id) const
 {
   if (superChamber_to_bestME0Segment_bydR_.find(id) == superChamber_to_bestME0Segment_bydR_.end()) return no_me0segment_;
   else  {
@@ -461,7 +461,7 @@ ME0RecHitMatcher::globalPoint(const ME0Segment& c) const
   return getME0Geometry()->idToDet(c.me0DetId())->surface().toGlobal(c.localPosition());
 }
 
-float 
+float
 ME0RecHitMatcher::me0DeltaPhi(ME0Segment Seg) const
 {
   auto chamber = getME0Geometry()->chamber(Seg.me0DetId());

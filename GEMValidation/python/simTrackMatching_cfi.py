@@ -205,7 +205,7 @@ SimTrackMatching = cms.PSet(
         minNHitsChamber = cms.int32(4),
     ),
     cscLCT = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.InputTag("simCscTriggerPrimitiveDigis"),
         run = cms.bool(True),
         minBX = cms.int32(5),
@@ -263,7 +263,7 @@ SimTrackMatching = cms.PSet(
         minNHitsChamber = cms.int32(4),
     ),
     dtLocalTrigger = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.InputTag("simDtTriggerPrimitiveDigis"),
         run = cms.bool(True),
         minBX = cms.int32(-1),
@@ -317,7 +317,7 @@ SimTrackMatching = cms.PSet(
     ),
 
     cscTfTrack = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         run = cms.bool(False),
         validInputTags = cms.InputTag("simCsctfTrackDigis"),
         minBX = cms.int32(-1),
@@ -342,7 +342,7 @@ SimTrackMatching = cms.PSet(
     ),
     ## TrackFinder candidates
     cscTfCand = cms.PSet(
-        verbose = cms.int32(1),
+        verbose = cms.int32(0),
         validInputTags = cms.InputTag("simCsctfDigis", "CSC"),
         run = cms.bool(True),
         minBX = cms.int32(-1),
